@@ -88,17 +88,6 @@ gh skill install jablonkai/skills --all --agent claude-code --scope user
 installs into your home directory so the skill is available everywhere. Pin a version
 with `--pin <tag-or-sha>`, and update later with `gh skill update --all`.
 
-### Working on this repo locally
-
-If you've cloned the repo and want your edits to take effect immediately, symlink instead
-of installing:
-
-```bash
-for d in skills/*/; do
-  ln -sfn "$PWD/$d" ~/.claude/skills/"$(basename "$d")"
-done
-```
-
 ## Adding a New Skill
 
 Start with Anthropic's [skill-creator](https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md)
