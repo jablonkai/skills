@@ -4,10 +4,6 @@ Personal catalog of reusable, task-oriented skills for AI coding agents (Claude 
 compatible tools). One directory per skill, each with a `SKILL.md` entry point and any
 reference material, scripts, or assets it needs.
 
-This repository is the home for these skills — they were previously kept alongside agents
-and instruction files in `agent-tools`, which now keeps only the agents, the global
-instruction file, and the `update-all` bootstrap script.
-
 Skills here follow the open **Agent Skills** format documented at
 [agentskills.io](https://agentskills.io/) — the reference for the `SKILL.md` structure,
 frontmatter fields, and progressive disclosure model used throughout this repo. The format
