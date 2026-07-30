@@ -179,7 +179,10 @@ class McpClient {
       this.pending.delete(id);
       throw new Error(`POST ${method} failed: HTTP ${res.status}`);
     }
-    return withTimeout(reply, TIMEOUT_MS, method);
+    // finally, not just the success path: a timed-out request would otherwise
+    // keep its resolver for the life of the process, and docs-dump issues one
+    // request per topic in a loop.
+    return withTimeout(reply, TIMEOUT_MS, method).finally(() => this.pending.delete(id));
   }
 
   async notify(method, params = {}) {
