@@ -8,7 +8,8 @@ cd "$repo_root"
 echo "Validating skill catalog..."
 
 # Skills excluded from version control (see .gitignore) are kept local and are not
-# part of the published catalog, so every check below operates on this list only.
+# part of the published catalog, so every check below operates on this list only
+# — link checking included, via markdown_files() further down.
 # Outside a git checkout nothing is ignored and all skill directories are checked.
 skill_dirs() {
   local dir
@@ -106,6 +107,20 @@ check_docs_in_sync() {
   done
 }
 
+# The published set of Markdown files: tracked files plus untracked ones that are
+# not gitignored — exactly what a commit would publish. Scoping link checking this
+# way keeps it in step with every check above, so a local run and CI agree.
+# Outside a git checkout nothing is ignored and every *.md is checked.
+markdown_files() {
+  if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    git ls-files --cached --others --exclude-standard -z -- '*.md' | tr '\0' '\n'
+  else
+    find . -type f -name '*.md' \
+      -not -path './.git/*' -not -path './.serena/*' -not -path './node_modules/*' |
+      sed 's|^\./||'
+  fi | grep -v '^$' | sort -u
+}
+
 check_markdown_links() {
   local file
   local file_dir
@@ -136,7 +151,7 @@ check_markdown_links() {
         exit 1
       fi
     done < <(grep -oE '\[[^]]+\]\(([^)]+)\)' "$file" | sed -E 's/.*\(([^)]+)\)/\1/' | sort -u)
-  done < <(find . -type f -name '*.md' -not -path './.git/*' -not -path './.serena/*' -not -path './node_modules/*' | sort)
+  done < <(markdown_files)
 }
 
 check_skill_frontmatter
