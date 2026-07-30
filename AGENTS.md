@@ -30,6 +30,7 @@ Personal skill catalog: one directory per reusable, task-oriented skill. See
 - `code-analyzer`: read-only whole-project audit for bugs, security, quality, performance, tests, docs, and prioritized improvement ideas
 - `duv`: DUV Ultramarathon Statistics lookup workflow
 - `emu-branding`: EMU visual identity and brand guidance
+- `error-debugging`: stack trace, crash report and panic analysis — root cause, fix, and verification across Kotlin/Android, KMP/Compose, Flutter, Swift, Rust and C++
 - `freecad`: remote-control a running FreeCAD (parametric CAD) by Python via a local bridge — primitives/booleans, Sketcher + PartDesign features, live metrics + viewport screenshots, STEP/STL/IGES/OBJ export
 - `github-commit-pr`: commit, push, and pull request workflow
 - `github-do-issue`: implement a GitHub issue locally before commit or PR creation
