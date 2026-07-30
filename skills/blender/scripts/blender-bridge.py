@@ -41,7 +41,7 @@ import threading
 import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-BRIDGE_VERSION = "1.0.0"
+BRIDGE_VERSION = "1.0.1"
 PORT = int(os.environ.get("BLENDER_BRIDGE_PORT", "8736"))
 
 _jobs = queue.Queue()
@@ -507,7 +507,9 @@ def _execute(job):
     try:
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
             exec(compile(code, filename, "exec"), ns)
-    except Exception:
+    except BaseException:
+        # BaseException, not Exception: a posted script calling sys.exit() raises
+        # SystemExit, which would otherwise escape and kill the main-thread pump.
         result["ok"] = False
         result["error"] = traceback.format_exc()
     result["output"] = buf.getvalue()
@@ -534,7 +536,9 @@ def _pump():
                 job["result"] = _state()
             else:
                 job["result"] = _execute(job)
-        except Exception:
+        except BaseException:
+            # Blender unregisters a timer whose callback raises, so nothing may
+            # escape this handler — including SystemExit and KeyboardInterrupt.
             job["result"] = {"ok": False, "output": "", "error": traceback.format_exc()}
         finally:
             job["done"].set()
@@ -567,6 +571,11 @@ class _Handler(BaseHTTPRequestHandler):
         if not job["done"].wait(timeout):
             return {"ok": False, "output": "",
                     "error": "timed out waiting for Blender's main thread"}
+        if job["result"] is None:
+            # The pump signalled completion without producing a result; never
+            # hand the wrapper a bare null, it has no error field to report.
+            return {"ok": False, "output": "",
+                    "error": "job finished without a result"}
         return job["result"]
 
     def do_GET(self):
