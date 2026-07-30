@@ -114,6 +114,11 @@ class _Bridge(QtCore.QObject):
         if len(body) < clen:
             return                                   # wait for the rest of the body
 
+        # The request is complete: consume it, so a second pipelined request on
+        # the same connection cannot re-dispatch this one. Every path below
+        # returns, so this is the single place it has to happen.
+        self.bufs[id(sock)] = b""
+
         if _cross_origin(headers):
             self._respond(sock, {"ok": False, "output": "",
                                  "error": "cross-origin request rejected"}, "403 Forbidden")
@@ -122,6 +127,13 @@ class _Bridge(QtCore.QObject):
         if path.startswith("/ping"):
             resp = {"ok": True, "bridge": "freecad",
                     "version": ".".join(App.Version()[0:3])}
+        elif not path.startswith("/run"):
+            # Anything else — a stray GET /favicon.ico, a probe — must not reach
+            # the exec branch, where it would run empty code, advance seq and
+            # rewrite the status file a poller relies on.
+            self._respond(sock, {"ok": False, "output": "",
+                                 "error": "unknown endpoint"}, "404 Not Found")
+            return
         else:
             try:
                 payload = json.loads(body.decode("utf-8")) if body else {}
