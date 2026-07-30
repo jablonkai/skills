@@ -12,11 +12,12 @@
 #                         optional {out} sets the OUT dir (env + a global var)
 #
 # Env overrides (read when the macro starts): FREECAD_BRIDGE_PORT (8735),
-# FREECAD_BRIDGE_STATUS (/tmp/freecad-bridge-status.json).
+# FREECAD_BRIDGE_STATUS (default $TMPDIR/freecad-bridge-<uid>-status.json, 0600).
 import os
 import sys
 import io
 import json
+import tempfile
 import traceback
 
 import FreeCAD as App
@@ -31,7 +32,33 @@ except ImportError:
     from PySide2 import QtCore, QtNetwork
 
 _PORT = int(os.environ.get("FREECAD_BRIDGE_PORT", "8735"))
-_STATUS = os.environ.get("FREECAD_BRIDGE_STATUS", "/tmp/freecad-bridge-status.json")
+
+
+def _default_status_path():
+    """Per-user status path, so another local user cannot pre-empt the name.
+
+    A fixed /tmp/freecad-bridge-status.json can be pre-created by anyone on a
+    shared host — as a symlink to write through, or with contents a poller
+    would read as a completed job.
+    """
+    uid = getattr(os, "getuid", lambda: 0)()
+    return os.path.join(tempfile.gettempdir(), "freecad-bridge-%s-status.json" % uid)
+
+
+_STATUS = os.environ.get("FREECAD_BRIDGE_STATUS") or _default_status_path()
+
+
+def _write_status(seq, ok):
+    """Write the completion status with 0600, refusing to follow a symlink."""
+    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0)
+    fd = os.open(_STATUS, flags, 0o600)
+    try:
+        st = os.fstat(fd)
+        if hasattr(os, "getuid") and st.st_uid != os.getuid():
+            raise OSError("%s is owned by uid %d, refusing to write" % (_STATUS, st.st_uid))
+        os.write(fd, json.dumps({"seq": seq, "ok": ok}).encode("utf-8"))
+    finally:
+        os.close(fd)
 
 
 def _cross_origin(headers):
@@ -156,10 +183,9 @@ class _Bridge(QtCore.QObject):
             self.seq += 1
             resp["seq"] = self.seq
             try:
-                with open(_STATUS, "w") as f:
-                    json.dump({"seq": self.seq, "ok": resp["ok"]}, f)
-            except Exception:
-                pass
+                _write_status(self.seq, resp["ok"])
+            except Exception as e:
+                App.Console.PrintError("Bridge: cannot write %s (%s)\n" % (_STATUS, e))
         self._respond(sock, resp)
 
     def _respond(self, sock, obj, status="200 OK"):

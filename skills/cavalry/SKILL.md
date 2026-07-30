@@ -33,8 +33,9 @@ the API surface.
    (`~/Library/Application Support/Cavalry/Scripts/` — verify via **Help ▸ Show Scripts Folder**).
 2. **Write a build script** to the scratchpad and send it:
    `bash scripts/cavalry-send.sh /path/to/build.js`. The helper waits for the bridge's status file
-   (`/tmp/cavalry-bridge-status.json`) to change; long renders need
-   `CAVALRY_SEND_TIMEOUT=600` (seconds).
+   to change — it discovers the path from the bridge's `GET /get` reply, so it lives in the user's
+   own Cavalry preferences folder rather than a guessable `/tmp` name (`CAVALRY_BRIDGE_STATUS`
+   overrides). Long renders need `CAVALRY_SEND_TIMEOUT=600` (seconds).
 3. **Feedback comes back through files, not HTTP.** The bridge only reports ok/failed;
    `console.log` output stays in Cavalry's Log window. So every script must *write its results to
    disk* to be read back:

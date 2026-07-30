@@ -7,13 +7,26 @@
 #   cavalry-send.sh --ping                     check the bridge is reachable
 #
 # Env: CAVALRY_BRIDGE_PORT (default 8731), CAVALRY_SEND_TIMEOUT seconds (default 30;
-# raise it for frame-loop renders). Completion is detected via the bridge's status
+# raise it for frame-loop renders), CAVALRY_BRIDGE_STATUS (default: whatever path
+# the bridge reports from GET /get). Completion is detected via the bridge's status
 # file; the final line of output is that status JSON ({"seq":N,"ok":true,...}).
 set -euo pipefail
 
 PORT="${CAVALRY_BRIDGE_PORT:-8731}"
 TIMEOUT="${CAVALRY_SEND_TIMEOUT:-30}"
-STATUS=/tmp/cavalry-bridge-status.json
+
+# Ask the bridge where its status file is rather than hardcoding a second copy
+# of the path. CAVALRY_BRIDGE_STATUS overrides, mirroring FREECAD_BRIDGE_STATUS.
+# The `|| true` matters: without it a failed curl (bridge down) would fail the
+# pipeline under `set -e -o pipefail` and abort with no message at all.
+discover_status() {
+    curl -s -m 3 "http://127.0.0.1:$PORT/get" 2>/dev/null \
+        | python3 -c 'import json,sys
+try:
+    print(json.load(sys.stdin).get("status") or "")
+except Exception:
+    pass' 2>/dev/null || true
+}
 
 if [ $# -lt 1 ]; then
     echo "usage: cavalry-send.sh <script.js> | -c '<code>' | --ping" >&2
@@ -36,6 +49,14 @@ else
     [ -f "$1" ] || { echo "ERROR: script not found: $1" >&2; exit 2; }
     abs=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
     payload=$(python3 -c 'import json,sys; print(json.dumps({"path": sys.argv[1]}))' "$abs")
+fi
+
+STATUS="${CAVALRY_BRIDGE_STATUS:-$(discover_status)}"
+if [ -z "$STATUS" ]; then
+    echo "ERROR: bridge did not report a status file path on 127.0.0.1:$PORT." >&2
+    echo "       Is Cavalry running with an up-to-date Cavalry Bridge started?" >&2
+    echo "       Set CAVALRY_BRIDGE_STATUS to override." >&2
+    exit 1
 fi
 
 before=$(cat "$STATUS" 2>/dev/null || true)
