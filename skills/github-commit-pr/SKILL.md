@@ -244,11 +244,20 @@ EOF
 After the PR is created, wait for the GitHub Actions run triggered by the push to finish:
 
 ```bash
-gh run watch $(gh run list --branch <branch-name> --limit 1 --json databaseId --jq '.[0].databaseId') --exit-status
+sha=$(git rev-parse HEAD)
+run_id=""
+for _ in $(seq 1 10); do
+  run_id=$(gh run list --commit "$sha" --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+  [ -n "$run_id" ] && break
+  sleep 5
+done
+[ -n "$run_id" ] || { echo "No CI run registered for $sha after 50s" >&2; exit 1; }
+gh run watch "$run_id" --exit-status
 ```
 
+- Select the run by **commit**, never by branch. `--branch ... --limit 1` returns the newest run *on the branch*, which may still be an older commit's run if CI has not registered the push yet — and if that stale run is green, the skill would merge on the strength of results that say nothing about what was just pushed.
 - `--exit-status` makes the command exit non-zero when the run fails, so failure is easy to detect.
-- If no run is found yet, retry after a short delay (CI may not have registered the push immediately).
+- The loop covers the registration delay: `gh run list` legitimately returns empty for a few seconds after a push, which is why the lookup is retried rather than trusted on the first call.
 - If the run **succeeds** → continue to Step 10.
 - If the run **fails** → when the logs are long, first delegate root-causing to a read-only subagent (see [Delegating to subagents](#delegating-to-subagents)) and pass its conclusion — failing step, error, and `file:line` — into the `github-fix-action-error` skill; otherwise invoke that skill directly. After the fix is committed and pushed, re-watch the new run. Repeat until the build is green or the user aborts.
 
@@ -357,9 +366,18 @@ If rebase has conflicts, stop and report — do not force-push or auto-resolve.
 After pushing, wait for the GitHub Actions run triggered by the new commit to finish:
 
 ```bash
-gh run watch $(gh run list --branch "$(git branch --show-current)" --limit 1 --json databaseId --jq '.[0].databaseId') --exit-status
+sha=$(git rev-parse HEAD)
+run_id=""
+for _ in $(seq 1 10); do
+  run_id=$(gh run list --commit "$sha" --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+  [ -n "$run_id" ] && break
+  sleep 5
+done
+[ -n "$run_id" ] || { echo "No CI run registered for $sha after 50s" >&2; exit 1; }
+gh run watch "$run_id" --exit-status
 ```
 
+- Select the run by **commit**, never by branch — see the note in **New PR flow → Step 9**. Pushing twice in quick succession is exactly when `--branch ... --limit 1` returns the earlier run.
 - `--exit-status` makes the command exit non-zero when the run fails.
 - If the run **succeeds** → continue to Step 6.
 - If the run **fails** → when the logs are long, first delegate root-causing to a read-only subagent (see [Delegating to subagents](#delegating-to-subagents)) and pass its conclusion — failing step, error, and `file:line` — into the `github-fix-action-error` skill; otherwise invoke that skill directly. After the fix is committed and pushed, re-watch the new run. Repeat until the build is green or the user aborts.
@@ -424,7 +442,7 @@ These boundaries protect the user's repository and team workflow:
 - The PR body must reflect the actual changes from the diff, not boilerplate — reviewers rely on it to understand the change
 - Issue closing keywords (`Closes #N`) go in the PR body, not in the commit message — GitHub only processes closing keywords from the PR body on the default branch
 - When pushing to an existing PR, do not modify the PR title or body — only push the new commit
-- Do not merge a PR until the watched GitHub Actions run has actually finished green — `gh run watch --exit-status` is the gate, never trust an in-flight or pending status
+- Do not merge a PR until the watched GitHub Actions run has actually finished green — `gh run watch --exit-status` is the gate, never trust an in-flight or pending status. The watched run must be the one for the commit you just pushed (`gh run list --commit "$(git rev-parse HEAD)"`), not merely the latest on the branch
 - Always confirm with the user once before merging — merging is shared state, visible to collaborators, and reverts are messy; the confirmation is the user's final chance to pause
 - Do not use `gh pr merge --admin` to bypass branch protection unless the user explicitly asks — protection rules exist to enforce review and quality gates, and bypassing them silently undermines the team's process
 - Respect `--no-merge` in `$ARGUMENTS` — when set, push and report but never call `gh pr merge`, so the user can hand the PR off for human review
