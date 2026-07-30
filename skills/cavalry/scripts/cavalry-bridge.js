@@ -68,6 +68,9 @@ var callbacks = {
 };
 
 server.listen("127.0.0.1", PORT);
+// Static reply for GET /get — what `cavalry-send.sh --ping` probes, mirroring
+// the /ping endpoints of the Blender and FreeCAD bridges.
+server.setResultForGet(JSON.stringify({ok: true, bridge: "cavalry", port: PORT}));
 server.addCallbackObject(callbacks);
 server.setRealtime();
 
