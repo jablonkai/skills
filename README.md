@@ -126,3 +126,10 @@ The validator checks:
 
 The same script runs in CI on every push and pull request
 (see [.github/workflows/validate.yml](.github/workflows/validate.yml)).
+
+## License
+
+[MIT](LICENSE). Bundled third-party assets keep their own licenses — see the
+license file shipped alongside each one (for example
+[Nebula Sans](skills/emu-branding/assets/fonts/NebulaSans/license.txt) and
+[cavalry-types](skills/cavalry/references/cavalry-types/LICENSE)).
