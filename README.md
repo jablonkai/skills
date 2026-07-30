@@ -8,6 +8,12 @@ This repository is the home for these skills — they were previously kept along
 and instruction files in `agent-tools`, which now keeps only the agents, the global
 instruction file, and the `update-all` bootstrap script.
 
+Skills here follow the open **Agent Skills** format documented at
+[agentskills.io](https://agentskills.io/) — the reference for the `SKILL.md` structure,
+frontmatter fields, and progressive disclosure model used throughout this repo. The format
+is supported by Claude Code and a growing number of other agents, so these skills are
+portable beyond a single tool.
+
 ## Available Skills
 
 ### App automation
@@ -41,17 +47,51 @@ skills/<name>/
 └── assets/           # optional — templates, fonts, images
 ```
 
-## Using These Skills
+## Installing These Skills
 
-Claude Code discovers skills from `~/.claude/skills/`. To make a skill from this repo
-available globally, symlink it:
+Install straight from GitHub — no clone needed. Both installers below read this repo's
+`skills/` directory and drop the chosen skills into the right place for your agent.
+
+### With the `skills` CLI ([skills.sh](https://skills.sh))
 
 ```bash
-ln -s "$PWD/skills/<name>" ~/.claude/skills/<name>
+# pick interactively from this repo
+npx skills add jablonkai/skills
+
+# a single skill, non-interactively (repeat the name for more)
+npx skills add jablonkai/skills --skill error-debugging
+
+# or address the skill by its path in the repo
+npx skills add https://github.com/jablonkai/skills/tree/main/skills/error-debugging
+
+# install globally (~/.claude/skills/) instead of into the current project
+npx skills add jablonkai/skills --global
 ```
 
-Symlinking (rather than copying) keeps the installed skill in sync with the repo. To
-install all of them:
+Other useful commands: `npx skills list`, `npx skills check`, `npx skills update`,
+`npx skills remove <name>`.
+
+### With the GitHub CLI (`gh` v2.90.0+)
+
+```bash
+# pick interactively from this repo
+gh skill install jablonkai/skills
+
+# a single skill
+gh skill install jablonkai/skills error-debugging
+
+# every skill in the repo, installed for Claude Code, user-wide
+gh skill install jablonkai/skills --all --agent claude-code --scope user
+```
+
+`--scope project` (the default) installs into the current repository; `--scope user`
+installs into your home directory so the skill is available everywhere. Pin a version
+with `--pin <tag-or-sha>`, and update later with `gh skill update --all`.
+
+### Working on this repo locally
+
+If you've cloned the repo and want your edits to take effect immediately, symlink instead
+of installing:
 
 ```bash
 for d in skills/*/; do
@@ -59,9 +99,12 @@ for d in skills/*/; do
 done
 ```
 
-Skills can also be used per-project by placing them under a repository's `.claude/skills/`.
-
 ## Adding a New Skill
+
+Start with Anthropic's [skill-creator](https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md)
+skill — it's the recommended way to scaffold a new skill, sharpen its description, and
+evaluate whether it triggers reliably. It ships with Claude Code as the `skill-creator`
+skill. Then apply this repo's conventions:
 
 1. Create `skills/<kebab-name>/SKILL.md` with `name` and `description` frontmatter. The
    `name` must match the directory name.
@@ -72,7 +115,10 @@ Skills can also be used per-project by placing them under a repository's `.claud
 4. Add an entry to **Available Skills** in this file and in [AGENTS.md](AGENTS.md).
 5. Run the validator.
 
-See [AGENTS.md](AGENTS.md) for the full conventions.
+See [AGENTS.md](AGENTS.md) for the full conventions, and
+[agentskills.io](https://agentskills.io/) for the format spec
+([specification](https://agentskills.io/specification),
+[quickstart](https://agentskills.io/skill-creation/quickstart)).
 
 ## Validation
 
