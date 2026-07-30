@@ -18,10 +18,32 @@ var STATUS_FILE = "/tmp/cavalry-bridge-status.json";
 var seq = 0;
 var server = new api.WebServer();
 
+// True when the request came from a browsing context on another origin. The
+// bridge executes arbitrary JavaScript, so a page on any site the user visits
+// could otherwise drive it with a CORS *simple* request (no preflight, and the
+// opaque response is irrelevant — the code has already run). curl and
+// cavalry-send.sh send neither header, so this costs them nothing.
+function isCrossOrigin(post) {
+    var headers = (post && post.headers) || [];
+    for (var i = 0; i < headers.length; i++) {
+        var name = String(headers[i].name || "").toLowerCase();
+        var value = String(headers[i].value || "").toLowerCase();
+        if (name === "origin" && value) return true;
+        if (name === "sec-fetch-site" && value !== "same-origin" && value !== "none") return true;
+    }
+    return false;
+}
+
 var callbacks = {
     onPost: function () {
         while (server.postCount() > 0) {
             var post = server.getNextPost();
+            if (isCrossOrigin(post)) {
+                // Drop it without touching seq or STATUS_FILE — the request
+                // never ran, so it must not look like a completed job.
+                console.error("Bridge: cross-origin request rejected");
+                continue;
+            }
             var body = post.result;
             var req = null;
             try { req = JSON.parse(body); } catch (e) { req = null; }

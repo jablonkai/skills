@@ -34,6 +34,22 @@ _PORT = int(os.environ.get("FREECAD_BRIDGE_PORT", "8735"))
 _STATUS = os.environ.get("FREECAD_BRIDGE_STATUS", "/tmp/freecad-bridge-status.json")
 
 
+def _cross_origin(headers):
+    """True when the request came from a browsing context on another origin.
+
+    The bridge execs arbitrary Python, so a page on any site the user visits
+    could otherwise drive it with a CORS *simple* request (no preflight, and the
+    opaque response is irrelevant — the code has already run). curl and
+    freecad-send.sh send neither header, so this costs them nothing.
+
+    `headers` maps lowercased bytes names to bytes values.
+    """
+    if headers.get(b"origin"):
+        return True
+    site = headers.get(b"sec-fetch-site", b"").decode("latin1", "replace").lower()
+    return site not in ("", "same-origin", "none")
+
+
 def _run(code, filename, out):
     """Exec code in a fresh namespace; capture stdout and any error."""
     ns = {"__name__": "__main__", "__file__": filename,
@@ -83,15 +99,25 @@ class _Bridge(QtCore.QObject):
         lines = head.split(b"\r\n")
         request = lines[0].decode("latin1", "replace")
         path = (request.split(" ") + ["", "/"])[1]
+        headers = {}
         clen = 0
         for ln in lines[1:]:
-            if ln.lower().startswith(b"content-length:"):
+            name, sep, value = ln.partition(b":")
+            if not sep:
+                continue
+            headers[name.strip().lower()] = value.strip()
+            if name.strip().lower() == b"content-length":
                 try:
-                    clen = int(ln.split(b":", 1)[1].strip())
+                    clen = int(value.strip())
                 except ValueError:
                     clen = 0
         if len(body) < clen:
             return                                   # wait for the rest of the body
+
+        if _cross_origin(headers):
+            self._respond(sock, {"ok": False, "output": "",
+                                 "error": "cross-origin request rejected"}, "403 Forbidden")
+            return
 
         if path.startswith("/ping"):
             resp = {"ok": True, "bridge": "freecad",
@@ -124,9 +150,9 @@ class _Bridge(QtCore.QObject):
                 pass
         self._respond(sock, resp)
 
-    def _respond(self, sock, obj):
+    def _respond(self, sock, obj, status="200 OK"):
         body = json.dumps(obj).encode("utf-8")
-        sock.write(b"HTTP/1.1 200 OK\r\n"
+        sock.write(b"HTTP/1.1 " + status.encode("latin1") + b"\r\n"
                    b"Content-Type: application/json\r\n"
                    b"Content-Length: " + str(len(body)).encode() + b"\r\n"
                    b"Connection: close\r\n\r\n" + body)
