@@ -74,9 +74,10 @@ class McpClient {
       throw new Error(`SSE connect failed: HTTP ${res.status}`);
     }
 
-    let resolveEndpoint;
-    const endpointReady = new Promise((resolve) => (resolveEndpoint = resolve));
-    this.resolveEndpoint = resolveEndpoint;
+    const endpointReady = new Promise((resolve, reject) => {
+      this.resolveEndpoint = resolve;
+      this.rejectEndpoint = reject;
+    });
     this.readLoop(res.body).catch(() => {});
     this.postUrl = await withTimeout(endpointReady, 10000, "waiting for endpoint event");
 
@@ -126,7 +127,25 @@ class McpClient {
     }
     const payload = data.join("\n");
     if (event === "endpoint") {
-      this.resolveEndpoint(new URL(payload, BASE).toString());
+      let url;
+      try {
+        url = new URL(payload, BASE);
+      } catch {
+        this.rejectEndpoint(new Error(`Malformed endpoint event: ${payload}`));
+        return;
+      }
+      // A relative payload resolves against BASE, but an absolute one wins
+      // outright — so a hostile or hijacked listener could point every later
+      // POST at a host of its choosing, including tools/call bodies carrying
+      // the contents of local .js files.
+      const expected = new URL(BASE).origin;
+      if (url.origin !== expected) {
+        this.rejectEndpoint(
+          new Error(`Refusing cross-origin endpoint: ${url.origin} (expected ${expected})`)
+        );
+        return;
+      }
+      this.resolveEndpoint(url.toString());
       return;
     }
     if (event !== "message" || !payload) return;
