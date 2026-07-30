@@ -21,7 +21,7 @@ the API surface.
 - [references/api-reference.md](references/api-reference.md) — condensed module reference (api, cavalry, ui, WebClient/WebServer, render scripts, CLI). Read it when you need something outside the cheatsheet below.
 - [references/cavalry-types/](references/cavalry-types/README.md) — the **complete** API as vendored TypeScript definitions with JSDoc examples; grep it for any function the reference doesn't cover.
 - [scripts/cavalry-bridge.js](scripts/cavalry-bridge.js) — the bridge to install into Cavalry.
-- [scripts/cavalry-send.sh](scripts/cavalry-send.sh) — send a JS file (or `-c 'inline code'`) to the bridge and wait for completion.
+- [scripts/cavalry-send.sh](scripts/cavalry-send.sh) — send a JS file (or `-c 'inline code'`) to the bridge and wait for completion. `--ping` checks the bridge is reachable first.
 
 ## The control loop
 
