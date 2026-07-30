@@ -41,7 +41,7 @@ import threading
 import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-BRIDGE_VERSION = "1.0.1"
+BRIDGE_VERSION = "1.1.0"
 PORT = int(os.environ.get("BLENDER_BRIDGE_PORT", "8736"))
 
 _jobs = queue.Queue()
@@ -563,6 +563,26 @@ class _Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _cross_origin(self):
+        """True when the request came from a browsing context on another origin.
+
+        The bridge execs arbitrary Python, so a page on any site the user visits
+        could otherwise drive it with a CORS *simple* request (no preflight, and
+        the opaque response is irrelevant — the code has already run). curl and
+        the *-send.sh wrappers send neither header, so this costs them nothing.
+        """
+        if self.headers.get("Origin"):
+            return True
+        site = (self.headers.get("Sec-Fetch-Site") or "").lower()
+        return site not in ("", "same-origin", "none")
+
+    def _reject_cross_origin(self):
+        if not self._cross_origin():
+            return False
+        self._reply({"ok": False, "output": "",
+                     "error": "cross-origin request rejected"}, 403)
+        return True
+
     def _dispatch(self, kind, payload=None, timeout=3600):
         job = {"kind": kind, "done": threading.Event(), "result": None}
         if payload:
@@ -579,6 +599,8 @@ class _Handler(BaseHTTPRequestHandler):
         return job["result"]
 
     def do_GET(self):
+        if self._reject_cross_origin():
+            return
         if self.path.startswith("/ping"):
             self._reply(self._dispatch("ping", timeout=10))
         elif self.path.startswith("/state"):
@@ -587,6 +609,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._reply({"ok": False, "error": "unknown endpoint"}, 404)
 
     def do_POST(self):
+        if self._reject_cross_origin():
+            return
         if not self.path.startswith("/run"):
             self._reply({"ok": False, "error": "unknown endpoint"}, 404)
             return
