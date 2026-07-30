@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash, Read, Grep, Glob, Task
+allowed-tools: Bash, Read, Grep, Glob
 argument-hint: '[<base-branch>] [--issue <number>] [--no-merge]'
 category: git
 description: 'Commit changes, create a feature branch, open a GitHub pull request, wait for CI, and merge the PR once GitHub Actions go green — or push new commits to an existing PR and merge after CI succeeds. Use whenever someone says ''commit and push'', ''create a PR'', ''open a pull request'', ''send for review'', ''push my changes'', ''merge when CI passes'', or is done with their work and ready to ship it. Also triggers for ''commitold be'', ''nyiss PR-t'', ''mergeld ha zöld a CI'', or any variation of wanting to get changes into a pull request and landed. Handles conventional commit messages, issue linking with auto-close keywords (Closes #N), sensitive file detection, PR template integration, and auto-merge with branch cleanup.'
