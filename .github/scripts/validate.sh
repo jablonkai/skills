@@ -83,17 +83,35 @@ check_skill_name_matches_dir() {
   done < <(skill_dirs)
 }
 
+# The body of the `## Available Skills` section, up to the next `## ` heading.
+# Matching the whole document instead would let a skill dropped from the list
+# still pass on the strength of one passing mention elsewhere in the prose.
+available_skills_section() {
+  awk '/^## Available Skills[[:space:]]*$/ { inside = 1; next }
+       /^## / { inside = 0 }
+       inside' "$1"
+}
+
 # Keep the catalog in the docs honest: every skill directory must be listed in
-# both README.md and AGENTS.md, and neither may list a skill that no longer exists.
+# the Available Skills section of both README.md and AGENTS.md, and neither may
+# list a skill that no longer exists.
 check_docs_in_sync() {
   local doc
   local dir_name
   local listed
+  local section
 
   for doc in README.md AGENTS.md; do
+    section=$(available_skills_section "$doc")
+
+    if [[ -z "$section" ]]; then
+      echo "No '## Available Skills' section found in $doc"
+      exit 1
+    fi
+
     while IFS= read -r dir_name; do
-      if ! grep -q "\`$dir_name\`" "$doc"; then
-        echo "Skill not listed in $doc: $dir_name"
+      if ! grep -q -- "^- \`$dir_name\`:" <<<"$section"; then
+        echo "Skill not listed in the Available Skills section of $doc: $dir_name"
         exit 1
       fi
     done < <(skill_dirs)
@@ -103,7 +121,7 @@ check_docs_in_sync() {
         echo "$doc lists a skill that does not exist: $listed"
         exit 1
       fi
-    done < <(grep -oE '^- \`[a-z0-9-]+\`' "$doc" | sed -E 's/^- `([a-z0-9-]+)`/\1/' | sort -u)
+    done < <(grep -oE '^- \`[a-z0-9-]+\`' <<<"$section" | sed -E 's/^- `([a-z0-9-]+)`/\1/' | sort -u)
   done
 }
 
