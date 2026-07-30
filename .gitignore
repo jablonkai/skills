@@ -1,0 +1,12 @@
+.DS_Store
+__pycache__/
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+.serena/cache/
+
+# Skills kept local — not part of the published catalog
+skills/figma-to-react-native/
+skills/indie-mvp-spec/
+skills/mobile-gotchas/
+skills/race-crew-kit/
+skills/token-optimization/

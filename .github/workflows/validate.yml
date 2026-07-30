@@ -1,0 +1,24 @@
+name: Validate Skills
+
+on:
+  # validate.sh checks the whole repo (all Markdown links + structure),
+  # so run on every PR rather than a path subset.
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run skill validation
+        run: bash .github/scripts/validate.sh

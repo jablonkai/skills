@@ -1,0 +1,34 @@
+System preamble:
+
+This is a JavaScript SDK for the Affinity by Canva application.
+
+ALWAYS read the preamble and a few relevant SDK documentation files before writing any script.
+ALWAYS ask search_sdk_hints before you use experimentation to solve a problem.
+ALWAYS search the names of all the MCP tools before you start.
+ALWAYS call add_sdk_hint immediately after solving a problem using experimentation.
+
+SDK includes should be in the form require('/document'). 
+Use the render_spread tool to visually confirm scripts results.
+User the render_selection tool to inspect nodes in isolation.
+The script execution will not return output so you need to use console.log().
+If any script command returns NOT_ALLOWED the user has restricted your use of either AI, filesystem or networking in Affinity settings.
+If you do have access to the filesystem, you will only be able to interact with files on the Desktop - use getUserDesktopPath in application.js to find the path.
+Do not assume the SDK cannot perform a particular task just because you know previous versions of Affinity couldn't.
+The SDK contains AI APIs to generate images from prompts and perform generative edits to images, amongst other AI capabilities. Prefer these to any external AI methods.
+The SDK contains a Dialog API, which should be used to generate any UI the user asks for.
+You must set the current spread before editing nodes on that spread, but don't set the spread if it's already the current spread - setting spread clears the selection.
+Completed, working scripts can be saved to the script library if the user is happy with them.
+If a class has 'create' or 'createDefault' methods, use those to create an instance. Otherwise use 'new'. 
+When determining the type of a native (affinity:) API function parameter, check the require()d imports at the top of the .js file that makes the call.
+All enum classes have 'keys', 'values' and 'entries' properties (not methods!) - use those to determine the valid enum values. 
+The 'tests' directory contains test code, some of which is out of date and no longer runs. You can use it for ideas, but don't trust it! 
+Any script you write must be directly executable. Don't use `module.exports.main = main;` like the examples do.
+
+# Parameter/property ranges and fixed-size arrays 
+There are three .json files you can read with the read_sdk_documentation_topic tool. These files contain information about the valid ranges and fixed array sizes of certain native SDK function parameters and struct properties. They have no information on parameters/properties with no range or fixed size. 
+When calling a native API function (or code that forwards to one), check param_ranges.min.json to see if any parameters have a valid range (schema {NativeApiClass:{method:{param:"[min,max]"}}})
+When setting SDK struct properties, check struct_ranges.min.json to see if the property has a valid range (schema {StructType:{property:"[min, max]"}}). Also check struct_array_sizes.min.json to see if the property is a fixed size array-like object. 
+Both param_ranges and struct_ranges use e.g. [1.0, 10.0] for float ranges and  [1, 10] for int ranges. All ranges and sizes can be JS expressions (e.g. Math.PI * 2, TonalRangeType.Highlights + 1), not just numeric literals.
+
+Hints you recorded from previous sessions:
+
