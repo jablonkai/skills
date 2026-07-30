@@ -3,6 +3,14 @@
 Personal skill catalog: one directory per reusable, task-oriented skill. See
 [README.md](README.md) for the full overview.
 
+## Reference
+
+Skills in this repo follow the open **Agent Skills** format — see
+[agentskills.io](https://agentskills.io/) for the authoritative
+[specification](https://agentskills.io/specification) of `SKILL.md`, its frontmatter
+fields, and the progressive disclosure model. The conventions below are this repo's
+house rules on top of that format; when the two disagree, the spec wins.
+
 ## AI agent guidance
 
 - `skills/<name>/` is the main workspace surface; changes to skills belong there.
@@ -78,6 +86,12 @@ Checks: frontmatter completeness, `name:`↔directory match, skill directory str
 kebab-case names, README/AGENTS catalog sync, and broken relative Markdown links.
 
 ## Adding a new skill
+
+Use Anthropic's **skill-creator** skill to author the skill body — it walks through
+scaffolding, description writing, and evaluation:
+<https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md>
+(available as the `skill-creator` skill in Claude Code). Then apply this repo's
+conventions on top:
 
 1. Create `skills/<kebab-name>/SKILL.md` with valid frontmatter
 2. Add an entry to **Available Skills** in both [README.md](README.md) and this file
