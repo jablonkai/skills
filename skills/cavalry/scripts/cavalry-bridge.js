@@ -13,7 +13,11 @@
 // stays in Cavalry's Log window — scripts must write results to files.
 
 var PORT = 8731;
-var STATUS_FILE = "/tmp/cavalry-bridge-status.json";
+// The user's own Cavalry preferences folder, not /tmp: a fixed /tmp name can be
+// pre-created by any other local user — as a symlink to write through, or with
+// contents cavalry-send.sh would read as a successful run. The exact path is
+// advertised in the GET /get reply below so the sender never has to guess it.
+var STATUS_FILE = api.getPreferencesPath() + "/cavalry-bridge-status.json";
 
 var seq = 0;
 var server = new api.WebServer();
@@ -69,8 +73,10 @@ var callbacks = {
 
 server.listen("127.0.0.1", PORT);
 // Static reply for GET /get — what `cavalry-send.sh --ping` probes, mirroring
-// the /ping endpoints of the Blender and FreeCAD bridges.
-server.setResultForGet(JSON.stringify({ok: true, bridge: "cavalry", port: PORT}));
+// the /ping endpoints of the Blender and FreeCAD bridges. It also carries the
+// status file path, which is how the sender discovers it.
+server.setResultForGet(JSON.stringify(
+    {ok: true, bridge: "cavalry", port: PORT, status: STATUS_FILE}));
 server.addCallbackObject(callbacks);
 server.setRealtime();
 
