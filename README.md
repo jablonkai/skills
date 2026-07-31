@@ -116,6 +116,8 @@ The validator checks:
 
 - required frontmatter fields (`name`, `description`)
 - frontmatter `name` matches the directory name
+- only documented frontmatter fields are used, and `risk` is `low`, `medium` or `high`
+  (see [AGENTS.md](AGENTS.md#frontmatter-fields))
 - kebab-case skill directory names
 - every skill directory contains a `SKILL.md`
 - README and AGENTS skill lists match the actual directories

@@ -1,6 +1,16 @@
 ---
 name: duv
 description: "Search and retrieve data from the DUV Ultramarathon Statistics website (statistik.d-u-v.org). Use when the user asks about ultramarathon results, runner profiles, race events, rankings, records, or finishing times — e.g. 'find runner X on DUV', 'what was the Spartathlon 2024 result', 'best 100km times in Hungary', 'lookup ultra runner'. The DUV database covers 10M+ performances, 2.4M+ runners, and 115k+ ultra events worldwide."
+category: data-lookup
+risk: low
+tags:
+  - ultrarunning
+  - duv
+  - race-results
+  - statistics
+  - web-scraping
+allowed-tools: Bash, Read, WebFetch
+argument-hint: "[runner name, event name, or ranking query]"
 ---
 
 # DUV Ultramarathon Statistics
