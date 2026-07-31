@@ -1,6 +1,7 @@
 ---
 name: github-do-issue
 description: "Fetch a GitHub issue, understand its requirements, plan and implement the solution, then run verification — without committing, pushing, or creating a PR. Use when someone says 'work on issue #N', 'do #N', 'implement #N', 'fix issue #N', 'dolgozz a #N-es issue-n', or pastes a GitHub issue URL and wants it implemented. The user always reviews the result and decides when to commit. Pairs naturally with github-commit-pr for the commit step afterward."
+summary: "fetch a GitHub issue, implement it in the current repository, and stop before commit or PR creation"
 category: development-workflow
 risk: low
 tags:

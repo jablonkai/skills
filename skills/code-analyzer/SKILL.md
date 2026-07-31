@@ -1,6 +1,7 @@
 ---
 name: code-analyzer
 description: "Audit an entire project for bugs, security vulnerabilities, code quality problems, performance issues, missing tests, documentation gaps, and concrete improvement or feature ideas — then produce a prioritized, actionable report with file:line references. Read-only by default; only edits or commits when the user explicitly asks for a fix afterwards. Use when someone says 'review my project', 'audit the codebase', 'find bugs', 'check for security issues', 'what could be improved', 'suggest improvements', 'are there any vulnerabilities', 'do a code quality review', or the Hungarian equivalents 'nézd át a projektet', 'auditáld a kódot', 'találj hibákat', 'milyen biztonsági problémák vannak', 'javasolj fejlesztéseket', 'mit lehetne javítani'. Trigger this skill whenever the user wants a holistic assessment of a project rather than a fix to one specific thing — even if they don't say the word 'audit'."
+summary: "holistic read-only project audit for bugs, security vulnerabilities, code quality issues, performance risks, missing tests, documentation gaps, and prioritized improvement ideas"
 category: code-quality
 risk: low
 tags:

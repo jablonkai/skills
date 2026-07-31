@@ -1,6 +1,7 @@
 ---
 name: freecad
 description: 'Remote-control a running FreeCAD (the open-source parametric CAD app) by Python script through a small local bridge — build and edit 3D models live: box/cylinder primitives and booleans, filleted/chamfered solids, constrained Sketcher profiles, parametric PartDesign features (pad, pocket, revolution, patterns), 2D Draft geometry, meshes, and TechDraw drawings, then measure them, grab viewport screenshots, and export STEP / IGES / BREP / STL / OBJ. Use whenever the user wants to create or edit a CAD model, 3D part, mechanical component, enclosure, bracket, or .FCStd file, convert or export a model to STEP/STL/IGES/OBJ, or says "FreeCAD", "CAD model", "parametric part", "make a 3D part", "export to STEP", "STL for printing" — even if they don''t mention scripting. Also covers Hungarian: "csinálj egy CAD modellt", "3D alkatrész", "parametrikus alkatrész", "exportáld STEP-be", "STL nyomtatáshoz".'
+summary: "remote-control a running FreeCAD (parametric CAD) by Python via a local bridge — primitives and booleans, constrained Sketcher profiles, PartDesign features, metrics and viewport screenshots, STEP/IGES/STL/OBJ export"
 category: cad
 risk: medium
 tags:

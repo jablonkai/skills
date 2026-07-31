@@ -1,6 +1,7 @@
 ---
 name: test-generation
 description: "Write tests for existing code: unit tests, integration tests, UI tests, edge cases and error paths, plus coverage analysis to find what is still untested. Detects the project's test framework from its build files and follows that project's conventions — Kotlin/KMP (kotlin.test, coroutines-test, Turbine, MockK, Kover), Compose Multiplatform, Flutter/Dart, Swift (Swift Testing, XCTest, XCUITest), Rust (cargo test, proptest, criterion), C++ (GoogleTest, Catch2), and secondarily Jest/Vitest, pytest, Go and JUnit. Use when someone says 'write tests for this', 'add unit tests', 'test this function', 'add an integration test', 'scaffold a test suite', 'what is not covered', 'improve test coverage', 'write a regression test for this bug', or the Hungarian 'írj teszteket', 'teszteld le ezt a függvényt', 'mi nincs letesztelve'. Not for auditing a whole project for bugs and missing tests in general (that is code-analyzer), nor for diagnosing a crash or a failing test's root cause (that is error-debugging)."
+summary: "write unit, integration and UI tests for existing code — framework detection from the build files, case selection for boundaries and error paths, correct source-set placement, and coverage gap analysis across Kotlin/KMP, Compose, Flutter/Dart, Swift, Rust and C++"
 category: testing
 risk: low
 tags:

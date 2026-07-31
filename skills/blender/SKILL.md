@@ -1,6 +1,7 @@
 ---
 name: blender
 description: 'Remote-control a running Blender by Python script through a small local bridge — build and edit 3D scenes live: mesh and curve modeling with bmesh and modifiers, materials and shader node graphs, geometry nodes, lighting and cameras, keyframe animation, rigging, physics simulation, Grease Pencil, the video sequencer, and EEVEE/Cycles rendering, then measure the result, grab viewport screenshots, and export glTF / FBX / USD / Alembic / OBJ / STL. Use whenever the user wants to create or edit a 3D scene, model, animation, product shot, or .blend file, render an image or video, convert or export a 3D asset, or says "Blender", "3D model", "render this", "make a 3D animation", "Blender scene", "export to glTF" — even if they don''t mention scripting.'
+summary: "remote-control a running Blender by Python via a local bridge — bmesh/modifier modeling, shader and geometry nodes, animation, rigging, physics, Grease Pencil and the VSE, EEVEE/Cycles stills and video, glTF/FBX/USD/OBJ/STL export"
 category: 3d
 risk: medium
 tags:
