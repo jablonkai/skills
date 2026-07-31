@@ -45,6 +45,7 @@ house rules on top of that format; when the two disagree, the spec wins.
 - `github-fix-action-error`: diagnose and fix the latest failing GitHub Actions run
 - `github-issues`: create, triage, label, comment on, and manage GitHub issues
 - `markitdown`: convert PDF, Office, HTML, data, e-book, image, audio, and ZIP files (or YouTube URLs) to Markdown via Microsoft's markitdown CLI or Python API
+- `test-generation`: generate unit, integration and UI tests plus coverage gap analysis — framework detection, case selection, source-set placement across Kotlin/KMP, Compose, Flutter/Dart, Swift, Rust and C++
 
 ## Conventions
 
