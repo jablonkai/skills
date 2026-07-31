@@ -27,7 +27,7 @@ readonly END_MARKER='<!-- END GENERATED SKILLS -->'
 readonly CATALOG_SECTIONS=(
   "App automation|design-automation,3d,motion-design,cad"
   "GitHub workflows|git,development-workflow,project-management"
-  "Development & analysis|code-quality,debugging,testing,document-conversion"
+  "Development & analysis|code-quality,debugging,testing,documentation,document-conversion"
   "Ultrarunning domain|data-lookup,branding"
 )
 
