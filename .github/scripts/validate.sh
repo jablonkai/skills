@@ -2,28 +2,22 @@
 
 set -euo pipefail
 
-repo_root=$(cd "$(dirname "$0")/../.." && pwd)
+script_dir=$(cd "$(dirname "$0")" && pwd)
+# shellcheck source-path=SCRIPTDIR
+# shellcheck source=catalog-lib.sh
+source "$script_dir/catalog-lib.sh"
 cd "$repo_root"
 
 echo "Validating skill catalog..."
 
-# Skills excluded from version control (see .gitignore) are kept local and are not
-# part of the published catalog, so every check below operates on this list only
-# — link checking included, via markdown_files() further down.
-# Outside a git checkout nothing is ignored and all skill directories are checked.
-skill_dirs() {
-  local dir
-
-  for dir in skills/*/; do
-    dir=${dir%/}
-    [[ -d "$dir" ]] || continue
-    git check-ignore -q "$dir" 2>/dev/null && continue
-    basename "$dir"
-  done | sort
-}
+# `summary` and `category` are required because the Available Skills sections of
+# README.md and AGENTS.md are rendered from them — a skill missing either cannot
+# be listed at all.
+readonly REQUIRED_FRONTMATTER_FIELDS=(name description summary category)
 
 check_skill_frontmatter() {
   local file
+  local field
 
   while IFS= read -r file; do
     [[ -f "$file" ]] || continue
@@ -33,50 +27,22 @@ check_skill_frontmatter() {
       exit 1
     fi
 
-    if ! grep -Eq '^name:' "$file"; then
-      echo "Missing name field: $file"
-      exit 1
-    fi
-
-    if ! grep -Eq '^description:' "$file"; then
-      echo "Missing description field: $file"
-      exit 1
-    fi
+    for field in "${REQUIRED_FRONTMATTER_FIELDS[@]}"; do
+      if ! grep -Eq "^$field:" "$file"; then
+        echo "Missing $field field: $file"
+        exit 1
+      fi
+    done
   done < <(skill_dirs | sed 's|^|skills/|; s|$|/SKILL.md|')
-}
-
-# Top-level frontmatter keys of a SKILL.md: the unindented `key:` lines between the
-# opening `---` and the closing one. Nested keys (list items, mapping values) are
-# indented and therefore skipped.
-frontmatter_keys() {
-  awk 'NR == 1 && $0 == "---" { inside = 1; next }
-       inside && $0 == "---" { exit }
-       inside && /^[A-Za-z][A-Za-z0-9_-]*:/ { sub(/:.*/, ""); print }' "$1"
-}
-
-frontmatter_value() {
-  grep -m1 -E "^$2:" "$1" | sed -E "s/^$2:[[:space:]]*//; s/^[\"']//; s/[\"']$//"
 }
 
 # The documented field set (see AGENTS.md). Rejecting anything else keeps
 # tool-generated blocks — e.g. the `metadata:` block written by `gh skill install`,
 # which pins a repo URL and tree SHA — from drifting into the catalog.
 readonly ALLOWED_FRONTMATTER_FIELDS=(
-  name description category risk tags allowed-tools argument-hint license
+  name description summary category risk tags allowed-tools argument-hint license
 )
 readonly ALLOWED_RISK_VALUES=(low medium high)
-
-contains() {
-  local needle=$1
-  shift
-  local candidate
-
-  for candidate in "$@"; do
-    [[ "$candidate" == "$needle" ]] && return 0
-  done
-
-  return 1
-}
 
 check_skill_frontmatter_fields() {
   local dir_name
@@ -143,46 +109,12 @@ check_skill_name_matches_dir() {
   done < <(skill_dirs)
 }
 
-# The body of the `## Available Skills` section, up to the next `## ` heading.
-# Matching the whole document instead would let a skill dropped from the list
-# still pass on the strength of one passing mention elsewhere in the prose.
-available_skills_section() {
-  awk '/^## Available Skills[[:space:]]*$/ { inside = 1; next }
-       /^## / { inside = 0 }
-       inside' "$1"
-}
-
-# Keep the catalog in the docs honest: every skill directory must be listed in
-# the Available Skills section of both README.md and AGENTS.md, and neither may
-# list a skill that no longer exists.
-check_docs_in_sync() {
-  local doc
-  local dir_name
-  local listed
-  local section
-
-  for doc in README.md AGENTS.md; do
-    section=$(available_skills_section "$doc")
-
-    if [[ -z "$section" ]]; then
-      echo "No '## Available Skills' section found in $doc"
-      exit 1
-    fi
-
-    while IFS= read -r dir_name; do
-      if ! grep -q -- "^- \`$dir_name\`:" <<<"$section"; then
-        echo "Skill not listed in the Available Skills section of $doc: $dir_name"
-        exit 1
-      fi
-    done < <(skill_dirs)
-
-    while IFS= read -r listed; do
-      if [[ ! -d "skills/$listed" ]]; then
-        echo "$doc lists a skill that does not exist: $listed"
-        exit 1
-      fi
-    done < <(grep -oE '^- \`[a-z0-9-]+\`' <<<"$section" | sed -E 's/^- `([a-z0-9-]+)`/\1/' | sort -u)
-  done
+# The Available Skills sections are generated, so the only honest check is to
+# re-render them and compare. This subsumes the old presence-only check: a
+# missing skill, a stale one, and a description that drifted from the
+# frontmatter all show up as a diff.
+check_catalog_generated() {
+  "$script_dir/generate-catalog.sh" --check
 }
 
 # The published set of Markdown files: tracked files plus untracked ones that are
@@ -237,7 +169,7 @@ check_skill_frontmatter_fields
 check_skill_structure
 check_kebab_case_skill_dirs
 check_skill_name_matches_dir
-check_docs_in_sync
+check_catalog_generated
 check_markdown_links
 
 echo "Validation passed."

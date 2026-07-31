@@ -1,6 +1,7 @@
 ---
 name: github-issues
 description: "Create, view, close, comment on, label, triage, and list GitHub issues with standardized structure. Use when someone says 'create an issue', 'file a bug', 'report this', 'open an issue for this', 'triage issues', 'label issue #N', 'close #N', 'list open issues', 'hozz létre egy issue-t', or wants to manage GitHub issues in any way. Enforces issue templates with required sections (Summary, Proposed Solution), applies GitHub's default label taxonomy, and validates labels exist before use."
+summary: "standardized issue creation, labeling, triage, commenting, and issue management through the GitHub CLI"
 category: project-management
 risk: low
 tags:

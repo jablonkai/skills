@@ -1,6 +1,7 @@
 ---
 name: cavalry
 description: 'Remote-control Cavalry (Scene Group''s 2D motion-design app) by script: build scenes procedurally, animate with keyframes and magic easing, do per-letter text animation, load image/JSON assets, and render PNG frames or full videos. Use whenever the user wants to create or edit a Cavalry scene (.cv file), a motion-graphics sting, logo animation, animated title, countdown, lower third, or particle-style burst in Cavalry — or says ''Cavalry'', ''logo sting'', ''make an animation in Cavalry'', ''intro animation'', ''render from Cavalry'' — even if they don''t mention scripting. Also use when a video project needs an animated overlay that DaVinci Resolve or ffmpeg alone can''t produce.'
+summary: "remote-control Cavalry (Scene Group's 2D motion-design app) via a scriptable bridge — build scenes procedurally, animate with keyframes and per-letter text effects, then render PNG frames or alpha overlay videos"
 category: motion-design
 risk: medium
 tags:

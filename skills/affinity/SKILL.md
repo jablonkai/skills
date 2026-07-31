@@ -1,6 +1,7 @@
 ---
 name: affinity
 description: 'Remote-control Affinity (the unified Affinity by Canva app: vector, pixel, and layout studios) with JavaScript through its local automation endpoint — no MCP client configuration needed. Automate document edits, batch operations, text/layer manipulation, and reusable library scripts, with rendered-JPEG visual verification. Use whenever the user wants to script or automate Affinity, programmatically edit .af / .afdesign / .afphoto / .afpub documents, batch-process designs, or says "Affinity", "Affinity script", "automate Affinity", "batch edit in Affinity", "control Affinity" — even if they don''t mention scripting.'
+summary: "remote-control Affinity (the unified Affinity by Canva app) with JavaScript via its local automation endpoint — document edits, batch operations, and reusable library scripts, with no MCP client configuration"
 category: design-automation
 risk: medium
 tags:
