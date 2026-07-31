@@ -52,6 +52,7 @@ house rules on top of that format; when the two disagree, the spec wins.
 - `github-fix-action-error`: diagnose the latest failing GitHub Actions run on the current branch, apply a targeted fix locally, and — after user approval — commit and push; refuses to run on main/master/develop
 - `github-issues`: standardized issue creation, labeling, triage, commenting, and issue management through the GitHub CLI
 - `markitdown`: convert PDF, Office, HTML, data, e-book, image, audio, and ZIP files (or YouTube URLs) to clean Markdown using Microsoft's markitdown tool, via CLI or Python API
+- `rebelle`: remote-control Rebelle and Rebelle Motion IO with JSON events — live WebSocket painting in Rebelle Pro, batch-rendered painted animation frames, and visual verification through canvas exports
 - `test-generation`: write unit, integration and UI tests for existing code — framework detection from the build files, case selection for boundaries and error paths, correct source-set placement, and coverage gap analysis across Kotlin/KMP, Compose, Flutter/Dart, Swift, Rust and C++
 <!-- END GENERATED SKILLS -->
 
