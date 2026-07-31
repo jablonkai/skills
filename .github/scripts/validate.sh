@@ -45,6 +45,66 @@ check_skill_frontmatter() {
   done < <(skill_dirs | sed 's|^|skills/|; s|$|/SKILL.md|')
 }
 
+# Top-level frontmatter keys of a SKILL.md: the unindented `key:` lines between the
+# opening `---` and the closing one. Nested keys (list items, mapping values) are
+# indented and therefore skipped.
+frontmatter_keys() {
+  awk 'NR == 1 && $0 == "---" { inside = 1; next }
+       inside && $0 == "---" { exit }
+       inside && /^[A-Za-z][A-Za-z0-9_-]*:/ { sub(/:.*/, ""); print }' "$1"
+}
+
+frontmatter_value() {
+  grep -m1 -E "^$2:" "$1" | sed -E "s/^$2:[[:space:]]*//; s/^[\"']//; s/[\"']$//"
+}
+
+# The documented field set (see AGENTS.md). Rejecting anything else keeps
+# tool-generated blocks — e.g. the `metadata:` block written by `gh skill install`,
+# which pins a repo URL and tree SHA — from drifting into the catalog.
+readonly ALLOWED_FRONTMATTER_FIELDS=(
+  name description category risk tags allowed-tools argument-hint license
+)
+readonly ALLOWED_RISK_VALUES=(low medium high)
+
+contains() {
+  local needle=$1
+  shift
+  local candidate
+
+  for candidate in "$@"; do
+    [[ "$candidate" == "$needle" ]] && return 0
+  done
+
+  return 1
+}
+
+check_skill_frontmatter_fields() {
+  local dir_name
+  local file
+  local key
+  local risk
+
+  while IFS= read -r dir_name; do
+    file="skills/$dir_name/SKILL.md"
+
+    while IFS= read -r key; do
+      if ! contains "$key" "${ALLOWED_FRONTMATTER_FIELDS[@]}"; then
+        echo "Unknown frontmatter field '$key' in $file (allowed: ${ALLOWED_FRONTMATTER_FIELDS[*]})"
+        exit 1
+      fi
+    done < <(frontmatter_keys "$file")
+
+    if grep -Eq '^risk:' "$file"; then
+      risk=$(frontmatter_value "$file" risk)
+
+      if ! contains "$risk" "${ALLOWED_RISK_VALUES[@]}"; then
+        echo "Invalid risk value '$risk' in $file (allowed: ${ALLOWED_RISK_VALUES[*]})"
+        exit 1
+      fi
+    fi
+  done < <(skill_dirs)
+}
+
 check_skill_structure() {
   local dir
 
@@ -173,6 +233,7 @@ check_markdown_links() {
 }
 
 check_skill_frontmatter
+check_skill_frontmatter_fields
 check_skill_structure
 check_kebab_case_skill_dirs
 check_skill_name_matches_dir

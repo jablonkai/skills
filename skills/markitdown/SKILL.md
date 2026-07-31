@@ -2,7 +2,7 @@
 name: markitdown
 description: "Convert files and documents to Markdown for LLM consumption using Microsoft's markitdown tool. Use whenever the user wants to turn a PDF, Word/Excel/PowerPoint file (.docx/.xlsx/.pptx), HTML page, CSV/JSON/XML, EPUB, image, audio file, ZIP archive, or YouTube URL into Markdown or plain text — e.g. 'convert this PDF to markdown', 'extract the text from report.docx', 'turn this spreadsheet into markdown', 'pull the transcript from this audio', 'markdownify these files', 'alakítsd át markdownná'. Also use when batch-converting a folder of documents, feeding office/PDF content into a prompt, or building a doc-to-markdown step in a script. Trigger even if the user names a file type without saying 'markitdown'."
 category: document-conversion
-risk: safe
+risk: low
 tags:
   - markdown
   - document-conversion

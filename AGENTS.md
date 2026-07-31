@@ -54,7 +54,36 @@ house rules on top of that format; when the two disagree, the spec wins.
 - Every skill dir must contain exactly one `SKILL.md`
 - The frontmatter `name:` **must** equal the directory name
 - Required YAML frontmatter fields: `name`, `description`
-- Common optional fields: `category`, `risk`, `tags`, `allowed-tools`, `argument-hint`
+- Optional fields: `category`, `risk`, `tags`, `allowed-tools`, `argument-hint`, `license`
+- No other top-level frontmatter keys — the validator rejects unknown fields so that
+  tooling-generated blocks (e.g. the `metadata:` block written by `gh skill install`)
+  don't drift into the catalog
+
+### Frontmatter fields
+
+| Field | Required | Value |
+|-------|----------|-------|
+| `name` | yes | kebab-case, equal to the directory name |
+| `description` | yes | what the skill does **and** when to use it (see below) |
+| `category` | no | free-form single token grouping the skill (e.g. `testing`, `git`, `3d`) |
+| `risk` | no | one of `low`, `medium`, `high` — see the scale below |
+| `tags` | no | YAML list of lowercase keywords |
+| `allowed-tools` | no | comma-separated tool names the skill needs |
+| `argument-hint` | no | usage string shown for `/`-invocation |
+| `license` | no | SPDX identifier, if the skill ships under its own terms |
+
+### Risk scale
+
+`risk` describes the blast radius of the skill running as intended — not how likely it
+is to go wrong:
+
+| Value | Meaning |
+|-------|---------|
+| `low` | Reads, analyzes, or makes changes that are cheap to review and undo — local file edits, generated docs, issue comments. |
+| `medium` | Drives an external application or mutates shared state: pushes commits, opens or merges pull requests, edits documents in a running app. |
+| `high` | Destructive or irreversible: deletes data, force-pushes, publishes, or spends money. |
+
+There is no separate `safe` level — read-only skills are `low`.
 
 ### Writing a description
 The `description` is the only thing an agent sees when deciding whether to load the
@@ -83,8 +112,9 @@ Always run before committing:
 bash .github/scripts/validate.sh
 ```
 
-Checks: frontmatter completeness, `name:`↔directory match, skill directory structure,
-kebab-case names, README/AGENTS catalog sync, and broken relative Markdown links.
+Checks: frontmatter completeness, the allowed frontmatter field set and `risk`
+vocabulary, `name:`↔directory match, skill directory structure, kebab-case names,
+README/AGENTS catalog sync, and broken relative Markdown links.
 
 ## Adding a new skill
 
