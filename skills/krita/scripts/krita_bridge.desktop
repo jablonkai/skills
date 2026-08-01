@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=Krita/PythonPlugin
+X-KDE-Library=krita_bridge
+X-Python-2-Compatible=false
+Name=Krita Bridge
+Comment=Local HTTP bridge that executes Python sent to 127.0.0.1:8737 in this session
