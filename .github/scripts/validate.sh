@@ -27,8 +27,13 @@ check_skill_frontmatter() {
       exit 1
     fi
 
+    if ! frontmatter_closed "$file"; then
+      echo "Unterminated YAML frontmatter block: $file"
+      exit 1
+    fi
+
     for field in "${REQUIRED_FRONTMATTER_FIELDS[@]}"; do
-      if ! grep -Eq "^$field:" "$file"; then
+      if ! frontmatter_has_key "$file" "$field"; then
         echo "Missing $field field: $file"
         exit 1
       fi
@@ -60,7 +65,7 @@ check_skill_frontmatter_fields() {
       fi
     done < <(frontmatter_keys "$file")
 
-    if grep -Eq '^risk:' "$file"; then
+    if frontmatter_has_key "$file" risk; then
       risk=$(frontmatter_value "$file" risk)
 
       if ! contains "$risk" "${ALLOWED_RISK_VALUES[@]}"; then
@@ -100,7 +105,7 @@ check_skill_name_matches_dir() {
   local declared
 
   while IFS= read -r dir_name; do
-    declared=$(grep -m1 -E '^name:' "skills/$dir_name/SKILL.md" | sed -E 's/^name:[[:space:]]*//; s/^["'"'"']//; s/["'"'"']$//')
+    declared=$(frontmatter_value "skills/$dir_name/SKILL.md" name)
 
     if [[ "$declared" != "$dir_name" ]]; then
       echo "Frontmatter name '$declared' does not match directory: skills/$dir_name"
