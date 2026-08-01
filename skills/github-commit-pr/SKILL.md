@@ -26,6 +26,15 @@ End-to-end workflow for committing changes, creating or updating a GitHub pull r
 - Creating PRs that reference and auto-close GitHub issues
 - Skip the merge step by passing `--no-merge` when you want a human to review before the PR lands
 
+## Detailed references
+
+Load each one at the step that needs it — don't read them up front:
+
+- [references/sensitive-files.md](references/sensitive-files.md) — the pre-staging secret scan: patterns to flag and how to handle a hit
+- [references/commit-conventions.md](references/commit-conventions.md) — conventional commit format and branch-name derivation
+- [references/pr-body.md](references/pr-body.md) — PR template discovery, default body structure, issue linking and closing keywords
+- [references/ci-and-merge.md](references/ci-and-merge.md) — the CI watch snippet, mergeability interpretation, merge strategy selection and confirmation
+
 ## Delegating to subagents
 
 Most of this workflow is fast, stateful `git`/`gh` commands that must stay with the main agent — it holds the full picture and is the only one that should change repo state. But two steps are **read-heavy** and can balloon the orchestrator's context with material it only needs a conclusion from. Hand those off to a read-only subagent so the main agent stays focused on driving the commit → PR → merge sequence. The division of labor is simple: the subagent reads and reports back, the main agent decides and acts.
@@ -113,44 +122,15 @@ If the diff is large, delegate the read instead of pulling it all inline — see
 
 ### Step 2: Check for sensitive files
 
-Before staging, scan `git status` output for potentially sensitive files:
-
-- `.env`, `.env.*` files
-- Files containing `secret`, `credential`, `token`, `password`, `key` in their name
-- `id_rsa`, `*.pem`, `*.key`, `*.p12`, `*.pfx`, `*.p8`, `*.keystore` files
-- `*.json` files that look like service account keys (e.g., `*-credentials.json`, `serviceaccount*.json`)
-
-If any are detected, **warn the user explicitly** and ask whether to exclude them. Do NOT silently stage sensitive files.
+Before staging, scan the `git status` output for secrets and credentials — patterns and handling in [references/sensitive-files.md](references/sensitive-files.md). If anything is flagged, warn the user and ask before staging; never stage a sensitive file silently.
 
 ### Step 3: Propose commit message
 
-Write a conventional commit message based on the diff:
-
-- **Format:** `<type>: <short summary>`
-- **Types:** `feat`, `fix`, `refactor`, `docs`, `style`, `chore`, `test`, `ci`
-- **Summary:** imperative mood, lowercase, no period, max 72 chars
-- Add a body (blank line + wrapped paragraphs) for complex changes
-
-Present the proposed message to the user:
-1. **Accept** — use as-is
-2. **Edit** — user provides their own
+Write a conventional commit message from the diff and present it to the user for accept-or-edit — format and rules in [references/commit-conventions.md](references/commit-conventions.md).
 
 ### Step 4: Create branch
 
-Derive a branch name from the commit message:
-
-1. Take the summary part (after `type: ` or `type(scope): `)
-2. Lowercase, replace spaces with hyphens, remove special characters (including parentheses from scoped types)
-3. Prefix with the type: `feat/add-dark-mode`, `fix/null-token-settings`
-4. Truncate to 60 characters max
-
-**Example:** `feat(auth): implement JWT tokens` → `feat/implement-jwt-tokens`
-
-```bash
-git checkout -b <branch-name>
-```
-
-If the branch already exists, append a numeric suffix (e.g., `-2`).
+Derive the branch name from the commit message and create it — see [references/commit-conventions.md](references/commit-conventions.md).
 
 ### Step 5: Stage and commit
 
@@ -176,52 +156,7 @@ If push fails due to remote rejection, report the error and stop — do not forc
 
 ### Step 7: Build PR body
 
-Check if the repository has a PR template:
-
-```bash
-cat .github/PULL_REQUEST_TEMPLATE.md 2>/dev/null || \
-  cat .github/pull_request_template.md 2>/dev/null || \
-  cat PULL_REQUEST_TEMPLATE.md 2>/dev/null || \
-  cat docs/PULL_REQUEST_TEMPLATE.md 2>/dev/null
-```
-
-If a template exists, use its structure and fill in the sections from the diff context. If no template exists, use this default structure:
-
-```markdown
-## Summary
-<1-3 bullet points describing the actual changes from the diff>
-
-## Test plan
-<bulleted checklist of testing steps>
-```
-
-#### Issue linking
-
-If `$ARGUMENTS` contains `--issue <number>`, or the user mentions an issue number, or the branch name contains an issue number:
-
-1. Fetch the issue details:
-
-```bash
-gh issue view <number> --json title,body,labels
-```
-
-2. Add a closing keyword to the PR body at the end of the Summary section:
-
-```markdown
-## Summary
-- <change description>
-- <change description>
-
-Closes #<number>
-```
-
-**Valid closing keywords** (all work the same): `Closes`, `Fixes`, `Resolves`. Use `Closes` by default. For bug fixes (commit type `fix`), use `Fixes` instead.
-
-3. If the issue has labels, apply matching labels to the PR after creation:
-
-```bash
-gh pr edit <pr-number> --add-label "<label1>,<label2>"
-```
+Check for a repository PR template, fill it (or the default Summary / Test plan structure) from the diff context, and add issue closing keywords if an issue is in play — all covered in [references/pr-body.md](references/pr-body.md).
 
 ### Step 8: Create PR
 
@@ -232,85 +167,20 @@ EOF
 )"
 ```
 
-- **Title:** first line of commit summary without the `type:` prefix, max 70 chars
-- **Base branch:** detected in pre-flight or from `$ARGUMENTS`
+Title and base-branch rules are in [references/pr-body.md](references/pr-body.md).
 
 ### Step 9: Watch CI
 
-After the PR is created, wait for the GitHub Actions run triggered by the push to finish:
+Wait for the GitHub Actions run triggered by the push to finish, selecting the run by **commit**, not by branch — snippet and failure handling in [references/ci-and-merge.md](references/ci-and-merge.md).
 
-```bash
-sha=$(git rev-parse HEAD)
-run_id=""
-for _ in $(seq 1 10); do
-  run_id=$(gh run list --commit "$sha" --limit 1 --json databaseId --jq '.[0].databaseId // empty')
-  [ -n "$run_id" ] && break
-  sleep 5
-done
-[ -n "$run_id" ] || { echo "No CI run registered for $sha after 50s" >&2; exit 1; }
-gh run watch "$run_id" --exit-status
-```
-
-- Select the run by **commit**, never by branch. `--branch ... --limit 1` returns the newest run *on the branch*, which may still be an older commit's run if CI has not registered the push yet — and if that stale run is green, the skill would merge on the strength of results that say nothing about what was just pushed.
-- `--exit-status` makes the command exit non-zero when the run fails, so failure is easy to detect.
-- The loop covers the registration delay: `gh run list` legitimately returns empty for a few seconds after a push, which is why the lookup is retried rather than trusted on the first call.
 - If the run **succeeds** → continue to Step 10.
-- If the run **fails** → when the logs are long, first delegate root-causing to a read-only subagent (see [Delegating to subagents](#delegating-to-subagents)) and pass its conclusion — failing step, error, and `file:line` — into the `github-fix-action-error` skill; otherwise invoke that skill directly. After the fix is committed and pushed, re-watch the new run. Repeat until the build is green or the user aborts.
+- If the run **fails** → root-cause it (delegating when the logs are long), fix via `github-fix-action-error`, push, and re-watch. Repeat until green or the user aborts.
 
 ### Step 10: Merge the PR
 
 CI is green — the user's intent in invoking this skill is to land the change, so proceed to merge unless `--no-merge` was passed in `$ARGUMENTS`. If `--no-merge` is set, skip to Step 11.
 
-Merging is a shared-state action visible to collaborators, and it's effectively irreversible (revert PRs are possible but messy), so confirm with the user once before doing it — keep the prompt short, since they already opted in by invoking this skill.
-
-#### Step 10a: Verify mergeability
-
-```bash
-gh pr view --json number,mergeable,mergeStateStatus,reviewDecision
-```
-
-Interpret the result:
-
-- `mergeable: MERGEABLE` and `mergeStateStatus: CLEAN` → ready to merge
-- `mergeStateStatus: HAS_HOOKS` → ready (post-merge hooks will run, that's fine)
-- `mergeStateStatus: BLOCKED` → branch protection blocks the merge (e.g., required reviewers, required signed commits, code owner review). Report which gate is blocking and stop — do not bypass with `--admin` unless the user explicitly asks
-- `mergeStateStatus: BEHIND` → base branch moved forward and the repo requires an up-to-date branch. Offer `gh pr update-branch <number>` and re-watch CI afterward
-- `mergeable: CONFLICTING` → conflicts with the base branch. Stop and ask the user to resolve manually
-- `mergeStateStatus: UNSTABLE` → required checks haven't completed even though our watched run passed. Investigate which check is pending before merging
-- `reviewDecision: CHANGES_REQUESTED` → at least one reviewer has requested changes. Stop and let the user address the review
-
-#### Step 10b: Choose a merge strategy
-
-Read the repo's allowed strategies so the chosen flag will actually work:
-
-```bash
-gh repo view --json mergeCommitAllowed,squashMergeAllowed,rebaseMergeAllowed
-```
-
-Preference order: `--squash` (cleanest history for feature PRs), then `--merge`, then `--rebase`. Pick the first one that's allowed. The skill exists to land PRs cleanly, so squash is the right default — but never pick a strategy the repo doesn't permit, or `gh pr merge` will reject it.
-
-#### Step 10c: Confirm and merge
-
-Tell the user concisely what you're about to do and ask once for confirmation:
-
-> "CI is green. Merge PR #<number> with `--squash` and delete the branch? (y/n)"
-
-If the user declines, skip to Step 11 and just report. If they confirm:
-
-```bash
-gh pr merge <number> --<strategy> --delete-branch
-```
-
-Notes:
-
-- `--delete-branch` removes both the local and remote branch after merge — this is the usual cleanup, but skip the flag if the user objects.
-- If the merge command fails because of branch protection (e.g., 405 method not allowed, "Pull Request is not mergeable"), surface the error and stop. Do not retry with `--admin` unless explicitly asked.
-- If `gh pr merge` succeeds, the local branch is gone; subsequent `git` commands should not assume it still exists. Switch back to the base branch and pull:
-
-```bash
-git checkout <base-branch>
-git pull
-```
+Follow the merge procedure in [references/ci-and-merge.md](references/ci-and-merge.md): verify mergeability, pick a strategy the repo allows (prefer `--squash`), confirm once with the user, then merge with `--delete-branch` and return to the base branch. Stop and report if branch protection, conflicts, or a pending check blocks the merge — never bypass with `--admin` unless the user explicitly asks.
 
 ### Step 11: Report
 
@@ -329,11 +199,11 @@ git diff HEAD
 
 ### Step 2: Check for sensitive files
 
-Same check as New PR flow Step 2.
+Same check as New PR flow Step 2 — see [references/sensitive-files.md](references/sensitive-files.md).
 
 ### Step 3: Propose commit message
 
-Same conventions as New PR flow Step 3.
+Same conventions as New PR flow Step 3 — see [references/commit-conventions.md](references/commit-conventions.md).
 
 ### Step 4: Stage, commit, and push
 
@@ -359,34 +229,11 @@ If rebase has conflicts, stop and report — do not force-push or auto-resolve.
 
 ### Step 5: Watch CI
 
-After pushing, wait for the GitHub Actions run triggered by the new commit to finish:
-
-```bash
-sha=$(git rev-parse HEAD)
-run_id=""
-for _ in $(seq 1 10); do
-  run_id=$(gh run list --commit "$sha" --limit 1 --json databaseId --jq '.[0].databaseId // empty')
-  [ -n "$run_id" ] && break
-  sleep 5
-done
-[ -n "$run_id" ] || { echo "No CI run registered for $sha after 50s" >&2; exit 1; }
-gh run watch "$run_id" --exit-status
-```
-
-- Select the run by **commit**, never by branch — see the note in **New PR flow → Step 9**. Pushing twice in quick succession is exactly when `--branch ... --limit 1` returns the earlier run.
-- `--exit-status` makes the command exit non-zero when the run fails.
-- If the run **succeeds** → continue to Step 6.
-- If the run **fails** → when the logs are long, first delegate root-causing to a read-only subagent (see [Delegating to subagents](#delegating-to-subagents)) and pass its conclusion — failing step, error, and `file:line` — into the `github-fix-action-error` skill; otherwise invoke that skill directly. After the fix is committed and pushed, re-watch the new run. Repeat until the build is green or the user aborts.
+Same as New PR flow Step 9 — see [references/ci-and-merge.md](references/ci-and-merge.md). Selecting the run by commit matters most here: pushing twice in quick succession is exactly when `--branch ... --limit 1` returns the earlier run.
 
 ### Step 6: Merge the PR
 
-Same flow as **New PR flow → Step 10**. Skip this step if `--no-merge` was passed in `$ARGUMENTS`.
-
-1. Verify mergeability with `gh pr view --json mergeable,mergeStateStatus,reviewDecision` — only proceed when the PR is `MERGEABLE` and `CLEAN` (or `HAS_HOOKS`). Stop on `BLOCKED`, `BEHIND`, `CONFLICTING`, `UNSTABLE`, or `CHANGES_REQUESTED`.
-2. Pick a strategy allowed by the repo (`gh repo view --json mergeCommitAllowed,squashMergeAllowed,rebaseMergeAllowed`). Prefer `--squash` → `--merge` → `--rebase`.
-3. Ask the user once: "CI is green. Merge PR #<number> with `--squash` and delete the branch? (y/n)"
-4. On confirmation: `gh pr merge <number> --<strategy> --delete-branch`, then `git checkout <base-branch> && git pull`.
-5. If branch protection blocks the merge, report the gate and stop — do not use `--admin` unless the user explicitly asks.
+Same merge procedure as New PR flow Step 10, from [references/ci-and-merge.md](references/ci-and-merge.md). Skip this step if `--no-merge` was passed in `$ARGUMENTS`.
 
 ### Step 7: Report
 

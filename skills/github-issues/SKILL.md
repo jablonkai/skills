@@ -47,101 +47,12 @@ Perform this parsing step **before** running any `gh issue` or `gh label` comman
 - Triaging or labeling existing issues
 - Listing open issues with their labels
 
-## Issue structure
+## Detailed references
 
-Every new issue MUST follow this structure:
+Load these on demand — don't read them up front:
 
-### Title
-
-- Start with a short, descriptive summary (max 72 characters)
-- Use imperative mood: "Add ...", "Fix ...", "Update ...", "Remove ..."
-- Do NOT prefix with type (no "Bug: ..." or "[Feature] ...") — labels handle categorization
-
-### Body
-
-Choose the template that matches the issue type:
-
-#### Enhancement / Feature template
-
-```markdown
-## Summary
-<1-3 sentences describing what needs to happen and why>
-
-## Proposed Solution
-<Detailed description of the implementation approach. Include:>
-- Affected files or modules (with paths where known)
-- Sub-sections for distinct layers (e.g., ### Backend, ### Frontend)
-- Code snippets or API signatures if relevant
-
-## Additional context
-<Links, screenshots, related issues, or implementation notes>
-```
-
-#### Bug template
-
-```markdown
-## Summary
-<1-3 sentences describing the bug and its impact>
-
-## Current behavior
-<What happens now — include error messages, stack traces, or logs>
-
-## Expected behavior
-<What should happen instead>
-
-## Steps to reproduce
-1. Step one
-2. Step two
-3. ...
-
-## Proposed Solution
-<Fix approach — which file/function to change and how>
-
-## Additional context
-<Links, screenshots, related issues>
-```
-
-**Rules:**
-- "Summary" is always required — this is the primary section explaining what and why
-- For bugs: "Current behavior", "Expected behavior", and "Steps to reproduce" are required
-- "Proposed Solution" is strongly encouraged — include specific file paths, module names, and implementation details when known
-- Use sub-headings (### Backend, ### Frontend, ### Flow) within "Proposed Solution" for complex changes touching multiple layers
-- "Additional context" is optional but encouraged
-- Remove unused sections rather than leaving them empty
-- Reference concrete file paths and function/type names to make issues actionable
-
-## GitHub default labels
-
-Always apply at least ONE type label and optionally a priority/status label. Use GitHub's built-in default labels:
-
-### Type labels (apply exactly one)
-
-| Label | When to use |
-|-------|-------------|
-| `bug` | Something is broken or not working as expected |
-| `enhancement` | New feature or improvement to existing functionality |
-| `documentation` | Documentation needs to be added or updated |
-| `question` | Needs clarification or discussion before action |
-
-### Status labels (apply as needed)
-
-| Label | When to use |
-|-------|-------------|
-| `duplicate` | Issue already exists — link the original and close |
-| `good first issue` | Simple enough for a newcomer to tackle |
-| `help wanted` | Extra attention or community help is needed |
-| `invalid` | Issue is not valid (wrong repo, not reproducible, etc.) |
-| `wontfix` | Acknowledged but will not be addressed |
-
-### Custom project labels
-
-If the project uses additional labels beyond GitHub defaults, always check available labels first:
-
-```bash
-gh label list
-```
-
-Use project-specific labels when they exist and are relevant. Do NOT create new labels without user confirmation.
+- [references/issue-templates.md](references/issue-templates.md) — title rules, the enhancement and bug body templates, the body-section rules, and type detection from title/context. Read before writing or rewriting an issue body.
+- [references/labels.md](references/labels.md) — the type/status label taxonomy, how to validate a label exists before applying it, and the `--add-label` vs `--label` rule. Read before applying or changing labels.
 
 ## Operations
 
@@ -149,10 +60,7 @@ Based on `$ARGUMENTS`, perform ONE of these operations:
 
 ### `create <title>`
 
-1. Determine the issue type from the title and context:
-   - Bug indicators: "fix", "broken", "error", "crash", "fail", "wrong", "incorrect", "regression"
-   - Enhancement indicators: "add", "implement", "new", "improve", "show", "allow", "support", "enable"
-   - Documentation indicators: "document", "readme", "guide", "docs"
+1. Determine the issue type from the title and context — see the type-detection indicators in [references/issue-templates.md](references/issue-templates.md).
 2. **Check for an existing issue covering the same thing — before creating anything.** Filing a second issue for a problem that already has one fragments the discussion and wastes triage effort, so always search first. Pull the most distinctive keywords from the title (drop generic verbs like "add"/"fix" and stop-words) and search across both open and closed issues:
 
 ```bash
@@ -165,20 +73,8 @@ gh issue list -R "$REPO" --search "<keywords>" --state all --json number,title,s
    - **A matching OPEN issue exists:** do not create a duplicate. Open it (`gh issue view <number> -R "$REPO"`) and compare its body against the new details. If the request brings genuinely new information (extra repro steps, an affected file the issue is missing, a clearer proposed solution, new context), update the existing issue instead — see step 6b. If the existing issue already covers everything, tell the user it's already filed (with the link) and stop without changing anything.
    - **A matching CLOSED issue exists:** surface it to the user with its link and state. Ask whether to reopen it (if the problem has resurfaced), add the new context as a comment, or file a fresh issue (e.g. the old one was a different root cause). Don't reopen silently.
 
-3. **Check which labels are available** in the target repository:
-
-```bash
-gh label list -R "$REPO" --json name --jq '.[].name'
-```
-
-   Compare the output against the GitHub default type labels (`bug`, `enhancement`, `documentation`, `question`). Note any that are missing.
-
-   - If all required type labels are present: proceed normally.
-   - If the expected type label is **missing**: inform the user, then either:
-     - Ask the user to pick an existing label from the list as a substitute, or
-     - Ask the user to confirm creating the missing label before continuing.
-
-4. Select the matching body template (enhancement or bug) and pre-fill the "Summary" section from context. If the user has provided enough detail, fill all applicable sections. Otherwise, ask for the missing required sections — especially "Proposed Solution" with specific file paths and implementation approach.
+3. **Check which labels are available** in the target repository and handle any missing type label — follow [references/labels.md](references/labels.md).
+4. Select the matching body template (enhancement or bug) from [references/issue-templates.md](references/issue-templates.md) and pre-fill the "Summary" section from context. If the user has provided enough detail, fill all applicable sections. Otherwise, ask for the missing required sections — especially "Proposed Solution" with specific file paths and implementation approach.
 5. Suggest appropriate labels based on the type detection and available labels discovered in step 3.
 6. **Present the full issue (title, body, labels) for user review before creating.** Wait for confirmation or edits.
 7. Create the issue:
@@ -315,18 +211,7 @@ gh api user --jq '.login'
 gh label list -R "$REPO" --json name --jq '.[].name'
 ```
 
-2. If `--remove` is **not** provided, add the label:
-
-```bash
-gh issue edit <number> -R "$REPO" --add-label "<label>"
-```
-
-   If `--remove` **is** provided, remove the label:
-
-```bash
-gh issue edit <number> -R "$REPO" --remove-label "<label>"
-```
-
+2. Add or remove the label with `--add-label` / `--remove-label` — see [references/labels.md](references/labels.md) for the exact commands and why `--label` must never be used on `gh issue edit`.
 3. If the label does not exist, warn the user and list available labels. Suggest the closest match if possible.
 
 ### `triage`
@@ -339,11 +224,7 @@ gh issue list -R "$REPO" --state open --json number,title,body,labels,createdAt 
 
 2. Filter for issues where `labels` is empty.
 3. If no unlabeled issues are found, inform the user ("All open issues are labeled") and stop.
-4. Analyze the title and body of each unlabeled issue to suggest a label:
-   - Bug indicators: "crash", "broken", "error", "fix", "fail", "wrong", "incorrect", "regression"
-   - Enhancement indicators: "add", "implement", "improve", "new", "allow", "show", "support", "enable"
-   - Documentation indicators: "readme", "docs", "guide", "document"
-   - If unclear, suggest `question`
+4. Analyze the title and body of each unlabeled issue to suggest a label, using the type-detection indicators in [references/issue-templates.md](references/issue-templates.md) and the taxonomy in [references/labels.md](references/labels.md).
 5. Present a summary table with suggested labels:
 
 ```
