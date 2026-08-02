@@ -78,8 +78,8 @@ house rules on top of that format; when the two disagree, the spec wins.
 
 | Field | Required | Value |
 |-------|----------|-------|
-| `name` | yes | kebab-case, equal to the directory name |
-| `description` | yes | what the skill does **and** when to use it (see below) |
+| `name` | yes | kebab-case, equal to the directory name — max 64 characters |
+| `description` | yes | what the skill does **and** when to use it (see below) — max 1024 characters |
 | `summary` | yes | single line, lowercase start, no trailing period — the catalog entry (see below) |
 | `category` | yes | single token grouping the skill (e.g. `testing`, `git`, `3d`), mapped to a README theme (see below) |
 | `risk` | no | one of `low`, `medium`, `high` — see the scale below |
@@ -144,6 +144,11 @@ Keep `SKILL.md` short and load detail on demand. Anything long — API reference
 specs, lookup tables — belongs in `references/` and should be pulled in only when the
 task needs it. Ship deterministic work as `scripts/` rather than prose instructions.
 
+The validator warns — it does not fail — when a `SKILL.md` runs past **250 lines** and
+the skill has no `references/` directory, since that combination means detail that
+could load on demand is loaded on every invocation instead. Splitting the detail out
+clears the warning; so does deciding the skill genuinely has nothing to split.
+
 ## Validation
 
 Always run before committing:
@@ -153,9 +158,10 @@ bash .github/scripts/validate.sh
 ```
 
 Checks: frontmatter completeness, the allowed frontmatter field set and `risk`
-vocabulary, `name:`↔directory match, skill directory structure, kebab-case names,
-README/AGENTS catalog sync (by regenerating both sections and failing on any
-difference), and broken relative Markdown links.
+vocabulary, `name:` and `description:` length caps, `name:`↔directory match, skill
+directory structure, kebab-case names, README/AGENTS catalog sync (by regenerating both
+sections and failing on any difference), and broken relative Markdown links. It also
+warns — without failing — on a `SKILL.md` over the progressive-disclosure line budget.
 
 ### Linting the shipped scripts
 

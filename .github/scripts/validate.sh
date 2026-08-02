@@ -76,6 +76,58 @@ check_skill_frontmatter_fields() {
   done < <(skill_dirs)
 }
 
+# Caps from the Agent Skills spec: `description` is the only thing an agent sees
+# when deciding whether to load a skill, and a description past the cap is
+# truncated — silently costing the skill the tail of its trigger phrases.
+readonly MAX_DESCRIPTION_LENGTH=1024
+readonly MAX_NAME_LENGTH=64
+
+check_skill_frontmatter_lengths() {
+  local dir_name
+  local file
+  local value
+
+  while IFS= read -r dir_name; do
+    file="skills/$dir_name/SKILL.md"
+
+    value=$(frontmatter_value "$file" name)
+    if (( ${#value} > MAX_NAME_LENGTH )); then
+      echo "Frontmatter name is ${#value} characters in $file (max $MAX_NAME_LENGTH)"
+      exit 1
+    fi
+
+    value=$(frontmatter_value "$file" description)
+    if (( ${#value} > MAX_DESCRIPTION_LENGTH )); then
+      echo "Frontmatter description is ${#value} characters in $file (max $MAX_DESCRIPTION_LENGTH)"
+      exit 1
+    fi
+  done < <(skill_dirs)
+}
+
+# Progressive disclosure (see AGENTS.md): a long SKILL.md with nothing in
+# references/ means detail that should load on demand is instead loaded on every
+# invocation. Only a warning — the budget is a smell, not a rule, and some skills
+# legitimately have no detail worth splitting out.
+readonly SKILL_LINE_BUDGET=250
+
+check_skill_size_budget() {
+  local dir_name
+  local file
+  local lines
+
+  while IFS= read -r dir_name; do
+    file="skills/$dir_name/SKILL.md"
+    [[ -d "skills/$dir_name/references" ]] && continue
+
+    # BSD wc pads its count with leading spaces; strip them so the message reads
+    # cleanly and the comparison below gets a bare integer.
+    lines=$(wc -l < "$file" | tr -d '[:space:]')
+    if (( lines > SKILL_LINE_BUDGET )); then
+      echo "Warning: $file is $lines lines (budget $SKILL_LINE_BUDGET) with no references/ — consider moving detail there"
+    fi
+  done < <(skill_dirs)
+}
+
 check_skill_structure() {
   local dir
 
@@ -171,6 +223,8 @@ check_markdown_links() {
 
 check_skill_frontmatter
 check_skill_frontmatter_fields
+check_skill_frontmatter_lengths
+check_skill_size_budget
 check_skill_structure
 check_kebab_case_skill_dirs
 check_skill_name_matches_dir
