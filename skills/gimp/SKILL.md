@@ -241,3 +241,22 @@ come from calling the export plug-in through the PDB — see
 - **Tools are not scriptable** — no transform widget, no free select, no menu-action
   trigger. Fills, paint calls, selections and GEGL filters are the whole vocabulary; see
   [recipes.md](references/recipes.md#what-the-api-cannot-do).
+
+## Security
+
+There is nothing to install here, but starting the Script-Fu server still turns GIMP into
+a **code-execution server**. Say so before asking for that click.
+
+- The server listens on `127.0.0.1:10008` and hands whatever arrives to `python-fu-eval` —
+  arbitrary Python with the user's privileges, over the user's open images. It carries **no
+  authentication**: every local process, and every other user on a shared machine, can
+  drive GIMP through it.
+- **Always 127.0.0.1.** The Start Server dialog accepts any listen address, and a server
+  bound to `0.0.0.0` or a LAN address is remote code execution for the whole network.
+  `gimp-start.sh` pins loopback; if the user starts it by hand, tell them the address.
+- It is not HTTP — the protocol is length-prefixed with a `G` magic byte, so a browser's
+  request is rejected at the first byte. That is a side effect of the wire format, not an
+  origin check.
+- **To stop it, quit GIMP.** The port can stay bound briefly after GIMP exits while the
+  plug-in process winds down, so a port check is not proof anything is live — `--ping`
+  is (`gimp-send.sh --ping`).

@@ -174,3 +174,21 @@ size (`rgba_canvas`, or `SAVE` with `scaling` for a NanoPixel-scale export).
   any documented behaviour.
 - **Animation licensing has strings attached** — see the note at the end of
   [batch.md](references/batch.md) before helping with a commercial production.
+
+## Security
+
+Path B opens nothing — Motion IO reads a file and exits. Path A does: launching Rebelle
+with `-websocket-server-enable` turns it into a **code-execution server** for its event
+vocabulary. Say so before asking the user to relaunch.
+
+- The server listens on `127.0.0.1:8265` (`REBELLE_WS_PORT`) and applies any event JSON it
+  receives to the artwork the user has open, and `export()` writes files with their
+  privileges. There is **no authentication**: every local process, and every other user on
+  a shared machine, can paint into their canvas.
+- `-websocket-allowed-ip-addresses` is the only access control, and it matches the socket's
+  peer address. Keep it to loopback (`::ffff:127.0.0.1,127.0.0.1`) — **never add a LAN
+  address**, which would expose the canvas to the network. Note that a web page in the
+  user's own browser is also a loopback peer, and WebSocket connections aren't subject to
+  CORS, so don't count on the allowlist to exclude one.
+- **To stop it, quit Rebelle** and relaunch without the flag. The flag is per-launch, so a
+  normally started Rebelle listens on nothing.
