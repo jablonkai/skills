@@ -22,3 +22,16 @@ jobs:
 
       - name: Run skill validation
         run: bash .github/scripts/validate.sh
+
+  # The bridges only run against a live Blender/FreeCAD/Cavalry/Affinity, so a
+  # static check is the only verification CI can give the shipped scripts.
+  # shellcheck, python3 and node are all preinstalled on the runner.
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Lint shipped scripts
+        run: bash .github/scripts/lint.sh
