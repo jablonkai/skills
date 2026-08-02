@@ -17,6 +17,7 @@
 //   affinity-cli.mjs search <query...>
 //   affinity-cli.mjs docs [<topic-filename>]
 //   affinity-cli.mjs docs-dump <output-dir>
+//   affinity-cli.mjs render [--selection] [--uuid <u>] [--spread <n>] [--out <path>]
 //
 // Env: AFFINITY_MCP_URL (default http://localhost:6767), AFFINITY_TIMEOUT_MS (default 120000)
 
@@ -271,7 +272,7 @@ async function cmdRun(client, { flags, positional }) {
 async function main() {
   const [command, ...rest] = process.argv.slice(2);
   if (!command) {
-    console.error("Commands: ping | tools | call | run | add | list | save | search | docs | docs-dump");
+    console.error("Commands: ping | tools | call | run | add | list | save | search | docs | docs-dump | render");
     process.exit(1);
   }
 
