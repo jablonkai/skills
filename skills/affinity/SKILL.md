@@ -111,3 +111,21 @@ Env overrides: `AFFINITY_MCP_URL` (default `http://localhost:6767`), `AFFINITY_T
 - Fallback if the endpoint route is ever unavailable: macOS GUI automation
   (System Events keystrokes/menus) works but is brittle and unverifiable — use it only for
   trivial one-shot actions, never for document editing.
+
+## Security
+
+Unlike the other app-automation skills, this one **opens no port of its own** — the
+listener is Affinity's. But turning the AI connector on is still a decision worth naming.
+
+- Enabling the connector makes Affinity serve its full scripting SDK on
+  `http://localhost:6767/sse`, an endpoint that executes JavaScript against the user's open
+  documents. `affinity-cli.mjs` is only a client of it.
+- The endpoint carries **no authentication**: while it is enabled, every local process, and
+  every other user on a shared machine, can drive Affinity through it. The CLI refuses an
+  SSE endpoint that redirects off `AFFINITY_MCP_URL`'s origin, so a hijacked session can't
+  silently repoint it — but that protects this client, not the endpoint.
+- What scripts may touch is gated by Affinity's own AI / filesystem / networking switches
+  (a `NOT_ALLOWED` reply means one is off). Turning one on widens what *any* client can do,
+  not just this skill — ask rather than assume.
+- **To close it, turn the AI connector off in Affinity's settings.** The endpoint goes with
+  it; nothing this skill installed keeps listening.

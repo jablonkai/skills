@@ -149,3 +149,22 @@ Feature types, constraint kinds, Draft/Mesh/TechDraw calls, and the full export 
 - **Booleans keep their inputs in the tree** (hidden) — `cut.Base`/`cut.Tool` still exist;
   export only the result feature.
 - Save the native `.FCStd` from the script so parametric work survives and can be re-edited.
+
+## Security
+
+Running the bridge means running a **code-execution server** on the user's machine. Say so
+before asking them to start it.
+
+- The bridge binds `127.0.0.1:8735` (`FREECAD_BRIDGE_PORT`) and executes any Python POSTed
+  to `/run` inside the live session — the user's privileges, the user's open documents.
+  Requests carry **no authentication**: every local process, and every other user on a
+  shared machine, can drive FreeCAD through it.
+- Web pages **cannot**. Requests carrying an `Origin` header or a cross-site
+  `Sec-Fetch-Site` are rejected with 403, so a page in the user's browser can't reach the
+  bridge. That check is the only gate — there is no token.
+- **Nothing listens until the user runs the bridge.** Both install routes (Python console
+  paste, Macro ▸ Execute) are per-session — the Macro folder copy only saves the pasting,
+  it does not autostart. Turning it into an autoload macro would make FreeCAD listen on
+  every launch; don't suggest that without saying so.
+- **To stop the bridge, quit FreeCAD.** There is no remote shutdown; the port is released
+  with the process.

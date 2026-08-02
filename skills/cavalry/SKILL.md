@@ -209,3 +209,21 @@ assets at render time.
   wrap in try/catch (fails if a modal dialog is open).
 - The vendored type definitions double as offline docs — nearly every function has a JSDoc
   example; grep before guessing a signature.
+
+## Security
+
+Running the bridge means running a **code-execution server** on the user's machine. Say so
+before asking them to start it.
+
+- The bridge binds `127.0.0.1:8731` and executes any JavaScript POSTed to it inside the
+  live session — the user's privileges, the user's open scene. Raw non-JSON bodies are run
+  as JS directly. Requests carry **no authentication**: every local process, and every
+  other user on a shared machine, can drive Cavalry through it.
+- Web pages **cannot**. Requests carrying an `Origin` header or a cross-site
+  `Sec-Fetch-Site` are rejected with 403, so a page in the user's browser can't reach the
+  bridge. That check is the only gate — there is no token.
+- **Nothing listens until the user runs it.** Copying `cavalry-bridge.js` into the Scripts
+  folder only puts it in the menu; the port opens when they pick **Scripts ▸ Cavalry
+  Bridge** and stays open for that session.
+- **To stop the bridge, quit Cavalry.** There is no remote shutdown; the port is released
+  with the process.

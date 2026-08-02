@@ -266,3 +266,22 @@ Animation, per-layer export, and batch folder processing are in
 - **Scripted edits aren't reliably undoable** — duplicate a layer or save a copy before
   destructive work on the user's own document; see
   [references/recipes.md](references/recipes.md).
+
+## Security
+
+Installing the bridge means running a **code-execution server** on the user's machine. Say
+so before asking them to install it.
+
+- The bridge binds `127.0.0.1:8737` (`KRITA_BRIDGE_PORT`) and executes any Python POSTed to
+  it inside the live session — the user's privileges, the user's open documents. Requests
+  carry **no authentication**: every local process, and every other user on a shared
+  machine, can drive Krita through it.
+- Web pages **cannot**. Requests carrying an `Origin` header or a cross-site
+  `Sec-Fetch-Site` are rejected with 403, so a page in the user's browser can't reach the
+  bridge. That check is the only gate — there is no token.
+- **The install choice decides how long the port stays open.** `krita-install-bridge.sh`
+  enables a pykrita plugin, so *every* Krita launch listens from then on, whether or not an
+  agent is driving it. The Scripter paste lasts only until Krita quits — offer it when the
+  user doesn't want a permanent listener.
+- **To stop the bridge, quit Krita**; to remove it, untick **Krita Bridge** in Settings ▸
+  Configure Krita ▸ Python Plugin Manager. There is no remote shutdown.

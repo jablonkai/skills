@@ -180,9 +180,27 @@ bpy.ops.wm.save_as_mainfile(filepath=OUT + "/hero.blend", copy=True)
   reported success but wrote nothing.
 - **Hand-off**: a `.glb`/`.blend` in `$OUT` opens in whatever the user already has.
 
+## Security
+
+Installing this skill means running a **code-execution server** on the user's machine. Say
+so before asking them to start the bridge.
+
+- The bridge binds `127.0.0.1:8736` (`BLENDER_BRIDGE_PORT`) and executes any Python POSTed
+  to `/run` inside the live session — the user's privileges, the user's open file. Requests
+  carry **no authentication**: every local process, and every other user on a shared
+  machine, can drive Blender through it.
+- Web pages **cannot**. Requests carrying an `Origin` header or a cross-site
+  `Sec-Fetch-Site` are rejected with 403, so a page in the user's browser can't reach the
+  bridge. That check is the only gate — there is no token.
+- **The install choice decides how long the port stays open.** Scripting workspace ▸ Run
+  Script lasts until Blender quits. The `scripts/startup/` install is recommended above for
+  convenience, but it makes *every* Blender launch listen, whether or not an agent is
+  driving it — offer the trade-off rather than assuming it.
+- **To stop the bridge, quit Blender.** There is no remote shutdown; the port is released
+  with the process.
+
 ## Safety
 
-- The bridge binds **127.0.0.1 only** and executes arbitrary Python in the user's session.
 - The open file may hold **unsaved work**. Never call `bpy.ops.wm.read_homefile()` or
   `bpy.data.batch_remove` without asking. `stage()` is the non-destructive default; it
   isolates geometry but **not** scene-level settings.
