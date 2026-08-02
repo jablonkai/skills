@@ -16,7 +16,8 @@ house rules on top of that format; when the two disagree, the spec wins.
 - `skills/<name>/` is the main workspace surface; changes to skills belong there.
 - Every skill directory must contain exactly one `SKILL.md` with YAML frontmatter `name:`, `description:`, `summary:` and `category:`.
 - The `name:` value must match the directory name. The `description:` value must explain what the skill does and when to use it.
-- Validate every change with `bash .github/scripts/validate.sh`.
+- Validate every change with `bash .github/scripts/validate.sh`, and any change under
+  `scripts/` with `bash .github/scripts/lint.sh` as well.
 - The **Available Skills** sections of `README.md` and `AGENTS.md` are generated — never
   hand-edit them. Change `summary:`/`category:` in the skill instead and run
   `.github/scripts/generate-catalog.sh`.
@@ -31,8 +32,9 @@ house rules on top of that format; when the two disagree, the spec wins.
 | `skills/<name>/scripts/` | Optional helper scripts shipped with the skill |
 | `skills/<name>/assets/` | Optional templates, fonts, images used by the skill |
 | `.github/scripts/validate.sh` | Local validation (run before committing) |
+| `.github/scripts/lint.sh` | Static checks for the shipped `scripts/` (run before committing) |
 | `.github/scripts/generate-catalog.sh` | Renders the Available Skills sections from frontmatter |
-| `.github/scripts/catalog-lib.sh` | Helpers shared by the two scripts above |
+| `.github/scripts/catalog-lib.sh` | Helpers shared by the scripts above |
 
 ## Available Skills
 
@@ -155,6 +157,31 @@ vocabulary, `name:`↔directory match, skill directory structure, kebab-case nam
 README/AGENTS catalog sync (by regenerating both sections and failing on any
 difference), and broken relative Markdown links.
 
+### Linting the shipped scripts
+
+Whenever a `scripts/` file changes, also run:
+
+```bash
+bash .github/scripts/lint.sh
+```
+
+Checks every `.sh`, `.py`, `.js` and `.mjs` under `.github/scripts/` and the
+`scripts/` of each published skill: `shellcheck` for shell, `python3 -m py_compile`
+for Python, `node --check` for JavaScript. These are static checks only — the app
+bridges need a live Blender, FreeCAD, Cavalry, GIMP, Krita, Rebelle or Affinity on
+the other end, so CI cannot execute them, which makes a syntax error the failure
+mode most likely to reach a consumer.
+
+`python3` and `node` you already have; shellcheck is the one extra tool:
+
+```bash
+brew install shellcheck
+```
+
+The same script runs as the `lint` job in
+[.github/workflows/validate.yml](.github/workflows/validate.yml), where all three
+tools are preinstalled on the runner.
+
 ## Adding a new skill
 
 Use Anthropic's **skill-creator** skill to author the skill body — it walks through
@@ -166,4 +193,5 @@ conventions on top:
 1. Create `skills/<kebab-name>/SKILL.md` with valid frontmatter, including `summary` and `category`
 2. Run `.github/scripts/generate-catalog.sh` to render the **Available Skills** entry into
    [README.md](README.md) and this file
-3. Run `bash .github/scripts/validate.sh`
+3. Run `bash .github/scripts/validate.sh`, plus `bash .github/scripts/lint.sh` if the
+   skill ships anything under `scripts/`
