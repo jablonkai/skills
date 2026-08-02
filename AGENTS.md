@@ -160,7 +160,8 @@ bash .github/scripts/validate.sh
 Checks: frontmatter completeness, the allowed frontmatter field set and `risk`
 vocabulary, `name:` and `description:` length caps, `name:`↔directory match, skill
 directory structure, kebab-case names, README/AGENTS catalog sync (by regenerating both
-sections and failing on any difference), and broken relative Markdown links. It also
+sections and failing on any difference), and broken relative Markdown links (links
+inside fenced code blocks are examples, not targets, and are skipped). It also
 warns — without failing — on a `SKILL.md` over the progressive-disclosure line budget.
 
 ### Linting the shipped scripts

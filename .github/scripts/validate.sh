@@ -188,6 +188,45 @@ markdown_files() {
   fi | grep -v '^$' | sort -u
 }
 
+# A file's prose, with fenced code blocks removed: a link inside a fence is an
+# example of markup, not a link the repo has to resolve, and skills are
+# documentation-heavy enough that such examples are expected. Fences are ``` or
+# ~~~ runs of three or more, indented at most three spaces (past that the line is
+# an indented code block, not a fence). A block closes on a bare fence of the same
+# character that is at least as long, so a longer fence can wrap an example that
+# itself contains one.
+strip_fenced_code_blocks() {
+  awk '
+    {
+      indent = 0
+      while (indent < 4 && substr($0, indent + 1, 1) == " ") indent++
+      rest = substr($0, indent + 1)
+
+      fence_char = substr(rest, 1, 1)
+      fence_len = 0
+      if (indent < 4 && (fence_char == "`" || fence_char == "~")) {
+        while (substr(rest, fence_len + 1, 1) == fence_char) fence_len++
+        if (fence_len < 3) fence_len = 0
+      }
+
+      if (inside) {
+        tail = substr(rest, fence_len + 1)
+        sub(/[[:space:]]+$/, "", tail)
+        if (fence_len >= open_len && fence_char == open_char && tail == "") inside = 0
+        next
+      }
+
+      if (fence_len) {
+        inside = 1
+        open_char = fence_char
+        open_len = fence_len
+        next
+      }
+
+      print
+    }' "$1"
+}
+
 check_markdown_links() {
   local file
   local file_dir
@@ -217,7 +256,8 @@ check_markdown_links() {
         echo "Broken relative Markdown link in $file: $target"
         exit 1
       fi
-    done < <(grep -oE '\[[^]]+\]\(([^)]+)\)' "$file" | sed -E 's/.*\(([^)]+)\)/\1/' | sort -u)
+    done < <(strip_fenced_code_blocks "$file" |
+      grep -oE '\[[^]]+\]\(([^)]+)\)' | sed -E 's/.*\(([^)]+)\)/\1/' | sort -u)
   done < <(markdown_files)
 }
 
