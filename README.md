@@ -140,7 +140,7 @@ The validator checks:
 - every skill directory contains a `SKILL.md`
 - the README and AGENTS skill lists match what the frontmatter renders — the check
   regenerates them and fails on any difference
-- broken relative Markdown links
+- broken relative Markdown links, ignoring links inside fenced code blocks
 
 The same script runs in CI on every push and pull request
 (see [.github/workflows/validate.yml](.github/workflows/validate.yml)).
