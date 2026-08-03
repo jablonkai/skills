@@ -1,6 +1,6 @@
 ---
 name: emu-branding
-description: "Brand guidelines and visual identity for EMU (Egyesület a Magyar Ultrafutásért — Association for Hungarian Ultrarunning). Use when creating any EMU-related visual content: social media posts, race posters, event presentations, documents, charts, data visualizations, or marketing materials. Covers logo usage, the EMU Blue (#00ADEF) color palette, Nebula Sans typography, and photography style. Also use when someone mentions the EMU 6-Day Race, ultrarunning branding, or needs on-brand design assets — even if they don't explicitly say 'brand guidelines'."
+description: "Brand guidelines and visual identity for EMU (Egyesület a Magyar Ultrafutásért). Use when creating any EMU-related visual content: social media posts, race posters, event presentations, documents, charts, data visualizations, or marketing materials. Covers logo usage, the EMU Blue (#00ADEF) color palette, Nebula Sans typography, and photography style. Also use when someone mentions the EMU 6-Day Race, ultrarunning branding, or needs on-brand design assets — even if they don't explicitly say 'brand guidelines'."
 summary: "brand guidelines and visual identity for EMU (Egyesület a Magyar Ultrafutásért), including logo, color palette, and typography"
 category: branding
 risk: low
@@ -15,7 +15,7 @@ allowed-tools: Read, Glob
 
 # EMU Branding
 
-Official brand guidelines for **EMU** (Egyesület a Magyar Ultrafutásért — Association for Hungarian Ultrarunning).
+Official brand guidelines for **EMU** (Egyesület a Magyar Ultrafutásért).
 
 ## Brand Identity
 
