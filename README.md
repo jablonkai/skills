@@ -26,7 +26,7 @@ portable beyond a single tool.
 
 ### GitHub workflows
 - `github-commit-pr`: end-to-end workflow for committing changes, pushing a branch, and opening or updating a GitHub pull request
-- `github-do-issue`: fetch a GitHub issue, implement it in the current repository, and stop before commit or PR creation
+- `github-do-issue`: fetch GitHub issues and implement them one at a time — each issue reviewed, committed and shipped as its own PR
 - `github-fix-action-error`: diagnose the latest failing GitHub Actions run on the current branch, apply a targeted fix locally, and — after user approval — commit and push; refuses to run on main/master/develop
 - `github-issues`: standardized issue creation, labeling, triage, commenting, and issue management through the GitHub CLI
 
