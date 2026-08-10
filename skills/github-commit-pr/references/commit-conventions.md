@@ -31,6 +31,10 @@ create a NEW commit — do not amend, and never pass `--no-verify`.
 Issue closing keywords (`Closes #N`) belong in the PR body, not the commit message: GitHub only
 processes them from the PR body.
 
+A commit message that needs "and" to describe two unrelated changes ("add dark mode and fix token
+refresh") is the tell that the staged set spans two issues. Unstage the second one and give it its
+own commit — the message gets easier to write, and each issue keeps a revertable commit of its own.
+
 ## Branch name
 
 Derive the branch name from the commit message:

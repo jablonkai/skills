@@ -47,7 +47,7 @@ Starting with #12. Order OK?
 If the issues have a natural dependency (one builds on another), say so and propose that order. Otherwise take them in the order given.
 
 2. Run the full workflow below — Steps 1 to 6 — for the first issue only.
-3. Stop and let the user review and land it (`github-commit-pr` handles commit → branch → PR for that one issue).
+3. Stop and let the user review and land it (`github-commit-pr --issue <N>` handles commit → branch → PR for that one issue; the `--issue` argument is what keeps its staging and its `Closes #N` scoped to this issue alone).
 4. Only once that issue's changes have left the working tree — committed, or explicitly set aside by the user — start Step 1 for the next issue.
 
 Never fetch all the issues up front and implement them together: keeping only the current issue in view is exactly what keeps its diff clean and reviewable.
@@ -70,7 +70,7 @@ If not in a git repository, abort with a clear message.
 git status --porcelain
 ```
 
-Uncommitted changes are not automatically a problem — but if they are the *previous* issue's work, starting the next one on top of them is how two issues end up in one commit. If the tree is dirty, show the user what's there and ask whether to commit it first (via `github-commit-pr`), stash it, or continue on purpose.
+Uncommitted changes are not automatically a problem — but if they are the *previous* issue's work, starting the next one on top of them is how two issues end up in one commit. If the tree is dirty, show the user what's there and ask whether to commit it first (via `github-commit-pr --issue <N>` for the issue that work belongs to), stash it, or continue on purpose.
 
 ## Workflow
 
@@ -197,11 +197,11 @@ When more issues are queued, end the report by naming what's left and what has t
 
 ```
 Remaining: #13, #14.
-Next step for #12: review, then commit + PR (github-commit-pr).
+Next step for #12: review, then commit + PR (github-commit-pr --issue 12).
 I'll start #13 once #12 is committed.
 ```
 
-**STOP HERE.** Do not commit, push, create a branch, or create a PR. The user decides what to do next. If they want to commit and open a PR, the `github-commit-pr` skill handles that workflow end-to-end — run it once per issue, so each issue gets its own branch, commit and pull request, with its own `Closes #N` link.
+**STOP HERE.** Do not commit, push, create a branch, or create a PR. The user decides what to do next. If they want to commit and open a PR, the `github-commit-pr` skill handles that workflow end-to-end — run it once per issue as `github-commit-pr --issue <N>`, so each issue gets its own branch, commit and pull request, with its own `Closes #N` link. Naming the issue matters when the tree still holds another issue's work: it tells that skill which paths to stage and which to leave for the next PR.
 
 ### Step 7: Move to the next issue
 
