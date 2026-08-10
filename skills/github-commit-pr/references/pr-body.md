@@ -47,6 +47,15 @@ Closes #<number>
 **Valid closing keywords** (all work the same): `Closes`, `Fixes`, `Resolves`. Use `Closes` by
 default. For bug fixes (commit type `fix`), use `Fixes` instead.
 
+**One closing keyword per PR.** A second `Closes #N` means the PR is carrying a second issue — the
+reviewer can no longer approve or revert either one on its own. If you're about to write two, stop
+and split the work into two PRs instead (see the SKILL's "One issue, one commit, one PR"). The
+exception is a bundle the user explicitly asked for: then list every issue, so no issue silently
+stays open after the merge.
+
+Related-but-not-closed issues are different — reference them without a keyword (`Related to #7`) so
+GitHub links them without closing them.
+
 Closing keywords go in the **PR body**, never the commit message — GitHub only processes closing
 keywords from the PR body on the default branch.
 

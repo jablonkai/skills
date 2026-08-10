@@ -2,7 +2,7 @@
 allowed-tools: Bash, Read, Grep, Glob, Task
 argument-hint: '[<base-branch>] [--issue <number>] [--no-merge]'
 category: git
-description: 'Commit changes, create a feature branch, open a GitHub pull request, wait for CI, and merge the PR once GitHub Actions go green — or push new commits to an existing PR and merge after CI succeeds. Use whenever someone says ''commit and push'', ''create a PR'', ''open a pull request'', ''send for review'', ''push my changes'', ''merge when CI passes'', or is done with their work and ready to ship it. Also triggers for ''commitold be'', ''nyiss PR-t'', ''mergeld ha zöld a CI'', or any variation of wanting to get changes into a pull request and landed. Handles conventional commit messages, issue linking with auto-close keywords (Closes #N), sensitive file detection, PR template integration, and auto-merge with branch cleanup.'
+description: 'Commit changes, create a feature branch, open a GitHub pull request, wait for CI, and merge the PR once GitHub Actions go green — or push new commits to an existing PR and merge after CI succeeds. Ships one issue per commit and per PR: when the working tree holds work for several issues it stages them one at a time instead of bundling them into a single review. Use whenever someone says ''commit and push'', ''create a PR'', ''open a pull request'', ''send for review'', ''push my changes'', ''commit issue #12'', ''merge when CI passes'', or is done with their work and ready to ship it. Also triggers for ''commitold be'', ''nyiss PR-t'', ''mergeld ha zöld a CI'', or any variation of wanting to get changes into a pull request and landed. Handles conventional commit messages, issue linking with auto-close keywords (Closes #N), sensitive file detection, PR template integration, and auto-merge with branch cleanup.'
 name: github-commit-pr
 risk: medium
 summary: "end-to-end workflow for committing changes, pushing a branch, and opening or updating a GitHub pull request"
@@ -24,7 +24,32 @@ End-to-end workflow for committing changes, creating or updating a GitHub pull r
 - Committing changes, opening a new PR, and landing it once CI is green
 - Pushing additional commits to an existing PR branch and merging after CI passes
 - Creating PRs that reference and auto-close GitHub issues
+- Landing several implemented issues — run this workflow once per issue, not once for the whole tree
 - Skip the merge step by passing `--no-merge` when you want a human to review before the PR lands
+
+## One issue, one commit, one PR
+
+A pull request is the unit a reviewer reads, a maintainer discusses, and a revert undoes. When it maps to exactly one issue, all three stay simple. A PR that closes three issues can't be reviewed in pieces, can't be reverted in pieces, and forces a reviewer who cares about one of them to read all three. So this workflow produces **one commit and one PR per issue** — even when the working tree already holds finished work for several.
+
+The place this goes wrong is staging: `git add -A` sweeps up everything in the tree, including another issue's work, and once two issues share a commit they can only be separated by hand. Before staging, work out what this commit is for:
+
+- `--issue <number>` in `$ARGUMENTS`, or an issue the user just named, settles it: that issue owns this commit and this PR.
+- Otherwise read `git status --porcelain` and look at whether the changed files tell one story. Files from an unrelated module, a second feature's tests, or a leftover experiment are a signal that the tree spans more than one job.
+
+When it does span more than one, don't guess and don't bundle — show the grouping you see and let the user confirm:
+
+```
+The working tree looks like two separate jobs:
+  #12 — dark mode toggle: src/theme/*, src/components/Toggle.tsx
+  #13 — token refresh fix: src/auth/refresh.ts, tests/auth.test.ts
+
+I'll commit #12 first and open its PR; #13 stays in the tree for the next run.
+Which one should go first?
+```
+
+Then stage only that issue's paths (New PR flow Step 5), land it, and run the workflow again for the next one. Two smaller PRs cost the reviewer less than one mixed PR, so the extra round trip is the point, not overhead.
+
+Two exceptions, both explicit: the user says the changes really are one unit of work (a refactor that several issues asked for), or they knowingly accept a bundled PR after you've named the cost. Their call — proceed, and list every issue in the PR body so nothing loses its link.
 
 ## Detailed references
 
@@ -87,6 +112,10 @@ git remote show origin | grep 'HEAD branch' | sed 's/.*: //'
 
 If `$ARGUMENTS` contains a positional argument, use it as the base branch instead. Fall back to `main` if both detection methods fail.
 
+4. **Scope of this commit:**
+
+Establish which issue this run is for — `--issue <number>` from `$ARGUMENTS`, the issue the user named, or the issue number in the branch name. If none of those apply, read the changed files and judge whether they tell one story; if they don't, settle it with the user before staging anything, as described in [One issue, one commit, one PR](#one-issue-one-commit-one-pr). Deciding this now is cheap; discovering it after `git commit` means unpicking a mixed diff.
+
 ## Flow detection
 
 After pre-flight, determine the flow:
@@ -134,8 +163,22 @@ Derive the branch name from the commit message and create it — see [references
 
 ### Step 5: Stage and commit
 
+When the whole tree belongs to this one issue, stage all of it:
+
 ```bash
 git add -A
+```
+
+When the tree spans several issues (pre-flight check 4), stage only the paths this issue owns, so the rest stays in the working tree for its own commit:
+
+```bash
+git add -- <path> <path> ...
+git status --short   # confirm the staged set is exactly this issue's work
+```
+
+Read the `git status --short` output before committing: anything staged that you can't tie to this issue belongs to the next PR, so unstage it (`git restore --staged <path>`) rather than letting it ride along.
+
+```bash
 git commit -m "$(cat <<'EOF'
 <type>: <summary>
 
@@ -144,7 +187,7 @@ EOF
 )"
 ```
 
-If the commit fails due to a pre-commit hook, read the hook output, fix the issue, re-stage, and create a NEW commit (do not amend).
+If the commit fails due to a pre-commit hook, read the hook output, fix the issue, re-stage, and create a NEW commit (do not amend). Re-stage the same scoped paths — a reflexive `git add -A` at this point is how the other issue's work sneaks in.
 
 ### Step 6: Push
 
@@ -186,6 +229,14 @@ Follow the merge procedure in [references/ci-and-merge.md](references/ci-and-mer
 
 Output the PR URL, the final CI status, and the merge outcome (merged via squash / merge skipped per --no-merge / merge blocked by ...).
 
+If changes were deliberately left in the working tree for another issue, say so and name what's next — that leftover diff is the next run's job, not an oversight:
+
+```
+Landed #12 → <pr-url> (squash-merged, branch deleted).
+Still in the tree: #13 — src/auth/refresh.ts, tests/auth.test.ts.
+Say the word and I'll commit #13 as its own PR.
+```
+
 ## Push to existing PR flow
 
 When a PR already exists for the current branch:
@@ -207,8 +258,10 @@ Same conventions as New PR flow Step 3 — see [references/commit-conventions.md
 
 ### Step 4: Stage, commit, and push
 
+Stage the same way as New PR flow Step 5 — everything when the tree is all this PR's work, scoped paths when it isn't. A PR that already links one issue keeps that scope: an unrelated change pushed into it turns a reviewed PR into a mixed one after the fact.
+
 ```bash
-git add -A
+git add -A          # or: git add -- <this PR's paths>
 git commit -m "$(cat <<'EOF'
 <type>: <summary>
 EOF
@@ -257,6 +310,8 @@ Do NOT modify the PR title or body.
 | `gh` not installed | `command -v gh` fails | Direct user to https://cli.github.com |
 | Not in a git repo | `git rev-parse --show-toplevel` fails | Abort with clear message |
 | No changes to commit | `git status` shows clean tree | Abort unless PR from existing commits |
+| Tree spans several issues | Changed files don't tell one story; more than one issue named | Show the grouping, commit the first issue only, leave the rest in the tree |
+| Unrelated file staged | `git status --short` shows a path outside this issue's scope | `git restore --staged <path>` before committing |
 | Sensitive files detected | Pattern match on `git status` output | Warn user, ask to exclude before staging |
 | Pre-commit hook failure | `git commit` exits non-zero | Read output, fix issue, create new commit |
 | Push rejected | `git push` exits non-zero | Report error, do not force-push |
@@ -281,7 +336,9 @@ These boundaries protect the user's repository and team workflow:
 - Do not skip pre-commit hooks (`--no-verify`) — hooks enforce project-level quality gates that exist for a reason
 - Do not commit `.env`, credentials, or secrets — always run the sensitive file check before staging and warn if anything is detected
 - If any step fails, stop and report the error — do not continue blindly, because later steps depend on earlier ones succeeding
-- Use `git add -A` for staging (full-change commit flow), but only after the sensitive file check passes
+- One issue per commit and per PR — a PR is what a reviewer reads and what a revert undoes, so it should map to exactly one issue. Bundle only when the user explicitly asks after hearing the cost, and then list every issue in the PR body
+- Use `git add -A` for staging (full-change commit flow), but only after the sensitive file check passes and only when the whole tree belongs to this issue — otherwise stage the issue's paths explicitly
+- Leave the other issues' changes in the working tree rather than committing them "while you're here" — they land next, in their own PR, where a reviewer can connect them to the issue that asked for them
 - The PR body must reflect the actual changes from the diff, not boilerplate — reviewers rely on it to understand the change
 - Issue closing keywords (`Closes #N`) go in the PR body, not in the commit message — GitHub only processes closing keywords from the PR body on the default branch
 - When pushing to an existing PR, do not modify the PR title or body — only push the new commit
