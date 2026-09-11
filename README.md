@@ -39,7 +39,7 @@ portable beyond a single tool.
 - `test-generation`: write unit, integration and UI tests for existing code — framework detection from the build files, case selection for boundaries and error paths, correct source-set placement, and coverage gap analysis across Kotlin/KMP, Compose, Flutter/Dart, Swift, Rust and C++
 
 ### Ultrarunning domain
-- `duv`: search and retrieve data from the DUV Ultramarathon Statistics website (statistik.d-u-v.org), including runner profiles, events, and rankings
+- `duv`: search and retrieve data from the DUV Ultramarathon Statistics website (statistik.d-u-v.org) via its JSON API — runner profiles, event results, rankings, calendars, and national/continental records by distance, gender and age group
 - `emu-branding`: brand guidelines and visual identity for EMU (Egyesület a Magyar Ultrafutásért), including logo, color palette, and typography
 <!-- END GENERATED SKILLS -->
 

@@ -1,8 +1,12 @@
-# DUV endpoint reference
+# DUV HTML endpoint reference
 
-Per-endpoint parameters and response shapes. Value vocabularies shared across endpoints
+Per-endpoint parameters and response shapes for the **HTML** pages. Most of these have a JSON
+twin under `json/m*.php` that is easier to consume — see [json-api.md](json-api.md) and prefer it.
+Come here for the pages without one (`geteventlist.php`, `getresultclub.php`, `recordsGER.php`,
+`bulk_search.php`, `getresulteventalltime.php`, `multiplefinish.php`), or when a user pastes an
+HTML URL and you need to understand its parameters. Value vocabularies shared across endpoints
 (country/nation, distance, surface, year, gender, age category, IAU label) live in
-[parameters.md](parameters.md).
+[parameters.md](parameters.md); records pages are in [records.md](records.md).
 
 All endpoints are under `https://statistik.d-u-v.org/` and accept
 `language=EN|DE|FR|ES|IT|RU|ZH|JA` — always pass `language=EN` for consistent parsing.
@@ -13,7 +17,9 @@ All endpoints are under `https://statistik.d-u-v.org/` and accept
 curl -sL "https://statistik.d-u-v.org/searchrunner.php?sname=Jablonkai&language=EN"
 ```
 
-- `sname` — full-text, ≥2 characters. Can be surname, firstname, or substring.
+- `sname` — ≥2 characters. `Smith` searches `Smith*`; `Smith, John` searches `Smith*, *John*`
+  (surname, given name, comma-separated). Greek/Cyrillic/Hebrew names work; for CJK names write
+  surname and given name with no space or comma between them.
 - **One match** → 302 redirect to `getresultperson.php?runner=<id>`. Use `curl -L` and
   `-w "%{url_effective}"` to see the resolved id.
 - **Many matches** → HTML list of `getresultperson.php?runner=<id>` links. Parse with
@@ -51,7 +57,9 @@ curl -s "https://statistik.d-u-v.org/getresultperson.php?runner=401716&language=
 curl -sL "https://statistik.d-u-v.org/searchevent.php?sname=Spartathlon&language=EN"
 ```
 
-- `sname` — ≥3 characters. Matches **event name OR start town/location**.
+- `sname` — ≥3 characters. Matches **event name OR start town/location**. Narrow with
+  comma-separated length and country: `York,100,USA` finds 100 km / 100 mi events in a town
+  matching *York* in the USA (and not Yorkshire, GBR).
 - Same one-match-302 / many-match-list behavior as `searchrunner.php`.
 - Result links: `getresultevent.php?event=<id>`.
 
@@ -73,6 +81,9 @@ curl -s "https://statistik.d-u-v.org/getresultevent.php?event=100580&language=EN
   compute derivations locally — the page URL params for these toggles are unstable.
 - Some events bundle several races (e.g. 50k + 100k on the same day) under separate event IDs —
   resolve each via `searchevent.php` or `geteventlist.php` rather than guessing.
+- Two sibling pages hang off the same id: `getresulteventalltime.php?event=<id>` — the all-time
+  list of every edition's results (the practical "course record" source), and
+  `multiplefinish.php?event=<id>` — runners ranked by number of finishes. Both are HTML only.
 
 ## `eventdetail.php` — event metadata/details
 
@@ -258,11 +269,21 @@ export.
 For scripted use, `getresultperson.php` + `searchrunner.php` per name is usually simpler than
 automating the bulk form.
 
+## `bestperfcountry.php` / `recordsGER.php` — records
+
+Documented in [records.md](records.md). `bestperfcountry.php?nat=HUN&dist=100km&type=0&cat=DOB`
+renders the same data as `json/mbestperfcountry.php` as two tables (women, men) with columns
+`Cat | Performance | flag | Name | DOB | Club | Date | Venue (Country)`; the flag column holds
+`I`/`T`/`S` for indoor / track / split. `recordsGER.php?dist=100km` is the official German list
+and has no JSON twin.
+
 ## Overview pages
 
 `overview_intbestlist.php`, `overview_dtbestlist.php`, `overview_records.php`,
 `overview_champions.php`, `overview_cups.php` are navigation hubs — static landing pages that link
 into the filterable endpoints above. Follow the links rather than trying to parameterize them.
+`overview_records.php` is also where the IAU world-record PDFs and the frozen national/German
+record PDFs are linked.
 
 ## RSS feeds
 

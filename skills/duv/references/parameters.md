@@ -13,7 +13,8 @@ One shared scheme, two param names. The same numeric continent codes and IOC-3 c
 every country/nation filter — only the param name changes.
 
 - `geteventlist.php`, `calendar.php`, `getresultclub.php` → `country=`
-- `getintbestlist.php` → `nat=` (same value vocabulary, different param name)
+- `getintbestlist.php`, `bestperfcountry.php` → `nat=` (same value vocabulary, different param name)
+- The `json/m*.php` twins use the same names as their HTML page.
 
 Accepted values:
 
@@ -22,7 +23,9 @@ Accepted values:
   `6`=Oceania.
 - IOC-3 country codes (e.g. `HUN`, `GER`, `USA`) — work on all four endpoints, including
   `getintbestlist.php`'s `nat=` even though the visible dropdown there only shows the seven
-  continental options.
+  continental options. Use uppercase: lowercase still filters on `bestperfcountry.php` but the
+  page heading loses the country name, and elsewhere it is untested.
+- `bestperfcountry.php` has **no** `all`/world scope — it returns nothing.
 
 The labels shown in the dropdown (`World`, `Europe`, …) are **not** valid values — `nat=Europe`
 silently returns 0 rows; use `nat=1`. Likewise the worldwide selector is `all`, not `World`.
@@ -35,7 +38,9 @@ produce an explicit invalid-input page, 0 rows, or a broader/odd-looking page he
 
 - Fixed distances: `50km`, `50mi`, `100km`, `100mi`
 - Time-limited: `6h`, `12h`, `24h`, `48h`, `72h`, `6d`, `10d`
-- Multi-day / long: `1000km`, `1000mi` (only `getintbestlist.php`)
+- Multi-day / long: `1000km`, `1000mi` (only `getintbestlist.php` and `bestperfcountry.php`)
+- `bestperfcountry.php` accepts exactly `50km 50mi 100km 100mi 1000km 1000mi 6h 12h 24h 48h 6d`
+  (no `72h`, `10d`, range codes); `recordsGER.php` only `50km 100km 6h 12h 24h 48h 6d`.
 - Distance-range codes (geteventlist + calendar only): `1` = 45–79 km, `2` = 80–119 km,
   `4` = 120–179 km, `8` = 180 km+
 - `calendar.php` additionally accepts surface tokens in the `dist` slot (same values as `surface`,
@@ -68,7 +73,8 @@ Omit the param or pass `all` for no surface filter.
 ## Gender (`getintbestlist.php` only)
 
 `gender=M|W`. The form *label* for the female list renders as "F", but the posted *value* is `W` —
-`gender=F` silently returns zero rows.
+`gender=F` silently returns zero rows. `bestperfcountry.php` has no gender parameter at all: both
+genders always come back, distinguished by the `W`/`M` prefix of the age-group key.
 
 ## Age category (`cat` on `getintbestlist.php`)
 
@@ -77,6 +83,17 @@ Gender-prefixed tokens, paired with the `gender` value:
 - Male list (`gender=M`): `all`, `MU23`, `M23`, `M35`, `M40`, `M45`, `M50`, `M55`, `M60`, `M65`,
   `M70`, `M75`, `M80`, `M85`, `M90`
 - Female list (`gender=W`): `all`, `WU23`, `W23`, `W35`, … `W90`
+
+## Records surface (`type` on `bestperfcountry.php`)
+
+`0` overall (default), `1` road, `2` track, `3` indoor. A different vocabulary from `surface` —
+the records page has no trail/stage/backyard split because those aren't record-eligible.
+
+## Age-group scheme (`cat` on `bestperfcountry.php`)
+
+Not an age group but the *scheme*: `DOB` = IAU groups by age on race day (U23, 23, 35, 40 …),
+`YOB` = German groups by year of birth (U20, 20, 30, 35 …). Omitted = `YOB`. Details in
+[records.md](records.md).
 
 ## IAU label (`label`)
 

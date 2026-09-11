@@ -1,83 +1,117 @@
 ---
 name: duv
-description: "Search and retrieve data from the DUV Ultramarathon Statistics website (statistik.d-u-v.org). Use when the user asks about ultramarathon results, runner profiles, race events, rankings, records, or finishing times — e.g. 'find runner X on DUV', 'what was the Spartathlon 2024 result', 'best 100km times in Hungary', 'lookup ultra runner'. The DUV database covers 10M+ performances, 2.4M+ runners, and 115k+ ultra events worldwide."
-summary: "search and retrieve data from the DUV Ultramarathon Statistics website (statistik.d-u-v.org), including runner profiles, events, and rankings"
+description: "Search and retrieve data from the DUV Ultramarathon Statistics website (statistik.d-u-v.org) through its JSON API and HTML pages. Use whenever the user asks about ultramarathon results, runner profiles, race events, rankings, or records — national records, continental bests, age-group (masters) records, best performances per country, distance (50 km, 100 km, 100 mi, 6 h, 12 h, 24 h, 48 h, 6 days) and gender, personal bests, finishing times, race calendars — e.g. 'Hungarian 100 km record', 'download all national records for Poland', 'best women's 24 h in Europe', 'find runner X on DUV', 'Spartathlon 2024 results', 'top 100 km times in 2024'. Also use for Hungarian phrasings like 'országos csúcs', 'magyar rekord', 'nemzeti rekordok letöltése', 'ultrafutó eredmények'. The DUV database covers 10M+ performances, 2.4M+ runners, and 115k+ ultra events worldwide."
+summary: "search and retrieve data from the DUV Ultramarathon Statistics website (statistik.d-u-v.org) via its JSON API — runner profiles, event results, rankings, calendars, and national/continental records by distance, gender and age group"
 category: data-lookup
 risk: low
 tags:
   - ultrarunning
   - duv
   - race-results
+  - records
   - statistics
-  - web-scraping
+  - json-api
 allowed-tools: Bash, Read, WebFetch
-argument-hint: "[runner name, event name, or ranking query]"
+argument-hint: "[runner name, event name, ranking or record query]"
 ---
 
 # DUV Ultramarathon Statistics
 
-The DUV (Deutsche Ultramarathon-Vereinigung) statistics site at `https://statistik.d-u-v.org/` is the canonical database for ultramarathon results worldwide.
+`https://statistik.d-u-v.org/` is the canonical database of ultramarathon results worldwide.
+It has **no documented API, but it does have a JSON one**: the `json/m*.php` endpoints that
+feed the DUV mobile app return clean JSON for runners, events, results, rankings, the calendar
+and national records. Use those first; scrape the HTML only for the handful of pages without a
+JSON twin. Everything is public and unauthenticated — but volunteer-run, so keep requests
+sequential and spaced.
 
-**There is no official API.** All data is served as HTML. Use `curl` / `WebFetch` and parse the returned pages.
+## Fastest path: the bundled client
 
-**Bad-parameter failure warning.** Passing a value the backend doesn't recognise is not consistently handled. Depending on the endpoint and parameter, DUV may return a tiny `Error - Invalid input: '<value>'` page, return 0 rows, drop only that filter, or fall back to a broader result set up to a hard row cap (1000 rows on most endpoints, 4000 on `getintbestlist.php`). That's why exact tokens matter: a wrong-looking result is often a bad parameter, not a shortage of data. When in doubt, vary one parameter and watch the result count and page heading change.
+`scripts/duv.py` (Python 3, standard library) wraps every JSON endpoint and prints CSV by
+default (`--format md|json`, `--out FILE`). Run it from the skill directory:
 
-## Detailed references
+```bash
+python3 scripts/duv.py records --nat HUN --dist 100km --dist 24h            # national records
+python3 scripts/duv.py records --nat HUN --dist all --overall-only --format md
+python3 scripts/duv.py records --nat 1 --dist 24h --type track --gender W     # Europe, track, women
+python3 scripts/duv.py rankings --year 2024 --dist 100km --gender W --nat HUN
+python3 scripts/duv.py rankings --year all --dist 24h --gender M --pages all --primary-only --out 24h.csv
+python3 scripts/duv.py runner --name "Berces, Edit"          # or --id 5752
+python3 scripts/duv.py search-event "Spartathlon"            # or "York,100,USA"
+python3 scripts/duv.py event --id 100580                     # finisher list
+python3 scripts/duv.py event-detail --id 100580              # organizer, venue, editions
+python3 scripts/duv.py calendar --year 2024 --country HUN --dist 100km
+python3 scripts/duv.py get "json/msearchrunner.php?sname=Jablonkai"   # any JSON URL, raw
+```
 
-Load these on demand — don't read them up front:
+`python3 scripts/duv.py <subcommand> -h` lists every flag. The script handles the two things
+that trip up hand-written calls — the UTF-8 BOM some responses carry, and the fact that DUV
+answers an **unrecognised parameter value with an empty 200 body** rather than an error. If
+Python's `urllib` can't verify the site certificate (a bare python.org install on macOS) it
+silently retries through `curl`.
 
-- [references/parameters.md](references/parameters.md) — shared value vocabularies (country/nation, distance, surface, year, gender, age category, IAU label). Read this whenever a query needs a filter beyond a plain id lookup.
-- [references/endpoints.md](references/endpoints.md) — per-endpoint parameters, example `curl` calls, and response shapes. Read the section for the endpoint you're about to call.
+## Records — the most asked-for thing
 
-## Core URL patterns
+DUV lists *best performances*, not ratified records, and says so on every records page. Report
+a "national record" from here with that one-sentence caveat; for official world records send
+the user to the IAU table (linked from `overview_records.php`). What exists:
 
-All endpoints are under `https://statistik.d-u-v.org/`. Every endpoint accepts `language=EN|DE|FR|ES|IT|RU|ZH|JA` — always pass `language=EN` for consistent parsing.
+| Ask | Do |
+|---|---|
+| National record, country X, distance D, either gender | `records --nat X --dist D` — both genders and every age group come back in one call |
+| All records of a country / several countries | `--dist all`, repeat `--nat`; add `--overall-only` for just the open records |
+| Continental bests | `--nat 1..6` (1 Europe, 2 Asia, 3 Africa, 4 N. America, 5 S. America, 6 Oceania) |
+| Road / track / indoor only | `--type road|track|indoor` (default `overall`) |
+| Age-group (masters) records | every row is an age group; `--cat DOB` = IAU groups (U23/23/35/40…), `--cat YOB` = German year-of-birth groups (U20/20/30/35…) |
+| World record | not on DUV → IAU; the unofficial "best ever" is `rankings --year all --dist D --gender G`, first row |
+| German official records | `recordsGER.php?dist=D` (HTML only) |
 
-| Endpoint | Purpose | Primary params |
-|---|---|---|
-| `searchrunner.php` | Search runners by name | `sname` |
-| `getresultperson.php` | Runner profile + all results | `runner` |
-| `searchevent.php` | Search events by name or town | `sname` |
-| `getresultevent.php` | Race results + finisher list | `event` |
-| `eventdetail.php` | Race metadata/details: date, start town, length, organizer | `event` |
-| `geteventlist.php` | Browse/filter past events | `year`, `country`, `dist`, `surface`, `label`, `from`, `to`, `sort` |
-| `getresultclub.php` | Club results | `club`, `year`, `racetype`, `aktype`, `sort` |
-| `getintbestlist.php` | International rankings | `year`, `dist`, `nat`, `gender`, `cat`, `label`, `hili`, `tt` |
-| `calendar.php` | Race calendar (upcoming/future events) | `year`, `country`, `dist`, `cups`, `rproof`, `mode`, `radius` |
-| `bulk_search.php` | Bulk runner search (POST, textarea of names) | form-encoded |
-| `overview_intbestlist.php` | International rankings overview | — |
-| `overview_dtbestlist.php` | German rankings overview | — |
-| `overview_records.php` | Records overview | — |
-| `overview_champions.php` | Championships overview | — |
-| `overview_cups.php` | Cups overview | — |
-| `latestresults_rss.php` | Recent results RSS feed | — |
-| `xml/nextraces_rss.php` | Upcoming races RSS feed | — |
+Read [references/records.md](references/records.md) before answering any records question — it
+covers the `S`/`T`/`I` split-track-indoor flags (a 100 km *split* inside a 24 h is not a
+stand-alone race record), scheme differences, and how to phrase the answer.
 
 ## Choosing an endpoint
 
-- **Past races with results** → `geteventlist.php`; **upcoming/scheduled races** → `calendar.php`. They are tuned for opposite directions in time.
-- **A runner's best time at a standard distance** → the personal-bests table on `getresultperson.php`; **any non-standard distance** → that page's per-year listing instead.
-- **"Top N in year X"** → `getintbestlist.php`. Its rows already carry athlete, nation, date and venue — don't follow each event link.
-- **Host town, organizer, participant cap, course notes** → `eventdetail.php?event=<id>`, reached from any list or result page.
+| Need | Endpoint (JSON unless noted) |
+|---|---|
+| Runner ID from a name | `msearchrunner.php?sname=Surname,Given` |
+| Profile, PBs, every result, year-by-year comparison | `mgetresultperson.php?runner=<id>` — PBs only for ranking-eligible distances; odd distances (81 km, 111 km) live in `AllPerfs` |
+| Event ID from a name or town | `msearchevent.php?sname=Name,100,HUN` — hits already carry full metadata |
+| Finisher list | `mgetresultevent.php?event=<id>` |
+| Host town, organizer, limits, every past edition | `meventdetail.php?event=<id>` — `editions[]` walks a race's history |
+| Top-N in a year / all-time list | `mgetintbestlist.php` — 400 rows per `page`, no hard cap; rows carry athlete, nation, date and venue, so don't follow links |
+| National / continental records | `mbestperfcountry.php` — see above |
+| Races in a year, past or future | `mcalendar.php?year=2024|futur&country=HUN&dist=…` — finished ones have `Results: "C"` |
+| Past events with finisher counts, km bounds (`from`/`to`), sort by finishers | `geteventlist.php` (HTML) |
+| Club results | `getresultclub.php` (HTML) |
+| Course record / all-time list of one event | `getresulteventalltime.php?event=<id>` (HTML) |
 
-Read the matching section of [references/endpoints.md](references/endpoints.md) before building the URL.
+Details: [references/json-api.md](references/json-api.md) for every JSON field,
+[references/endpoints.md](references/endpoints.md) for the HTML pages and their form quirks,
+[references/parameters.md](references/parameters.md) for the shared value vocabularies. Read the
+section for the endpoint you're about to call rather than all of it.
 
-## Scraping tips
+## Traps worth knowing before the first request
 
-- Always append `&language=EN` so labels are predictable.
-- Use `curl -sL` to follow the single-match redirects from search endpoints.
-- Parse IDs with regex — the HTML is stable but not semantic.
-- HTML entities: links contain `&amp;` — decode before following.
-- Be polite: sequential requests with small delays. The site is community-run.
-- If a param you expect isn't filtering, fetch the page and check both the `name='...'` attribute *and* the `<option value='...'>` text in the form HTML — param names *and* value tokens both diverge from user-facing labels. Recurring traps (full detail in [references/parameters.md](references/parameters.md)):
-  - `nat` vs "Country" on rankings; the worldwide value is `all`, not `World`; continents are numeric `1`–`6`, not their English names.
-  - `gender=W` (not `F`) for the women's list.
-  - `surface=Indoo` / `Backy` / `Elim` / `Walk` (5-char truncation, case-sensitive) — full words like `Backyard` can fail with `Error - Invalid input`, and lowercase words can fail or get ignored.
-  - `label` value differs by endpoint: `Y` on `geteventlist.php`, `IAU` on `getintbestlist.php`.
-  - `sort` is numeric (`1`/`2`) on `geteventlist.php` and `getresultclub.php` — not the dropdown labels.
-  - `racetype`/`aktype` on `getresultclub.php` are misleadingly named — see their section in [references/endpoints.md](references/endpoints.md).
-  - Page caps: 1000 rows on most endpoints, **4000** on `getintbestlist.php`. A wrong-looking value may parse as "no filter", partially apply other filters, return 0 rows, or produce a short invalid-input page.
+- **Exact tokens or nothing.** `dist=100km` not `100 km`; `gender=W` not `F`; `nat=1` not
+  `Europe`; `surface=Backy`/`Indoo` (5-char truncation, case-sensitive). JSON answers a bad
+  token with an empty body; HTML pages may return 0 rows, drop the filter, or show a tiny
+  `Error - Invalid input` page. A suspicious result is usually a bad parameter, not missing data.
+- **`nat` filters by athlete nationality, not venue.** "Best 24 h run in Europe" needs the world
+  list filtered client-side on the event `Country`.
+- **Multi-performance rows** in rankings are ranked `(2)`, `(3)` … — strip them before counting
+  distinct athletes (`--primary-only`).
+- **No world scope on records.** `nat=all` returns nothing there.
+- **Same concept, different token per page:** `label=Y` on `geteventlist.php` vs `label=IAU` on
+  the rankings; `country=` on the calendar vs `nat=` on rankings and records; `sort=1|2`
+  numeric on the HTML lists.
+- **Never guess IDs.** Runner, event and club IDs are opaque — resolve them by search first.
+  When a name search returns several people, `ActivRange` (years active) and `YOB` separate
+  namesakes faster than opening each profile.
+- **Privacy.** Runners with `Privacy: "1"` asked to be anonymised; don't work around it.
 
-## When unsure of an ID
+## Answering well
 
-Never guess runner, event, or club IDs — always resolve them via `searchrunner.php` / `searchevent.php` / `getresultclub.php` first, or via `geteventlist.php` filters. IDs are opaque and not derivable from names.
+Name the scope you used (country vs nationality, year vs all-time, surface, age scheme, splits
+included or not). Keep DUV's `dd.mm.yyyy` vs ISO date difference in mind when sorting across
+endpoints. When a question is ambiguous — "best women's 24 h in Europe" — pick the more likely
+reading, say which one, and offer the other.
