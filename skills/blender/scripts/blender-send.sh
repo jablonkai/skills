@@ -64,7 +64,9 @@ args=()
 while [ $# -gt 0 ]; do
     case "$1" in
         --arg)
-            [ $# -ge 2 ] && [[ "$2" == *=* ]] || { echo "usage: --arg KEY=VALUE" >&2; exit 2; }
+            if [ $# -lt 2 ] || [[ "$2" != *=* ]]; then
+                echo "usage: --arg KEY=VALUE" >&2; exit 2
+            fi
             args+=("$2"); shift 2 ;;
         *) echo "ERROR: unexpected argument: $1" >&2; exit 2 ;;
     esac
