@@ -1,10 +1,10 @@
 'use strict';
-const {Document, DocumentPromises} = require("/document.js");
-const {RasterSelectionLogicalOperation} = require("/commands.js");
+const {Document, DocumentPromises} = require('/document.js');
+const {RasterSelectionLogicalOperation} = require('/commands.js');
 const {ErrorCode} = require('affinity:common');
-const {RasterSelection} = require("/rasterselection.js");
-const {TestUtils} = require("/tests/testUtils.js");
-const {Curve, CurveNodeType} = require("/geometry.js");
+const {RasterSelection} = require('/rasterselection.js');
+const {TestUtils} = require('/tests/testUtils.js');
+const {Curve, CurveNodeType} = require('/geometry.js');
 
 function testRasterSelection() {
     const document = TestUtils.newA4Empty();
@@ -23,6 +23,22 @@ function testRasterSelection() {
     let invert = document.rasterInvertSelection();
     const rasterSelection4 = document.rasterSelection;
     console.assert(rasterSelection4.isSelectNone);
+
+    const rangeSelections = [
+        () => document.rasterSelectReds(),
+        () => document.rasterSelectGreens(),
+        () => document.rasterSelectBlues(),
+        () => document.rasterSelectMidtones(),
+        () => document.rasterSelectShadows(),
+        () => document.rasterSelectHighlights(),
+        () => document.rasterSelectTransparent(),
+        () => document.rasterSelectPartiallyTransparent(),
+        () => document.rasterSelectOpaque(),
+    ];
+    for (const selectRange of rangeSelections) {
+        selectRange();
+        console.assert(document.rasterSelection.isSelectNone);
+    }
 }
 
 function testCurveToRasterSelection() {

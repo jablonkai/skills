@@ -29,11 +29,12 @@ const {
     DialogTextControlApi,
     DialogUnitValueEditorApi
 } = require('affinity:ui');
-const { Collection } = require('./collection.js');
-const { Colour } = require('./colours.js');
-const { createTypedFill, SolidFill } = require('./fills.js');
-const { Font, FontCollection, FontFamily } = require('./fonts.js');
-const { HandleObject } = require('./handleobject.js');
+const { Collection } = require('/collection.js');
+const { Colour } = require('/colours.js');
+const { createTypedFill, SolidFill } = require('/fills.js');
+const { Font, FontCollection, FontFamily } = require('/fonts.js');
+const { HandleObject } = require('/handleobject.js');
+const { LineStyleDescriptor } = require('/linestyle.js');
 
 function getCtrlId(ctrlOrCtrlID) {
     return (ctrlOrCtrlID instanceof DialogControl) ? ctrlOrCtrlID.controlID : ctrlOrCtrlID;
@@ -849,11 +850,12 @@ class DialogStrokeEditor extends DialogControl {
     }
 
     get stroke() {
-        return DialogStrokeEditorApi.getStroke(this.handle);
+        const strokeHandle = DialogStrokeEditorApi.getStroke(this.handle);
+        return strokeHandle ? new LineStyleDescriptor(strokeHandle) : null;
     }
 
     set stroke(stroke) {
-        DialogStrokeEditorApi.setStroke(this.handle, stroke);
+        DialogStrokeEditorApi.setStroke(this.handle, stroke?.handle);
     }
 
     setStroke(stroke) {
@@ -952,7 +954,10 @@ class DialogGroup extends DialogItem {
     }
 
     addUnitValueEditor(label, units, displayUnits, initialValue, minValue = null, maxValue = null) {
-        const unitValueEditor = new DialogUnitValueEditor(DialogGroupApi.addUnitValueEditor(this.handle, label, units, displayUnits, minValue, maxValue, initialValue));
+        // A null limit must not clamp the initial value before the no-limit flag is set.
+        const min = minValue ?? Math.min(initialValue, maxValue ?? initialValue);
+        const max = maxValue ?? Math.max(initialValue, min);
+        const unitValueEditor = new DialogUnitValueEditor(DialogGroupApi.addUnitValueEditor(this.handle, label, units, displayUnits, min, max, initialValue));
         if (minValue == null)
             unitValueEditor.noMinValue = true;
         if (maxValue == null)
@@ -961,7 +966,9 @@ class DialogGroup extends DialogItem {
     }
 
     addUserUnitValueEditor(label, units, displayUnits, initialValue, minValue = null, maxValue = null) {
-        const unitValueEditor = new DialogUnitValueEditor(DialogGroupApi.addUserUnitValueEditor(this.handle, label, units, displayUnits, minValue, maxValue, initialValue));
+        const min = minValue ?? Math.min(initialValue, maxValue ?? initialValue);
+        const max = maxValue ?? Math.max(initialValue, min);
+        const unitValueEditor = new DialogUnitValueEditor(DialogGroupApi.addUserUnitValueEditor(this.handle, label, units, displayUnits, min, max, initialValue));
         if (minValue == null)
             unitValueEditor.noMinValue = true;
         if (maxValue == null)

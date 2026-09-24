@@ -1,19 +1,19 @@
 'use strict';
-const {app} = require('/application');
-const {PolyCurveNodeDefinition, NodeChildType, Node} = require('/nodes');
-const dommodule = require("affinity:dom");
-const {DocumentCommand, AddChildNodesCommandBuilder} = require("/commands");
-const {Document, DocumentPromises} = require("/document.js");
-const {PolyCurve, Curve, CurveBuilder, Rectangle, CurveCornerData, CurveCornerType} = require("/geometry.js");
-const {Fill, FillDescriptor, NoFill} = require("/fills");
-const {BlendMode} = require("affinity:common");
-const {LineStyleDescriptor, LineType} = require("/linestyle");
-const {Colour, RGBA8, SVG11} = require("/colours");
+const {app} = require('/application.js');
+const {PolyCurveNodeDefinition, NodeChildType, Node} = require('/nodes.js');
+const dommodule = require('affinity:dom');
+const {DocumentCommand, AddChildNodesCommandBuilder} = require('/commands.js');
+const {Document, DocumentPromises} = require('/document.js');
+const {PolyCurve, Curve, CurveBuilder, Rectangle, CurveCornerData, CurveCornerType} = require('/geometry.js');
+const {Fill, FillDescriptor, NoFill} = require('/fills.js');
+const {BlendMode} = require('affinity:common');
+const {LineStyleDescriptor, LineType} = require('/linestyle.js');
+const {Colour, RGBA8, SVG11} = require('/colours.js');
 const {ErrorCode} = require('affinity:common');
-const {CurvesInterface} = require('/curvesinterface')
-const {Selection, SelectionItem} = require('/selections')
+const {CurvesInterface} = require('/curvesinterface.js')
+const {Selection, SelectionItem} = require('/selections.js')
 
-const {TestUtils} = require('/tests/testUtils');
+const {TestUtils} = require('/tests/testUtils.js');
 
 
 // Test CreateSetCurvesCommand with PolyCurveNode
@@ -37,7 +37,7 @@ function testSetCurvesCommand() {
         const lineFill = FillDescriptor.createSolid(SVG11.blue, BlendMode.Normal);
         const lineStyle = LineStyleDescriptor.createDefault(5);
 
-        let pcNodeDef = PolyCurveNodeDefinition.create(polyCurve, noFill, lineStyle, lineFill, noFill);
+        let pcNodeDef = PolyCurveNodeDefinition.create(polyCurve, noFill, lineFill, lineStyle, noFill);
 
         let acnBuilder = AddChildNodesCommandBuilder.create();
         acnBuilder.addNode(pcNodeDef);
@@ -95,7 +95,7 @@ function testAddCurveCommand() {
         const lineFill = FillDescriptor.createSolid(SVG11.green, BlendMode.Normal);
         const lineStyle = LineStyleDescriptor.createDefault(3);
 
-        let pcNodeDef = PolyCurveNodeDefinition.create(polyCurve, noFill, lineStyle, lineFill, noFill);
+        let pcNodeDef = PolyCurveNodeDefinition.create(polyCurve, noFill, lineFill, lineStyle, noFill);
 
         let acnBuilder = AddChildNodesCommandBuilder.create();
         acnBuilder.addNode(pcNodeDef);
@@ -139,7 +139,7 @@ function testAddCurveNodeCommand() {
         const lineFill = FillDescriptor.createSolid(SVG11.red, BlendMode.Normal);
         const lineStyle = LineStyleDescriptor.createDefault(5);
 
-        let pcNodeDef = PolyCurveNodeDefinition.create(polyCurve, noFill, lineStyle, lineFill, noFill);
+        let pcNodeDef = PolyCurveNodeDefinition.create(polyCurve, noFill, lineFill, lineStyle, noFill);
 
         let acnBuilder = AddChildNodesCommandBuilder.create();
         acnBuilder.addNode(pcNodeDef);

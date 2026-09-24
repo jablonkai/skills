@@ -7,9 +7,9 @@ const {
     RasterBrushTextureMode
 } = require('affinity:brushes');
 const { BlendMode } = require('affinity:common');
-const { Spline } = require('./geometry.js');
-const { HandleObject } = require('./handleobject.js');
-const { RasterObject } = require('./rasterobject.js');
+const { Spline } = require('/geometry.js');
+const { HandleObject } = require('/handleobject.js');
+const { RasterObject } = require('/rasterobject.js');
 
 class BrushDynamic extends HandleObject {
     constructor(handle) {

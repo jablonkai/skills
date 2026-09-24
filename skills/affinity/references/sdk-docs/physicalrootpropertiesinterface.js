@@ -1,11 +1,11 @@
 'use strict';
 
 const { PhysicalRootPropertiesInterfaceApi } = require('affinity:dom');
-const { HandleObject } = require('./handleobject.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
-const PageBoxInterfaceModule = require('./pageboxinterface.js');
+const NodesModule = require('/nodes.js');
+const PageBoxInterfaceModule = require('/pageboxinterface.js');
 
 class PhysicalRootPropertiesInterface extends HandleObject {
     constructor(handle) {

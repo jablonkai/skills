@@ -18,12 +18,14 @@ dictionary, CLI, or URL scheme, and its file formats are proprietary. Its only a
 surface is the **AI connector**: when enabled, the app serves its JavaScript scripting SDK
 on `http://localhost:6767/sse`. The endpoint speaks the MCP protocol, but this skill drives
 it directly over HTTP/SSE with a zero-dependency Node CLI — no MCP client configuration,
-no tool schemas loaded into context. Verified end-to-end against Affinity 3.2.3.
+no tool schemas loaded into context. Verified end-to-end against Affinity 3.3.0 (build 4850).
 
 - [scripts/affinity-cli.mjs](scripts/affinity-cli.mjs) — the CLI (Node ≥ 18, no npm install needed).
 - [references/api-reference.md](references/api-reference.md) — verified endpoint tool contracts + SDK preamble digest. **Read it before writing scripts.**
 - [references/sdk-map.md](references/sdk-map.md) — curated SDK digest: module map, node model, creation recipes (text, image, adjustments), gotchas. Read it when writing anything beyond the basic drawing recipe.
-- [references/sdk-docs/](references/sdk-docs/) — the complete vendored SDK documentation (109 topics, ~1.3 MB). Grep it for exact signatures only after sdk-map.md; never read the big files whole (`nodes.js` is 180 KB).
+- [references/sdk-docs/](references/sdk-docs/) — the complete vendored SDK documentation (142 topics, ~1.8 MB). Grep it for exact signatures only after sdk-map.md; never read the big files whole (`nodes.js` is ~300 KB).
+- Online signature reference for the native `*Api` layer the vendored JS wraps:
+  <https://sdk.affinity.studio/latest/js/> (`apis/<ApiName>/<method>.html`, `enums/<Enum>.html`).
 
 ## The control loop
 
@@ -44,9 +46,18 @@ no tool schemas loaded into context. Verified end-to-end against Affinity 3.2.3.
    (return values are dropped). Entry point:
 
    ```js
-   const { app } = require('/application');
-   const doc = app.documents.current;
+   const { app } = require('/application');   // '/application.js' works too
+   const doc = app.documents.current;          // null when no document is open
    ```
+
+   Three things trip up almost every first script, so get them right up front:
+   - **New documents default to millimetres.** `NewDocumentOptions` setters are write-only;
+     set `o.units = UnitType.Pixel` (from `/units.js`) before `o.width/height/dpi`.
+   - **Text size is in document pixels, not points:** `px = pt * doc.dpi / 72`.
+   - **`app.documents.all` is a plain Array**, node `.children` a lazy `Collection` — see sdk-map.
+
+   Unsure what the user's settings allow? Log `require('/environment').Environment.permissions`
+   (→ `{fileSystem, network, genAI}`) and `.fileSystemRoots` before writing code that needs them.
 
    When an API resists, search the crowd-sourced hints pool:
    `node scripts/affinity-cli.mjs search "set blend mode"`.
@@ -82,6 +93,7 @@ no tool schemas loaded into context. Verified end-to-end against Affinity 3.2.3.
 ```bash
 node scripts/affinity-cli.mjs ping                          # endpoint alive?
 node scripts/affinity-cli.mjs run file.js                   # execute script, print console output
+node scripts/affinity-cli.mjs run -                       # same, script read from stdin (heredoc)
 node scripts/affinity-cli.mjs render [--selection] [--spread N] --out f.jpg
 node scripts/affinity-cli.mjs tools [--json]                # list endpoint tools (verified list in api-reference)
 node scripts/affinity-cli.mjs call <tool> '{"arg":"val"}'   # generic tool call
@@ -90,7 +102,7 @@ node scripts/affinity-cli.mjs list                          # library scripts
 node scripts/affinity-cli.mjs save --title "T" --out f.js   # export library script to disk
 node scripts/affinity-cli.mjs search "query"                # SDK hints search
 node scripts/affinity-cli.mjs docs [<topic>]                # list / print SDK doc topics
-node scripts/affinity-cli.mjs docs-dump <dir>               # (re-)vendor SDK docs; resumable
+node scripts/affinity-cli.mjs docs-dump <dir> [--force]     # (re-)vendor SDK docs; resumable
 ```
 
 Env overrides: `AFFINITY_MCP_URL` (default `http://localhost:6767`), `AFFINITY_TIMEOUT_MS`
@@ -98,16 +110,21 @@ Env overrides: `AFFINITY_MCP_URL` (default `http://localhost:6767`), `AFFINITY_T
 
 ## Known limitations
 
-- `NOT_ALLOWED` from any script command = the user disabled AI / filesystem / networking
-  for scripting in Affinity settings — ask them to enable what's needed.
+- A `PERMISSION_DENIED` error (the SDK preamble calls it `NOT_ALLOWED`) = the user disabled
+  AI / filesystem / networking for scripting in Affinity settings — ask them to enable what's
+  needed; don't probe around it.
 - Script filesystem access is **Desktop-only** (`app.userDesktopPath`); no network from
   script code. Prefer `render` for verification over script-side exports.
 - Library scripts **cannot be deleted** through the endpoint — only from the Scripts panel.
 - Setting the current spread clears the selection; set it only when actually switching.
+- `doc.close()` closes **without prompting and discards unsaved changes** — only close
+  documents the script created itself, or `save()` first.
 - Endpoint sessions can die during long batches (POST → HTTP 404) — just re-run; each CLI
   invocation is a fresh session (the preamble gate is handled automatically).
-- If the SDK docs seem stale after an Affinity update, re-run
-  `docs-dump references/sdk-docs` and refresh the api-reference digest.
+- After an Affinity update, check `app.version` against the version noted above. If it
+  moved, dump into an **empty** directory (`docs-dump /tmp/sdk-new`, then replace
+  `references/sdk-docs/`) — dumping over the old tree keeps stale files and skips changed
+  ones — and refresh the api-reference and sdk-map digests.
 - Fallback if the endpoint route is ever unavailable: macOS GUI automation
   (System Events keystrokes/menus) works but is brittle and unverifiable — use it only for
   trivial one-shot actions, never for document editing.
@@ -125,7 +142,7 @@ listener is Affinity's. But turning the AI connector on is still a decision wort
   SSE endpoint that redirects off `AFFINITY_MCP_URL`'s origin, so a hijacked session can't
   silently repoint it — but that protects this client, not the endpoint.
 - What scripts may touch is gated by Affinity's own AI / filesystem / networking switches
-  (a `NOT_ALLOWED` reply means one is off). Turning one on widens what *any* client can do,
+  (a `PERMISSION_DENIED` error means one is off). Turning one on widens what *any* client can do,
   not just this skill — ask rather than assume.
 - **To close it, turn the AI connector off in Affinity's settings.** The endpoint goes with
   it; nothing this skill installed keeps listening.

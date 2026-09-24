@@ -2,8 +2,10 @@
 
 const { EnumerationResult } = require('affinity:common');
 const {
+    BoundingBox,
     CubicBezier,
     CubicBezierApi,
+    CubicBezierPair,
     CurveApi,
     CurveBuilderApi,
     CurveCornerData,
@@ -11,26 +13,128 @@ const {
     CurveNode,
     CurveNodeStyle,
     CurveNodeType,
+    CurvePair,
+    Endpoints,
+    MeshApi,
+    MeshDirection,
+    MeshSize,
     Point,
+    PointApi,
+    PointMinMax,
     PolyCurveApi,
     PolygonApi,
     PolyPolyCurveApi,
     Rectangle,
+    RectangleApi,
+    ShapeTrapezoidPositions,
+    SplineFindPointResult,
     Size,
-    SizeInt,
     SplineApi,
     SplineProfile,
     Transform,
     TransformApi,
     TransformData,
     Vector,
+    VectorApi,
     WindingOrder
 } = require('affinity:geometry');
-const { Collection, SpanCollection } = require('./collection.js');
-const { HandleObject } = require('./handleobject.js');
+const { Collection, SpanCollection } = require('/collection.js');
+const { HandleObject } = require('/handleobject.js');
 
 
-// Create some object-oriented functions and add them to the Transform function's prototype
+// Add object-oriented helpers to the CubicBezier prototype that delegate to CubicBezierApi
+Object.assign(CubicBezier.prototype, {
+    assign: function(source) { CubicBezierApi.assign(this, source); return this; },
+    makeLine: function(ptA, ptB) { CubicBezierApi.makeLine(this, ptA, ptB); return this; },
+    reverse: function() { CubicBezierApi.reverse(this); return this; },
+    transform: function(xf) { CubicBezierApi.transform(this, xf); return this; },
+    evaluate: function(t) { return CubicBezierApi.evaluate(this, t); },
+    getCurvature: function(t) { return CubicBezierApi.getCurvature(this, t); },
+    getNormal: function(t, normalise = true) { return CubicBezierApi.getNormal(this, t, normalise); },
+    getTangent: function(t, normalise = true) { return CubicBezierApi.getTangent(this, t, normalise); },
+    getClosestPoint: function(pt) { return CubicBezierApi.getClosestPoint(this, pt); },
+    split: function(t) { return CubicBezierApi.split(this, t); },
+    splitLeft: function(t) { return CubicBezierApi.splitLeft(this, t); },
+    splitRight: function(t) { return CubicBezierApi.splitRight(this, t); },
+    getParamAtLength: function(length) { return CubicBezierApi.getParamAtLength(this, length); },
+
+    // non-mutating helpers
+    clone: function() { const res = new CubicBezier(); res.assign(this); return res; },
+    toString : function() { return `[${this.start} ${this.c1} ${this.c2} ${this.end}]`; },
+    reversed: function() { return this.clone().reverse(); },
+    transformed: function(xf) { return this.clone().transform(xf); }
+});
+
+Object.defineProperties(CubicBezier.prototype, {
+    length: { get() { return CubicBezierApi.getLength(this); } },
+    boundingBox: { get() { return CubicBezierApi.getBoundingBox(this); } },
+    controlBox: { get() { return CubicBezierApi.getControlBox(this); } },
+});
+
+CubicBezier.createLine = function(ptA, ptB) { return new CubicBezier().makeLine(ptA, ptB); };
+
+
+// Add object-oriented helpers to the Point prototype that delegate to PointApi
+Object.assign(Point.prototype, {
+    // mutating API functions:
+    makeZero: function() { PointApi.makeZero(this); return this; },
+    assign: function(source) { PointApi.assign(this, source); return this; },
+    negEq: function() { PointApi.negEq(this); return this; },
+    absEq: function() { PointApi.absEq(this); return this; },
+
+    // non-mutating API functions:
+    distance: function(other) { return PointApi.distance(this, other); },
+    distanceSquared: function(other) { return PointApi.distanceSquared(this, other); },
+    interpolate: function(other, t) { return PointApi.interpolate(this, other, t); },
+    scale: function(factor) { return PointApi.scale(this, factor); },
+    translate: function(vec) { return PointApi.translate(this, vec); },
+    transform: function(xf) { return PointApi.transform(this, xf); },
+    vectorTo: function(other) { return PointApi.vectorTo(this, other); },
+});
+
+// Helper properties on Points
+Object.defineProperties(Point.prototype, {
+    neg: { get() { return PointApi.getNeg(this); } },
+    abs: { get() { return PointApi.getAbs(this); } },
+});
+
+// "Static" Point helpers
+Object.defineProperty(Point, 'zero', { get() { return new Point(0, 0); } });
+
+
+// Add object-oriented helpers to the Rectangle prototype that delegate to RectangleApi
+Object.assign(Rectangle.prototype, {
+    // mutating API functions:
+    makeZero: function() { RectangleApi.makeZero(this); return this; },
+    makeNormalised: function() { RectangleApi.makeNormalised(this); return this; },
+    assign: function(source) { RectangleApi.assign(this, source); return this; },
+    assignMinMax: function(minPt, maxPt) { RectangleApi.assignMinMax(this, minPt, maxPt); return this; },
+    offset: function(vec) { RectangleApi.offset(this, vec); return this; },
+    moveTo: function(pt) { RectangleApi.moveTo(this, pt); return this; },
+    centreOn: function(pt) { RectangleApi.centreOn(this, pt); return this; },
+});
+
+// Helper properties on Rectangles
+Object.defineProperties(Rectangle.prototype, {
+    topLeft: { get() { return RectangleApi.getTopLeft(this); } },
+    topCentre: { get() { return RectangleApi.getTopCentre(this); } },
+    topRight: { get() { return RectangleApi.getTopRight(this); } },
+    centreLeft: { get() { return RectangleApi.getCentreLeft(this); } },
+    centre: { get() { return RectangleApi.getCentre(this); } },
+    centreRight: { get() { return RectangleApi.getCentreRight(this); } },
+    bottomLeft: { get() { return RectangleApi.getBottomLeft(this); } },
+    bottomCentre: { get() { return RectangleApi.getBottomCentre(this); } },
+    bottomRight: { get() { return RectangleApi.getBottomRight(this); } },
+    minPoint: { get() { return RectangleApi.getMinPoint(this); } },
+    maxPoint: { get() { return RectangleApi.getMaxPoint(this); } },
+    minMaxPoints: { get() { return RectangleApi.getMinMaxPoints(this); } },
+    area: { get() { return RectangleApi.getArea(this); } },
+    isFinite: { get() { return RectangleApi.isFinite(this); } },
+    isValid: { get() { return RectangleApi.isValid(this); } },
+});
+
+
+// Add object-oriented helpers to the Transform prototype that delegate to TransformApi
 Object.assign(Transform.prototype, {
     setIdentity: function() { TransformApi.setIdentity(this); return this; },
 
@@ -80,7 +184,12 @@ Object.assign(Transform.prototype, {
     sheared: function(x, y) { return this.clone().shear(x, y); },
     rotated: function(rads) { return this.clone().rotate(rads); },
     translated: function(x, y) { return this.clone().translate(x, y); },
-    toString: function() { return this.data.toString(); }
+    toString: function() { return this.data.toString(); },
+
+    // Show the 6 matrix components when inspected via /inspect.js
+    [Symbol.for('affinity.inspect.custom')]: function(depth, options, inspect) {
+        return 'Transform ' + inspect(Array.from(this.data), options);
+    }
 });
 
 // Add some helper properties to Transforms
@@ -104,36 +213,94 @@ Object.assign(Transform, {
 });
 
 
-// Same for CubicBezier:
-Object.assign(CubicBezier.prototype, {
-    assign: function(source) { CubicBezierApi.assign(this, source); return this; },
-    makeLine: function(ptA, ptB) { CubicBezierApi.makeLine(this, ptA, ptB); return this; },
-    reverse: function() { CubicBezierApi.reverse(this); return this; },
-    transform: function(xf) { CubicBezierApi.transform(this, xf); return this; },
-    evaluate: function(t) { return CubicBezierApi.evaluate(this, t); },
-    getCurvature: function(t) { return CubicBezierApi.getCurvature(this, t); },
-    getNormal: function(t, normalise = true) { return CubicBezierApi.getNormal(this, t, normalise); },
-    getTangent: function(t, normalise = true) { return CubicBezierApi.getTangent(this, t, normalise); },
-    getClosestPoint: function(pt) { return CubicBezierApi.getClosestPoint(this, pt); },
-    split: function(t) { return CubicBezierApi.split(this, t); },
-    splitLeft: function(t) { return CubicBezierApi.splitLeft(this, t); },
-    splitRight: function(t) { return CubicBezierApi.splitRight(this, t); },
-    getParamAtLength: function(length) { return CubicBezierApi.getParamAtLength(this, length); },
+// Add object-oriented helpers to the Vector prototype that delegate to VectorApi
+Object.assign(Vector.prototype, {
+    // mutating API functions:
+    makeZero: function() { VectorApi.makeZero(this); return this; },
+    assign: function(source) { VectorApi.assign(this, source); return this; },
+    negEq: function() { VectorApi.negEq(this); return this; },
+    absEq: function() { VectorApi.absEq(this); return this; },
 
-    // non-mutating helpers
-    clone: function() { const res = new CubicBezier(); res.assign(this); return res; },
-    toString : function() { return `[${this.start} ${this.c1} ${this.c2} ${this.end}]`; },
-    reversed: function() { return this.clone().reverse(); },
-    transformed: function(xf) { return this.clone().transform(xf); }
+    // non-mutating API functions:
+    reverse: function() { return VectorApi.reverse(this); },
+    dot: function(other) { return VectorApi.dot(this, other); },
+    cross: function(other) { return VectorApi.cross(this, other); },
+    normalise: function() { return VectorApi.normalise(this); },
+    scale: function(factor) { return VectorApi.scale(this, factor); },
+    add: function(other) { return VectorApi.add(this, other); },
+    subtract: function(other) { return VectorApi.subtract(this, other); },
+    rotate: function(rads) { return VectorApi.rotate(this, rads); },
+    transform: function(xf) { return VectorApi.transform(this, xf); },
 });
 
-Object.defineProperties(CubicBezier.prototype, {
-    length: { get() { return CubicBezierApi.getLength(this); } },
-    boundingBox: { get() { return CubicBezierApi.getBoundingBox(this); } },
-    controlBox: { get() { return CubicBezierApi.getControlBox(this); } },
+// Helper properties on Vectors
+Object.defineProperties(Vector.prototype, {
+    neg: { get() { return VectorApi.getNeg(this); } },
+    abs: { get() { return VectorApi.getAbs(this); } },
+    angle: { get() { return VectorApi.getAngle(this); } },
+    angleDeg: { get() { return VectorApi.getAngleDeg(this); } },
+    spangle: { get() { return VectorApi.getSpangle(this); } },
+    length: { get() { return VectorApi.length(this); } },
+    lengthSquared: { get() { return VectorApi.lengthSquared(this); } },
 });
 
-CubicBezier.createLine = function(ptA, ptB) { return new CubicBezier().makeLine(ptA, ptB); };
+// "Static" Vector helpers
+Object.defineProperty(Vector, 'zero', { get() { return new Vector(0, 0); } });
+
+
+// Native struct templates can enumerate their instance properties in reverse
+// registration order (y before x, etc.), so manually set the display order
+// used by inspect.js via its custom-inspection hook.
+const inspectCustom = Symbol.for('affinity.inspect.custom');
+function setInspectPropertyOrder(proto, name, keys) {
+    proto[inspectCustom] = function(depth, options, inspect) {
+        const obj = {};
+        for (const key of keys)
+            obj[key] = this[key];
+        return (name ? name + ' ' : '') + inspect(obj, options);
+    };
+}
+
+setInspectPropertyOrder(Point.prototype, 'Point', ['x', 'y']);
+setInspectPropertyOrder(Vector.prototype, 'Vector', ['x', 'y']);
+setInspectPropertyOrder(Size.prototype, 'Size', ['width', 'height']);
+setInspectPropertyOrder(Rectangle.prototype, 'Rectangle', ['x', 'y', 'width', 'height']);
+setInspectPropertyOrder(CubicBezier.prototype, 'CubicBezier', ['start', 'c1', 'c2', 'end']);
+setInspectPropertyOrder(TransformData.prototype, 'TransformData',
+    ['scaleX', 'scaleY', 'shear', 'rotation', 'translateX', 'translateY']);
+setInspectPropertyOrder(MeshSize.prototype, 'MeshSize', ['xSize', 'ySize']);
+setInspectPropertyOrder(CurveCornerData.prototype, 'CurveCornerData', ['type', 'radius']);
+setInspectPropertyOrder(CurveNode.prototype, 'CurveNode', ['position', 'style', 'type']);
+
+// The point-like values returned by CubicBezier and CurveNode properties are
+// internal proxy types; their prototypes are only reachable via an instance.
+try {
+    setInspectPropertyOrder(Object.getPrototypeOf(new CubicBezier().start), '', ['x', 'y']);
+    setInspectPropertyOrder(Object.getPrototypeOf(new CurveNode().position), 'CurveNodePosition', ['x', 'y']);
+}
+catch (err) {
+    // tolerate template changes; inspect falls back to default formatting
+}
+
+Object.assign(Vector, {
+    withAngle: function(rads) {
+        if (!Number.isFinite(rads))
+            throw new RangeError("invalid angle");
+        return new Vector(Math.cos(rads), Math.sin(rads));
+    },
+    withAngleDeg: function(deg) {
+        if (!Number.isFinite(deg))
+            throw new RangeError("invalid angle");
+        const rads = deg * Math.PI / 180;
+        return new Vector(Math.cos(rads), Math.sin(rads));
+    },
+    withSpangle: function(spangle) {
+        if (!Number.isFinite(spangle))
+            throw new RangeError("invalid angle");
+        const rads = spangle * 2 * Math.PI;
+        return new Vector(Math.cos(rads), Math.sin(rads));
+    },
+});
 
 
 // sorting function for numbers
@@ -150,18 +317,18 @@ function rangesIntersect(a1, a2, b1, b2) {
 
 // returns the intersection of two ranges, or nothing if the ranges don't intersect
 function intersectRanges(a1, a2, b1, b2) {
-	let a = [a1, a2].sort(numberComp)
+    let a = [a1, a2].sort(numberComp)
     let b = [b1, b2].sort(numberComp);
-			
+            
     if (a[1] < b[0] || b[1] < a[0]) {
-    	return;
+        return;
     }
     
     let res =
     [
-   		Math.max(a[0], b[0]),
-    	Math.min(a[1], b[1])
-   	];
+        Math.max(a[0], b[0]),
+        Math.min(a[1], b[1])
+    ];
     return res;
 }
 
@@ -175,34 +342,34 @@ function rectsIntersect(rc1, rc2) {
 
 // returns the intersection of two rectangles, or nothing if the rectangles don't intersect
 function intersectRects(rc1, rc2) {
-	let a = intersectRanges(rc1.x, rc1.x + rc1.width, rc2.x, rc2.x + rc2.width);
-	if (a) {
-		let b = intersectRanges(rc1.y, rc1.y + rc1.height, rc2.y, rc2.y + rc2.height);
-		if (b) {
-			let res = new Rectangle(
-				a[0],
-				b[0],
-				a[1] - a[0],
-				b[1] - b[0],
-			);
-			return res;
-		}
-	}
+    let a = intersectRanges(rc1.x, rc1.x + rc1.width, rc2.x, rc2.x + rc2.width);
+    if (a) {
+        let b = intersectRanges(rc1.y, rc1.y + rc1.height, rc2.y, rc2.y + rc2.height);
+        if (b) {
+            let res = new Rectangle(
+                a[0],
+                b[0],
+                a[1] - a[0],
+                b[1] - b[0],
+            );
+            return res;
+        }
+    }
 }
 
 function unionRanges(a1, a2, b1, b2) {
-	let res = 
-	[
-		Math.min(a1, b1),
-		Math.max(a2, b2)
-	];
-	return res;
+    let res = 
+    [
+        Math.min(a1, b1),
+        Math.max(a2, b2)
+    ];
+    return res;
 }
 
 function unionRects(rc1, rc2) {
-	const xs = unionRanges(rc1.x, rc1.x + rc1.width, rc2.x, rc2.x + rc2.width);
-	const ys = unionRanges(rc1.y, rc1.y + rc1.height, rc2.y, rc2.y + rc2.height);
-	return new Rectangle(xs[0], ys[0], xs[1] - xs[0], ys[1] - ys[0]);
+    const xs = unionRanges(rc1.x, rc1.x + rc1.width, rc2.x, rc2.x + rc2.width);
+    const ys = unionRanges(rc1.y, rc1.y + rc1.height, rc2.y, rc2.y + rc2.height);
+    return new Rectangle(xs[0], ys[0], xs[1] - xs[0], ys[1] - ys[0]);
 }
 
 // returns true IFF a value is within a range
@@ -218,84 +385,84 @@ function pointInRect(rc, pt) {
 
 
 class CurveBuilder extends HandleObject {
-	constructor(handle) {
-		if (handle === undefined)
-			super(CurveBuilderApi.create());
-		else
-			super(handle);
-	}
+    constructor(handle) {
+        if (handle === undefined)
+            super(CurveBuilderApi.create());
+        else
+            super(handle);
+    }
 
-	static create() {
-		return new CurveBuilder(CurveBuilderApi.create());
-	}
+    static create() {
+        return new CurveBuilder(CurveBuilderApi.create());
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'CurveBuilder';
-	}
+    get [Symbol.toStringTag]() {
+        return 'CurveBuilder';
+    }
 
-	clone() {
-		return new CurveBuilder(CurveBuilderApi.clone(this.handle));
-	}
+    clone() {
+        return new CurveBuilder(CurveBuilderApi.clone(this.handle));
+    }
 
-	begin(point) {
-		CurveBuilderApi.begin(this.handle, point);
-		return this;
-	}
+    begin(point) {
+        CurveBuilderApi.begin(this.handle, point);
+        return this;
+    }
 
-	beginXY(x, y) {
-		CurveBuilderApi.begin(this.handle, { x:x, y:y });
-		return this;
-	}
+    beginXY(x, y) {
+        CurveBuilderApi.begin(this.handle, { x:x, y:y });
+        return this;
+    }
 
-	lineTo(point) {
-		CurveBuilderApi.lineTo(this.handle, point);
-		return this;
-	}
+    lineTo(point) {
+        CurveBuilderApi.lineTo(this.handle, point);
+        return this;
+    }
 
-	lineToXY(x, y) {
-		CurveBuilderApi.lineTo(this.handle, { x:x, y:y });
-		return this;
-	}
+    lineToXY(x, y) {
+        CurveBuilderApi.lineTo(this.handle, { x:x, y:y });
+        return this;
+    }
 
-	lineRelative(vector) {
-		CurveBuilderApi.lineRelative(this.handle, vector);
-		return this;
-	}
+    lineRelative(vector) {
+        CurveBuilderApi.lineRelative(this.handle, vector);
+        return this;
+    }
 
-	lineRelativeXY(dx, dy) {
-		CurveBuilderApi.lineRelative(this.handle, { x:dx, y:dy });
-		return this;
-	}
+    lineRelativeXY(dx, dy) {
+        CurveBuilderApi.lineRelative(this.handle, { x:dx, y:dy });
+        return this;
+    }
 
-	close() {
-		CurveBuilderApi.close(this.handle);
-		return this;
-	}
+    close() {
+        CurveBuilderApi.close(this.handle);
+        return this;
+    }
 
-	createCurve() {
-		const curveHandle = CurveBuilderApi.createCurve(this.handle);
-		return new Curve(curveHandle);
-	}
+    createCurve() {
+        const curveHandle = CurveBuilderApi.createCurve(this.handle);
+        return new Curve(curveHandle);
+    }
 
-	transform(xf) {
-		CurveBuilderApi.transform(this.handle, xf);
-		return this;
-	}
+    transform(xf) {
+        CurveBuilderApi.transform(this.handle, xf);
+        return this;
+    }
 
-	translate(dx, dy) {
-		return this.transform(Transform.createTranslate(dx, dy));
-	}
+    translate(dx, dy) {
+        return this.transform(Transform.createTranslate(dx, dy));
+    }
 
-	rotate(angle) {
-		return this.transform(Transform.createRotate(angle));
-	}
+    rotate(angle) {
+        return this.transform(Transform.createRotate(angle));
+    }
 
-	scale(x, y) {
-		if (y === undefined) {
-			y = x;
-		}
-		return this.transform(Transform.createScale(x, y));
-	}
+    scale(x, y) {
+        if (y === undefined) {
+            y = x;
+        }
+        return this.transform(Transform.createScale(x, y));
+    }
     
     versineTo(point, versine) {
         CurveBuilderApi.versineTo(this.handle, point, versine);
@@ -856,47 +1023,47 @@ class PolyPolyCurvePolyCurves extends HandleObject {
 
 
 class TransformBuilder {
-	#transform;
-	
-	constructor() {
-		this.#transform = Transform.createIdentity();
-	}
-	
+    #transform;
+    
+    constructor() {
+        this.#transform = Transform.createIdentity();
+    }
+    
     translate(xy) {
-		return this.translateXY(xy.x, xy.y);
-	}
+        return this.translateXY(xy.x, xy.y);
+    }
 
-	translateXY(x, y) {
-		this.#transform = Transform.createTranslate(x, y).multiply(this.#transform);
-		return this;
-	}
-	
-	scale(xy) {
-		return this.scaleXY(xy.x, xy.y);
-	}
+    translateXY(x, y) {
+        this.#transform = Transform.createTranslate(x, y).multiply(this.#transform);
+        return this;
+    }
+    
+    scale(xy) {
+        return this.scaleXY(xy.x, xy.y);
+    }
 
     scaleXY(x, y) {
-		this.#transform = Transform.createScale(x, y).multiply(this.#transform);
-		return this;
-	}
-	
-	rotate(rads) {
-		this.#transform = Transform.createRotate(rads).multiply(this.#transform);
-		return this;
-	}
-	
-	shear(xy) {
-		return this.shearXY(xy.x, xy.y);
-	}
+        this.#transform = Transform.createScale(x, y).multiply(this.#transform);
+        return this;
+    }
+    
+    rotate(rads) {
+        this.#transform = Transform.createRotate(rads).multiply(this.#transform);
+        return this;
+    }
+    
+    shear(xy) {
+        return this.shearXY(xy.x, xy.y);
+    }
 
     shearXY(x, y) {
-		this.#transform = Transform.createShear(x, y).multiply(this.#transform);
-		return this;
-	}
-	
-	get transform() {
-		return this.#transform;
-	}
+        this.#transform = Transform.createShear(x, y).multiply(this.#transform);
+        return this;
+    }
+    
+    get transform() {
+        return this.#transform;
+    }
 }
 
 class Spline extends HandleObject {
@@ -982,6 +1149,57 @@ class Spline extends HandleObject {
         for (let i = 0; i < num; i++) {
             yield this.getPoint(i);
         }
+    }
+}
+
+class Mesh extends HandleObject {
+
+    get [Symbol.toStringTag]() {
+        return 'Mesh';
+    }
+
+    constructor(handle) {
+        super(handle);
+    }
+
+    clone() {
+        return new Mesh(MeshApi.cloneAsMesh(this.handle));
+    }
+    
+    get size() {
+        return MeshApi.getSize(this.handle);
+    }
+    
+    getNodePosition(xIndex, yIndex) {
+        return MeshApi.getNodePosition(this.handle, xIndex, yIndex);
+    }
+
+    setNodePosition(xIndex, yIndex, point) {
+        return MeshApi.setNodePosition(this.handle, xIndex, yIndex, point);
+    }
+
+    getNodeStyle(xIndex, yIndex) {
+        return MeshApi.getNodeStyle(this.handle, xIndex, yIndex);
+    }
+
+    setNodeStyle(xIndex, yIndex, style) {
+        return MeshApi.setNodeStyle(this.handle, xIndex, yIndex, style);
+    }
+
+    insertSpline(isVertical, index, param) {
+        return MeshApi.insertSpline(this.handle, isVertical, index, param);
+    }
+
+    deleteSpline(isVertical, index) {
+        return MeshApi.deleteSpline(this.handle, isVertical, index);
+    }
+
+    getCurveNodePosition(xIndex, yIndex, direction) {
+        return MeshApi.getCurveNodePosition(this.handle, xIndex, yIndex, direction);
+    }
+
+    setCurveNodePosition(xIndex, yIndex, direction, point) {
+        return MeshApi.setCurveNodePosition(this.handle, xIndex, yIndex, direction, point);
     }
 }
 
@@ -1102,7 +1320,9 @@ module.exports.unionRanges = unionRanges;
 module.exports.unionRects = unionRects;
 module.exports.valueInRange = valueInRange;
 
+module.exports.BoundingBox = BoundingBox;
 module.exports.CubicBezier = CubicBezier;
+module.exports.CubicBezierPair = CubicBezierPair;
 module.exports.Curve = Curve;
 module.exports.CurveBuilder = CurveBuilder;
 module.exports.CurveCornerData = CurveCornerData;
@@ -1110,14 +1330,21 @@ module.exports.CurveCornerType = CurveCornerType;
 module.exports.CurveNode = CurveNode;
 module.exports.CurveNodeStyle = CurveNodeStyle;
 module.exports.CurveNodeType = CurveNodeType;
+module.exports.CurvePair = CurvePair;
+module.exports.Endpoints = Endpoints;
+module.exports.Mesh = Mesh;
+module.exports.MeshDirection = MeshDirection;
+module.exports.MeshSize = MeshSize;
 module.exports.Point = Point;
+module.exports.PointMinMax = PointMinMax;
 module.exports.PolyCurve = PolyCurve;
 module.exports.PolyPolyCurve = PolyPolyCurve;
 module.exports.Polygon = Polygon;
 module.exports.Rectangle = Rectangle;
+module.exports.ShapeTrapezoidPositions = ShapeTrapezoidPositions;
 module.exports.Size = Size;
-module.exports.SizeInt = SizeInt;
 module.exports.Spline = Spline;
+module.exports.SplineFindPointResult = SplineFindPointResult;
 module.exports.SplineProfile = SplineProfile;
 module.exports.Transform = Transform;
 module.exports.TransformData = TransformData;

@@ -1,9 +1,9 @@
 'use strict';
 
-const { TestUtils } = require("/tests/testUtils");
-const { DocumentCommand } = require("/commands.js");
+const { TestUtils } = require('/tests/testUtils.js');
+const { DocumentCommand } = require('/commands.js');
 
-const { sleep } = require("affinity:timers");
+const { sleep } = require('affinity:timers');
 
 function runTests() {
     let doc = TestUtils.getFile("/TextTest.afdesign");

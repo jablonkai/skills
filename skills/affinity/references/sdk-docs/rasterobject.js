@@ -1,7 +1,7 @@
 'use strict';
 
-const { RasterExtendType, RasterFormat, RasterIntent, RasterObjectApi, RasterObjectType, RasterResamplerType } = require('affinity:raster');
-const { HandleObject } = require('./handleobject.js');
+const { NodeRenderingEngineOptionsApi, RasterExtendType, RasterFormat, RasterIntent, RasterObjectApi, RasterObjectType, RasterResamplerType } = require('affinity:raster');
+const { HandleObject } = require('/handleobject.js');
 
 function createTypedRasterObject(handle) {
     if (handle == null)
@@ -59,14 +59,14 @@ class RasterObject extends HandleObject {
     copyTo(dest, destRect, srcX, srcY) {
         return RasterObjectApi.copyTo(this.handle, dest.handle, destRect, srcX, srcY);
     }
-	
-	clone() {
-		return new RasterObject(RasterObjectApi.clone(this.handle));
-	}
-	
-	cloneEmpty() {
-		return new RasterObject(RasterObjectApi.cloneEmpty(this.handle));
-	}
+    
+    clone() {
+        return new RasterObject(RasterObjectApi.clone(this.handle));
+    }
+    
+    cloneEmpty() {
+        return new RasterObject(RasterObjectApi.cloneEmpty(this.handle));
+    }
 }
 
 class Bitmap extends RasterObject {
@@ -118,32 +118,138 @@ class PixelBuffer extends RasterObject {
     }
 }
 
+class NodeRenderingEngineOptions extends HandleObject {
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new NodeRenderingEngineOptions(). Use NodeRenderingEngineOptions.create() instead.");
+            super(NodeRenderingEngineOptionsApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'NodeRenderingEngineOptions';
+    }
+
+    static create() {
+        return new NodeRenderingEngineOptions(NodeRenderingEngineOptionsApi.create());
+    }
+
+    clone() {
+        return new NodeRenderingEngineOptions(NodeRenderingEngineOptionsApi.clone(this.handle));
+    }
+
+    get downResamplerType() {
+        return NodeRenderingEngineOptionsApi.getDownResamplerType(this.handle);
+    }
+
+    set downResamplerType(value) {
+        NodeRenderingEngineOptionsApi.setDownResamplerType(this.handle, value);
+    }
+
+    get upResamplerType() {
+        return NodeRenderingEngineOptionsApi.getUpResamplerType(this.handle);
+    }
+
+    set upResamplerType(value) {
+        NodeRenderingEngineOptionsApi.setUpResamplerType(this.handle, value);
+    }
+
+    get isPerfectClipping() {
+        return NodeRenderingEngineOptionsApi.getIsPerfectClipping(this.handle);
+    }
+
+    set isPerfectClipping(value) {
+        NodeRenderingEngineOptionsApi.setIsPerfectClipping(this.handle, value);
+    }
+
+    get antialias() {
+        return NodeRenderingEngineOptionsApi.getAntialias(this.handle);
+    }
+
+    set antialias(value) {
+        NodeRenderingEngineOptionsApi.setAntialias(this.handle, value);
+    }
+
+    get ditherGradients() {
+        return NodeRenderingEngineOptionsApi.getDitherGradients(this.handle);
+    }
+
+    set ditherGradients(value) {
+        NodeRenderingEngineOptionsApi.setDitherGradients(this.handle, value);
+    }
+
+    get isMaskRenderingMode() {
+        return NodeRenderingEngineOptionsApi.getIsMaskRenderingMode(this.handle);
+    }
+
+    set isMaskRenderingMode(value) {
+        NodeRenderingEngineOptionsApi.setIsMaskRenderingMode(this.handle, value);
+    }
+
+    get clipToSpread() {
+        return NodeRenderingEngineOptionsApi.getClipToSpread(this.handle);
+    }
+
+    set clipToSpread(value) {
+        NodeRenderingEngineOptionsApi.setClipToSpread(this.handle, value);
+    }
+
+    get allowDegradedBitmaps() {
+        return NodeRenderingEngineOptionsApi.getAllowDegradedBitmaps(this.handle);
+    }
+
+    set allowDegradedBitmaps(value) {
+        NodeRenderingEngineOptionsApi.setAllowDegradedBitmaps(this.handle, value);
+    }
+
+    get isIsolatedRendering() {
+        return NodeRenderingEngineOptionsApi.getIsIsolatedRendering(this.handle);
+    }
+
+    set isIsolatedRendering(value) {
+        NodeRenderingEngineOptionsApi.setIsIsolatedRendering(this.handle, value);
+    }
+
+    get drawBackground() {
+        return NodeRenderingEngineOptionsApi.getDrawBackground(this.handle);
+    }
+
+    set drawBackground(value) {
+        NodeRenderingEngineOptionsApi.setDrawBackground(this.handle, value);
+    }
+}
+
 class NodeRenderingEngine extends RasterObject {
 
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'NodeRenderingEngine';
-	}
+    get [Symbol.toStringTag]() {
+        return 'NodeRenderingEngine';
+    }
 
-	static createDefault(node, format) {
-		return new NodeRenderingEngine(RasterObjectApi.createDefaultNodeRenderingEngine(node.handle, format));
-	}
+    static createDefault(node, format) {
+        return new NodeRenderingEngine(RasterObjectApi.createDefaultNodeRenderingEngine(node.handle, format));
+    }
 
-	static create(node, format, options) {
-		return new NodeRenderingEngine(RasterObjectApi.createNodeRenderingEngine(node.handle, format, options));
-	}
+    static create(node, format, options) {
+        return new NodeRenderingEngine(RasterObjectApi.createNodeRenderingEngine(node.handle, format, options.handle));
+    }
 }
 
 module.exports.createTypedRasterObject = createTypedRasterObject;
-module.exports.RasterObject = RasterObject;
+
 module.exports.Bitmap = Bitmap;
-module.exports.PixelBuffer = PixelBuffer;
 module.exports.NodeRenderingEngine = NodeRenderingEngine;
+module.exports.NodeRenderingEngineOptions = NodeRenderingEngineOptions;
+module.exports.PixelBuffer = PixelBuffer;
 module.exports.RasterExtendType = RasterExtendType;
 module.exports.RasterFormat = RasterFormat;
 module.exports.RasterIntent = RasterIntent;
+module.exports.RasterObject = RasterObject;
 module.exports.RasterObjectType = RasterObjectType;
 module.exports.RasterResamplerType = RasterResamplerType;

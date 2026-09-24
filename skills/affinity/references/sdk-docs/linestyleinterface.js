@@ -2,12 +2,12 @@
 
 const { EnumerationResult } = require('affinity:common');
 const { ContentType, LineStyleInterfaceApi } = require('affinity:dom');
-const { FillDescriptor } = require('./fills.js');
-const { HandleObject } = require('./handleobject.js');
-const { LineStyleDescriptor} = require('./linestyle.js');
+const { FillDescriptor } = require('/fills.js');
+const { HandleObject } = require('/handleobject.js');
+const { LineStyleDescriptor} = require('/linestyle.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 // Transforms:
 require('/geometry.js');

@@ -2,12 +2,12 @@
 
 const { EnumerationResult } = require('affinity:common');
 const { BrushFillInterfaceApi, ContentType } = require('affinity:dom');
-const { FillDescriptor } = require('./fills.js');
-const { HandleObject } = require('./handleobject.js');
+const { FillDescriptor } = require('/fills.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
-const SelectionsModule = require('./selections.js');
+const NodesModule = require('/nodes.js');
+const SelectionsModule = require('/selections.js');
 
 // monkey patches:
 require('/geometry.js');

@@ -23,93 +23,98 @@ const {
     TransparencySubSelectionApi
 } = require('affinity:dom');
 const { TableAxis } = require('affinity:story');
-const { Collection, SpanCollection } = require("./collection.js");
-const { HandleObject } = require("./handleobject.js");
+const { Collection, SpanCollection } = require('/collection.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require("./nodes.js");
+const NodesModule = require('/nodes.js');
+
+// monkey patches:
+require('/geometry.js');
+require('/story.js');
+
 function createTypedSubSelection(subSelectionHandle) {
     if (subSelectionHandle == null)
         return null;
 
-	switch (SubSelectionApi.getSubSelectionType(subSelectionHandle).value) {
+    switch (SubSelectionApi.getSubSelectionType(subSelectionHandle).value) {
         case SubSelectionType.CurveEdge.value:
             return new CurveEdgeSubSelection(CurveEdgeSubSelectionApi.fromSubSelection(subSelectionHandle));
-		case SubSelectionType.CurveNode.value:
-		    return new CurveNodeSubSelection(CurveNodeSubSelectionApi.fromSubSelection(subSelectionHandle));
-		case SubSelectionType.Fill.value:
-			return new FillSubSelection(FillSubSelectionApi.fromSubSelection(subSelectionHandle));
+        case SubSelectionType.CurveNode.value:
+            return new CurveNodeSubSelection(CurveNodeSubSelectionApi.fromSubSelection(subSelectionHandle));
+        case SubSelectionType.Fill.value:
+            return new FillSubSelection(FillSubSelectionApi.fromSubSelection(subSelectionHandle));
         case SubSelectionType.FillMesh.value:
             return new FillMeshSubSelection(FillMeshSubSelectionApi.fromSubSelection(subSelectionHandle));
-		case SubSelectionType.LineFill.value:
-			return new LineFillSubSelection(LineFillSubSelectionApi.fromSubSelection(subSelectionHandle));
+        case SubSelectionType.LineFill.value:
+            return new LineFillSubSelection(LineFillSubSelectionApi.fromSubSelection(subSelectionHandle));
         case SubSelectionType.LineFillMesh.value:
             return new LineFillMeshSubSelection(LineFillMeshSubSelectionApi.fromSubSelection(subSelectionHandle));
         case SubSelectionType.Table.value:
             return new TableSubSelection(TableSubSelectionApi.fromSubSelection(subSelectionHandle));
-		case SubSelectionType.Text.value:
-			return new TextSelection(TextSelectionApi.fromSubSelection(subSelectionHandle));
-		case SubSelectionType.Transparency.value:
-			return new TransparencySubSelection(TransparencySubSelectionApi.fromSubSelection(subSelectionHandle));
+        case SubSelectionType.Text.value:
+            return new TextSelection(TextSelectionApi.fromSubSelection(subSelectionHandle));
+        case SubSelectionType.Transparency.value:
+            return new TransparencySubSelection(TransparencySubSelectionApi.fromSubSelection(subSelectionHandle));
         case SubSelectionType.TransparencyMesh.value:
             return new TransparencyMeshSubSelection(TransparencyMeshSubSelectionApi.fromSubSelection(subSelectionHandle));
-		default:
-			return new SubSelection(subSelectionHandle);
-	}
+        default:
+            return new SubSelection(subSelectionHandle);
+    }
 }
 
 class SelectionItem extends HandleObject {
-	
-	constructor(handle) {
-		super(handle);
-	}
+    
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'SelectionItem';
-	}
-	
-	get isSelectionItem() {
-		return true;
-	}
+    get [Symbol.toStringTag]() {
+        return 'SelectionItem';
+    }
+    
+    get isSelectionItem() {
+        return true;
+    }
 
-	get node() {
-		const nodeHandle = SelectionItemApi.getNode(this.handle);
-		if (!nodeHandle)
-			return null;
-		return NodesModule.createTypedNode(nodeHandle);
-	}
+    get node() {
+        const nodeHandle = SelectionItemApi.getNode(this.handle);
+        if (!nodeHandle)
+            return null;
+        return NodesModule.createTypedNode(nodeHandle);
+    }
 
-	getSubSelection(index) {
-		return createTypedSubSelection(SelectionItemApi.getSubSelection(this.handle, index));
-	}
+    getSubSelection(index) {
+        return createTypedSubSelection(SelectionItemApi.getSubSelection(this.handle, index));
+    }
 
-	getSubSelectionOfType(subSelectionType) {
-		const handle = SelectionItemApi.getSubSelectionOfType(this.handle, subSelectionType);
-		return handle ? createTypedSubSelection(handle) : handle;
-	}
+    getSubSelectionOfType(subSelectionType) {
+        const handle = SelectionItemApi.getSubSelectionOfType(this.handle, subSelectionType);
+        return handle ? createTypedSubSelection(handle) : handle;
+    }
 
-	get subSelectionCount() {
-		return SelectionItemApi.getSubSelectionCount(this.handle);
-	}
+    get subSelectionCount() {
+        return SelectionItemApi.getSubSelectionCount(this.handle);
+    }
 
-	enumerateSubSelections(callback) {
-		if (typeof callback === 'function') {
-			function wrapped(subSelectionHandle) {
-				return callback(createTypedSubSelection(subSelectionHandle));
-			}
-			return SelectionItemApi.enumerateSubSelections(this.handle, wrapped);
-		}
-		return SelectionItemApi.enumerateSubSelections(this.handle, callback);
-	}
+    enumerateSubSelections(callback) {
+        if (typeof callback === 'function') {
+            function wrapped(subSelectionHandle) {
+                return callback(createTypedSubSelection(subSelectionHandle));
+            }
+            return SelectionItemApi.enumerateSubSelections(this.handle, wrapped);
+        }
+        return SelectionItemApi.enumerateSubSelections(this.handle, callback);
+    }
 
-	get subSelections() {
-		const res = [];
+    get subSelections() {
+        const res = [];
         this.enumerateSubSelections(subSelection => {
             res.push(subSelection);
             return EnumerationResult.Continue;
         });
         return res;
-	}
+    }
 }
 
 class Selection extends HandleObject {
@@ -133,13 +138,21 @@ class Selection extends HandleObject {
         return new SpanCollection(this);
     }
 
-	get nodes() {
-		return this.items.map(item => item.node).filter(node => node);
-	}
+    get nodes() {
+        return this.items.map(item => item.node).filter(node => node);
+    }
 
-	get firstNode() {
-		return this.nodes.first;
-	}
+    get firstNode() {
+        return this.nodes.first;
+    }
+
+    get hasKeyObject() {
+        return SelectionApi.getHasKeyObject(this.handle);
+    }
+
+    set hasKeyObject(hasKeyObject) {
+        SelectionApi.setHasKeyObject(this.handle, hasKeyObject);
+    }
     
     add(nodeOrItem) {
         if (nodeOrItem.isNode) {
@@ -153,63 +166,63 @@ class Selection extends HandleObject {
         }
     }
 
-	addNode(node) {
-		return SelectionApi.addNode(this.handle, node.handle);
-	}
+    addNode(node) {
+        return SelectionApi.addNode(this.handle, node.handle);
+    }
     
     addItem(item) {
         return SelectionApi.addItem(this.handle, item.handle);
     }
-	
-	addSelectable(selectable) {
-		return SelectionApi.addSelectable(this.handle, selectable.handle);
-	}
-	
-	addSubSelectionForNode(node, subSelection) {
-		return SelectionApi.addSubSelectionForNode(this.handle, node.handle, subSelection.handle);
-	}
-	
-	get isSelection() {
-		return true;
-	}
+    
+    addSelectable(selectable) {
+        return SelectionApi.addSelectable(this.handle, selectable.handle);
+    }
+    
+    addSubSelectionForNode(node, subSelection) {
+        return SelectionApi.addSubSelectionForNode(this.handle, node.handle, subSelection.handle);
+    }
+    
+    get isSelection() {
+        return true;
+    }
 
-	getFirstSubSelectionOfType(subSelectionType) {
-		const handle = SelectionApi.getFirstSubSelectionOfType(this.handle, subSelectionType);
-		return handle ? createTypedSubSelection(handle) : null;
-	}
+    getFirstSubSelectionOfType(subSelectionType) {
+        const handle = SelectionApi.getFirstSubSelectionOfType(this.handle, subSelectionType);
+        return handle ? createTypedSubSelection(handle) : null;
+    }
 
-	removeNested() {
-		return SelectionApi.removeNested(this.handle);
-	}
+    removeNested() {
+        return SelectionApi.removeNested(this.handle);
+    }
 
-	containsItem(item) {
-		return SelectionApi.containsItem(this.handle, item.handle);
-	}
-	
-	static create(document, items, removeNested) {
-		let sel = Selection.createEmpty(document);
-		if (items != null) {
-			if (items.isNode || items.isSelectionItem || items.isSelectable) {
-				sel.add(items);
-			}
-			else if (items[Symbol.iterator]) {
-				for (const item of items) {
-					sel.add(item);
-				}
-			}
-			if (removeNested)
-				sel.removeNested();
-		}
-		return sel;
-	}
+    containsItem(item) {
+        return SelectionApi.containsItem(this.handle, item.handle);
+    }
+    
+    static create(document, items, removeNested) {
+        let sel = Selection.createEmpty(document);
+        if (items != null) {
+            if (items.isNode || items.isSelectionItem || items.isSelectable) {
+                sel.add(items);
+            }
+            else if (items[Symbol.iterator]) {
+                for (const item of items) {
+                    sel.add(item);
+                }
+            }
+            if (removeNested)
+                sel.removeNested();
+        }
+        return sel;
+    }
 
-	static createEmpty(document) {
-		return new Selection(SelectionApi.createEmpty(document.handle));
-	}
+    static createEmpty(document) {
+        return new Selection(SelectionApi.createEmpty(document.handle));
+    }
 
-	clear() {
-		SelectionApi.clear(this.handle);
-	}
+    clear() {
+        SelectionApi.clear(this.handle);
+    }
 }
 
 class SubSelection extends HandleObject {
@@ -225,103 +238,103 @@ class SubSelection extends HandleObject {
         return true;
     }
 
-	get subSelectionType() {
-		return SubSelectionApi.getSubSelectionType(this.handle);
-	}
+    get subSelectionType() {
+        return SubSelectionApi.getSubSelectionType(this.handle);
+    }
 }
 
 class CurveNodeSubSelection extends SubSelection {
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'CurveNodeSubSelection';
-	}
+    get [Symbol.toStringTag]() {
+        return 'CurveNodeSubSelection';
+    }
 
-	static create(items) {
-		if (items != null) {
-			if (items instanceof Collection)
-				items = items.toArray();
-			else if (!(items instanceof Array))
-				items = [items];
-		}
-		return new CurveNodeSubSelection(CurveNodeSubSelectionApi.create(items));
-	}
-	
-	get isEmpty() {
-		return CurveNodeSubSelectionApi.isEmpty(this.handle);
-	}
+    static create(items) {
+        if (items != null) {
+            if (items instanceof Collection)
+                items = items.toArray();
+            else if (!(items instanceof Array))
+                items = [items];
+        }
+        return new CurveNodeSubSelection(CurveNodeSubSelectionApi.create(items));
+    }
+    
+    get isEmpty() {
+        return CurveNodeSubSelectionApi.isEmpty(this.handle);
+    }
 
-	get itemCount() {
-		return CurveNodeSubSelectionApi.getItemCount(this.handle);
-	}
+    get itemCount() {
+        return CurveNodeSubSelectionApi.getItemCount(this.handle);
+    }
 
-	getItem(index) {
-		return CurveNodeSubSelectionApi.getItem(this.handle, index);
-	}
+    getItem(index) {
+        return CurveNodeSubSelectionApi.getItem(this.handle, index);
+    }
 
-	enumerateItems(callback) {
-		return CurveNodeSubSelectionApi.enumerateItems(this.handle, callback);
-	}
+    enumerateItems(callback) {
+        return CurveNodeSubSelectionApi.enumerateItems(this.handle, callback);
+    }
 
-	get items() {
-		let res = [];
+    get items() {
+        let res = [];
         function callback(range) {
             res.push(range);
             return EnumerationResult.Continue;
         }
         this.enumerateItems(callback);
         return res;
-	}
+    }
 
-	enumerateItemsWithCurveID(curveID, callback) {
-		return CurveNodeSubSelectionApi.enumerateItemsWithCurveID(this.handle, curveID, callback);
-	}
+    enumerateItemsWithCurveID(curveID, callback) {
+        return CurveNodeSubSelectionApi.enumerateItemsWithCurveID(this.handle, curveID, callback);
+    }
 
-	getItemsWithCurveID(curveID) {
-		let res = [];
+    getItemsWithCurveID(curveID) {
+        let res = [];
         function callback(range) {
             res.push(range);
             return EnumerationResult.Continue;
         }
         this.enumerateItemsWithCurveID(curveID, callback);
         return res;
-	}
+    }
 
-	cloneAndAddItems(items) {
-		if (items != null) {
-			if (items instanceof Collection)
-				items = items.toArray();
-			else if (!(items instanceof Array))
-				items = [items];
-		}
-		return new CurveNodeSubSelection(CurveNodeSubSelectionApi.cloneAndAddItems(this.handle, items));
-	}
-	
-	cloneAndRemoveItems(items) {
-		if (items != null) {
-			if (items instanceof Collection)
-				items = items.toArray();
-			else if (!(items instanceof Array))
-				items = [items];
-		}
-		return new CurveNodeSubSelection(CurveNodeSubSelectionApi.cloneAndRemoveItems(this.handle, items));
-	}
+    cloneAndAddItems(items) {
+        if (items != null) {
+            if (items instanceof Collection)
+                items = items.toArray();
+            else if (!(items instanceof Array))
+                items = [items];
+        }
+        return new CurveNodeSubSelection(CurveNodeSubSelectionApi.cloneAndAddItems(this.handle, items));
+    }
+    
+    cloneAndRemoveItems(items) {
+        if (items != null) {
+            if (items instanceof Collection)
+                items = items.toArray();
+            else if (!(items instanceof Array))
+                items = [items];
+        }
+        return new CurveNodeSubSelection(CurveNodeSubSelectionApi.cloneAndRemoveItems(this.handle, items));
+    }
 
-	cloneAndRemoveCurves(curveIDs) {
-		if (curveIDs != null) {
-			if (curveIDs instanceof Collection)
+    cloneAndRemoveCurves(curveIDs) {
+        if (curveIDs != null) {
+            if (curveIDs instanceof Collection)
                 curveIDs = curveIDs.toArray();
-			else if (!(curveIDs instanceof Array))
+            else if (!(curveIDs instanceof Array))
                 curveIDs = [curveIDs];
-		}
-		return new CurveNodeSubSelection(CurveNodeSubSelectionApi.cloneAndRemoveCurves(this.handle, curveIDs));
-	}
+        }
+        return new CurveNodeSubSelection(CurveNodeSubSelectionApi.cloneAndRemoveCurves(this.handle, curveIDs));
+    }
 
-	clone() {
-		return new CurveNodeSubSelection(CurveNodeSubSelectionApi.clone(this.handle));
-	}
+    clone() {
+        return new CurveNodeSubSelection(CurveNodeSubSelectionApi.clone(this.handle));
+    }
 }
 
 class CurveEdgeSubSelection extends SubSelection {
@@ -455,33 +468,33 @@ class FillMeshSubSelection extends SubSelection {
 
     static fromSubSelection(subSelection) {
         return new FillMeshSubSelection(FillMeshSubSelectionApi.fromSubSelection(subSelection.handle));
-	}
+    }
 }
 
 class FillSubSelection extends SubSelection {
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'FillSubSelection';
-	}
+    get [Symbol.toStringTag]() {
+        return 'FillSubSelection';
+    }
 
-	get index() {
-		return FillSubSelectionApi.getIndex(this.handle);
-	}
+    get index() {
+        return FillSubSelectionApi.getIndex(this.handle);
+    }
 
-	static fromSubSelection(subSelection) {
-		return new FillSubSelection(FillSubSelectionApi.fromSubSelection(subSelection.handle));
-	}
+    static fromSubSelection(subSelection) {
+        return new FillSubSelection(FillSubSelectionApi.fromSubSelection(subSelection.handle));
+    }
 
-	clone() {
-		return new FillSubSelection(FillSubSelectionApi.clone(this.handle));
-	}
+    clone() {
+        return new FillSubSelection(FillSubSelectionApi.clone(this.handle));
+    }
 
-	cloneAsFillSubSelection() {
-		return new FillSubSelection(FillSubSelectionApi.cloneAsFillSubSelection(this.handle));
-	}
+    cloneAsFillSubSelection() {
+        return new FillSubSelection(FillSubSelectionApi.cloneAsFillSubSelection(this.handle));
+    }
 }
 
 class LineFillMeshSubSelection extends SubSelection {
@@ -525,29 +538,29 @@ class LineFillMeshSubSelection extends SubSelection {
 }
 
 class LineFillSubSelection extends SubSelection {
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'LineFillSubSelection';
-	}
+    get [Symbol.toStringTag]() {
+        return 'LineFillSubSelection';
+    }
 
-	get index() {
-		return LineFillSubSelectionApi.getIndex(this.handle);
-	}
+    get index() {
+        return LineFillSubSelectionApi.getIndex(this.handle);
+    }
 
-	static fromSubSelection(subSelection) {
-		return new LineFillSubSelection(LineFillSubSelectionApi.fromSubSelection(subSelection.handle));
-	}
+    static fromSubSelection(subSelection) {
+        return new LineFillSubSelection(LineFillSubSelectionApi.fromSubSelection(subSelection.handle));
+    }
 
-	clone() {
-		return new LineFillSubSelection(LineFillSubSelectionApi.clone(this.handle));
-	}
+    clone() {
+        return new LineFillSubSelection(LineFillSubSelectionApi.clone(this.handle));
+    }
 
-	cloneAsLineFillSubSelection() {
-		return new LineFillSubSelection(LineFillSubSelectionApi.cloneAsLineFillSubSelection(this.handle));
-	}
+    cloneAsLineFillSubSelection() {
+        return new LineFillSubSelection(LineFillSubSelectionApi.cloneAsLineFillSubSelection(this.handle));
+    }
 }
 
 class TableSubSelection extends SubSelection {
@@ -613,69 +626,69 @@ class TableSubSelection extends SubSelection {
 };
 
 class TextSelection extends SubSelection {
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'TextSelection';
-	}
+    get [Symbol.toStringTag]() {
+        return 'TextSelection';
+    }
 
-	static create(rangesOrNull) {
-		if (rangesOrNull != null) {
-			if (rangesOrNull instanceof Collection)
-				rangesOrNull = rangesOrNull.toArray();
-			else if (!(rangesOrNull instanceof Array))
-				rangesOrNull = [rangesOrNull];
-		}
-		return new TextSelection(TextSelectionApi.create(rangesOrNull));
-	}
-	
-	get isEmpty() {
-		return TextSelectionApi.isEmpty(this.handle);
-	}
+    static create(rangesOrNull) {
+        if (rangesOrNull != null) {
+            if (rangesOrNull instanceof Collection)
+                rangesOrNull = rangesOrNull.toArray();
+            else if (!(rangesOrNull instanceof Array))
+                rangesOrNull = [rangesOrNull];
+        }
+        return new TextSelection(TextSelectionApi.create(rangesOrNull));
+    }
+    
+    get isEmpty() {
+        return TextSelectionApi.isEmpty(this.handle);
+    }
 
-	get hasMarkedText() {
-		return TextSelectionApi.hasMarkedText(this.handle);
-	}
+    get hasMarkedText() {
+        return TextSelectionApi.hasMarkedText(this.handle);
+    }
 
-	get caret() {
-		return TextSelectionApi.getCaret(this.handle);
-	}
+    get caret() {
+        return TextSelectionApi.getCaret(this.handle);
+    }
 
-	get anchor() {
-		return TextSelectionApi.getAnchor(this.handle);
-	}
+    get anchor() {
+        return TextSelectionApi.getAnchor(this.handle);
+    }
 
-	get markedTextBegin() {
-		return TextSelectionApi.getMarkedTextBegin(this.handle);
-	}
+    get markedTextBegin() {
+        return TextSelectionApi.getMarkedTextBegin(this.handle);
+    }
 
-	get markedTextEnd() {
-		return TextSelectionApi.getMarkedTextEnd(this.handle);
-	}
+    get markedTextEnd() {
+        return TextSelectionApi.getMarkedTextEnd(this.handle);
+    }
 
-	get rangeCount() {
-		return TextSelectionApi.getRangeCount(this.handle);
-	}
+    get rangeCount() {
+        return TextSelectionApi.getRangeCount(this.handle);
+    }
 
-	getRange(index) {
-		return TextSelectionApi.getRange(this.handle, index);
-	}
+    getRange(index) {
+        return TextSelectionApi.getRange(this.handle, index);
+    }
 
-	enumerateRanges(callback) {
-		return TextSelectionApi.enumerateRanges(this.handle, callback);
-	}
+    enumerateRanges(callback) {
+        return TextSelectionApi.enumerateRanges(this.handle, callback);
+    }
 
-	get ranges() {
-		let res = [];
+    get ranges() {
+        let res = [];
         function callback(range) {
             res.push(range);
             return EnumerationResult.Continue;
         }
         this.enumerateRanges(callback);
         return res;
-	}
+    }
 };
 
 class TransparencyMeshSubSelection extends SubSelection {
@@ -719,29 +732,29 @@ class TransparencyMeshSubSelection extends SubSelection {
 }
 
 class TransparencySubSelection extends SubSelection {
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'TransparencySubSelection';
-	}
+    get [Symbol.toStringTag]() {
+        return 'TransparencySubSelection';
+    }
 
-	get index() {
-		return TransparencySubSelectionApi.getIndex(this.handle);
-	}
+    get index() {
+        return TransparencySubSelectionApi.getIndex(this.handle);
+    }
 
-	static fromSubSelection(subSelection) {
-		return new TransparencySubSelection(TransparencySubSelectionApi.fromSubSelection(subSelection.handle));
-	}
+    static fromSubSelection(subSelection) {
+        return new TransparencySubSelection(TransparencySubSelectionApi.fromSubSelection(subSelection.handle));
+    }
 
-	clone() {
-		return new TransparencySubSelection(TransparencySubSelectionApi.clone(this.handle));
-	}
+    clone() {
+        return new TransparencySubSelection(TransparencySubSelectionApi.clone(this.handle));
+    }
 
-	cloneAsTransparencySubSelection() {
-		return new TransparencySubSelection(TransparencySubSelectionApi.cloneAsTransparencySubSelection(this.handle));
-	}
+    cloneAsTransparencySubSelection() {
+        return new TransparencySubSelection(TransparencySubSelectionApi.cloneAsTransparencySubSelection(this.handle));
+    }
 }
 
 module.exports.createTypedSubSelection = createTypedSubSelection;

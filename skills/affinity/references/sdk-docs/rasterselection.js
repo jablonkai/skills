@@ -1,7 +1,7 @@
 'use strict';
 
 const { RasterSelectionApi } = require('affinity:dom');
-const { HandleObject } = require("./handleobject.js");
+const { HandleObject } = require('/handleobject.js');
 
 class RasterSelection extends HandleObject {
     constructor(handle) {

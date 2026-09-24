@@ -1,13 +1,13 @@
 'use strict';
 
 const {ErrorCode} = require('affinity:common');
-const {Document} = require("/document");
-const {DocumentPreset, NewDocumentOptions, DocumentPresetType} = require("/document");
-const {DocumentCommand, AddChildNodesCommandBuilder} = require("/commands")
-const {TestUtils} = require("/tests/testUtils");
-const {ShapeNodeDefinition, NodeChildType, ImageNodeDefinition} = require("/nodes");
-const {Selection} = require("/selections");
-const {PixelBuffer, RasterFormat} = require('/rasterobject');
+const {Document} = require('/document.js');
+const {DocumentPreset, NewDocumentOptions, DocumentPresetType} = require('/document.js');
+const {DocumentCommand, AddChildNodesCommandBuilder} = require('/commands.js')
+const {TestUtils} = require('/tests/testUtils.js');
+const {ShapeNodeDefinition, NodeChildType, ImageNodeDefinition} = require('/nodes.js');
+const {Selection} = require('/selections.js');
+const {PixelBuffer, RasterFormat} = require('/rasterobject.js');
 
 function testRasteriseObjects() {
     let doc = TestUtils.getA4Empty();

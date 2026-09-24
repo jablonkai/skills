@@ -2,11 +2,11 @@
 
 const { ShapeInterfaceApi, } = require('affinity:dom');
 const { ShapeType } = require('affinity:geometry');
-const { HandleObject } = require('./handleobject.js');
-const { createTypedShape } = require('./shapes.js');
+const { HandleObject } = require('/handleobject.js');
+const { createTypedShape } = require('/shapes.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 // monkey patches:
 require('/geometry.js');

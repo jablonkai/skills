@@ -2,7 +2,7 @@
 const {
     ColourProfile,
     ColourProfileSet,
-} = require('/colours');
+} = require('/colours.js');
 
 
 function testColourProfileSet() {

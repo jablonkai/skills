@@ -1,11 +1,11 @@
 'use strict';
-const {app} = require('/application');
-const dommodule = require("affinity:dom");
-const {EnumerationResult} = require("affinity:common");
-const {Document, DocumentPromises} = require("/document");
-const {DocumentCommand} = require("/commands");
+const {app} = require('/application.js');
+const dommodule = require('affinity:dom');
+const {EnumerationResult} = require('affinity:common');
+const {Document, DocumentPromises} = require('/document.js');
+const {DocumentCommand} = require('/commands.js');
 
-const {TestUtils} = require('/tests/testUtils');
+const {TestUtils} = require('/tests/testUtils.js');
 
 function printEmbeddedDocumentNodeInfo(embDocNode) {
     console.log("Selected Page Bounding Box Type:");
@@ -78,7 +78,7 @@ function testEmbeddedDocumentWithArtboard() {
 
 function enumLayerVis(lname, vis) {
     console.log(lname, vis);
-	return EnumerationResult.Continue;
+    return EnumerationResult.Continue;
 }
 
 

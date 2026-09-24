@@ -7,8 +7,8 @@ class Collection {
     }
 
     get [Symbol.toStringTag]() {
-		return 'Collection';
-	}
+        return 'Collection';
+    }
 
     get generator() {
         return this.#genFunc;

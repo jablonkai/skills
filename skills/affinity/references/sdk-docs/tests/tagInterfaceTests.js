@@ -1,9 +1,9 @@
 'use strict';
-const {Document} = require('/document');
-const {DocumentCommand, AddChildNodesCommandBuilder, NodeChildType} = require('/commands');
-const {ShapeNodeDefinition} = require('/nodes');
-const {TagInterface, PredefinedTagKey} = require('/tagInterface');
-const {TestUtils} = require("/tests/testUtils");
+const {Document} = require('/document.js');
+const {DocumentCommand, AddChildNodesCommandBuilder, NodeChildType} = require('/commands.js');
+const {ShapeNodeDefinition} = require('/nodes.js');
+const {TagInterface, PredefinedTagKey} = require('/taginterface.js');
+const {TestUtils} = require('/tests/testUtils.js');
 
 function testTagInterface() {
     let doc = TestUtils.newA4Empty();

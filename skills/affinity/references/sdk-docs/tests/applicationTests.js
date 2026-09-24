@@ -1,7 +1,7 @@
 'use strict';
 
-const { app } = require("/application.js");
-const { BuildKind, UiParadigm } = require("affinity:application");
+const { app } = require('/application.js');
+const { BuildKind, UiParadigm } = require('affinity:application');
 
 function runTests() {
     console.assert(typeof app.compileDate === "string");

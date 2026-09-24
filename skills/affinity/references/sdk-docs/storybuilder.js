@@ -2,9 +2,9 @@
 
 const { RasterFormat } = require('affinity:raster');
 const { StoryBuilderApi } = require('affinity:story');
-const { GlyphAtts } = require('./glyphatts.js');
-const { HandleObject } = require('./handleobject.js');
-const { ParagraphAtts } = require('./paragraphatts.js');
+const { GlyphAtts } = require('/glyphatts.js');
+const { HandleObject } = require('/handleobject.js');
+const { ParagraphAtts } = require('/paragraphatts.js');
 
 class StoryBuilder extends HandleObject {
     get [Symbol.toStringTag]() { return 'StoryBuilder'; }

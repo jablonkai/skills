@@ -2,7 +2,7 @@
 const {
     ColourProfile,
     ColourSpaceType
-} = require('/colours');
+} = require('/colours.js');
 
 function testColourProfile() {
     for (let [name, value] of ColourSpaceType.entries) {

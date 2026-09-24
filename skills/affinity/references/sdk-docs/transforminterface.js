@@ -1,10 +1,10 @@
 'use strict';
 
-const { TransformInterfaceApi } = require('affinity:dom');
-const { HandleObject } = require('./handleobject.js');
+const { FocalPoint, TransformInterfaceApi } = require('affinity:dom');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 // monkey patches:
 require('/geometry.js');
@@ -67,4 +67,5 @@ class TransformInterface extends HandleObject {
     }
 }
 
+module.exports.FocalPoint = FocalPoint;
 module.exports.TransformInterface = TransformInterface;

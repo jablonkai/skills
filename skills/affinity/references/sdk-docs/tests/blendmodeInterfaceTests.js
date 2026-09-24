@@ -1,13 +1,13 @@
 'use strict';
 
-const { TestUtils } = require('/tests/testUtils');
-const { Document } = require('/document');
-const { Selection } = require('/selections');
-const { DocumentCommand } = require('/commands');
-const { ShapeNodeDefinition, NodeChildType } = require('/nodes');
-const { AddChildNodesCommandBuilder } = require('/commands');
-const { Spline, SplineProfile } = require('/geometry');
-const { BlendMode, AntialiasingMode } = require('/blendmodeinterface');
+const { TestUtils } = require('/tests/testUtils.js');
+const { Document } = require('/document.js');
+const { Selection } = require('/selections.js');
+const { DocumentCommand } = require('/commands.js');
+const { ShapeNodeDefinition, NodeChildType } = require('/nodes.js');
+const { AddChildNodesCommandBuilder } = require('/commands.js');
+const { Spline, SplineProfile } = require('/geometry.js');
+const { BlendMode, AntialiasingMode } = require('/blendmodeinterface.js');
 
 function testBlendModeInterface() {
     let doc = TestUtils.newA4Empty();

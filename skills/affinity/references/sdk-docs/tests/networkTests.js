@@ -1,5 +1,5 @@
 'use strict';
-const {HttpRequest, HttpResponse, RequestMethod, HttpStatusCode} = require('/network');
+const {HttpRequest, HttpResponse, RequestMethod, HttpStatusCode} = require('/network.js');
 const {ErrorCode} = require('affinity:common');
 
 function RequestCB(reqState, response, reason) {
@@ -29,7 +29,7 @@ function HttpRequestGetTest() {
 function HttpRequestPostTest() {
     var req = HttpRequest.create("https://httpbin.org/post", RequestMethod.Post);
     req.setHeaderValue("accept", "application/json");
-	var result = req.do();
+    var result = req.do();
     RequestCB(result.state, result.response, result.reason);
  }
 

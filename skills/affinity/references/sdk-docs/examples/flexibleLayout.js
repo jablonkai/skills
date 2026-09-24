@@ -1,5 +1,5 @@
-const { Dialog, HorizontalAlignment } = require('/dialog');
-const { SVG11 } = require('/colours');
+const { Dialog, HorizontalAlignment } = require('/dialog.js');
+const { SVG11 } = require('/colours.js');
 
 function main() {
     const dlg = Dialog.create("Flexible Layout Demo")

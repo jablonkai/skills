@@ -1,8 +1,8 @@
 'use strict';
 
 const { Dialog, DialogResult } = require('/dialog.js');
-const { Document } = require('/document');
-const { GroupTransformAnchor, GroupTransformData, GroupTransformOrder, GroupTransformType } = require('/commands');
+const { Document } = require('/document.js');
+const { GroupTransformAnchor, GroupTransformData, GroupTransformOrder, GroupTransformType } = require('/commands.js');
 
 const doc = Document.current;
 

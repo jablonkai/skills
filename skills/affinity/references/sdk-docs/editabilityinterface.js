@@ -1,10 +1,10 @@
 'use strict';
 
 const { EditabilityInterfaceApi } = require('affinity:dom');
-const { HandleObject } = require('./handleobject.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 class EditabilityInterface extends HandleObject {
     constructor(handle) {

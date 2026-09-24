@@ -1,14 +1,14 @@
 'use strict';
 
-const { app } = require('/application');
-const { ShapeNodeDefinition, NodeChildType } = require('/nodes');
-const { AddChildNodesCommandBuilder } = require('/commands');
-const { FillDescriptor, FillType } = require('/fills');
+const { app } = require('/application.js');
+const { ShapeNodeDefinition, NodeChildType } = require('/nodes.js');
+const { AddChildNodesCommandBuilder } = require('/commands.js');
+const { FillDescriptor, FillType } = require('/fills.js');
 const { BlendMode } = require('affinity:common');
-const { LineStyleDescriptor, LineType } = require('/linestyle');
-const { Colour, RGBA8 } = require('/colours');
+const { LineStyleDescriptor, LineType } = require('/linestyle.js');
+const { Colour, RGBA8 } = require('/colours.js');
 const { ErrorCode } = require('affinity:common');
-const { TestUtils } = require('/tests/testUtils');
+const { TestUtils } = require('/tests/testUtils.js');
 
 
 function createTestFillDescriptor(r, g, b, a, blendMode = BlendMode.Normal) {
@@ -362,6 +362,32 @@ function testVectorNodeDefinitionIntegration() {
 }
 
 
+function testPictureFrameDefinitionIntegration() {
+    let doc = TestUtils.newA4Empty();
+
+    if (doc) {
+        let shapeDef = ShapeNodeDefinition.createDefault();
+        console.assert(!shapeDef.pictureFrameEnabled, "Picture frame should initially be disabled");
+
+        shapeDef.setPictureFrameEnabled(true);
+        console.assert(shapeDef.pictureFrameEnabled, "Picture frame should be enabled on the definition");
+
+        let acnBuilder = AddChildNodesCommandBuilder.create();
+        acnBuilder.addShapeNode(shapeDef);
+        let anCommand = acnBuilder.createCommand(false, NodeChildType.Main);
+        doc.executeCommand(anCommand);
+
+        const newNode = doc.layers.first;
+        console.assert(newNode.isShapeNode, "Picture frame should be created as a shape node");
+        console.assert(newNode.pictureFrameEnabled, "Created shape should have PictureFrameInterface enabled");
+
+        doc.undo();
+        doc.close();
+        console.log("testPictureFrameDefinitionIntegration OK");
+    }
+}
+
+
 function testBrushFillCRUDWorkflow() {
     let shapeDef = ShapeNodeDefinition.createDefault();
     
@@ -614,6 +640,7 @@ function testVectorNodeDefinition() {
     testCurrentLineStyleIndex();
     
     testVectorNodeDefinitionIntegration();
+    testPictureFrameDefinitionIntegration();
     testBrushFillCRUDWorkflow();
     testLineStyleCRUDWorkflow();
     

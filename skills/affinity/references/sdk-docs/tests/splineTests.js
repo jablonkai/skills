@@ -1,5 +1,5 @@
 'use strict';
-const { Spline, SplineProfile, Point } = require('/geometry');
+const { Spline, SplineProfile, Point } = require('/geometry.js');
 
 function testSpline() {
     // ============================================================================

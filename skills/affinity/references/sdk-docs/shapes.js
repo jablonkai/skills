@@ -53,7 +53,10 @@ const {
     ShapeType,
     WifiEncryptionType,
 } = require('affinity:geometry');
-const { HandleObject } = require("./handleobject.js");
+const { HandleObject } = require('/handleobject.js');
+
+// monkey patches:
+require('/geometry.js');
 
 function createTypedQRPayload(payloadHandle) {
     if (payloadHandle == null)
@@ -1498,31 +1501,40 @@ class ShapePolygon extends Shape {
     }
 }
 
-class ShapeRectangleCornerProxy extends HandleObject {
+class ShapeRectangleCorner {
+    #shapeRectangleHandle;
     #cornerIndex;
+
     constructor(shapeRectangleHandle, cornerIndex) {
-        super(shapeRectangleHandle);
+        this.#shapeRectangleHandle = shapeRectangleHandle;
         this.#cornerIndex = cornerIndex;
     }
 
     get [Symbol.toStringTag]() {
-        return 'ShapeRectangleCornerProxy';
+        return 'ShapeRectangleCorner';
+    }
+
+    [Symbol.for('affinity.inspect.custom')](depth, options, inspect) {
+        return 'ShapeRectangleCorner ' + inspect({
+            radius: this.radius,
+            cornerType: this.cornerType,
+        }, options);
     }
 
     get radius() {
-        return ShapeRectangleApi.getCornerRadius(this.handle, this.#cornerIndex);
+        return ShapeRectangleApi.getCornerRadius(this.#shapeRectangleHandle, this.#cornerIndex);
     }
 
     get cornerType() {
-        return ShapeRectangleApi.getCornerType(this.handle, this.#cornerIndex);
+        return ShapeRectangleApi.getCornerType(this.#shapeRectangleHandle, this.#cornerIndex);
     }
 
     setRadius(value, width, height) {
-        ShapeRectangleApi.setCornerRadius(this.handle, this.#cornerIndex, value, width, height);
+        ShapeRectangleApi.setCornerRadius(this.#shapeRectangleHandle, this.#cornerIndex, value, width, height);
     }
 
     set cornerType(value) {
-        ShapeRectangleApi.setCornerType(this.handle, this.#cornerIndex, value);
+        ShapeRectangleApi.setCornerType(this.#shapeRectangleHandle, this.#cornerIndex, value);
     }
 
     assign(src, width, height) {
@@ -1559,28 +1571,28 @@ class ShapeRectangle extends Shape {
     #topLeft;
     get topLeft() {
         if (!this.#topLeft)
-            this.#topLeft = new ShapeRectangleCornerProxy(this.handle, ShapeCornerIndex.TopLeft);
+            this.#topLeft = new ShapeRectangleCorner(this.handle, ShapeCornerIndex.TopLeft);
         return this.#topLeft;
     }
 
     #topRight;
     get topRight() {
         if (!this.#topRight)
-            this.#topRight = new ShapeRectangleCornerProxy(this.handle, ShapeCornerIndex.TopRight);
+            this.#topRight = new ShapeRectangleCorner(this.handle, ShapeCornerIndex.TopRight);
         return this.#topRight;
     }
 
     #bottomLeft;
     get bottomLeft() {
         if (!this.#bottomLeft)
-            this.#bottomLeft = new ShapeRectangleCornerProxy(this.handle, ShapeCornerIndex.BottomLeft);
+            this.#bottomLeft = new ShapeRectangleCorner(this.handle, ShapeCornerIndex.BottomLeft);
         return this.#bottomLeft;
     }
 
     #bottomRight;
     get bottomRight() {
         if (!this.#bottomRight)
-            this.#bottomRight = new ShapeRectangleCornerProxy(this.handle, ShapeCornerIndex.BottomRight);
+            this.#bottomRight = new ShapeRectangleCorner(this.handle, ShapeCornerIndex.BottomRight);
         return this.#bottomRight;
     }
 

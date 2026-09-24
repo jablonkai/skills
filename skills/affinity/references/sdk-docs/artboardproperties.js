@@ -1,13 +1,12 @@
 'use strict';
 
-const { ArtboardPropertiesApi, EffectiveMarginBehaviour } = require('affinity:dom');
-const { FillDescriptor } = require('./fills.js');
-const { HandleObject } = require('./handleobject.js');
-const { MarginsInterface } = require('./marginsinterface.js');
+const { ArtboardPropertiesApi } = require('affinity:dom');
+const { HandleObject } = require('/handleobject.js');
+const { MarginsInterface } = require('/marginsinterface.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
-const PhysicalRootPropertiesInterfaceModule = require('./physicalrootpropertiesinterface.js');
+const NodesModule = require('/nodes.js');
+const PhysicalRootPropertiesInterfaceModule = require('/physicalrootpropertiesinterface.js');
 
 class ArtboardProperties extends HandleObject {
     constructor(handle) {
@@ -22,12 +21,12 @@ class ArtboardProperties extends HandleObject {
         return true;
     }
 
-    getMarginBox(behaviour) {
-        return ArtboardPropertiesApi.getMarginBox(this.handle, behaviour);
-    }
-
+    /**
+    * @deprecated Use MarginsInterface.marginFill instead
+    */
     get marginFill() {
-        return new FillDescriptor(ArtboardPropertiesApi.getMarginFill(this.handle));
+        console.warn("Using deprecated ArtboardProperties get marginFill() function. Use MarginsInterface.marginFill instead.");
+        return this.marginsInterface.marginFill;
     }
     
     get marginsInterface() {
@@ -44,4 +43,3 @@ class ArtboardProperties extends HandleObject {
 }
 
 module.exports.ArtboardProperties = ArtboardProperties;
-module.exports.EffectiveMarginBehaviour = EffectiveMarginBehaviour;

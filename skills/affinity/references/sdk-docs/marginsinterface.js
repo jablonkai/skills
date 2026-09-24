@@ -1,7 +1,8 @@
 'use strict';
 
+const { FillDescriptor } = require('/fills.js');
+const { HandleObject } = require('/handleobject.js');
 const { MarginsInterfaceApi } = require('affinity:dom');
-const { HandleObject } = require('./handleobject.js');
 
 class MarginsInterface extends HandleObject {
     constructor(handle) {
@@ -12,12 +13,25 @@ class MarginsInterface extends HandleObject {
         return 'MarginsInterface';
     }
 
+    get margins() {
+        return MarginsInterfaceApi.getMargins(this.handle);
+    }
+
+    get marginFill() {
+        return new FillDescriptor(MarginsInterfaceApi.getMarginFill(this.handle));
+    }
+
     get useMargins() {
         return MarginsInterfaceApi.getUseMargins(this.handle);
     }
 
     get hasMargins() {
-        return MarginsInterfaceApi.hasMargins(this.handle);
+        const margins = this.margins;
+        return this.useMargins
+            && !(margins.left === 0
+                && margins.top === 0
+                && margins.right === 0
+                && margins.bottom === 0);
     }
 }
 

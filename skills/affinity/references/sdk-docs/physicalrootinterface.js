@@ -1,11 +1,11 @@
 'use strict';
 
 const { PhysicalRootInterfaceApi } = require('affinity:dom');
-const { HandleObject } = require('./handleobject.js');
-const { PhysicalRootPropertiesInterface } = require('./physicalrootpropertiesinterface.js');
+const { HandleObject } = require('/handleobject.js');
+const { PhysicalRootPropertiesInterface } = require('/physicalrootpropertiesinterface.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 class PhysicalRootInterface extends HandleObject {
     constructor(handle) {
@@ -17,7 +17,8 @@ class PhysicalRootInterface extends HandleObject {
     }
 
     get physicalRootProperties() {
-        return new PhysicalRootPropertiesInterface(PhysicalRootInterfaceApi.getPhysicalRootProperties(this.handle));
+        const handle = PhysicalRootInterfaceApi.getPhysicalRootProperties(this.handle);
+        return handle ? new PhysicalRootPropertiesInterface(handle) : null;
     }
 
     get node() {

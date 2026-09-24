@@ -1,5 +1,5 @@
 'use strict';
-const { Polygon } = require('/geometry');
+const { Polygon } = require('/geometry.js');
 const { EnumerationResult } = require('affinity:common');
 
 function runPolygonTests() {

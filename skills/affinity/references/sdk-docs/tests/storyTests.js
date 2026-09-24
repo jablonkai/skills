@@ -1,6 +1,6 @@
 'use strict';
 
-const { StoryBuilder } = require('/storybuilder');
+const { StoryBuilder } = require('/storybuilder.js');
 const {
     GlyphAtts,
     TypographicLineType,
@@ -11,7 +11,7 @@ const {
     TocRoleType,
     GlyphAttDoubleType,
     GlyphAttStringType,
-} = require('/glyphatts');
+} = require('/glyphatts.js');
 const {
     ParagraphAtts,
     ParagraphAlignXType,
@@ -22,12 +22,12 @@ const {
     ParagraphLineBreakModeType,
     ParagraphAttDoubleType,
     ParagraphAttStringType,
-} = require('/paragraphatts');
-const { StoryDelta } = require('/storydelta');
-const { ArtTextNodeDefinition, FrameTextNodeDefinition } = require('/nodes');
-const { Document } = require('/document');
-const { AddChildNodesCommandBuilder } = require('/commands');
-const { TestUtils } = require('/tests/testUtils');
+} = require('/paragraphatts.js');
+const { StoryDelta } = require('/storydelta.js');
+const { ArtTextNodeDefinition, FrameTextNodeDefinition } = require('/nodes.js');
+const { Document } = require('/document.js');
+const { AddChildNodesCommandBuilder } = require('/commands.js');
+const { TestUtils } = require('/tests/testUtils.js');
 
 function runTests() {
 

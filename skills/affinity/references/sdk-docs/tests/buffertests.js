@@ -1,6 +1,6 @@
 'use strict';
 
-const {Buffer} = require('/buffer');
+const {Buffer} = require('/buffer.js');
 
 function testSlice() {
     // slice is a copy of the original buffer, so modifying it should not modify the original.

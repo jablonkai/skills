@@ -1,12 +1,13 @@
 'use strict';
 
 const { BlendMode, UnitType } = require('affinity:common');
-const { BitmapFillApi, FillApi, FillDescriptorApi, FillMask, FillType, GradientFillApi, GradientFillType, HatchFillApi, NoFillApi, SolidFillApi } = require('affinity:fills');
+const { BitmapFillApi, ColourMeshApi, DiffusionCurveKind, DiffusionCurveParametric, DiffusionCurveSetApi, DiffusionCurveSide, DiffusionFillApi, FillApi, FillDescriptorApi, FillMask, FillType, GradientFillApi, GradientFillType, HatchFillApi, MeshFillApi, NoFillApi, SolidFillApi, TransformInfo } = require('affinity:fills');
 const { RasterExtendType, RasterResamplerType } = require('affinity:raster');
-const { Colour, ColourProfile, Gradient } = require('./colours.js');
-const { HandleObject } = require('./handleobject.js');
-const { HatchPattern } = require('./hatch.js');
-const { RasterObject } = require('./rasterobject.js');
+const { Colour, ColourProfile, Gradient } = require('/colours.js');
+const { Curve, Mesh, Transform } = require('/geometry.js');
+const { HandleObject } = require('/handleobject.js');
+const { HatchPattern } = require('/hatch.js');
+const { RasterObject } = require('/rasterobject.js');
 
 // monkey patches:
 require('/geometry.js');
@@ -26,6 +27,10 @@ function createTypedFill(fillHandle) {
             return new HatchFill(HatchFillApi.fromFill(fillHandle));
         case FillType.Bitmap.value:
             return new BitmapFill(BitmapFillApi.fromFill(fillHandle));
+        case FillType.Mesh.value:
+            return new MeshFill(MeshFillApi.fromFill(fillHandle));
+        case FillType.Diffusion.value:
+            return new DiffusionFill(DiffusionFillApi.fromFill(fillHandle));
         default:
             return new Fill(fillHandle);
     }
@@ -205,6 +210,205 @@ class GradientFill extends Fill {
 }
 
 
+class DiffusionCurveSet extends HandleObject {
+    constructor(handle) {
+        super(handle);
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'DiffusionCurveSet';
+    }
+
+    static create() {
+        return new DiffusionCurveSet(DiffusionCurveSetApi.create());
+    }
+
+    static createDefault(colourA, colourB) {
+        return new DiffusionCurveSet(DiffusionCurveSetApi.createDefault(colourA.handle, colourB.handle));
+    }
+
+    clone() {
+        return new DiffusionCurveSet(DiffusionCurveSetApi.clone(this.handle));
+    }
+
+    get curveCount() {
+        return DiffusionCurveSetApi.getCurveCount(this.handle);
+    }
+
+    addCurve(points, leftColour, rightColour) {
+        DiffusionCurveSetApi.addCurve(this.handle, points, leftColour?.handle, rightColour?.handle);
+    }
+
+    removeCurve(index) {
+        DiffusionCurveSetApi.removeCurve(this.handle, index);
+    }
+
+    getCurvePointCount(index) {
+        return DiffusionCurveSetApi.getCurvePointCount(this.handle, index);
+    }
+
+    getCurvePoint(index, pointIndex) {
+        return DiffusionCurveSetApi.getCurvePoint(this.handle, index, pointIndex);
+    }
+
+    // Convenience over the SDK's count + index accessors
+    getCurvePoints(index) {
+        const count = DiffusionCurveSetApi.getCurvePointCount(this.handle, index);
+        const points = [];
+        for (let n = 0; n < count; ++n) {
+            points.push(DiffusionCurveSetApi.getCurvePoint(this.handle, index, n));
+        }
+        return points;
+    }
+
+    setCurvePoints(index, points) {
+        DiffusionCurveSetApi.setCurvePoints(this.handle, index, points);
+    }
+
+    getCurveColour(index, side) {
+        const clrHandle = DiffusionCurveSetApi.getCurveColour(this.handle, index, side);
+        return clrHandle ? new Colour(clrHandle) : null;
+    }
+
+    setCurveColour(index, side, colour) {
+        DiffusionCurveSetApi.setCurveColour(this.handle, index, side, colour?.handle);
+    }
+
+    getCurveBlur(index) {
+        return DiffusionCurveSetApi.getCurveBlur(this.handle, index);
+    }
+
+    setCurveBlur(index, blur) {
+        DiffusionCurveSetApi.setCurveBlur(this.handle, index, blur);
+    }
+
+    getCurveStrength(index) {
+        return DiffusionCurveSetApi.getCurveStrength(this.handle, index);
+    }
+
+    setCurveStrength(index, strength) {
+        DiffusionCurveSetApi.setCurveStrength(this.handle, index, strength);
+    }
+
+    getCurvePressure(index) {
+        const curveHandle = DiffusionCurveSetApi.getCurvePressure(this.handle, index);
+        return curveHandle ? new Curve(curveHandle) : null;
+    }
+
+    setCurvePressure(index, curve) {
+        DiffusionCurveSetApi.setCurvePressure(this.handle, index, curve?.handle);
+    }
+
+    get backgroundColour() {
+        const clrHandle = DiffusionCurveSetApi.getBackgroundColour(this.handle);
+        return clrHandle ? new Colour(clrHandle) : null;
+    }
+
+    set backgroundColour(value) {
+        DiffusionCurveSetApi.setBackgroundColour(this.handle, value?.handle);
+    }
+
+    get backgroundStrength() {
+        return DiffusionCurveSetApi.getBackgroundStrength(this.handle);
+    }
+
+    set backgroundStrength(value) {
+        DiffusionCurveSetApi.setBackgroundStrength(this.handle, value);
+    }
+
+    // Parametric primitives: ellipses, elliptical arcs and straight lines
+    // project to Bezier chains internally (their points remain readable) and
+    // are stable under affine transforms of the owning shape. Setting
+    // explicit points on a parametric curve demotes it to a Bezier chain.
+    // Compare getCurveKind against DiffusionCurveKind values.
+
+    getCurveKind(index) {
+        return DiffusionCurveSetApi.getCurveKind(this.handle, index);
+    }
+
+    // Returns a DiffusionCurveParametric ({ centre, radiusX, radiusY,
+    // rotation, angle0, angle1 }); for a line, centre is the start point and
+    // (angle0, angle1) the end point. Throws for a plain Bezier curve
+    getCurveParametric(index) {
+        return DiffusionCurveSetApi.getCurveParametric(this.handle, index);
+    }
+
+    setCurveEllipse(index, centre, radiusX, radiusY, rotation = 0) {
+        DiffusionCurveSetApi.setCurveEllipse(this.handle, index, centre, radiusX, radiusY, rotation);
+    }
+
+    setCurveArc(index, centre, radiusX, radiusY, rotation, angle0, angle1) {
+        DiffusionCurveSetApi.setCurveArc(this.handle, index, centre, radiusX, radiusY, rotation, angle0, angle1);
+    }
+
+    setCurveLine(index, start, end) {
+        DiffusionCurveSetApi.setCurveLine(this.handle, index, start, end);
+    }
+
+    addEllipse(centre, radiusX, radiusY, rotation = 0, leftColour, rightColour) {
+        DiffusionCurveSetApi.addEllipse(this.handle, centre, radiusX, radiusY, rotation, leftColour?.handle, rightColour?.handle);
+    }
+
+    addArc(centre, radiusX, radiusY, rotation, angle0, angle1, leftColour, rightColour) {
+        DiffusionCurveSetApi.addArc(this.handle, centre, radiusX, radiusY, rotation, angle0, angle1, leftColour?.handle, rightColour?.handle);
+    }
+
+    addLine(start, end, leftColour, rightColour) {
+        DiffusionCurveSetApi.addLine(this.handle, start, end, leftColour?.handle, rightColour?.handle);
+    }
+
+    // Node styles (Bezier curves only): smooth nodes keep their two off-curve
+    // handles collinear when edited in the tool
+
+    getCurveNodeCount(index) {
+        return DiffusionCurveSetApi.getCurveNodeCount(this.handle, index);
+    }
+
+    getCurveNodeSmooth(index, node) {
+        return DiffusionCurveSetApi.getCurveNodeSmooth(this.handle, index, node);
+    }
+
+    setCurveNodeSmooth(index, node, smooth) {
+        DiffusionCurveSetApi.setCurveNodeSmooth(this.handle, index, node, smooth);
+    }
+}
+
+
+class DiffusionFill extends Fill {
+    constructor(handle) {
+        super(handle);
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'DiffusionFill';
+    }
+
+    static create(curveSet) {
+        return new DiffusionFill(DiffusionFillApi.create(curveSet.handle));
+    }
+
+    static createDefault() {
+        return new DiffusionFill(DiffusionFillApi.createDefault());
+    }
+
+    static fromFill(fill) {
+        return new DiffusionFill(DiffusionFillApi.fromFill(fill.handle));
+    }
+
+    clone() {
+        return new DiffusionFill(DiffusionFillApi.clone(this.handle));
+    }
+
+    cloneWithNewCurves(curveSet) {
+        return new DiffusionFill(DiffusionFillApi.cloneWithNewCurves(this.handle, curveSet.handle));
+    }
+
+    get curveSet() {
+        return new DiffusionCurveSet(DiffusionFillApi.getCurves(this.handle));
+    }
+}
+
+
 class HatchFill extends Fill {
     constructor(handle) {
         super(handle);
@@ -329,6 +533,72 @@ class BitmapFill extends Fill {
     }
 }
 
+class ColourMesh extends Mesh {
+    constructor(handle) {
+        super(handle);
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'ColourMesh';
+    }
+
+    static createDefaultNone() {
+        return new ColourMesh(ColourMeshApi.createDefaultNone());
+    }
+
+    static createDefaultWhite() {
+        return new ColourMesh(ColourMeshApi.createDefaultWhite());
+    }
+
+    static createFromColour(colour, size) {
+        return new ColourMesh(ColourMeshApi.createFromColour(colour.handle, size));
+    }
+
+    static createFromGradient(gradient, isRadial) {
+        return new ColourMesh(ColourMeshApi.createFromGradient(gradient.handle, isRadial));
+    }
+
+    clone() {
+        return new ColourMesh(ColourMeshApi.cloneAsColourMesh(this.handle));
+    }
+
+    getNodeColour(xIndex, yIndex) {
+        const clrHandle = ColourMeshApi.getNodeColour(this.handle, xIndex, yIndex);
+        return clrHandle ? new Colour(clrHandle) : null;
+    }
+
+    setNodeColour(xIndex, yIndex, colour) {
+        ColourMeshApi.setNodeColour(this.handle, xIndex, yIndex, colour?.handle);
+    }
+}
+
+
+class MeshFill extends Fill {
+    constructor(handle) {
+        super(handle);
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'MeshFill';
+    }
+
+    static create(colourMesh) {
+        return new MeshFill(MeshFillApi.create(colourMesh.handle));
+    }
+
+    static fromFill(fill) {
+        return new MeshFill(MeshFillApi.fromFill(fill.handle));
+    }
+
+    clone() {
+        return new MeshFill(MeshFillApi.cloneAsMeshFill(this.handle));
+    }
+
+    get colourMesh() {
+        return new ColourMesh(MeshFillApi.getColourMesh(this.handle));
+    }
+}
+
 class FillDescriptor extends HandleObject {
     constructor(handle) {
         super(handle);
@@ -410,6 +680,10 @@ class FillDescriptor extends HandleObject {
         return new FillDescriptor(FillDescriptorApi.createSolid(solidFill.handle, blendMode));
     }
 
+    // bounds ({x, y, width, height}, typically the node's baseBox) maps the
+    // curve set's unit square onto that box, like the fill tool does when
+    // converting a fill. Without it the transform is identity, which is only
+    // useful for fills anchored to pre-transformed geometry.
     static create(fill, scaleWithObject, transform, blendMode, anchoredToSpread) {
         return new FillDescriptor(FillDescriptorApi.create(fill.handle, scaleWithObject, transform, blendMode, anchoredToSpread));
     }
@@ -419,9 +693,25 @@ class FillDescriptor extends HandleObject {
     }
 }
 
+function makeFillDescriptor(fillDescriptor) {
+    if (fillDescriptor == null) {
+        return FillDescriptor.createNone();
+    }
+    if (fillDescriptor instanceof SolidFill || fillDescriptor instanceof Colour) {
+        return FillDescriptor.createSolid(fillDescriptor);
+    }
+    return fillDescriptor;
+}
+
 module.exports.BitmapFill = BitmapFill;
 module.exports.BlendMode = BlendMode;
+module.exports.ColourMesh = ColourMesh;
 module.exports.createTypedFill = createTypedFill;
+module.exports.DiffusionCurveKind = DiffusionCurveKind;
+module.exports.DiffusionCurveParametric = DiffusionCurveParametric;
+module.exports.DiffusionCurveSet = DiffusionCurveSet;
+module.exports.DiffusionCurveSide = DiffusionCurveSide;
+module.exports.DiffusionFill = DiffusionFill;
 module.exports.Fill = Fill;
 module.exports.FillDescriptor = FillDescriptor;
 module.exports.FillMask = FillMask;
@@ -429,8 +719,11 @@ module.exports.FillType = FillType;
 module.exports.GradientFill = GradientFill;
 module.exports.GradientFillType = GradientFillType;
 module.exports.HatchFill = HatchFill;
+module.exports.makeFillDescriptor = makeFillDescriptor;
+module.exports.MeshFill = MeshFill;
 module.exports.NoFill = NoFill;
 module.exports.RasterExtendType = RasterExtendType;
 module.exports.RasterResamplerType = RasterResamplerType;
 module.exports.SolidFill = SolidFill;
+module.exports.TransformInfo = TransformInfo;
 module.exports.UnitType = UnitType;

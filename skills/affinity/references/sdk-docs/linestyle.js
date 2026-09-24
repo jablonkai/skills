@@ -11,9 +11,9 @@ const {
     LineType,
     StrokeAlignment
 } = require('affinity:linestyles');
-const { Curve } = require('./geometry.js');
-const { HandleObject } = require('./handleobject.js');
-const { VectorBrush } = require('./vectorbrush.js');
+const { Curve } = require('/geometry.js');
+const { HandleObject } = require('/handleobject.js');
+const { PathBrush } = require('/pathbrush.js');
 
 class ArrowHead extends HandleObject {
     constructor(handle) {
@@ -105,7 +105,7 @@ class LineStyle extends HandleObject {
             opts?.dashPattern ?? [1.0, 1.0],
             opts?.resIndependent,
             opts?.balancedDashes ?? true,
-            opts?.vectorBrush ?? VectorBrush.createDefault() /// TODO: to be decided, there is no default atm.
+            opts?.pathBrush?.handle
         ));
     }
 
@@ -193,13 +193,13 @@ class LineStyle extends HandleObject {
         LineStyleApi.setHasBalancedDashes(this.handle, balanced);
     }
     
-    get vectorBrush() {
-        const vbHandle = LineStyleApi.getVectorBrush(this.handle);
-        return vbHandle ? new VectorBrush(vbHandle) : null;
+    get pathBrush() {
+        const vbHandle = LineStyleApi.getPathBrush(this.handle);
+        return vbHandle ? new PathBrush(vbHandle) : null;
     }
     
-    set vectorBrush(brush) {
-        return LineStyleApi.setVectorBrush(this.handle, brush.handle);
+    set pathBrush(brush) {
+        return LineStyleApi.setPathBrush(this.handle, brush.handle);
     }
 }
 
@@ -216,9 +216,9 @@ class LineStyleDescriptor extends HandleObject {
     static create(lineStyle, options) {
         const handle = LineStyleDescriptorApi.create(
             lineStyle.handle,
-            options?.frontArrow,
-            options?.backArrow,
-            options?.pressure,
+            options?.frontArrow?.handle,
+            options?.backArrow?.handle,
+            options?.pressure?.handle,
             options?.isBehind,
             options?.isScale,
             options?.strokeAlignment ?? StrokeAlignment.Centre

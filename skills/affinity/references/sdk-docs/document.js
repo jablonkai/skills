@@ -1,7 +1,7 @@
 'use strict';
 
 const { ColourSpaceType } = require('affinity:colours');
-const { DocumentCommandApi } = require('affinity:commands');
+const { DocumentCommandApi, InsertionMode } = require('affinity:commands');
 const { EnumerationResult, ErrorCode, UnitType } = require('affinity:common');
 const {
     ContentType,
@@ -11,6 +11,7 @@ const {
     DocumentHistoryApi,
     DocumentHistoryItemApi,
     DocumentLoadMode,
+    DocumentLoadResult,
     DocumentPresetApi,
     DocumentSnapshotApi,
     FileExportAreaApi,
@@ -22,21 +23,21 @@ const {
     SpatialAnchor
 } = require('affinity:dom');
 const { RasterFormat } = require('affinity:raster');
-const { Collection } = require('./collection.js');
-const { Colour, ColourProfile } = require('./colours.js');
-const { DrawingScale } = require('./drawingscale.js');
-const { FillDescriptor, SolidFill } = require('./fills.js');
-const { HandleObject } = require('./handleobject.js');
-const { LineStyle, LineStyleMask } = require('./linestyle.js');
-const { PixelBuffer } = require('./rasterobject.js');
-const { RasterSelection } = require('./rasterselection.js');
-const { ShapeCornerType, ShapeRectangle } = require('./shapes.js');
-const { UnitValueConverter } = require('./units.js');
+const { Collection } = require('/collection.js');
+const { ColourProfile } = require('/colours.js');
+const { DrawingScale } = require('/drawingscale.js');
+const { makeFillDescriptor } = require('/fills.js');
+const { HandleObject } = require('/handleobject.js');
+const { LineStyle, LineStyleMask } = require('/linestyle.js');
+const { PixelBuffer } = require('/rasterobject.js');
+const { RasterSelection } = require('/rasterselection.js');
+const { ShapeCornerType, ShapeRectangle } = require('/shapes.js');
+const { UnitValueConverter } = require('/units.js');
 
 // cyclics:
-const CommandsModule = require('./commands.js');
-const NodesModule = require('./nodes.js');
-const SelectionsModule = require('./selections.js');
+const CommandsModule = require('/commands.js');
+const NodesModule = require('/nodes.js');
+const SelectionsModule = require('/selections.js');
 
 class DocumentSnapshot extends HandleObject {
     constructor(handle) {
@@ -262,6 +263,16 @@ class Document extends HandleObject {
         }
     }
 
+    get hasKeyObject() {
+        return this.selection.hasKeyObject;
+    }
+    
+    set hasKeyObject(hasKeyObject) {
+        const selection = this.selection;
+        selection.hasKeyObject = hasKeyObject;
+        this.selection = selection;
+    }
+
     get dpi() {
         return DocumentApi.getDpi(this.handle);
     }
@@ -362,10 +373,10 @@ class Document extends HandleObject {
         return DocumentApi.close(this.handle);
     }
 
-    static createFromPreset(preset, landscape) {
-        if (landscape == null)
-            landscape = preset.width > preset.height;
-        return new Document(DocumentApi.createFromPreset(preset.handle, landscape));
+    static createFromPreset(preset, isLandscape) {
+        if (isLandscape == null)
+            isLandscape = preset.width > preset.height;
+        return new Document(DocumentApi.createFromPreset(preset.handle, isLandscape));
     }
 
     static createFromOptions(options) {
@@ -402,6 +413,10 @@ class Document extends HandleObject {
             const cmd = CommandsModule.DocumentCommand.createSetDocumentUnits(value);
             return this.executeCommand(cmd);
         }
+    }
+
+    get insertionMode() {
+        return DocumentApi.getInsertionMode(this.handle);
     }
 
     get unitValueConverter() {
@@ -493,18 +508,17 @@ class Document extends HandleObject {
         return DocumentApi.loadAsync(path, null, callback);
     }
 
-    static createFromPresetAsync(preset, landscape, callback) {
-        if (landscape == null) {
-            landscape = preset.width > preset.height;
-        }
+    static createFromPresetAsync(preset, isLandscape, callback) {
+        if (isLandscape == null)
+            isLandscape = preset.width > preset.height;
         if (typeof callback === 'function') {
             function wrapped(errorCode, documentHandle) {
                 const document = documentHandle ? new Document(documentHandle) : null;
                 callback(errorCode, document);
             }
-            return DocumentApi.createFromPresetAsync(preset.handle, landscape, wrapped);
+            return DocumentApi.createFromPresetAsync(preset.handle, isLandscape, wrapped);
         }
-        return DocumentApi.createFromPresetAsync(preset.handle, landscape, callback);
+        return DocumentApi.createFromPresetAsync(preset.handle, isLandscape, callback);
     }
 
     static createAsync(options, callback) {
@@ -608,21 +622,6 @@ class Document extends HandleObject {
             return SelectionsModule.Selection.create(this, selection);
     }
 
-    #makeFillDescriptor(fillDescriptor) {
-        if (fillDescriptor == null) {
-            return FillDescriptor.createNone();
-        }
-        if (fillDescriptor instanceof FillDescriptor) {
-            return fillDescriptor;
-        }
-        if (fillDescriptor instanceof SolidFill) {
-            return FillDescriptor.createSolid(fillDescriptor);
-        }
-        if (fillDescriptor instanceof Colour) {
-            return FillDescriptor.createSolid(fillDescriptor);
-        }
-        return fillDescriptor;
-    }
     undo() {
         this.history.undo();
     }
@@ -676,6 +675,16 @@ class Document extends HandleObject {
         const cmd = CommandsModule.DocumentCommand.createShowAll();
         return this.executeCommand(cmd, preview);
     }
+
+    unlockAll(preview) {
+        const cmd = CommandsModule.DocumentCommand.createUnlockAll();
+        return this.executeCommand(cmd, preview);
+    }
+
+    flipCanvas(isHorizontal, preview) {
+        const cmd = CommandsModule.DocumentCommand.createFlipCanvas(isHorizontal);
+        return this.executeCommand(cmd, preview);
+    }
     
     addNode(nodeDefinition, targetNode = null, childList = NodesModule.NodeChildType.Main, preview) {
         const builder = CommandsModule.AddChildNodesCommandBuilder.create();
@@ -707,17 +716,17 @@ class Document extends HandleObject {
     }
 
     setBrushFillDescriptor(fillDescriptorOrColour, selection, options, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetBrushFill(this.#ensureSelection(selection), this.#makeFillDescriptor(fillDescriptorOrColour), options);
+        const cmd = CommandsModule.DocumentCommand.createSetBrushFill(this.#ensureSelection(selection), makeFillDescriptor(fillDescriptorOrColour), options);
         return this.executeCommand(cmd, preview);
     }
 
     setPenFillDescriptor(fillDescriptorOrColour, selection, options, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetPenFill(this.#ensureSelection(selection), this.#makeFillDescriptor(fillDescriptorOrColour), options);
+        const cmd = CommandsModule.DocumentCommand.createSetPenFill(this.#ensureSelection(selection), makeFillDescriptor(fillDescriptorOrColour), options);
         return this.executeCommand(cmd, preview);
     }
 
     setTransparencyFillDescriptor(fillDescriptor, selection, options, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetTransparencyFill(this.#ensureSelection(selection), this.#makeFillDescriptor(fillDescriptor), options);
+        const cmd = CommandsModule.DocumentCommand.createSetTransparencyFill(this.#ensureSelection(selection), makeFillDescriptor(fillDescriptor), options);
         return this.executeCommand(cmd, preview);
     }
 
@@ -935,6 +944,36 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
+    smoothCurves(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSmoothCurves(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    breakCurves(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createBreakCurves(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    joinCurves(selection, isJoinStraight, preview) {
+        const cmd = CommandsModule.DocumentCommand.createJoinCurves(this.#ensureSelection(selection), isJoinStraight);
+        return this.executeCommand(cmd, preview);
+    }
+
+    reverseCurves(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createReverseCurves(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    mergeCurves(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createMergeCurves(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    separateCurves(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSeparateCurves(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
     setBrushHatchFillAttributes(attr, selection, options, preview) {
         const cmd = CommandsModule.DocumentCommand.createSetBrushHatchFillAttributes(this.#ensureSelection(selection), attr, options);
         return this.executeCommand(cmd, preview);
@@ -983,7 +1022,7 @@ class Document extends HandleObject {
     insertGlyphAt(glyph, textNode, position, preview) {
         const selection = SelectionsModule.Selection.create(this, textNode);
         const textSelection = SelectionsModule.TextSelection.create([{begin:position, end:position}]);
-        selection.addSubSelection(textNode, textSelection);
+        selection.addSubSelectionForNode(textNode, textSelection);
         const cmd = CommandsModule.DocumentCommand.createInsertGlyph(selection, glyph);
         return this.executeCommand(cmd, preview);
     }
@@ -995,6 +1034,51 @@ class Document extends HandleObject {
     
     rasterSelectAll(preview){
         const cmd = CommandsModule.DocumentCommand.createRasterSelectAll();
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterSelectReds(preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterSelectReds();
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterSelectGreens(preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterSelectGreens();
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterSelectBlues(preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterSelectBlues();
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterSelectMidtones(preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterSelectMidtones();
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterSelectShadows(preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterSelectShadows();
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterSelectHighlights(preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterSelectHighlights();
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterSelectTransparent(preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterSelectTransparent();
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterSelectPartiallyTransparent(preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterSelectPartiallyTransparent();
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterSelectOpaque(preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterSelectOpaque();
         return this.executeCommand(cmd, preview);
     }
     
@@ -1010,6 +1094,61 @@ class Document extends HandleObject {
     
     rasterReselect(preview){
         const cmd = CommandsModule.DocumentCommand.createRasterReselect();
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterAutoColours(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterAutoColours(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterAutoContrast(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterAutoContrast(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterAutoLevels(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterAutoLevels(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterAutoWhiteBalance(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterAutoWhiteBalance(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterPolarToRectangular(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterPolarToRectangular(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterRectangularToPolar(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterRectangularToPolar(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterEdgeDetect(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterEdgeDetect(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterHorizontalEdgeDetect(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterHorizontalEdgeDetect(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterVerticalEdgeDetect(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterVerticalEdgeDetect(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterFill(selection, mode, colour, opacity, blendMode, preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterFill(this.#ensureSelection(selection), mode, colour, opacity, blendMode);
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterFloodFill(selection, point, tolerance, isContiguous, antialias, samplingSource, blendMode, colour, preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterFloodFill(this.#ensureSelection(selection), point, tolerance, isContiguous, antialias, samplingSource, blendMode, colour);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1051,8 +1190,23 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
     
+    rasterFloodSelect(point, tolerance, isContiguous, antialias, operation, samplingSource, preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterFloodSelect(point, tolerance, isContiguous, antialias, operation, samplingSource);
+        return this.executeCommand(cmd, preview);
+    }
+    
     flatten(preview) {
         const cmd = CommandsModule.DocumentCommand.createFlatten();
+        return this.executeCommand(cmd, preview);
+    }
+
+    mergeDown(preview) {
+        const cmd = CommandsModule.DocumentCommand.createMergeDown();
+        return this.executeCommand(cmd, preview);
+    }
+
+    mergeSelected(preview) {
+        const cmd = CommandsModule.DocumentCommand.createMergeSelected();
         return this.executeCommand(cmd, preview);
     }
 
@@ -1702,6 +1856,11 @@ class Document extends HandleObject {
         return this.executeCommand(cmd);
     }
 
+    setPageDocumentProperties(spreadNode, page, pageDocumentProperties) {
+        const cmd = CommandsModule.DocumentCommand.createSetPageDocumentProperties(spreadNode, page, pageDocumentProperties);
+        return this.executeCommand(cmd);
+    }
+
     addArtboard(artboardDefinition, copyProperties, copyGuides, preview) {
         const cmd = CommandsModule.DocumentCommand.createAddArtboard(artboardDefinition, copyProperties, copyGuides);
         return this.executeCommand(cmd, preview);
@@ -1712,6 +1871,31 @@ class Document extends HandleObject {
         def.setShape(ShapeRectangle.create());
         def.setBoundingRectangle(rectangle);
         return this.addArtboard(def, copyProperties, copyGuides, preview);
+    }
+
+    boolOpUnion(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createBoolOpUnion(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    boolOpSubtract(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createBoolOpSubtract(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    boolOpIntersect(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createBoolOpIntersect(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    boolOpXor(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createBoolOpXor(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    divideShapes(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createDivideShapes(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
     }
 
     // TODO: asynchronous command helpers
@@ -1754,6 +1938,10 @@ class NewDocumentOptions extends HandleObject {
         return 'NewDocumentOptions';
     }
 
+    clone() {
+        return new NewDocumentOptions(NewDocumentOptionsApi.clone(this.handle));
+    }
+
     static createDefault() {
         return new NewDocumentOptions(NewDocumentOptionsApi.createDefault());
     }
@@ -1790,10 +1978,6 @@ class NewDocumentOptions extends HandleObject {
         NewDocumentOptionsApi.setIsFacing(this.handle, facing);
     }
     
-    set isLandscape(isLandscape) {
-        NewDocumentOptionsApi.setIsLandscape(this.handle, isLandscape);
-    }
-    
     set isVerticalStack(verticalStack) {
         NewDocumentOptionsApi.setIsVerticalStack(this.handle, verticalStack);
     }
@@ -1807,7 +1991,7 @@ class NewDocumentOptions extends HandleObject {
     }
     
     set colourProfile(profile) {
-        NewDocumentOptionsApi.setColourProfile(this.handle, profile);
+        NewDocumentOptionsApi.setColourProfile(this.handle, profile.handle);
     }
     
     set width(w) {
@@ -2219,9 +2403,9 @@ class DocumentPromises {
         });
     }
 
-    static createFromPreset(preset, landscape) {
+    static createFromPreset(preset, isLandscape) {
         return new Promise((resolve, reject) => {
-            Document.createFromPresetAsync(preset, landscape, (err, document) => {
+            Document.createFromPresetAsync(preset, isLandscape, (err, document) => {
                 if (err)
                     reject(err);
                 else
@@ -2315,6 +2499,7 @@ module.exports.DocumentExportRecord = DocumentExportRecord;
 module.exports.DocumentExportRecords = DocumentExportRecords;
 module.exports.DocumentHistory = DocumentHistory;
 module.exports.DocumentLoadMode = DocumentLoadMode;
+module.exports.DocumentLoadResult = DocumentLoadResult;
 module.exports.DocumentPreset = DocumentPreset;
 module.exports.DocumentPromises = DocumentPromises;
 module.exports.DocumentSnapshot = DocumentSnapshot;
@@ -2322,6 +2507,7 @@ module.exports.ErrorCode = ErrorCode;
 module.exports.FileExportArea = FileExportArea;
 module.exports.FileExportOptions = FileExportOptions;
 module.exports.ImagePlacement = ImagePlacement;
+module.exports.InsertionMode = InsertionMode;
 module.exports.LoadDocumentOptions = LoadDocumentOptions;
 module.exports.NewDocumentOptions = NewDocumentOptions;
 module.exports.PackageResourcesPolicy = PackageResourcesPolicy;

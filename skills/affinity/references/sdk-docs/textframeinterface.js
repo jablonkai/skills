@@ -1,10 +1,11 @@
 'use strict';
 
+const { EnumerationResult } = require('affinity:common');
 const { TextFrameInterfaceApi } = require('affinity:dom');
-const { HandleObject } = require('./handleobject.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 // monkey patches:
 require('/geometry.js');
@@ -64,6 +65,25 @@ class TextFrameInterface extends HandleObject {
 
     get textFlowIndex() {
         return TextFrameInterfaceApi.getTextFlowIndex(this.handle);
+    }
+
+    enumerateTextFlowNodes(callback) {
+        if (typeof callback === 'function') {
+            function wrapped(nodeHandle) {
+                return callback(NodesModule.createTypedNode(nodeHandle));
+            }
+            return TextFrameInterfaceApi.enumerateTextFlowNodes(this.handle, wrapped);
+        }
+        return TextFrameInterfaceApi.enumerateTextFlowNodes(this.handle, callback);
+    }
+
+    get textFlowNodes() {
+        const nodes = [];
+        this.enumerateTextFlowNodes(node => {
+            nodes.push(node);
+            return EnumerationResult.Continue;
+        });
+        return nodes;
     }
 
     get scalarStoryToDomainTransform() {
