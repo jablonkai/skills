@@ -6,6 +6,9 @@
 #   blender-send.sh -c 'print(len(bpy.data.objects))'   run inline code
 #   blender-send.sh --ping                      check the bridge is up
 #   blender-send.sh --state                     cheap scene summary as JSON
+#   blender-send.sh build.py --arg quality=final --arg frames=48
+#                                               pass KEY=VALUE strings to the script
+#                                               as the injected ARGS dict
 #
 # The script runs INSIDE Blender on the main thread, so bpy.data writes are
 # legal, the viewport updates, and snapshot()/render() work. The bridge returns
@@ -49,14 +52,29 @@ esac
 OUT_JSON="${OUT:-}"
 if [ "$1" = "-c" ]; then
     [ $# -ge 2 ] || { echo "usage: blender-send.sh -c '<code>'" >&2; exit 2; }
-    payload=$(CODE="$2" OUT="$OUT_JSON" python3 -c \
-        'import json,os;print(json.dumps({"code":os.environ["CODE"],"out":os.environ.get("OUT","")}))')
+    kind=code; target="$2"; shift 2
 else
     [ -f "$1" ] || { echo "ERROR: script not found: $1" >&2; exit 2; }
-    abs=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-    payload=$(SCRIPT="$abs" OUT="$OUT_JSON" python3 -c \
-        'import json,os;print(json.dumps({"path":os.environ["SCRIPT"],"out":os.environ.get("OUT","")}))')
+    kind=path; target=$(cd "$(dirname "$1")" && pwd)/$(basename "$1"); shift
 fi
+
+# The script runs inside Blender, so this shell's environment never reaches it —
+# --arg KEY=VALUE is the way to parameterise a send (preview vs final, sizes, ...).
+args=()
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --arg)
+            [ $# -ge 2 ] && [[ "$2" == *=* ]] || { echo "usage: --arg KEY=VALUE" >&2; exit 2; }
+            args+=("$2"); shift 2 ;;
+        *) echo "ERROR: unexpected argument: $1" >&2; exit 2 ;;
+    esac
+done
+
+payload=$(KIND="$kind" TARGET="$target" OUT="$OUT_JSON" python3 -c '
+import json, os, sys
+body = {os.environ["KIND"]: os.environ["TARGET"], "out": os.environ.get("OUT", "")}
+body["args"] = dict(a.split("=", 1) for a in sys.argv[1:])
+print(json.dumps(body))' ${args[@]+"${args[@]}"})
 
 resp=$(curl -s -m "$TIMEOUT" -X POST "$BASE/run" --data-binary "$payload") || not_reachable
 

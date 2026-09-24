@@ -1,6 +1,6 @@
 # Import / export
 
-Verified on Blender 5.2.0 LTS — every export below was run and produced a non-empty file.
+Verified on Blender 5.2.2 LTS — every export below was run and produced a non-empty file.
 
 ## Where each operator lives
 
@@ -61,6 +61,7 @@ bpy.ops.export_scene.gltf(
     export_apply=True,                # apply modifiers
     export_animations=True,
     export_draco_mesh_compression_enable=False,   # Draco is available in this build
+    # export_meshopt_compression_enable=True,     # 5.2: EXT/KHR_meshopt_compression
     export_yup=True,                  # Y-up for the glTF convention
 )
 ```
@@ -96,7 +97,9 @@ bpy.ops.wm.alembic_export(filepath=OUT + "/cache.abc",
 ```
 
 **OBJ / STL / PLY** — geometry only. STL is triangles with no colour, materials or UVs;
-use it for 3D printing and nothing else.
+use it for 3D printing and nothing else. 5.2's STL exporter takes
+`evaluation_mode="DAG_EVAL_RENDER"` (default) or `"DAG_EVAL_VIEWPORT"` to pick which
+modifier levels (e.g. subdivision) are baked in.
 
 ```python
 bpy.ops.wm.obj_export(filepath=p, export_selected_objects=True,

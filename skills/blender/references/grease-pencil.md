@@ -1,6 +1,6 @@
 # Grease Pencil v3 — 2D drawing in 3D space
 
-Verified on Blender 5.2.0 LTS. Grease Pencil was rewritten for 4.3; everything from the
+Verified on Blender 5.2.2 LTS. Grease Pencil was rewritten for 4.3; everything from the
 legacy API is gone:
 
 | Legacy (≤4.2) | Blender 5.2 |
@@ -25,7 +25,8 @@ ob.type                                  # 'GREASEPENCIL'
 Or from a preset (this also sets up a default material and layers):
 
 ```python
-bpy.ops.object.grease_pencil_add(type="MONKEY")   # EMPTY | STROKE | MONKEY | LINEART …
+bpy.ops.object.grease_pencil_add(type="MONKEY")   # EMPTY | STROKE | MONKEY
+                                                  # | LINEART_SCENE | _COLLECTION | _OBJECT
 ob = bpy.context.object
 ```
 
@@ -41,6 +42,8 @@ frm.frame_number
 ```
 
 Each `layer.frames[i]` holds one `drawing`. Add a frame per pose to animate.
+Layer masks: `layer.use_masks = True`, then add other layers to `layer.mask_layers`.
+`layer.tint_color` tints the whole layer.
 
 ## Drawing strokes
 
@@ -62,7 +65,9 @@ drawing.tag_positions_changed()          # flush after moving points
 Several strokes at once: `drawing.add_strokes([12, 8, 30])`.
 
 Stroke-level flags live on the stroke: `stroke.cyclic`, `stroke.material_index`,
-`stroke.softness`, `stroke.start_cap`, `stroke.end_cap`.
+`stroke.softness`, `stroke.start_cap`, `stroke.end_cap`, `stroke.fill_opacity`, and — new in
+5.2 — `stroke.fill_id` (fills are grouped per stroke, not per material) and
+`stroke.hide_stroke` (draw the fill without its outline).
 
 Other `drawing` methods: `remove_strokes`, `resize_strokes`, `reorder_strokes`,
 `set_types`, `attributes`, `color_attributes`, `curve_offsets`, `vertex_group_assign`,
@@ -122,7 +127,7 @@ m.target_material = mat
 # m.source_collection / m.source_object for the narrower modes
 # edge types: m.use_contour, use_crease, use_material, use_edge_mark,
 #             use_intersection, use_light_contour
-m.thickness = 25
+m.radius = 0.003                     # stroke radius in metres (was .thickness)
 ```
 
 Line Art re-evaluates the scene, so it is slow on heavy scenes and updates only on frame
