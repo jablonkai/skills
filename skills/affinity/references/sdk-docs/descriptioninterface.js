@@ -1,11 +1,11 @@
 'use strict';
 
 const { DescriptionInterfaceApi } = require('affinity:dom');
-const { Colour } = require('./colours.js');
-const { HandleObject } = require('./handleobject.js');
+const { Colour } = require('/colours.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 class DescriptionInterface extends HandleObject {
     constructor(handle) {

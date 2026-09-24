@@ -10,13 +10,13 @@
 //   affinity-cli.mjs ping
 //   affinity-cli.mjs tools [--json]
 //   affinity-cli.mjs call <tool> ['{"json":"args"}']
-//   affinity-cli.mjs run <file.js> [--title "<title>"]
+//   affinity-cli.mjs run <file.js | -> [--title "<title>"]   (- reads the script from stdin)
 //   affinity-cli.mjs add --title "<t>" --description "<d>" --file <file.js>
 //   affinity-cli.mjs list
 //   affinity-cli.mjs save --title "<t>" [--out <path>]
 //   affinity-cli.mjs search <query...>
 //   affinity-cli.mjs docs [<topic-filename>]
-//   affinity-cli.mjs docs-dump <output-dir>
+//   affinity-cli.mjs docs-dump <output-dir> [--force]
 //   affinity-cli.mjs render [--selection] [--uuid <u>] [--spread <n>] [--out <path>]
 //
 // Env: AFFINITY_MCP_URL (default http://localhost:6767), AFFINITY_TIMEOUT_MS (default 120000)
@@ -216,6 +216,12 @@ function printToolResult(result) {
   console.log(text || JSON.stringify(result, null, 2));
 }
 
+async function readStdin() {
+  const chunks = [];
+  for await (const chunk of process.stdin) chunks.push(chunk);
+  return Buffer.concat(chunks).toString("utf8");
+}
+
 function parseFlags(args) {
   const flags = {};
   const positional = [];
@@ -237,9 +243,10 @@ function parseFlags(args) {
 
 async function cmdRun(client, { flags, positional }) {
   const file = positional[0];
-  if (!file) throw new Error("Usage: run <file.js> [--title <title>]");
-  const code = await readFile(path.resolve(file), "utf8");
-  const title = flags.title || path.basename(file, ".js");
+  if (!file) throw new Error("Usage: run <file.js | -> [--title <title>]");
+  const code = file === "-" ? await readStdin() : await readFile(path.resolve(file), "utf8");
+  if (!code.trim()) throw new Error("Empty script");
+  const title = flags.title || (file === "-" ? "stdin-script" : path.basename(file, ".js"));
 
   const { tools } = await client.request("tools/list", {});
   const names = tools.map((t) => t.name);
@@ -388,8 +395,9 @@ async function main() {
         break;
       }
       case "docs-dump": {
-        const outDir = rest[0];
-        if (!outDir) throw new Error("Usage: docs-dump <output-dir>");
+        const force = rest.includes("--force");
+        const outDir = rest.find((a) => a !== "--force");
+        if (!outDir) throw new Error("Usage: docs-dump <output-dir> [--force]");
         // Several topics refuse to load until the preamble has been read in-session.
         await client.callTool("read_sdk_documentation_topic", { filename: "preamble" }).catch(() => {});
         const listResult = await client.callTool("list_sdk_documentation", {});
@@ -411,13 +419,17 @@ async function main() {
           }
           try {
             // Long dumps can outlive the SSE session; rerunning resumes where it left off.
-            if (!rest.includes("--force") && (await readFile(dest, "utf8").catch(() => null)) !== null) {
+            if (!force && (await readFile(dest, "utf8").catch(() => null)) !== null) {
               saved += 1;
               continue;
             }
             const doc = await client.callTool("read_sdk_documentation_topic", { filename: topic });
+            const text = toolText(doc);
+            // Refusals (e.g. the preamble gate) come back as ordinary text; saving one would
+            // make the resume check above treat the topic as done forever.
+            if (doc.isError || /^ERROR:/.test(text)) throw new Error(text.slice(0, 200) || "error result");
             await mkdir(path.dirname(dest), { recursive: true });
-            await writeFile(dest, toolText(doc), "utf8");
+            await writeFile(dest, text, "utf8");
             saved += 1;
           } catch (err) {
             console.error(`Failed: ${topic} — ${err.message}`);

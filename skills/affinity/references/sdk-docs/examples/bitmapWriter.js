@@ -4,13 +4,13 @@
 
 'use strict';
 
-const { app } = require('/application');
-const { Dialog, DialogResult } = require('/dialog');
-const { Document } = require('/document');
-const { ImageNodeDefinition } = require('/nodes');
-const { Bitmap, PixelBuffer, RasterFormat } = require('/rasterobject');
-const { PixelReaderWriterRGBA8 } = require('/pixelaccessor');
-const { UnitType } = require('/units');
+const { app } = require('/application.js');
+const { Dialog, DialogResult } = require('/dialog.js');
+const { Document } = require('/document.js');
+const { ImageNodeDefinition } = require('/nodes.js');
+const { Bitmap, PixelBuffer, RasterFormat } = require('/rasterobject.js');
+const { PixelReaderWriterRGBA8 } = require('/pixelaccessor.js');
+const { UnitType } = require('/units.js');
 
 function main(usePixelWriter) {
     const doc = Document.current;

@@ -1,34 +1,3 @@
-/*
-BSD 3-Clause License
-
-Copyright (c) 2026, Canva Pty Ltd.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-Redistributions of source code must retain the above copyright notice, this
-list of conditions and the following disclaimer.
-
-Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-Neither the name of the copyright holder nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
 'use strict';
 
 // Builds a new A4 landscape document containing a TableTextNode populated
@@ -37,15 +6,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // networking is disabled it falls back to the bundled local copy.
 
 const { ErrorCode } = require('affinity:common');
-const { Document, DocumentPreset } = require('/document');
-const { HttpRequest, RequestMethod } = require('/network');
-const { TableTextNodeDefinition } = require('/nodes');
-const { AddChildNodesCommandBuilder } = require('/commands');
-const { Selection, TextSelection } = require('/selections');
-const { HardBreakType } = require('/story');
-const { StoryDelta } = require('/storydelta');
-const { GlyphAttDoubleType } = require('/glyphatts');
-const { FontWeight } = require('/fonts');
+const { Document, DocumentPreset } = require('/document.js');
+const { HttpRequest, RequestMethod } = require('/network.js');
+const { TableTextNodeDefinition } = require('/nodes.js');
+const { AddChildNodesCommandBuilder } = require('/commands.js');
+const { Selection, TextSelection } = require('/selections.js');
+const { HardBreakType } = require('/story.js');
+const { StoryDelta } = require('/storydelta.js');
+const { GlyphAttDoubleType } = require('/glyphatts.js');
+const { FontWeight } = require('/fonts.js');
 
 const DATA_URL = "https://jsonlint.com/datasets/countries.json";
 const LOCAL_FALLBACK = require('/examples/countries.json');
@@ -53,9 +22,9 @@ const NUM_ROWS = 20;
 const HEADER_PT = 14;
 const BODY_PT = 10;
 
-function newA4Empty(landscape) {
+function newA4Empty(isLandscape) {
     const a4 = DocumentPreset.all.filter(p => p.name.includes("A4"))[0];
-    return Document.createFromPreset(a4, landscape);
+    return Document.createFromPreset(a4, isLandscape);
 }
 
 // Returns the parsed JSON body, or null if the request is not denied

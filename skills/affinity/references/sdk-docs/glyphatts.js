@@ -11,10 +11,10 @@ const {
     TocRoleType,
     TypographicLineType
 } = require('affinity:story');
-const Fill = require('./fills.js');
-const { Font } = require('./fonts.js');
-const { HandleObject } = require('./handleobject.js');
-const LineStyle = require('./linestyle.js');
+const Fill = require('/fills.js');
+const { Font } = require('/fonts.js');
+const { HandleObject } = require('/handleobject.js');
+const LineStyle = require('/linestyle.js');
 
 class GlyphAtts extends HandleObject {
 

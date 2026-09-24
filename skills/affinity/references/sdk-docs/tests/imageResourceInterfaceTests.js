@@ -1,8 +1,8 @@
 'use strict';
-const {app} = require('/application');
-const {ImageResourceInterface} = require('/imageResourceInterface');
-const {ColourProfileSet} = require('/colour');
-const {createTypedNode} = require('/node');
+const {app} = require('/application.js');
+const {ImageResourceInterface} = require('/imageresourceinterface.js');
+const {ColourProfileSet} = require('/colour.js');
+const {createTypedNode} = require('/node.js');
 
 function testImageResourceInterface() {
     const doc = app.documents.current;
@@ -15,26 +15,28 @@ function testImageResourceInterface() {
         console.log(".imageFilePath:");
         console.log(imgResInterface.imageFilePath);
         
-        console.log(".imageFileSize:");
-        console.log(imgResInterface.imageFileSize);
+        console.log(".getImageFileSize(asBigInt):");
+        console.log(imgResInterface.getImageFileSize(false));
+        console.log(imgResInterface.getImageFileSize(true));
         
-        console.log(".modifiedTime:");
-        console.log(imgResInterface.modifiedTime);
+        console.log(".getModifiedTime(asBigInt):");
+        console.log(imgResInterface.getModifiedTime(false));
+        console.log(imgResInterface.getModifiedTime(true));
         
         console.log(".fileType:");
-        console.log(imgResInterface.modifiedTime);
+        console.log(imgResInterface.fileType);
         
         console.log(".fileTypeName:");
-        console.log(imgResInterface.modifiedTime);
+        console.log(imgResInterface.fileTypeName);
         
         console.log(".page:");
-        console.log(imgResInterface.modifiedTime);
+        console.log(imgResInterface.page);
         
         console.log(".artboard:");
-        console.log(imgResInterface.modifiedTime);
+        console.log(imgResInterface.artboard);
         
         console.log(".isOnArtboard:");
-        console.log(imgResInterface.modifiedTime);
+        console.log(imgResInterface.isOnArtboard);
         
         console.log(".originalDPI:");
         console.log(imgResInterface.originalDPI);

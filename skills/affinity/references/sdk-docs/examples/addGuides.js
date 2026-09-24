@@ -1,11 +1,11 @@
 
 'use strict';
 
-const {Document} = require('/document');
-const {Dialog, DialogResult} = require('/dialog');
-const {UnitType} = require("/units");
-const {unionRects} = require('/geometry');
-const {DocumentCommand, CompoundCommandBuilder} = require('/commands');
+const {Document} = require('/document.js');
+const {Dialog, DialogResult} = require('/dialog.js');
+const {UnitType} = require('/units.js');
+const {unionRects} = require('/geometry.js');
+const {DocumentCommand, CompoundCommandBuilder} = require('/commands.js');
 
 function calculateOffsets(dlg) {
     const offsets = {

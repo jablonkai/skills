@@ -2,10 +2,10 @@
 
 const { FileType, ImagePlacement, ImageResourceInterfaceApi } = require('affinity:dom');
 const { RasterFormat } = require('affinity:raster');
-const { HandleObject} = require('./handleobject.js');
+const { HandleObject} = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 class ImageResourceInterface extends HandleObject {
     constructor(handle) {
@@ -20,12 +20,20 @@ class ImageResourceInterface extends HandleObject {
         return ImageResourceInterfaceApi.getImageFilePath(this.handle);
     }
     
+    getImageFileSize(asBigInt) {
+        return ImageResourceInterfaceApi.getImageFileSize(this.handle, asBigInt);
+    }
+
     get imageFileSize() {
-        return ImageResourceInterfaceApi.getImageFileSize(this.handle);
+        return this.getImageFileSize();
     }
     
+    getModifiedTime(asBigInt) {
+        return ImageResourceInterfaceApi.getModifiedTime(this.handle, asBigInt);
+    }
+
     get modifiedTime() {
-        return ImageResourceInterfaceApi.getModifiedTime(this.handle);
+        return this.getModifiedTime();
     }
     
     get fileType() {

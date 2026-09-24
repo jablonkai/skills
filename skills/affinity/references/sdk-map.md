@@ -1,8 +1,13 @@
 # Affinity SDK map — curated digest of `sdk-docs/`
 
-Distilled from the vendored SDK source (Affinity 3.2.3). Use this file to find the right
+Distilled from the vendored SDK source (Affinity 3.3.0). Use this file to find the right
 module and API shape *before* grepping `sdk-docs/`; grep only for exact signatures/params.
-All modules load as `require('/name')` (vendored file `name.js` mirrors the module).
+All modules load as `require('/name.js')` or `require('/name')` (vendored file `name.js`
+mirrors the module).
+
+**Debugging tip:** `const { inspect } = require('/inspect.js'); console.log(inspect(x));`
+dumps any SDK object (handle objects, structs, enums) with all its getters — the fastest
+way to discover what a node, fill or selection actually holds.
 
 ## The three ways to change a document
 
@@ -15,8 +20,10 @@ All modules load as `require('/name')` (vendored file `name.js` mirrors the modu
    statics (~300 in `commands.js`), needed when batching via
    `CompoundCommandBuilder.create()` → `addCommand(cmd)` → `createCommand()`.
 3. **Node insertion** — single node: `doc.addNode(nodeDefinition, targetNode = null,
-   childList = NodeChildType.Main, preview)`. Multiple/positioned:
-   `AddChildNodesCommandBuilder` (see api-reference.md drawing recipe).
+   childList = NodeChildType.Main, preview)` (returns nothing; inserts relative to the
+   selection). Nested/positioned or several: `AddChildNodesCommandBuilder` +
+   `setInsertionTarget(parent)`, then read the new node from `doc.selection` (see
+   api-reference.md).
 
 Everything is undoable: `doc.undo()/redo()`, `doc.history` (DocumentHistory),
 snapshots (`doc.snapshots`, `DocumentCommand.createAddDocumentSnapshot`).
@@ -24,8 +31,16 @@ snapshots (`doc.snapshots`, `DocumentCommand.createAddDocumentSnapshot`).
 ## document.js — Document (the hub)
 
 - Lifecycle: `Document.current/.all/.load(path)`, `.createFromPreset(preset, landscape)`,
-  `.create(options)` (`NewDocumentOptions.createDefault()`), `save()`, `saveAs(path)`,
-  `close()`; `isDirty`, `title`, `path`.
+  `.create(options)` (verified; the new doc becomes current). Options default to **mm**;
+  setters are write-only, so set units first:
+  ```js
+  const { UnitType } = require('/units.js');
+  const o = NewDocumentOptions.createDefault();
+  o.units = UnitType.Pixel; o.width = 1200; o.height = 800; o.dpi = 144;
+  const doc = Document.create(o);
+  ```
+   `save()`, `saveAs(path)`, `close()` (**no prompt — discards unsaved changes**);
+  `isDirty`, `title`, `path`.
 - Structure: `rootNode`, `currentSpread`, `spreads`, `artboards`, `layers`, `pageCount`,
   `hasArtboards`; sizes `sizePixels/widthPixels/heightPixels`, `dpi`, `units`, `format`.
 - Selection: `doc.selection` (Selection), `selectAll()`, `DocumentCommand.createSetSelection`.
@@ -44,21 +59,36 @@ snapshots (`doc.snapshots`, `DocumentCommand.createAddDocumentSnapshot`).
 - Raster selection: `rasterSelectAll/Deselect/InvertSelection`, `setRasterSelectionFromPolygon/
   FromObject`, `growShrink/feather/smooth/outlineRasterSelection`; also `flatten()`,
   `mergeVisible()`.
+- Vector ops (3.3, all `(selection, preview)`): `boolOpUnion/Subtract/Intersect/Xor`,
+  `divideShapes`; curves: `joinCurves(sel, isJoinStraight)`, `mergeCurves`, `breakCurves`,
+  `separateCurves`, `reverseCurves`, `smoothCurves`. `boolOpUnion` verified: shapes →
+  one `PolyCurveNode`.
+- Raster ops (3.3): `rasterAutoLevels/Contrast/Colours/WhiteBalance(sel)`,
+  `rasterFill(sel, mode, colour, opacity, blendMode)`, `rasterFloodFill(sel, point,
+  tolerance, isContiguous, antialias, samplingSource, blendMode, colour)`,
+  `rasterFloodSelect(point, …)`, tonal/colour selections `rasterSelectHighlights/
+  Midtones/Shadows/Reds/Greens/Blues/Transparent/Opaque`, `rasterEdgeDetect` (+ H/V),
+  `rasterPolarToRectangular` / reverse; layers `mergeDown()`, `mergeSelected()`,
+  `flipCanvas(isHorizontal)`, `unlockAll()`; per-page props `setPageDocumentProperties`.
 - Layer-effect setters: ~150 `set<Fx>LayerEffect*` methods (Bevel/Emboss, Outline, Inner/Outer
   Shadow & Glow, ColourOverlay, GradientOverlay, PhongBevel, GaussianBlur) — all take
   `(selection, …, enableIfDisabled, preview)`; `removeAllLayerEffects(selection)`.
 
-## nodes.js — node model (the 180 KB one)
+## nodes.js — node model (the ~300 KB one)
 
 Hierarchy: `Node` → `LogicalNode` (fills/strokes) → `ContainerNode` (layers), `GroupNode`,
 `DocumentNode`; `Node` → `PhysicalNode` → `SpreadNode`, `TextNode` (Art/Frame/Path/Table…),
 `VectorNode` (`ShapeNode`, `PolyCurveNode`, `ImageNode`), `RasterNode` (pixel layers,
 adjustments, live filters), `EmbeddedDocumentNode`.
 
-- Type guards on every class: `node.isShapeNode`, `.isTextNodeDefinition`, etc.
-- Traversal: `node.children` / `.descendents` (lazy `Collection` — `filter/map/take/toArray`),
-  `nextSibling`, `spread`, `document`; reorder with `moveToFirstChild/moveToParent/…`;
-  `delete()`, `duplicate(transform?)`.
+- Type guards: `node.isShapeNode`, `.isTextNode`, `.isVectorNode`, `.isTextNodeDefinition`…
+  are defined only on the classes they describe — elsewhere they are `undefined`, not
+  `false`, so test truthiness (`filter(n => n.isShapeNode)`), never `=== false`.
+- Traversal: `node.children` (lazy `Collection` — `filter/map/take/toArray/at(i)`, also
+  iterable with `for…of`; `app.documents.all` by contrast is a plain Array); there is
+  no descendants getter, so recurse through `children` for a deep walk. Also `nextSibling`,
+  `spread`, `document`; reorder with `moveToFirstChild/moveToParent/…`; `delete()`,
+  `duplicate(transform?)`.
 - Geometry: `spreadBaseBox`, `localVisibleBox`, `getExactSpreadVisibleBox()`,
   `transform` / `transformInterface`, `baseToSpreadTransform`.
 - State: `isVisible`, `globalOpacity`, `blendMode`, `isLocked`/`lock()`, `description`,
@@ -94,6 +124,9 @@ adjustments, live filters), `EmbeddedDocumentNode`.
   pixel layer: `RasterNodeDefinition` + `.setBitmap(bm)` (see `tests/rasterNodeTests.js`).
 - **Freeform path**: `PolyCurveNodeDefinition.create(curve, brushFill, lineStyle, lineFill,
   transparencyFill)` with a `PolyCurve` from geometry.
+- **Measurement** (3.3): `MeasurementNodeDefinition` → `AddChildNodesCommandBuilder
+  .addMeasurementNode(def)`; tune with `DocumentCommand.createSetMeasurement*` (units,
+  precision, annotation offset, endpoint markers).
 - **Layer/group**: `ContainerNodeDefinition.create(name)`; table: `TableTextNodeDefinition`
   (working example: `examples/tableFromJson.js`).
 
@@ -105,12 +138,14 @@ adjustments, live filters), `EmbeddedDocumentNode`.
   the *text selection* (or whole node selection).
 - `StoryDelta` statics = every text attribute: `createFamilyName/Weight/Italic/Width`,
   `createFont`, `createAlignX(ParagraphAlignXType.Centre)`, `createBrushFill(fd)` (text
-  colour), `createGlyphDouble(GlyphAttDoubleType.Height, pts)` (font size), underline/caps/
+  colour), `createGlyphDouble(GlyphAttDoubleType.Height, px)` (font size — in **document
+  pixels**: `pt * doc.dpi / 72`; the same unit as `GlyphAtts.height`), underline/caps/
   super-sub/leading/indent/hyphenation…, combined with `createComposite([...])`.
 - `GlyphAtts.create()` / `ParagraphAtts.create()` — absolute attribute sets for StoryBuilder
   (`sb.setGlyphAtts`); deltas are usually easier.
 - Fonts: `Font.create(family, weight, isItalic, width)`, `Font.all`, `FontFamily.all`,
-  `FontWeight.Bold` etc.; document fonts: `doc.getFontNames()`.
+  `FontWeight` = Thin, ExtraLight, Light, **Normal** (not "Regular"), Medium, SemiBold,
+  Bold, ExtraBold, Black; document fonts: `doc.getFontNames()`.
 - Glyph objects (fields, breaks, anchors, index marks): `glyphs.js`;
   `doc.insertGlyph(glyph, selection)`.
 
@@ -121,8 +156,11 @@ adjustments, live filters), `EmbeddedDocumentNode`.
 - `FillDescriptor.createSolid(solidFill, blendMode)` / `.create(fill, scaleWithObject,
   transform, blendMode, anchoredToSpread)`; fill types: `SolidFill.create(colour)`,
   `GradientFill.create(Gradient.create(stops), gradientFillType)`, `BitmapFill.create(bitmap,
-  extendType, resamplerType, ignoreAlpha)`, `HatchFill`, `NoFill`.
-- `LineStyle.create(opts)` / `.createDefaultWithWeight(w)`; `LineStyleDescriptor.create(
+  extendType, resamplerType, ignoreAlpha)`, `HatchFill`, `NoFill`; new in 3.3:
+  `MeshFill.create(ColourMesh)` and `DiffusionFill.create(DiffusionCurveSet)` (working
+  example: `examples/meshBubble.js`).
+- `LineStyle.create(opts)` / `.createDefaultWithWeight(w)`; brush strokes via
+  `lineStyle.pathBrush` (`PathBrush`, `pathbrush.js` — replaced 3.2's `vectorBrush` property); `LineStyleDescriptor.create(
   lineStyle, options)` adds arrowheads (`ArrowHead.create(style, opts)`), pressure,
   stroke alignment. Apply via `doc.setLineStyleDescriptor` or the per-prop setters.
 - Gradients on canvas: `doc.setBrushFillDescriptor(fd, selection)`; blend modes:
@@ -147,8 +185,9 @@ Curves: `Curve.createLine/Rectangle/Ellipse/Diamond/Lozenge`, `CurveBuilder`
 
 ## Selections (selections.js)
 
-`doc.selection` → `Selection` (`length`, `at(i)`, `items`, `add(node)`); construct fresh via
-`node.selfSelection` or add nodes to selection then call `doc.set*`. Sub-selections
+`doc.selection` → `Selection` (`length`, `nodes`, `addNode(node)`); build one for any set of
+nodes with `Selection.create(doc, nodesArray)` (verified) or `node.selfSelection`, then pass
+it to `doc.set*` / `doc.boolOp*`. Sub-selections
 (curve nodes/edges, fill mesh, table cells, text ranges): `CurveNodeSubSelection`,
 `TableSubSelection`, `TextSelection`… — mostly consumed by curve-editing commands
 (`createDeleteCurveNodes`, `createSetCurveNodeStyle`, knife/scissor cuts).
@@ -163,9 +202,19 @@ Curves: `Curve.createLine/Rectangle/Ellipse/Diamond/Lozenge`, `CurveBuilder`
 - **network.js** — `HttpRequest` exists but script networking is normally disabled.
 - **timers.js** — `setTimeout/setInterval/setImmediate` (scripts can be async;
   console output only while script runs).
-- **collection.js** — every `.children`/`.all` is a lazy `Collection`: `filter/map/some/
-  reduce/take/toArray`; don't index like an array, use `.at(i)`.
+- **collection.js** — node `.children` (and most node-list getters) are lazy `Collection`s:
+  `filter/map/some/reduce/take/toArray/at(i)`, iterable with `for…of`. Exception:
+  `app.documents.all` is a plain JS Array (no `toArray`). When unsure, `[...x]` works on both.
 - **buffer.js** — Node-like `Buffer` for pixel/file IO.
+- **environment.js** (3.3) — `Environment.permissions` (`{fileSystem, network, genAI}`),
+  `.fileSystemRoots`, `.sdkVersionStr`, `.configuration`, `.getHeapStatistics()`.
+- **os.js** (3.3) — `OS.platform/arch/osName/osVersion/Eol`.
+- **logging.js** (3.3) — `LogFile.create(path, logLevel, append)` → `start/flush/stop`;
+  captures console output to a (Desktop) file — see `examples/logToFile.js`.
+- **inspect.js** (3.3) — `inspect(value, opts)`, `format(...)` (Node-style); see the tip at
+  the top.
+- **configuration.js** (3.3) — `ConfigurationItem.createFromJsonString(str)` — typed JSON
+  tree the app uses for settings.
 - **exportconfig.js** — per-node export setup (`ExportConfig`/`ExportFormat`/`ExportScale`),
   applied with `DocumentCommand.createSetExportConfig(selection, cfg)`; for one-off exports
   prefer `doc.export`.
@@ -183,7 +232,9 @@ Curves: `Curve.createLine/Rectangle/Ellipse/Diamond/Lozenge`, `CurveBuilder`
 - Almost every API has an `xxxAsync(…, callback)` twin plus `doc.promises` /
   `DocumentPromises` — stick to sync in scripts, it's simpler and output ordering is stable.
 - `examples/*.js` wrap code in `function main()` + `module.exports.main` — live execution
-  needs top-level code instead; the logic inside is still accurate. `tests/*.js` are partly
+  needs top-level code instead; the logic inside is still accurate.
+- 3.3 renames: `ShapeRectangleCornerProxy` → `ShapeRectangleCorner`; `LineStyle.vectorBrush`
+  → `.pathBrush`. Scripts or hints written for 3.2 may use the old names. `tests/*.js` are partly
   stale — treat as idea sources only.
 - Enum classes expose `keys`/`values`/`entries` as **properties**; log
   `SomeEnum.keys` to discover valid values.
@@ -199,7 +250,7 @@ Curves: `Curve.createLine/Rectangle/Ellipse/Diamond/Lozenge`, `CurveBuilder`
 | Commands, batching | `commands.js` |
 | Shapes (30+ classes, QR payloads) | `shapes.js`, `shapeinterface.js` |
 | Geometry, curves, transforms | `geometry.js`, `curvesinterface.js`, `drawingscale.js`, `units.js` |
-| Colour, fills, strokes | `colours.js`, `fills.js`, `linestyle.js`, `linestyleinterface.js`, `hatch.js`, `brushfillinterface.js` |
+| Colour, fills, strokes | `colours.js`, `fills.js`, `linestyle.js`, `linestyleinterface.js`, `hatch.js`, `brushfillinterface.js`, `pathbrush.js` |
 | Text | `story.js`, `storybuilder.js`, `storydelta.js`, `storyinterface.js`, `glyphs.js`, `glyphatts.js`, `paragraphatts.js`, `fonts.js`, `textframeinterface.js` |
 | Raster, pixels, brushes | `rasterobject.js`, `rasterinterface.js`, `pixelaccessor.js`, `rasterbrush.js`, `vectorbrush.js`, `rasterselection.js`, `buffer.js` |
 | Layer effects | `layereffects.js`, `layereffectsinterface.js` |
@@ -208,7 +259,8 @@ Curves: `Curve.createLine/Rectangle/Ellipse/Diamond/Lozenge`, `CurveBuilder`
 | Artboards, spreads, pages | `artboardinterface.js`, `artboardproperties.js`, `pageboxinterface.js`, `marginsinterface.js`, `physicalroot*.js` |
 | UI dialogs | `dialog.js` |
 | Files, network, timers | `fs.js`, `network.js`, `timers.js` |
+| Runtime, permissions, debugging | `environment.js`, `os.js`, `logging.js`, `inspect.js`, `configuration.js` |
 | Node aspect interfaces | `baseboxinterface.js`, `blendmodeinterface.js`, `transforminterface.js`, `transparencyinterface.js`, `visibilityinterface.js`, `taginterface.js`, `descriptioninterface.js`, `editabilityinterface.js`, `imageresourceinterface.js`, `pictureframeinterface.js`, `compoundoperationinterface.js`, `exportableinterface.js` |
 | Embedded documents | `nodes.js` (`EmbeddedDocumentNode`) |
 | Valid ranges | `param_ranges.min.json`, `struct_ranges.min.json`, `struct_array_sizes.min.json` |
-| Working examples | `examples/` (artboardGrid, tableFromJson, bitmapWriter, boldItalics, addGuides, flexibleLayout…) |
+| Working examples | `examples/` — layout: artboardGrid, makeGrid, stepAndRepeat, alignToPage, cropMarks, addGuides, flexibleLayout; text: tableFromJson, splitStory, breakFrame, textOnCurvesAndShapes, boldItalics; curves: roundAnyCorner, cornerEffects, pathEffects, bulgedPolyline, divideLength, arrowheads; selection: selectObjects, swapObjects, randomise, countSelectedItems; pixels/fills: bitmapWriter, meshBubble; misc: logToFile |

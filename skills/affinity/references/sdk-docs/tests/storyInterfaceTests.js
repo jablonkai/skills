@@ -1,8 +1,8 @@
 'use strict';
 
-const { TestUtils } = require("/tests/testUtils");
-const { IndexRange } = require("affinity:story")
-const { Transform } = require("/geometry.js")
+const { TestUtils } = require('/tests/testUtils.js');
+const { IndexRange } = require('affinity:story')
+const { Transform } = require('/geometry.js')
 
 function doStoryInterfaceTests(iface, node) {
     console.assert(iface.isMultiFrameTextFlow === false);

@@ -10,7 +10,8 @@ const { PixelReaderM8Api, PixelReaderWriterM8Api } = require('affinity:raster');
 const { PixelReaderM16Api, PixelReaderWriterM16Api } = require('affinity:raster');
 const { PixelReaderRGBAufApi, PixelReaderWriterRGBAufApi } = require('affinity:raster');
 const { PixelReaderMfApi, PixelReaderWriterMfApi } = require('affinity:raster');
-const { HandleObject } = require('./handleobject.js');
+const { HandleObject } = require('/handleobject.js');
+const { RasterFormat } = require('/rasterobject.js');
 
 class PixelReaderRGBA8 extends HandleObject {
     constructor(handle) {
@@ -493,6 +494,44 @@ class PixelReaderWriterMf extends HandleObject {
 }
 
 
+const accessorsByFormat = new Map([
+    [RasterFormat.RGBA8,   { reader: PixelReaderRGBA8,   readerWriter: PixelReaderWriterRGBA8 }],
+    [RasterFormat.RGBA16,  { reader: PixelReaderRGBA16,  readerWriter: PixelReaderWriterRGBA16 }],
+    [RasterFormat.IA8,     { reader: PixelReaderIA8,     readerWriter: PixelReaderWriterIA8 }],
+    [RasterFormat.IA16,    { reader: PixelReaderIA16,    readerWriter: PixelReaderWriterIA16 }],
+    [RasterFormat.CMYKA8,  { reader: PixelReaderCMYKA8,  readerWriter: PixelReaderWriterCMYKA8 }],
+    [RasterFormat.LABA16,  { reader: PixelReaderLABA16,  readerWriter: PixelReaderWriterLABA16 }],
+    [RasterFormat.M8,      { reader: PixelReaderM8,      readerWriter: PixelReaderWriterM8 }],
+    [RasterFormat.M16,     { reader: PixelReaderM16,     readerWriter: PixelReaderWriterM16 }],
+    [RasterFormat.RGBAUF,  { reader: PixelReaderRGBAuf,  readerWriter: PixelReaderWriterRGBAuf }],
+    [RasterFormat.MF,      { reader: PixelReaderMf,      readerWriter: PixelReaderWriterMf }],
+]);
+
+function accessorsForBitmap(bitmap) {
+    const format = bitmap.format;
+    const accessors = accessorsByFormat.get(format);
+    if (!accessors)
+        throw new Error(`No pixel accessor available for raster format '${format}'`);
+    return accessors;
+}
+
+// Creates a read-only pixel accessor matching the bitmap's pixel type.
+// The caller owns the returned accessor and must call dispose() when finished.
+function createPixelReader(bitmap) {
+    return accessorsForBitmap(bitmap).reader.create(bitmap);
+}
+
+// Creates a read/write pixel accessor matching the bitmap's pixel type.
+// The caller owns the returned accessor and must call dispose() when finished.
+function createPixelReaderWriter(bitmap) {
+    return accessorsForBitmap(bitmap).readerWriter.create(bitmap);
+}
+
+// Re-exports
+module.exports.RasterFormat = RasterFormat;
+
+module.exports.createPixelReader = createPixelReader;
+module.exports.createPixelReaderWriter = createPixelReaderWriter;
 module.exports.PixelReaderRGBA8 = PixelReaderRGBA8;
 module.exports.PixelReaderWriterRGBA8 = PixelReaderWriterRGBA8;
 module.exports.PixelReaderRGBA16 = PixelReaderRGBA16;

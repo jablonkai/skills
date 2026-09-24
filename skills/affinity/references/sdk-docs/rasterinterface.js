@@ -2,11 +2,11 @@
 
 const { RasterInterfaceApi } = require('affinity:dom');
 const { RasterFormat } = require('affinity:raster');
-const { HandleObject } = require('./handleobject.js');
-const { Bitmap, PixelBuffer } = require('./rasterobject.js');
+const { HandleObject } = require('/handleobject.js');
+const { Bitmap, PixelBuffer } = require('/rasterobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 // monkey patches:
 require('/geometry.js');

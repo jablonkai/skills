@@ -1,10 +1,10 @@
 'use strict';
 
 const { PredefinedTagKey, TagInterfaceApi } = require('affinity:dom');
-const { HandleObject } = require('./handleobject.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 class TagInterface extends HandleObject {
     constructor(handle) {

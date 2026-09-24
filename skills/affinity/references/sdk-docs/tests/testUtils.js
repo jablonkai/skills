@@ -1,7 +1,7 @@
 'use strict';
-const {app} = require('/application');
-const {Document, DocumentPromises, DocumentPreset} = require("/document");
-const {PixelBuffer, RasterFormat} = require("/rasterObject");
+const {app} = require('/application.js');
+const {Document, DocumentPromises, DocumentPreset} = require('/document.js');
+const {PixelBuffer, RasterFormat} = require('/rasterobject.js');
 
 class TestUtils {
     static getRandomRGBA8Bitmap(width, height) {

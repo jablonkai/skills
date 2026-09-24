@@ -11,7 +11,7 @@ const {
     ParagraphStartAtHardBreakType,
     ParagraphUseSpaceBeforeMode
 } = require('affinity:story');
-const { HandleObject } = require('./handleobject.js');
+const { HandleObject } = require('/handleobject.js');
 
 class ParagraphAtts extends HandleObject {
 

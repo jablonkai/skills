@@ -1,6 +1,7 @@
 # Affinity automation endpoint — API reference
 
-Verified live against **Affinity 3.2.3.4646 (macOS)**, protocol `2025-11-25`, 2026-07-22.
+Verified live against **Affinity 3.3.0.4850 (macOS)**, protocol `2025-11-25`, 2026-09-24.
+The tool set is unchanged from 3.2.3; the SDK itself grew substantially (see sdk-map.md).
 
 ## Endpoint
 
@@ -16,7 +17,7 @@ Verified live against **Affinity 3.2.3.4646 (macOS)**, protocol `2025-11-25`, 20
 - Long-running sessions can die server-side (POST starts returning HTTP 404) — rerun the
   command; `docs-dump` resumes, skipping already-saved files.
 
-## Tools (verified 3.2.3)
+## Tools (verified 3.3.0)
 
 | Tool | Arguments | Notes |
 |---|---|---|
@@ -26,7 +27,7 @@ Verified live against **Affinity 3.2.3.4646 (macOS)**, protocol `2025-11-25`, 20
 | `list_library_scripts` | `{}` | Names of installed library scripts. |
 | `save_script_to_library` | `{title, description, code}` | Re-saving an existing title updates it. No delete via endpoint — Scripts panel UI only. |
 | `read_library_script` | `{title}` | Script source as text. |
-| `list_sdk_documentation` | `{}` | CSV of topic filenames. Quirk: lists `adjustment_ranges`/`filter_ranges`, which 404; the real range files are the three `.min.json` below and are NOT listed. |
+| `list_sdk_documentation` | `{}` | CSV of topic filenames, including the three `.min.json` range files (3.2.3 listed dead `adjustment_ranges`/`filter_ranges` entries instead — fixed in 3.3). |
 | `read_sdk_documentation_topic` | `{filename}` | One topic as text. Requires preamble first (see above). |
 | `search_sdk_hints` | `{prompt}` | Crowd-sourced hints pool; treat as leads, not truth. |
 | `add_sdk_hint` | `{hint}` | Contribute a hint after solving something by experimentation. |
@@ -37,19 +38,27 @@ Verified live against **Affinity 3.2.3.4646 (macOS)**, protocol `2025-11-25`, 20
 
 ## JavaScript SDK — preamble digest
 
-Full vendored docs live in `sdk-docs/` (109 topics + `examples/`, `tests/` subdirs + 3 range
-JSONs; ~1.3 MB — **grep, don't read whole files**; `nodes.js` alone is 180 KB).
+Full vendored docs live in `sdk-docs/` (142 topics incl. `examples/`, `tests/` and the 3 range
+JSONs; ~1.8 MB — **grep, don't read whole files**; `nodes.js` alone is ~300 KB).
 **[sdk-map.md](sdk-map.md) is the curated digest of all of it** — module map, node model,
 text/image/adjustment recipes, gotchas. Read it before grepping raw sdk-docs.
 
-- Includes: `require('/application')`, `require('/document')`, etc. — the vendored files
-  mirror these module names. Native modules appear as `require('affinity:...')`.
+- Includes: the 3.3 preamble uses `require('/document.js')`; the suffix-less
+  `require('/document')` still works (both verified). The vendored files mirror these module
+  names. Native modules appear as `require('affinity:...')` — the JS classes forward to
+  `*Api` statics that take the target handle as their first argument (`self`).
+- Online reference for those native APIs (signatures only, no prose; methods without a
+  return type return void): <https://sdk.affinity.studio/latest/js/> — `apis/<ApiName>/index.html`
+  (method list), `apis/<ApiName>/<method>.html` (args/types), `enums/<Enum>.html`,
+  `classes/<Class>.html`, `objects.inv` (every symbol → URL). Use it when a vendored JS
+  wrapper only says `return XxxApi.foo(this.handle, …)`.
 - Entry API: `const { app } = require('/application');` → `app.documents.current` /
   `.all` / `.load(path)`, `app.userDesktopPath`, `app.alert/confirm/prompt/chooseFile`,
   version getters. Document: `doc.sessionUuid`, `doc.persistentUuid`.
 - **No return values**: script output only via `console.log()`.
-- `NOT_ALLOWED` from any command = the user disabled AI / filesystem / networking for
-  scripts in Affinity settings.
+- A denied command throws `PERMISSION_DENIED` (the preamble says `NOT_ALLOWED`; 3.3 actually
+  throws the former) = the user disabled AI / filesystem / networking for scripts. Check up front with `require('/environment').Environment`:
+  `.permissions` → `{fileSystem, network, genAI}`, `.fileSystemRoots` → allowed dirs.
 - Filesystem access (when allowed) is **Desktop-only** — use `app.userDesktopPath`.
 - **Must set the current spread before editing nodes on it**, but don't re-set it if
   already current — setting the spread clears the selection.
@@ -87,6 +96,10 @@ console.log(doc.currentSpread.children.length);      // verify
 
 - Single node shortcut — skip the builder:
   `doc.addNode(nodeDefinition, targetNode = null, childList = NodeChildType.Main, preview)`.
+  It returns nothing and inserts **relative to the current selection**, so consecutive calls
+  nest unpredictably. For anything beyond one node use the builder with an explicit
+  `setInsertionTarget(parent)`; the inserted node is then selected — grab it with
+  `doc.selection.nodes.toArray()[0]` (e.g. to set `node.userDescription = 'Name'`).
 - Most edits don't need commands at all: `Document` has direct wrappers (`doc.setText`,
   `setOpacity`, `setBlendMode`, `applyTransform`, …) — see `sdk-map.md`.
 - `ShapeNodeDefinition.create(shape, rect, brushFill, lineFill, lineStyle, transparencyFill)` —

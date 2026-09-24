@@ -1,20 +1,22 @@
 'use strict';
-const {app} = require('/application');
-const {ShapeNodeDefinition, PolyCurveNodeDefinition, ContainerNodeDefinition, ExposureAdjustmentRasterNodeDefinition, GaussianBlurFilterRasterNodeDefinition, createTypedNode, Node, NodeChildType} = require('/nodes');
-const dommodule = require("affinity:dom");
-const {DocumentCommand, AddChildNodesCommandBuilder, InsertionMode} = require("/commands");
-const {Document, DocumentPromises} = require("/document.js");
-const {Shape, ShapeType} = require("/shapes");
-const {Fill, FillDescriptor} = require("/fills");
-const {BlendMode} = require("affinity:common");
-const {Rectangle} = require("/geometry");
-const {LineStyleDescriptor, LineType} = require("/linestyle");
-const {Colour, RGBA8} = require("/colours");
+const {app} = require('/application.js');
+const {ShapeNodeDefinition, PolyCurveNodeDefinition, ContainerNodeDefinition, ExposureAdjustmentRasterNodeDefinition, GaussianBlurFilterRasterNodeDefinition, createTypedNode, Node, NodeChildType} = require('/nodes.js');
+const dommodule = require('affinity:dom');
+const {DocumentCommand, AddChildNodesCommandBuilder, InsertionMode} = require('/commands.js');
+const {Document, DocumentPromises} = require('/document.js');
+const {Shape, ShapeType} = require('/shapes.js');
+const {Fill, FillDescriptor} = require('/fills.js');
+const {BlendMode} = require('affinity:common');
+const {Rectangle} = require('/geometry.js');
+const {LineStyleDescriptor, LineType} = require('/linestyle.js');
+const {Colour, RGBA8} = require('/colours.js');
 const {ErrorCode} = require('affinity:common');
-const {RasterFormat} = require('/rasterobject');
-const {RasterNodeDefinition, ImageNodeDefinition} = require('/nodes');
+const {RasterFormat} = require('/rasterobject.js');
+const {RasterNodeDefinition, ImageNodeDefinition} = require('/nodes.js');
 
-const {TestUtils} = require('/tests/testUtils');
+const {Selection} = require('/selections.js');
+
+const {TestUtils} = require('/tests/testUtils.js');
 
 function addChildNodeCollectiveFailPassTest() {
     let doc = TestUtils.getFile("/AddNodeDocSpreads.afdesign");
@@ -428,7 +430,7 @@ function testShapeNodeFailure() {
             console.assert(false, "Failed");
         } catch (err) {
             if (err.errorCode.value != ErrorCode.INVALID_OP)
-				console.log(err.stack);
+                console.log(err.stack);
         }
         doc.close();
         console.log("testShapeNodeFailure OK");
@@ -528,6 +530,31 @@ function testAddNodeFail() {
 }
 
 
+function testInsertionModeWithSelection() {
+    let doc = TestUtils.newA4Empty();
+
+    let acnBuilder = AddChildNodesCommandBuilder.create();
+    acnBuilder.addContainerNode(ContainerNodeDefinition.createDefault());
+    doc.executeCommand(acnBuilder.createCommand(false, NodeChildType.Main));
+
+    const container = doc.layers.first;
+    console.assert(container.isContainerNode);
+
+    acnBuilder = AddChildNodesCommandBuilder.create();
+    acnBuilder.addNode(ShapeNodeDefinition.createDefault());
+    acnBuilder.setInsertionTargetSelection(Selection.create(doc, container));
+    acnBuilder.setInsertionMode(InsertionMode.Inside_AtBack);
+    doc.executeCommand(acnBuilder.createCommand(false, NodeChildType.Main));
+
+    const child = container.children.first;
+    console.assert(child != null && child.isShapeNode);
+    console.assert(doc.layers.countIf(() => true) == 1);
+
+    doc.close();
+    console.log("testInsertionModeWithSelection OK");
+}
+
+
 function testAddNodes() {
     //testAddNodeDescription();
     addChildNodeCollectiveFailPassTest();
@@ -537,6 +564,7 @@ function testAddNodes() {
     testRandom();
     testShapeNodeAddBrushAndLineStyle();
     testAddNodeFail();
+    testInsertionModeWithSelection();
 }
 
 function addNodesDemo() {

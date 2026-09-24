@@ -1,8 +1,8 @@
 'use strict';
 
 const { EnumerationResult } = require('affinity:common');
-const { FontApi, FontCollectionApi, FontFamilyApi, FontWeight, FontWidth, PanoseApi, PanoseType } = require('affinity:fonts');
-const { HandleObject } = require('./handleobject.js');
+const { FontApi, FontCollectionApi, FontFamilyApi, FontField, FontWeight, FontWidth, PanoseApi, PanoseType, VariableFontBold, VariableFontItalic } = require('affinity:fonts');
+const { HandleObject } = require('/handleobject.js');
 
 class Panose extends HandleObject {
     constructor(handle) {
@@ -324,7 +324,10 @@ class FontFamily extends HandleObject {
 module.exports.Font = Font;
 module.exports.FontCollection = FontCollection;
 module.exports.FontFamily = FontFamily;
+module.exports.FontField = FontField;
 module.exports.FontWeight = FontWeight;
 module.exports.FontWidth = FontWidth;
 module.exports.Panose = Panose;
 module.exports.PanoseType = PanoseType;
+module.exports.VariableFontBold = VariableFontBold;
+module.exports.VariableFontItalic = VariableFontItalic;

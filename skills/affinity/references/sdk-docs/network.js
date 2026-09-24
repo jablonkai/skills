@@ -1,7 +1,7 @@
 'use strict';
 
-const { HttpRequestApi, HttpResponseApi, HttpStatusCode, RequestMethod } = require('affinity:network');
-const { HandleObject } = require('./handleobject.js');
+const { HttpRequestApi, HttpRequestResult, HttpResponseApi, HttpStatusCode, RequestMethod } = require('affinity:network');
+const { HandleObject } = require('/handleobject.js');
 
 class HttpRequest extends HandleObject {
     constructor(handle) {
@@ -46,8 +46,8 @@ class HttpRequest extends HandleObject {
 
     do() {
         var result = HttpRequestApi.do(this.handle);
-		result.response = new HttpResponse(result.response);
-		return result;
+        result.response = new HttpResponse(result.response);
+        return result;
     }
 
     doAsync(callback) {
@@ -88,6 +88,7 @@ class HttpResponse extends HandleObject {
 }
 
 module.exports.HttpRequest = HttpRequest;
+module.exports.HttpRequestResult = HttpRequestResult;
 module.exports.HttpResponse = HttpResponse;
 module.exports.RequestMethod = RequestMethod;
 module.exports.HttpStatusCode = HttpStatusCode;

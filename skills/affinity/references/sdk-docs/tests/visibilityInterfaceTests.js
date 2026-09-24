@@ -1,9 +1,9 @@
 'use strict';
-const {Document} = require('/document');
-const {DocumentCommand, AddChildNodesCommandBuilder, NodeChildType} = require('/commands');
-const {ShapeNodeDefinition} = require('/nodes');
-const {VisibilityInterface, VisibilityTestOptionsApi, TextVisibilityOptionsApi} = require('/visibilityInterface');
-const {TestUtils} = require("/tests/testUtils");
+const {Document} = require('/document.js');
+const {DocumentCommand, AddChildNodesCommandBuilder, NodeChildType} = require('/commands.js');
+const {ShapeNodeDefinition} = require('/nodes.js');
+const {VisibilityInterface, VisibilityTestOptionsApi, TextVisibilityOptionsApi} = require('/visibilityinterface.js');
+const {TestUtils} = require('/tests/testUtils.js');
 
 function testVisibilityInterface() {
     let doc = TestUtils.newA4Empty();

@@ -1,6 +1,6 @@
 'use strict';
-const {app} = require('/application');
-const {createTypedNode} = require('/node');
+const {app} = require('/application.js');
+const {createTypedNode} = require('/node.js');
 
 function testGroupNode() {
     const doc = app.documents.current;

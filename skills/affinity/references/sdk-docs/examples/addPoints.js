@@ -1,8 +1,8 @@
 'use strict';
 
-const { Document } = require('/document');
-const { DocumentCommand, CompoundCommandBuilder } = require('/commands');
-const { CurveBuilder, PolyCurve } = require('/geometry');
+const { Document } = require('/document.js');
+const { DocumentCommand, CompoundCommandBuilder } = require('/commands.js');
+const { CurveBuilder, PolyCurve } = require('/geometry.js');
 
 const doc = Document.current;
 
@@ -37,7 +37,7 @@ function addPoints(polyCurveNodes) {
     for (const polyCurveNode of polyCurveNodes) {
         const newPoly = createNewPolyCurve(polyCurveNode.polyCurve);
         if (newPoly.curveCount > 0) {
-            cmds.push(DocumentCommand.createSetPolyCurveNodeCurves(polyCurveNode, newPoly));
+            cmds.push(DocumentCommand.createSetCurves(polyCurveNode.curvesInterface, newPoly));
         }
     }
 

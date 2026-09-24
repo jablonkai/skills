@@ -1,7 +1,7 @@
 'use strict';
 
 const { ColourSpaceType } = require('affinity:colours');
-const { EnumerationResult } = require('affinity:common');
+const { EnumerationResult, UnitType } = require('affinity:common');
 
 // general nodes
 const {
@@ -14,6 +14,9 @@ const {
     ContainerNodeApi,
     ContainerNodeDefinitionApi,
     CurvePathTextNodeApi,
+    CurvePathTextNodeDefinitionApi,
+    DevelopNodeApi,
+    DevelopParametersApi,
     EmbeddedDocumentNodeApi,
     EnclosureRasterNodeApi,
     EnclosureRasterNodeDefinitionApi,
@@ -24,6 +27,7 @@ const {
     GroupNodeApi,
     ImageNodeApi,
     ImageNodeDefinitionApi,
+    LineDescriptors,
     LogicalNodeApi,
     LogicalNodeDefinitionApi,
     NodeApi,
@@ -35,13 +39,18 @@ const {
     PolyCurveNodeApi,
     PolyCurveNodeDefinitionApi,
     PolyCurveTextNodeApi,
+    PolyCurveTextNodeDefinitionApi,
     RasterNodeApi,
     RasterNodeDefinitionApi,
     ShapeNodeApi,
     ShapeNodeDefinitionApi,
     ShapePathTextNodeApi,
+    ShapePathTextNodeDefinitionApi,
     ShapeTextNodeApi,
+    ShapeTextNodeDefinitionApi,
     SpreadNodeApi,
+    MeasurementNodeApi,
+    MeasurementNodeDefinitionApi,
     TableTextNodeApi,
     TableTextNodeDefinitionApi,
     TextNodeApi,
@@ -94,28 +103,28 @@ const {
 
 // raster adjustment parameters
 const {
-    BlackAndWhiteAdjustmentParameters,
-    BrightnessContrastAdjustmentParameters,
-    ColourBalanceAdjustmentParameters,
+    BlackAndWhiteAdjustmentParametersApi,
+    BrightnessContrastAdjustmentParametersApi,
+    ColourBalanceAdjustmentParametersApi,
     ColourBalanceValues,
     CurvesAdjustmentParametersApi,
-    ExposureAdjustmentParameters,
+    ExposureAdjustmentParametersApi,
     HSLShiftAdjustmentChannelParameters,
     HSLShiftAdjustmentColourRange,
     HSLShiftAdjustmentParametersApi,
     LevelsAdjustmentChannelParameters,
-    LevelsAdjustmentParameters,
-    NormalsAdjustmentParameters,
-    PosteriseAdjustmentParameters,
-    RecolourAdjustmentParameters,
-    SelectiveColourAdjustmentParameters,
-    ShadowsHighlightsAdjustmentParameters,
-    SplitToningAdjustmentParameters,
-    ThresholdAdjustmentParameters,
-    ToneCompressionAdjustmentParameters,
-    ToneStretchAdjustmentParameters,
-    VibranceAdjustmentParameters,
-    WhiteBalanceAdjustmentParameters,
+    LevelsAdjustmentParametersApi,
+    NormalsAdjustmentParametersApi,
+    PosteriseAdjustmentParametersApi,
+    RecolourAdjustmentParametersApi,
+    SelectiveColourAdjustmentParametersApi,
+    ShadowsHighlightsAdjustmentParametersApi,
+    SplitToningAdjustmentParametersApi,
+    ThresholdAdjustmentParametersApi,
+    ToneCompressionAdjustmentParametersApi,
+    ToneStretchAdjustmentParametersApi,
+    VibranceAdjustmentParametersApi,
+    WhiteBalanceAdjustmentParametersApi,
 } = require('affinity:dom');
 
 
@@ -185,39 +194,39 @@ const {
 
 // raster filter parameters
 const {
-    AddNoiseFilterParameters,
-    BilateralBlurFilterParameters,
-    BloomFilterParameters,
-    BoxBlurFilterParameters,
-    ClarityFilterParameters,
-    DefringeFilterParameters,
-    DenoiseFilterParameters,
+    AddNoiseFilterParametersApi,
+    BilateralBlurFilterParametersApi,
+    BloomFilterParametersApi,
+    BoxBlurFilterParametersApi,
+    ClarityFilterParametersApi,
+    DefringeFilterParametersApi,
+    DenoiseFilterParametersApi,
     DepthOfFieldFilterParametersApi,
-    DiffuseFilterParameters,
-    DiffuseGlowFilterParameters,
-    DustAndScratchFilterParameters,
+    DiffuseFilterParametersApi,
+    DiffuseGlowFilterParametersApi,
+    DustAndScratchFilterParametersApi,
     EllipticalDepthOfFieldParameters,
     FieldBlurFilterParametersApi,
     FieldBlurItemParameters,
-    GaussianBlurFilterParameters,
-    HalftoneFilterParameters,
-    HighPassFilterParameters,
-    LensBlurFilterParameters,
-    MaximumBlurFilterParameters,
-    MedianBlurFilterParameters,
-    MinimumBlurFilterParameters,
-    MotionBlurFilterParameters,
-    PinchPunchFilterParameters,
-    PixelateFilterParameters,
-    RadialBlurFilterParameters,
-    RippleFilterParameters,
-    ShadowsHighlightsFilterParameters,
-    SphericalFilterParameters,
+    GaussianBlurFilterParametersApi,
+    HalftoneFilterParametersApi,
+    HighPassFilterParametersApi,
+    LensBlurFilterParametersApi,
+    MaximumBlurFilterParametersApi,
+    MedianBlurFilterParametersApi,
+    MinimumBlurFilterParametersApi,
+    MotionBlurFilterParametersApi,
+    PinchPunchFilterParametersApi,
+    PixelateFilterParametersApi,
+    RadialBlurFilterParametersApi,
+    RippleFilterParametersApi,
+    ShadowsHighlightsFilterParametersApi,
+    SphericalFilterParametersApi,
     TiltShiftDepthOfFieldParameters,
-    TwirlFilterParameters,
-    UnsharpMaskFilterParameters,
-    VignetteFilterParameters,
-    VoronoiFilterParameters,
+    TwirlFilterParametersApi,
+    UnsharpMaskFilterParametersApi,
+    VignetteFilterParametersApi,
+    VoronoiFilterParametersApi,
 } = require('affinity:dom');
 
 // other bits
@@ -225,6 +234,9 @@ const {
     AddNoiseType,
     BloomMethod,
     DepthOfFieldMode,
+    DevelopDetailRefinementMethod,
+    DevelopInvertMethod,
+    DevelopToneCurveMethod,
     DocumentApi,
     DocumentNodeApi,
     HalftoneDotType,
@@ -233,6 +245,7 @@ const {
     NodeChildType,
     PageBoundingBoxType,
     SelectiveColour,
+    SelectiveColourWeights,
     ShadowsHighlightsVersion,
     TonalRangeType,
     ToneCompressionMethod,
@@ -243,43 +256,44 @@ const { RasterExtendType, RasterFormat, RasterResamplerType } = require('affinit
 
 const { StoryIoFormat } = require('affinity:story');
 
-const { Collection } = require('./collection.js');
-const { Colour } = require('./colours.js');
-const { FillDescriptor } = require('./fills.js');
-const { PolyCurve, Spline } = require('./geometry.js');
-const { HandleObject } = require('./handleobject.js');
-const { LineStyle, LineStyleDescriptor, LineStyleMask } = require('./linestyle.js');
-const { RasterObject } = require('./rasterobject.js');
-const { Selectable } = require('./selectable.js');
-const { createTypedShape, Shape } = require('./shapes.js');
+const { Collection } = require('/collection.js');
+const { Colour } = require('/colours.js');
+const { FillDescriptor } = require('/fills.js');
+const { Endpoints, PolyCurve, Spline } = require('/geometry.js');
+const { GlyphAtts } = require('/glyphatts.js');
+const { HandleObject, livePoint, liveStruct, liveStructArray, setStructArray } = require('/handleobject.js');
+const { LineStyle, LineStyleDescriptor, LineStyleMask } = require('/linestyle.js');
+const { RasterObject } = require('/rasterobject.js');
+const { Selectable } = require('/selectable.js');
+const { createTypedShape, Shape } = require('/shapes.js');
 
 // cyclics:
-const ArtboardInterfaceModule = require('./artboardinterface.js');
-const BaseBoxInterfaceModule = require('./baseboxinterface.js');
-const BlendModeInterfaceModule = require('./blendmodeinterface.js');
-const BrushFillInterfaceModule = require('./brushfillinterface.js');
-const CommandsModule  = require('./commands.js');
-const CompoundOperationInterfaceModule = require('./compoundoperationinterface.js');
-const CurvesInterfaceModule = require('./curvesinterface.js');
-const DescriptionInterfaceModule = require('./descriptioninterface.js');
-const DocumentModule = require('./document.js');
-const EditabilityInterfaceModule = require('./editabilityinterface.js');
-const ExportableInterfaceModule = require('./exportableinterface.js');
-const ImageResourceInterfaceModule = require('./imageresourceinterface.js');
-const LayerEffectsInterfaceModule = require('./layereffectsinterface.js');
-const LineStyleInterfaceModule = require('./linestyleinterface.js');
-const PhysicalRootInterfaceModule = require('./physicalrootinterface.js');
-const PhysicalRootPropertiesInterfaceModule = require('./physicalrootpropertiesinterface.js');
-const PictureFrameInterfaceModule = require('./pictureframeinterface.js');
-const RasterInterfaceModule = require('./rasterinterface.js');
-const SelectionsModule = require('./selections.js');
-const ShapeInterfaceModule = require('./shapeinterface.js');
-const StoryInterfaceModule = require('./storyinterface.js');
-const TagInterfaceModule = require('./taginterface.js');
-const TextFrameInterfaceModule = require('./textframeinterface.js');
-const TransformInterfaceModule = require('./transforminterface.js');
-const TransparencyInterfaceModule = require('./transparencyinterface.js');
-const VisibilityInterfaceModule = require('./visibilityinterface.js');
+const ArtboardInterfaceModule = require('/artboardinterface.js');
+const BaseBoxInterfaceModule = require('/baseboxinterface.js');
+const BlendModeInterfaceModule = require('/blendmodeinterface.js');
+const BrushFillInterfaceModule = require('/brushfillinterface.js');
+const CommandsModule  = require('/commands.js');
+const CompoundOperationInterfaceModule = require('/compoundoperationinterface.js');
+const CurvesInterfaceModule = require('/curvesinterface.js');
+const DescriptionInterfaceModule = require('/descriptioninterface.js');
+const DocumentModule = require('/document.js');
+const EditabilityInterfaceModule = require('/editabilityinterface.js');
+const ExportableInterfaceModule = require('/exportableinterface.js');
+const ImageResourceInterfaceModule = require('/imageresourceinterface.js');
+const LayerEffectsInterfaceModule = require('/layereffectsinterface.js');
+const LineStyleInterfaceModule = require('/linestyleinterface.js');
+const PhysicalRootInterfaceModule = require('/physicalrootinterface.js');
+const PhysicalRootPropertiesInterfaceModule = require('/physicalrootpropertiesinterface.js');
+const PictureFrameInterfaceModule = require('/pictureframeinterface.js');
+const RasterInterfaceModule = require('/rasterinterface.js');
+const SelectionsModule = require('/selections.js');
+const ShapeInterfaceModule = require('/shapeinterface.js');
+const StoryInterfaceModule = require('/storyinterface.js');
+const TagInterfaceModule = require('/taginterface.js');
+const TextFrameInterfaceModule = require('/textframeinterface.js');
+const TransformInterfaceModule = require('/transforminterface.js');
+const TransparencyInterfaceModule = require('/transparencyinterface.js');
+const VisibilityInterfaceModule = require('/visibilityinterface.js');
 
 function* getNodeSiblings(nodeHandle, reverse) {
     const getNextSibling = reverse ? NodeApi.getPreviousSibling : NodeApi.getNextSibling;
@@ -378,16 +392,16 @@ class NodeDescendents extends Collection {
 
 class Node extends Selectable {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'Node';
-	}
+        return 'Node';
+    }
 
     get isNode() {
-		return true;
-	}
+        return true;
+    }
 
     isSameNode(otherNode) {
         return NodeApi.isSameNode(this.handle, otherNode.handle);
@@ -395,57 +409,57 @@ class Node extends Selectable {
 
     get document() {
         const documentHandle = NodeApi.getDocument(this.handle);
-		return documentHandle ? new DocumentModule.Document(documentHandle) : null;
-	}
+        return documentHandle ? new DocumentModule.Document(documentHandle) : null;
+    }
 
     get selfSelection() {
         return SelectionsModule.Selection.create(this.document, this);
     }
 
     get nextSibling() {
-		const handle = NodeApi.getNextSibling(this.handle);
-		if (handle)
-			return createTypedNode(handle)
+        const handle = NodeApi.getNextSibling(this.handle);
+        if (handle)
+            return createTypedNode(handle)
         else
             return null;
-	}
-	
-	get previousSibling() {
-		const handle = NodeApi.getPreviousSibling(this.handle);
-		if (handle)
-			return createTypedNode(handle)
+    }
+    
+    get previousSibling() {
+        const handle = NodeApi.getPreviousSibling(this.handle);
+        if (handle)
+            return createTypedNode(handle)
         else
             return null;
-	}
-	
-	get parent() {
-		const handle = NodeApi.getParent(this.handle);
-		if (handle)
-			return createTypedNode(handle)
+    }
+    
+    get parent() {
+        const handle = NodeApi.getParent(this.handle);
+        if (handle)
+            return createTypedNode(handle)
         else
             return null;
-	}
-	
-	get firstChild() {
-		return this.getFirstChild(NodeChildType.Main);
-	}
-	
-	get lastChild() {
-		return this.getLastChild(NodeChildType.Main);
-	}
+    }
+    
+    get firstChild() {
+        return this.getFirstChild(NodeChildType.Main);
+    }
+    
+    get lastChild() {
+        return this.getLastChild(NodeChildType.Main);
+    }
 
     getFirstChild(nodeChildType) {
         const handle = NodeApi.getFirstChild(this.handle, nodeChildType);
-		if (handle)
-			return createTypedNode(handle)
+        if (handle)
+            return createTypedNode(handle)
         else
             return null;
     }
 
     getLastChild(nodeChildType) {
         const handle = NodeApi.getLastChild(this.handle, nodeChildType);
-		if (handle)
-			return createTypedNode(handle)
+        if (handle)
+            return createTypedNode(handle)
         else
             return null;
     }
@@ -793,9 +807,9 @@ class NodeDefinition extends HandleObject {
         return true;
     }
     
-	set transform(xf) {
-		NodeDefinitionApi.setTransform(this.handle, xf);
-	}
+    set transform(xf) {
+        NodeDefinitionApi.setTransform(this.handle, xf);
+    }
     
     get transform() {
         return NodeDefinitionApi.getTransform(this.handle);
@@ -996,12 +1010,12 @@ class LogicalNode extends Node {
 
     // TransparencyInterfaceModule.TransparencyInterface
     #transparencyInterface;
-	get transparencyInterface() {
+    get transparencyInterface() {
         if (!this.#transparencyInterface) {
             this.#transparencyInterface = new TransparencyInterfaceModule.TransparencyInterface(LogicalNodeApi.getTransparencyInterface(this.handle));
         }
-		return this.#transparencyInterface;
-	}
+        return this.#transparencyInterface;
+    }
 
     get transparencyFillDescriptor() {
         return this.transparencyInterface.fillDescriptor;
@@ -1068,12 +1082,12 @@ class DocumentNode extends LogicalNode {
     }
 
     get [Symbol.toStringTag]() {
-		return 'DocumentNode';
-	}
+        return 'DocumentNode';
+    }
 
     get isDocumentNode() {
-		return true;
-	}
+        return true;
+    }
 
     get pageCount() {
         return DocumentNodeApi.getPageCount(this.handle);
@@ -1186,6 +1200,727 @@ class PhysicalNodeDefinition extends NodeDefinition {
     }
 }
 
+
+class DevelopParameters extends HandleObject {
+    constructor(handle) {
+        super(handle);
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'DevelopParameters';
+    }
+
+    get isDevelopParameters() {
+        return true;
+    }
+
+    set exposure(value) {
+        DevelopParametersApi.setExposure(this.handle, value);
+    }
+
+    get exposure() {
+        return DevelopParametersApi.getExposure(this.handle);
+    }
+
+    set exposureEnabled(value) {
+        DevelopParametersApi.setExposureEnabled(this.handle, value);
+    }
+
+    get exposureEnabled() {
+        return DevelopParametersApi.getExposureEnabled(this.handle);
+    }
+
+    set blackpoint(value) {
+        DevelopParametersApi.setBlackpoint(this.handle, value);
+    }
+
+    get blackpoint() {
+        return DevelopParametersApi.getBlackpoint(this.handle);
+    }
+
+    set whitepoint(value) {
+        DevelopParametersApi.setWhitepoint(this.handle, value);
+    }
+
+    get whitepoint() {
+        return DevelopParametersApi.getWhitepoint(this.handle);
+    }
+
+    set contrast(value) {
+        DevelopParametersApi.setContrast(this.handle, value);
+    }
+
+    get contrast() {
+        return DevelopParametersApi.getContrast(this.handle);
+    }
+
+    set enhanceEnabled(value) {
+        DevelopParametersApi.setEnhanceEnabled(this.handle, value);
+    }
+
+    get enhanceEnabled() {
+        return DevelopParametersApi.getEnhanceEnabled(this.handle);
+    }
+
+    set saturation(value) {
+        DevelopParametersApi.setSaturation(this.handle, value);
+    }
+
+    get saturation() {
+        return DevelopParametersApi.getSaturation(this.handle);
+    }
+
+    set vibrance(value) {
+        DevelopParametersApi.setVibrance(this.handle, value);
+    }
+
+    get vibrance() {
+        return DevelopParametersApi.getVibrance(this.handle);
+    }
+
+    set clarity(value) {
+        DevelopParametersApi.setClarity(this.handle, value);
+    }
+
+    get clarity() {
+        return DevelopParametersApi.getClarity(this.handle);
+    }
+
+    set texture(value) {
+        DevelopParametersApi.setTexture(this.handle, value);
+    }
+
+    get texture() {
+        return DevelopParametersApi.getTexture(this.handle);
+    }
+
+    set shadowsIntensity(value) {
+        DevelopParametersApi.setShadowsIntensity(this.handle, value);
+    }
+
+    get shadowsIntensity() {
+        return DevelopParametersApi.getShadowsIntensity(this.handle);
+    }
+
+    set highlightsIntensity(value) {
+        DevelopParametersApi.setHighlightsIntensity(this.handle, value);
+    }
+
+    get highlightsIntensity() {
+        return DevelopParametersApi.getHighlightsIntensity(this.handle);
+    }
+
+    set shadowsHighlightsEnabled(value) {
+        DevelopParametersApi.setShadowsHighlightsEnabled(this.handle, value);
+    }
+
+    get shadowsHighlightsEnabled() {
+        return DevelopParametersApi.getShadowsHighlightsEnabled(this.handle);
+    }
+
+    set whiteBalance(value) {
+        DevelopParametersApi.setWhiteBalance(this.handle, value);
+    }
+
+    get whiteBalance() {
+        return DevelopParametersApi.getWhiteBalance(this.handle);
+    }
+
+    set tint(value) {
+        DevelopParametersApi.setTint(this.handle, value);
+    }
+
+    get tint() {
+        return DevelopParametersApi.getTint(this.handle);
+    }
+
+    set whiteBalanceEnabled(value) {
+        DevelopParametersApi.setWhiteBalanceEnabled(this.handle, value);
+    }
+
+    get whiteBalanceEnabled() {
+        return DevelopParametersApi.getWhiteBalanceEnabled(this.handle);
+    }
+
+    get rawWhiteBalance() {
+        return DevelopParametersApi.getRawWhiteBalance(this.handle);
+    }
+
+    set applyToneCurve(value) {
+        DevelopParametersApi.setApplyToneCurve(this.handle, value);
+    }
+
+    get applyToneCurve() {
+        return DevelopParametersApi.getApplyToneCurve(this.handle);
+    }
+
+    set toneCurveEnabled(value) {
+        DevelopParametersApi.setToneCurveEnabled(this.handle, value);
+    }
+
+    get toneCurveEnabled() {
+        return DevelopParametersApi.getToneCurveEnabled(this.handle);
+    }
+
+    set toneCurveMethod(value) {
+        DevelopParametersApi.setToneCurveMethod(this.handle, value);
+    }
+
+    get toneCurveMethod() {
+        return DevelopParametersApi.getToneCurveMethod(this.handle);
+    }
+
+    set curves(value) {
+        DevelopParametersApi.setCurves(this.handle, value?.handle);
+    }
+
+    get curves() {
+        return new CurvesAdjustmentParameters(DevelopParametersApi.getCurves(this.handle));
+    }
+
+    set curvesEnabled(value) {
+        DevelopParametersApi.setCurvesEnabled(this.handle, value);
+    }
+
+    get curvesEnabled() {
+        return DevelopParametersApi.getCurvesEnabled(this.handle);
+    }
+
+    set noiseReductionLuminanceSigma(value) {
+        DevelopParametersApi.setNoiseReductionLuminanceSigma(this.handle, value);
+    }
+
+    get noiseReductionLuminanceSigma() {
+        return DevelopParametersApi.getNoiseReductionLuminanceSigma(this.handle);
+    }
+
+    set noiseReductionChromaSigma(value) {
+        DevelopParametersApi.setNoiseReductionChromaSigma(this.handle, value);
+    }
+
+    get noiseReductionChromaSigma() {
+        return DevelopParametersApi.getNoiseReductionChromaSigma(this.handle);
+    }
+
+    set noiseReductionDetail(value) {
+        DevelopParametersApi.setNoiseReductionDetail(this.handle, value);
+    }
+
+    get noiseReductionDetail() {
+        return DevelopParametersApi.getNoiseReductionDetail(this.handle);
+    }
+
+    set luminanceContribution(value) {
+        DevelopParametersApi.setLuminanceContribution(this.handle, value);
+    }
+
+    get luminanceContribution() {
+        return DevelopParametersApi.getLuminanceContribution(this.handle);
+    }
+
+    set colourContribution(value) {
+        DevelopParametersApi.setColourContribution(this.handle, value);
+    }
+
+    get colourContribution() {
+        return DevelopParametersApi.getColourContribution(this.handle);
+    }
+
+    set noiseReductionEnabled(value) {
+        DevelopParametersApi.setNoiseReductionEnabled(this.handle, value);
+    }
+
+    get noiseReductionEnabled() {
+        return DevelopParametersApi.getNoiseReductionEnabled(this.handle);
+    }
+
+    set waveletLumaSigma(value) {
+        DevelopParametersApi.setWaveletLumaSigma(this.handle, value);
+    }
+
+    get waveletLumaSigma() {
+        return DevelopParametersApi.getWaveletLumaSigma(this.handle);
+    }
+
+    set waveletChromaSigma(value) {
+        DevelopParametersApi.setWaveletChromaSigma(this.handle, value);
+    }
+
+    get waveletChromaSigma() {
+        return DevelopParametersApi.getWaveletChromaSigma(this.handle);
+    }
+
+    set waveletLevels(value) {
+        DevelopParametersApi.setWaveletLevels(this.handle, value);
+    }
+
+    get waveletLevels() {
+        return DevelopParametersApi.getWaveletLevels(this.handle);
+    }
+
+    set waveletChromaLevels(value) {
+        DevelopParametersApi.setWaveletChromaLevels(this.handle, value);
+    }
+
+    get waveletChromaLevels() {
+        return DevelopParametersApi.getWaveletChromaLevels(this.handle);
+    }
+
+    set waveletDetail(value) {
+        DevelopParametersApi.setWaveletDetail(this.handle, value);
+    }
+
+    get waveletDetail() {
+        return DevelopParametersApi.getWaveletDetail(this.handle);
+    }
+
+    set waveletNoiseReductionEnabled(value) {
+        DevelopParametersApi.setWaveletNoiseReductionEnabled(this.handle, value);
+    }
+
+    get waveletNoiseReductionEnabled() {
+        return DevelopParametersApi.getWaveletNoiseReductionEnabled(this.handle);
+    }
+
+    set noiseAdditionIntensity(value) {
+        DevelopParametersApi.setNoiseAdditionIntensity(this.handle, value);
+    }
+
+    get noiseAdditionIntensity() {
+        return DevelopParametersApi.getNoiseAdditionIntensity(this.handle);
+    }
+
+    set noiseAdditionGaussian(value) {
+        DevelopParametersApi.setNoiseAdditionGaussian(this.handle, value);
+    }
+
+    get noiseAdditionGaussian() {
+        return DevelopParametersApi.getNoiseAdditionGaussian(this.handle);
+    }
+
+    set noiseAdditionColour(value) {
+        DevelopParametersApi.setNoiseAdditionColour(this.handle, value);
+    }
+
+    get noiseAdditionColour() {
+        return DevelopParametersApi.getNoiseAdditionColour(this.handle);
+    }
+
+    set noiseAdditionEnabled(value) {
+        DevelopParametersApi.setNoiseAdditionEnabled(this.handle, value);
+    }
+
+    get noiseAdditionEnabled() {
+        return DevelopParametersApi.getNoiseAdditionEnabled(this.handle);
+    }
+
+    set profileEnabled(value) {
+        DevelopParametersApi.setProfileEnabled(this.handle, value);
+    }
+
+    get profileEnabled() {
+        return DevelopParametersApi.getProfileEnabled(this.handle);
+    }
+
+    set detailRefinementRadius(value) {
+        DevelopParametersApi.setDetailRefinementRadius(this.handle, value);
+    }
+
+    get detailRefinementRadius() {
+        return DevelopParametersApi.getDetailRefinementRadius(this.handle);
+    }
+
+    set detailRefinementAmount(value) {
+        DevelopParametersApi.setDetailRefinementAmount(this.handle, value);
+    }
+
+    get detailRefinementAmount() {
+        return DevelopParametersApi.getDetailRefinementAmount(this.handle);
+    }
+
+    set detailRefinementMethod(value) {
+        DevelopParametersApi.setDetailRefinementMethod(this.handle, value);
+    }
+
+    get detailRefinementMethod() {
+        return DevelopParametersApi.getDetailRefinementMethod(this.handle);
+    }
+
+    set detailRefinementEnabled(value) {
+        DevelopParametersApi.setDetailRefinementEnabled(this.handle, value);
+    }
+
+    get detailRefinementEnabled() {
+        return DevelopParametersApi.getDetailRefinementEnabled(this.handle);
+    }
+
+    set defringeHue(value) {
+        DevelopParametersApi.setDefringeHue(this.handle, value);
+    }
+
+    get defringeHue() {
+        return DevelopParametersApi.getDefringeHue(this.handle);
+    }
+
+    set defringeComplementary(value) {
+        DevelopParametersApi.setDefringeComplementary(this.handle, value);
+    }
+
+    get defringeComplementary() {
+        return DevelopParametersApi.getDefringeComplementary(this.handle);
+    }
+
+    set defringeTolerance(value) {
+        DevelopParametersApi.setDefringeTolerance(this.handle, value);
+    }
+
+    get defringeTolerance() {
+        return DevelopParametersApi.getDefringeTolerance(this.handle);
+    }
+
+    set defringeThreshold(value) {
+        DevelopParametersApi.setDefringeThreshold(this.handle, value);
+    }
+
+    get defringeThreshold() {
+        return DevelopParametersApi.getDefringeThreshold(this.handle);
+    }
+
+    set defringeRadius(value) {
+        DevelopParametersApi.setDefringeRadius(this.handle, value);
+    }
+
+    get defringeRadius() {
+        return DevelopParametersApi.getDefringeRadius(this.handle);
+    }
+
+    set defringeEnabled(value) {
+        DevelopParametersApi.setDefringeEnabled(this.handle, value);
+    }
+
+    get defringeEnabled() {
+        return DevelopParametersApi.getDefringeEnabled(this.handle);
+    }
+
+    set chromaticAberrationEnabled(value) {
+        DevelopParametersApi.setChromaticAberrationEnabled(this.handle, value);
+    }
+
+    get chromaticAberrationEnabled() {
+        return DevelopParametersApi.getChromaticAberrationEnabled(this.handle);
+    }
+
+    set chromaticAberrationUseProfile(value) {
+        DevelopParametersApi.setChromaticAberrationUseProfile(this.handle, value);
+    }
+
+    get chromaticAberrationUseProfile() {
+        return DevelopParametersApi.getChromaticAberrationUseProfile(this.handle);
+    }
+
+    set lensVignetteEnabled(value) {
+        DevelopParametersApi.setLensVignetteEnabled(this.handle, value);
+    }
+
+    get lensVignetteEnabled() {
+        return DevelopParametersApi.getLensVignetteEnabled(this.handle);
+    }
+
+    set lensVignetteUseProfile(value) {
+        DevelopParametersApi.setLensVignetteUseProfile(this.handle, value);
+    }
+
+    get lensVignetteUseProfile() {
+        return DevelopParametersApi.getLensVignetteUseProfile(this.handle);
+    }
+
+    set lensVignetteIntensity(value) {
+        DevelopParametersApi.setLensVignetteIntensity(this.handle, value);
+    }
+
+    get lensVignetteIntensity() {
+        return DevelopParametersApi.getLensVignetteIntensity(this.handle);
+    }
+
+    set postVignetteEnabled(value) {
+        DevelopParametersApi.setPostVignetteEnabled(this.handle, value);
+    }
+
+    get postVignetteEnabled() {
+        return DevelopParametersApi.getPostVignetteEnabled(this.handle);
+    }
+
+    set postVignetteIntensity(value) {
+        DevelopParametersApi.setPostVignetteIntensity(this.handle, value);
+    }
+
+    get postVignetteIntensity() {
+        return DevelopParametersApi.getPostVignetteIntensity(this.handle);
+    }
+
+    set postVignetteScale(value) {
+        DevelopParametersApi.setPostVignetteScale(this.handle, value);
+    }
+
+    get postVignetteScale() {
+        return DevelopParametersApi.getPostVignetteScale(this.handle);
+    }
+
+    set postVignetteHardness(value) {
+        DevelopParametersApi.setPostVignetteHardness(this.handle, value);
+    }
+
+    get postVignetteHardness() {
+        return DevelopParametersApi.getPostVignetteHardness(this.handle);
+    }
+
+    set lensCorrectionEnabled(value) {
+        DevelopParametersApi.setLensCorrectionEnabled(this.handle, value);
+    }
+
+    get lensCorrectionEnabled() {
+        return DevelopParametersApi.getLensCorrectionEnabled(this.handle);
+    }
+
+    set lensProfileDistortion(value) {
+        DevelopParametersApi.setLensProfileDistortion(this.handle, value);
+    }
+
+    get lensProfileDistortion() {
+        return DevelopParametersApi.getLensProfileDistortion(this.handle);
+    }
+
+    set lensDistortion(value) {
+        DevelopParametersApi.setLensDistortion(this.handle, value);
+    }
+
+    get lensDistortion() {
+        return DevelopParametersApi.getLensDistortion(this.handle);
+    }
+
+    set lensRotation(value) {
+        DevelopParametersApi.setLensRotation(this.handle, value);
+    }
+
+    get lensRotation() {
+        return DevelopParametersApi.getLensRotation(this.handle);
+    }
+
+    set lensScale(value) {
+        DevelopParametersApi.setLensScale(this.handle, value);
+    }
+
+    get lensScale() {
+        return DevelopParametersApi.getLensScale(this.handle);
+    }
+
+    set lensHorizontal(value) {
+        DevelopParametersApi.setLensHorizontal(this.handle, value);
+    }
+
+    get lensHorizontal() {
+        return DevelopParametersApi.getLensHorizontal(this.handle);
+    }
+
+    set lensVertical(value) {
+        DevelopParametersApi.setLensVertical(this.handle, value);
+    }
+
+    get lensVertical() {
+        return DevelopParametersApi.getLensVertical(this.handle);
+    }
+
+    get lensProfileName() {
+        return DevelopParametersApi.getLensProfileName(this.handle);
+    }
+
+    set invertEnabled(value) {
+        DevelopParametersApi.setInvertEnabled(this.handle, value);
+    }
+
+    get invertEnabled() {
+        return DevelopParametersApi.getInvertEnabled(this.handle);
+    }
+
+    set invertMethod(value) {
+        DevelopParametersApi.setInvertMethod(this.handle, value);
+    }
+
+    get invertMethod() {
+        return DevelopParametersApi.getInvertMethod(this.handle);
+    }
+
+    set invertStrength(value) {
+        DevelopParametersApi.setInvertStrength(this.handle, value);
+    }
+
+    get invertStrength() {
+        return DevelopParametersApi.getInvertStrength(this.handle);
+    }
+
+    set hslEnabled(value) {
+        DevelopParametersApi.setHSLEnabled(this.handle, value);
+    }
+
+    get hslEnabled() {
+        return DevelopParametersApi.getHSLEnabled(this.handle);
+    }
+
+    set blackAndWhiteEnabled(value) {
+        DevelopParametersApi.setBlackAndWhiteEnabled(this.handle, value);
+    }
+
+    get blackAndWhiteEnabled() {
+        return DevelopParametersApi.getBlackAndWhiteEnabled(this.handle);
+    }
+
+    set splitToningEnabled(value) {
+        DevelopParametersApi.setSplitToningEnabled(this.handle, value);
+    }
+
+    get splitToningEnabled() {
+        return DevelopParametersApi.getSplitToningEnabled(this.handle);
+    }
+
+    set selectiveColourEnabled(value) {
+        DevelopParametersApi.setSelectiveColourEnabled(this.handle, value);
+    }
+
+    get selectiveColourEnabled() {
+        return DevelopParametersApi.getSelectiveColourEnabled(this.handle);
+    }
+
+    set colourBalanceEnabled(value) {
+        DevelopParametersApi.setColourBalanceEnabled(this.handle, value);
+    }
+
+    get colourBalanceEnabled() {
+        return DevelopParametersApi.getColourBalanceEnabled(this.handle);
+    }
+
+    set hsl(value) {
+        DevelopParametersApi.setHSL(this.handle, value?.handle);
+    }
+
+    get hsl() {
+        return new HSLShiftAdjustmentParameters(DevelopParametersApi.getHSL(this.handle));
+    }
+
+    set blackAndWhite(value) {
+        DevelopParametersApi.setBlackAndWhite(this.handle, value?.handle);
+    }
+
+    get blackAndWhite() {
+        return new BlackAndWhiteAdjustmentParameters(DevelopParametersApi.getBlackAndWhite(this.handle));
+    }
+
+    set splitToning(value) {
+        DevelopParametersApi.setSplitToning(this.handle, value?.handle);
+    }
+
+    get splitToning() {
+        return new SplitToningAdjustmentParameters(DevelopParametersApi.getSplitToning(this.handle));
+    }
+
+    set selectiveColour(value) {
+        DevelopParametersApi.setSelectiveColour(this.handle, value?.handle);
+    }
+
+    get selectiveColour() {
+        return new SelectiveColourAdjustmentParameters(DevelopParametersApi.getSelectiveColour(this.handle));
+    }
+
+    set colourBalance(value) {
+        DevelopParametersApi.setColourBalance(this.handle, value?.handle);
+    }
+
+    get colourBalance() {
+        return new ColourBalanceAdjustmentParameters(DevelopParametersApi.getColourBalance(this.handle));
+    }
+
+    set showClippedHighlights(value) {
+        DevelopParametersApi.setShowClippedHighlights(this.handle, value);
+    }
+
+    get showClippedHighlights() {
+        return DevelopParametersApi.getShowClippedHighlights(this.handle);
+    }
+
+    set showClippedShadows(value) {
+        DevelopParametersApi.setShowClippedShadows(this.handle, value);
+    }
+
+    get showClippedShadows() {
+        return DevelopParametersApi.getShowClippedShadows(this.handle);
+    }
+
+    set showClippedTones(value) {
+        DevelopParametersApi.setShowClippedTones(this.handle, value);
+    }
+
+    get showClippedTones() {
+        return DevelopParametersApi.getShowClippedTones(this.handle);
+    }
+
+    set showFocusPeaking(value) {
+        DevelopParametersApi.setShowFocusPeaking(this.handle, value);
+    }
+
+    get showFocusPeaking() {
+        return DevelopParametersApi.getShowFocusPeaking(this.handle);
+    }
+
+    set focusPeakingHue(value) {
+        DevelopParametersApi.setFocusPeakingHue(this.handle, value);
+    }
+
+    get focusPeakingHue() {
+        return DevelopParametersApi.getFocusPeakingHue(this.handle);
+    }
+}
+
+
+class DevelopNode extends PhysicalNode {
+    constructor(handle) {
+        super(handle);
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'DevelopNode';
+    }
+
+    get isDevelopNode() {
+        return true;
+    }
+
+    get parameters() {
+        return new DevelopParameters(DevelopNodeApi.getParameters(this.handle));
+    }
+
+    get sourceIsRaw() {
+        return DevelopNodeApi.getSourceIsRaw(this.handle);
+    }
+
+    get imageSize() {
+        return DevelopNodeApi.getImageSize(this.handle);
+    }
+
+    // ImageResourceInterfaceModule.ImageResourceInterface
+    #imageResourceInterface;
+    get imageResourceInterface() {
+        if (!this.#imageResourceInterface)
+            this.#imageResourceInterface = new ImageResourceInterfaceModule.ImageResourceInterface(DevelopNodeApi.getImageResourceInterface(this.handle));
+        return this.#imageResourceInterface;
+    }
+
+    // RasterInterfaceModule.RasterInterface
+    #rasterInterface;
+    get rasterInterface() {
+        if (!this.#rasterInterface)
+            this.#rasterInterface = new RasterInterfaceModule.RasterInterface(DevelopNodeApi.getRasterInterface(this.handle));
+        return this.#rasterInterface;
+    }
+}
 
 class EmbeddedDocumentNode extends PhysicalNode {
     constructor(handle) {
@@ -1344,8 +2079,12 @@ class EmbeddedDocumentNode extends PhysicalNode {
         return this.imageResourceInterface.imageFilePath;
     }
 
+    getImageFileSize(asBigInt) {
+        return this.imageResourceInterface.getImageFileSize(asBigInt);
+    }
+
     get imageFileSize() {
-        return this.imageResourceInterface.imageFileSize;
+        return this.getImageFileSize();
     }
 
     get imageFileType() {
@@ -1358,12 +2097,12 @@ class EmbeddedDocumentNode extends PhysicalNode {
     
     // TransparencyInterfaceModule.TransparencyInterface
     #transparencyInterface;
-	get transparencyInterface() {
+    get transparencyInterface() {
         if (!this.#transparencyInterface) {
             this.#transparencyInterface = new TransparencyInterfaceModule.TransparencyInterface(EmbeddedDocumentNodeApi.getTransparencyInterface(this.handle));
         }
-		return this.#transparencyInterface;
-	}
+        return this.#transparencyInterface;
+    }
 
     get transparencyFillDescriptor() {
         return this.transparencyInterface.fillDescriptor;
@@ -1391,14 +2130,14 @@ class RasterNode extends PhysicalNode {
     get extendEmpty() {
         return RasterNodeApi.isExtendEmpty(this.handle);
     }
-	
+    
     // RasterInterfaceModule.RasterInterface
     #rasterInterface;
-	get rasterInterface() {
+    get rasterInterface() {
         if (!this.#rasterInterface)
             this.#rasterInterface = new RasterInterfaceModule.RasterInterface(RasterNodeApi.getRasterInterface(this.handle));
         return this.#rasterInterface;
-	}
+    }
 
     get rasterWidth() {
         return this.rasterInterface.width;
@@ -1431,29 +2170,29 @@ class RasterNode extends PhysicalNode {
 
 
 class RasterNodeDefinition extends PhysicalNodeDefinition {
-	constructor(handle) {
-		super(handle);
-	}
-	
-	get [Symbol.toStringTag]() {
-		return 'RasterNodeDefinition';
-	}
-	
-	static create(format) {
-		return new RasterNodeDefinition(RasterNodeDefinitionApi.create(format));
-	}
+    constructor(handle) {
+        super(handle);
+    }
+    
+    get [Symbol.toStringTag]() {
+        return 'RasterNodeDefinition';
+    }
+    
+    static create(format) {
+        return new RasterNodeDefinition(RasterNodeDefinitionApi.create(format));
+    }
 
-	get isRasterNodeDefinition() {
-		return true;
-	}
-	
-	set bitmap(bm) {
-		RasterNodeDefinitionApi.setBitmap(this.handle, bm.handle);
-	}
-	
-	get bitmap() {
-		return new RasterObject(RasterNodeDefinitionApi.getBitmap(this.handle));
-	}
+    get isRasterNodeDefinition() {
+        return true;
+    }
+    
+    set bitmap(bm) {
+        RasterNodeDefinitionApi.setBitmap(this.handle, bm.handle);
+    }
+    
+    get bitmap() {
+        return new RasterObject(RasterNodeDefinitionApi.getBitmap(this.handle));
+    }
 
     setBitmap(bm) {
         this.bitmap = bm;
@@ -1577,6 +2316,81 @@ class AdjustmentRasterNodeDefinition extends EnclosureRasterNodeDefinition {
 }
 
 
+class BlackAndWhiteAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use BlackAndWhiteAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new BlackAndWhiteAdjustmentParameters(). Use BlackAndWhiteAdjustmentParameters.create() instead.");
+            super(BlackAndWhiteAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'BlackAndWhiteAdjustmentParameters';
+    }
+
+    get isBlackAndWhiteAdjustmentParameters() {
+        return true;
+    }
+
+    set red(value) {
+        BlackAndWhiteAdjustmentParametersApi.setRed(this.handle, value);
+    }
+
+    get red() {
+        return BlackAndWhiteAdjustmentParametersApi.getRed(this.handle);
+    }
+
+    set green(value) {
+        BlackAndWhiteAdjustmentParametersApi.setGreen(this.handle, value);
+    }
+
+    get green() {
+        return BlackAndWhiteAdjustmentParametersApi.getGreen(this.handle);
+    }
+
+    set blue(value) {
+        BlackAndWhiteAdjustmentParametersApi.setBlue(this.handle, value);
+    }
+
+    get blue() {
+        return BlackAndWhiteAdjustmentParametersApi.getBlue(this.handle);
+    }
+
+    set cyan(value) {
+        BlackAndWhiteAdjustmentParametersApi.setCyan(this.handle, value);
+    }
+
+    get cyan() {
+        return BlackAndWhiteAdjustmentParametersApi.getCyan(this.handle);
+    }
+
+    set magenta(value) {
+        BlackAndWhiteAdjustmentParametersApi.setMagenta(this.handle, value);
+    }
+
+    get magenta() {
+        return BlackAndWhiteAdjustmentParametersApi.getMagenta(this.handle);
+    }
+
+    set yellow(value) {
+        BlackAndWhiteAdjustmentParametersApi.setYellow(this.handle, value);
+    }
+
+    get yellow() {
+        return BlackAndWhiteAdjustmentParametersApi.getYellow(this.handle);
+    }
+
+    static create() {
+        return new BlackAndWhiteAdjustmentParameters(BlackAndWhiteAdjustmentParametersApi.create());
+    }
+}
+
+
 class BlackAndWhiteAdjustmentRasterNode extends AdjustmentRasterNode {
     constructor(handle) {
         super(handle);
@@ -1591,7 +2405,7 @@ class BlackAndWhiteAdjustmentRasterNode extends AdjustmentRasterNode {
     }
 
     get parameters() {
-        return BlackAndWhiteAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new BlackAndWhiteAdjustmentParameters(BlackAndWhiteAdjustmentRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -1610,11 +2424,11 @@ class BlackAndWhiteAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDe
     }
 
     set parameters(parameters) {
-        BlackAndWhiteAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        BlackAndWhiteAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return BlackAndWhiteAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new BlackAndWhiteAdjustmentParameters(BlackAndWhiteAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -1623,11 +2437,62 @@ class BlackAndWhiteAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDe
     }
 
     static create(parameters) {
-        return new BlackAndWhiteAdjustmentRasterNodeDefinition(BlackAndWhiteAdjustmentRasterNodeDefinitionApi.create(parameters));
+        return new BlackAndWhiteAdjustmentRasterNodeDefinition(BlackAndWhiteAdjustmentRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new BlackAndWhiteAdjustmentRasterNodeDefinition(BlackAndWhiteAdjustmentRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class BrightnessContrastAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use BrightnessContrastAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new BrightnessContrastAdjustmentParameters(). Use BrightnessContrastAdjustmentParameters.create() instead.");
+            super(BrightnessContrastAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'BrightnessContrastAdjustmentParameters';
+    }
+
+    get isBrightnessContrastAdjustmentParameters() {
+        return true;
+    }
+
+    set brightness(value) {
+        BrightnessContrastAdjustmentParametersApi.setBrightness(this.handle, value);
+    }
+
+    get brightness() {
+        return BrightnessContrastAdjustmentParametersApi.getBrightness(this.handle);
+    }
+
+    set contrast(value) {
+        BrightnessContrastAdjustmentParametersApi.setContrast(this.handle, value);
+    }
+
+    get contrast() {
+        return BrightnessContrastAdjustmentParametersApi.getContrast(this.handle);
+    }
+
+    set isLinear(value) {
+        BrightnessContrastAdjustmentParametersApi.setIsLinear(this.handle, value);
+    }
+
+    get isLinear() {
+        return BrightnessContrastAdjustmentParametersApi.getIsLinear(this.handle);
+    }
+
+    static create() {
+        return new BrightnessContrastAdjustmentParameters(BrightnessContrastAdjustmentParametersApi.create());
     }
 }
 
@@ -1646,7 +2511,7 @@ class BrightnessContrastAdjustmentRasterNode extends AdjustmentRasterNode {
     }
 
     get parameters() {
-        return BrightnessContrastAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new BrightnessContrastAdjustmentParameters(BrightnessContrastAdjustmentRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -1665,11 +2530,11 @@ class BrightnessContrastAdjustmentRasterNodeDefinition extends AdjustmentRasterN
     }
 
     set parameters(parameters) {
-        BrightnessContrastAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        BrightnessContrastAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return BrightnessContrastAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new BrightnessContrastAdjustmentParameters(BrightnessContrastAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -1678,11 +2543,75 @@ class BrightnessContrastAdjustmentRasterNodeDefinition extends AdjustmentRasterN
     }
 
     static create(parameters) {
-        return new BrightnessContrastAdjustmentRasterNodeDefinition(BrightnessContrastAdjustmentRasterNodeDefinitionApi.create(parameters));
+        return new BrightnessContrastAdjustmentRasterNodeDefinition(BrightnessContrastAdjustmentRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new BrightnessContrastAdjustmentRasterNodeDefinition(BrightnessContrastAdjustmentRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+const COLOUR_BALANCE_ADJUSTMENT_VALUES_FIELDS = ['cyanRed', 'magentaGreen', 'yellowBlue'];
+
+class ColourBalanceAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use ColourBalanceAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new ColourBalanceAdjustmentParameters(). Use ColourBalanceAdjustmentParameters.create() instead.");
+            super(ColourBalanceAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'ColourBalanceAdjustmentParameters';
+    }
+
+    get isColourBalanceAdjustmentParameters() {
+        return true;
+    }
+
+    get valuesCount() {
+        return ColourBalanceAdjustmentParametersApi.getValuesCount(this.handle);
+    }
+
+    setValues(tonalRange, value) {
+        ColourBalanceAdjustmentParametersApi.setValues(this.handle, tonalRange, value);
+    }
+
+    getValues(tonalRange) {
+        return ColourBalanceAdjustmentParametersApi.getValues(this.handle, tonalRange);
+    }
+
+    // The callback is invoked as callback(tonalRange, values), with tonalRange a TonalRangeType, and returns an EnumerationResult.
+    enumerateValues(callback) {
+        return ColourBalanceAdjustmentParametersApi.enumerateValues(this.handle, callback);
+    }
+
+    // Whole-array assignment: params.values = [{...}, ...] sends every element (any array-like with valuesCount object elements).
+    set values(values) {
+        setStructArray(this.valuesCount, values, (tonalRange, value) => this.setValues(tonalRange, value), 'ColourBalanceValues');
+    }
+
+    // Array-like live view indexed by TonalRangeType: params.values[i] = {...} and params.values[i].cyanRed = v both write through.
+    get values() {
+        return liveStructArray(this.valuesCount, COLOUR_BALANCE_ADJUSTMENT_VALUES_FIELDS, tonalRange => this.getValues(tonalRange), (tonalRange, value) => this.setValues(tonalRange, value));
+    }
+
+    set preserveLuminosity(value) {
+        ColourBalanceAdjustmentParametersApi.setPreserveLuminosity(this.handle, value);
+    }
+
+    get preserveLuminosity() {
+        return ColourBalanceAdjustmentParametersApi.getPreserveLuminosity(this.handle);
+    }
+
+    static create() {
+        return new ColourBalanceAdjustmentParameters(ColourBalanceAdjustmentParametersApi.create());
     }
 }
 
@@ -1701,7 +2630,7 @@ class ColourBalanceAdjustmentRasterNode extends AdjustmentRasterNode {
     }
 
     get parameters() {
-        return ColourBalanceAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new ColourBalanceAdjustmentParameters(ColourBalanceAdjustmentRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -1720,11 +2649,11 @@ class ColourBalanceAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDe
     }
 
     set parameters(parameters) {
-        ColourBalanceAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        ColourBalanceAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return ColourBalanceAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new ColourBalanceAdjustmentParameters(ColourBalanceAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -1733,7 +2662,7 @@ class ColourBalanceAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDe
     }
 
     static create(parameters) {
-        return new ColourBalanceAdjustmentRasterNodeDefinition(ColourBalanceAdjustmentRasterNodeDefinitionApi.create(parameters));
+        return new ColourBalanceAdjustmentRasterNodeDefinition(ColourBalanceAdjustmentRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
@@ -1777,6 +2706,15 @@ class CurvesAdjustmentParameters extends HandleObject {
     
     getChannelSpline(channel) {
         return new Spline(CurvesAdjustmentParametersApi.getChannelSpline(this.handle, channel));
+    }
+
+    get channelSplineCount() {
+        return CurvesAdjustmentParametersApi.getChannelSplineCount(this.handle);
+    }
+
+    // The callback is invoked as callback(channel, spline) and returns an EnumerationResult; spline is null for an unset channel.
+    enumerateChannelSplines(callback) {
+        return CurvesAdjustmentParametersApi.enumerateChannelSplines(this.handle, (channel, splineHandle) => callback(channel, splineHandle ? new Spline(splineHandle) : null));
     }
     
     get min() {
@@ -1833,7 +2771,7 @@ class CurvesAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefinitio
     }
 
     get parameters() {
-        return CurvesAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new CurvesAdjustmentParameters(CurvesAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -1864,6 +2802,41 @@ class CurvesAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefinitio
 }
 
 
+class ExposureAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use ExposureAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new ExposureAdjustmentParameters(). Use ExposureAdjustmentParameters.create() instead.");
+            super(ExposureAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'ExposureAdjustmentParameters';
+    }
+
+    get isExposureAdjustmentParameters() {
+        return true;
+    }
+
+    set exposure(value) {
+        ExposureAdjustmentParametersApi.setExposure(this.handle, value);
+    }
+
+    get exposure() {
+        return ExposureAdjustmentParametersApi.getExposure(this.handle);
+    }
+
+    static create() {
+        return new ExposureAdjustmentParameters(ExposureAdjustmentParametersApi.create());
+    }
+}
+
+
 class ExposureAdjustmentRasterNode extends AdjustmentRasterNode {
     constructor(handle) {
         super(handle);
@@ -1878,7 +2851,7 @@ class ExposureAdjustmentRasterNode extends AdjustmentRasterNode {
     }
     
     get parameters() {
-        return ExposureAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new ExposureAdjustmentParameters(ExposureAdjustmentRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -1897,15 +2870,15 @@ class ExposureAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefinit
     }
     
     set parameters(params) {
-        ExposureAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, params);
+        ExposureAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, params.handle);
     }
 
     get parameters() {
-        return ExposureAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new ExposureAdjustmentParameters(ExposureAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
     
     static create(params) {
-        return new ExposureAdjustmentRasterNodeDefinition(ExposureAdjustmentRasterNodeDefinitionApi.create(params));
+        return new ExposureAdjustmentRasterNodeDefinition(ExposureAdjustmentRasterNodeDefinitionApi.create(params.handle));
     }
 
     static createDefault() {
@@ -1958,6 +2931,20 @@ class HSLShiftAdjustmentParameters extends HandleObject {
     get useHSV() {
         return HSLShiftAdjustmentParametersApi.getUseHSV(this.handle);
     }
+
+    get channelCount() {
+        return HSLShiftAdjustmentParametersApi.getChannelCount(this.handle);
+    }
+
+    // The callback is invoked as callback(channel, channelParameters) and returns an EnumerationResult.
+    enumerateChannelParameters(callback) {
+        return HSLShiftAdjustmentParametersApi.enumerateChannelParameters(this.handle, callback);
+    }
+
+    // The callback is invoked as callback(channel, colourRange) and returns an EnumerationResult.
+    enumerateChannelColourRanges(callback) {
+        return HSLShiftAdjustmentParametersApi.enumerateChannelColourRanges(this.handle, callback);
+    }
     
     static create() {
         return new HSLShiftAdjustmentParameters(HSLShiftAdjustmentParametersApi.create());
@@ -2002,7 +2989,7 @@ class HSLShiftAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefinit
     }
 
     get parameters() {
-        return HSLShiftAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new HSLShiftAdjustmentParameters(HSLShiftAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     static create(parameters) {
@@ -2049,6 +3036,71 @@ class InvertAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefinitio
 }
 
 
+const LEVELS_ADJUSTMENT_CHANNEL_FIELDS = ['blackLevel', 'whiteLevel', 'gamma', 'outputBlackLevel', 'outputWhiteLevel'];
+
+class LevelsAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use LevelsAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new LevelsAdjustmentParameters(). Use LevelsAdjustmentParameters.create() instead.");
+            super(LevelsAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'LevelsAdjustmentParameters';
+    }
+
+    get isLevelsAdjustmentParameters() {
+        return true;
+    }
+
+    set masterParameters(value) {
+        LevelsAdjustmentParametersApi.setMasterParameters(this.handle, value);
+    }
+
+    // Live view: params.masterParameters = {...} and params.masterParameters.gamma = v both write through.
+    get masterParameters() {
+        return liveStruct(LEVELS_ADJUSTMENT_CHANNEL_FIELDS, () => LevelsAdjustmentParametersApi.getMasterParameters(this.handle), value => LevelsAdjustmentParametersApi.setMasterParameters(this.handle, value));
+    }
+
+    get channelParametersCount() {
+        return LevelsAdjustmentParametersApi.getChannelParametersCount(this.handle);
+    }
+
+    setChannelParameters(channel, value) {
+        LevelsAdjustmentParametersApi.setChannelParameters(this.handle, channel, value);
+    }
+
+    getChannelParameters(channel) {
+        return LevelsAdjustmentParametersApi.getChannelParameters(this.handle, channel);
+    }
+
+    // The callback is invoked as callback(channel, channelParameters) and returns an EnumerationResult.
+    enumerateChannelParameters(callback) {
+        return LevelsAdjustmentParametersApi.enumerateChannelParameters(this.handle, callback);
+    }
+
+    // Whole-array assignment: params.channelParameters = [{...}, ...] sends every element (any array-like with channelParametersCount object elements).
+    set channelParameters(values) {
+        setStructArray(this.channelParametersCount, values, (channel, value) => this.setChannelParameters(channel, value), 'LevelsAdjustmentChannelParameters');
+    }
+
+    // Array-like live view: params.channelParameters[1] = {...} and params.channelParameters[1].gamma = v both write through.
+    get channelParameters() {
+        return liveStructArray(this.channelParametersCount, LEVELS_ADJUSTMENT_CHANNEL_FIELDS, channel => this.getChannelParameters(channel), (channel, value) => this.setChannelParameters(channel, value));
+    }
+
+    static create() {
+        return new LevelsAdjustmentParameters(LevelsAdjustmentParametersApi.create());
+    }
+}
+
+
 class LevelsAdjustmentRasterNode extends AdjustmentRasterNode {
     constructor(handle) {
         super(handle);
@@ -2063,7 +3115,7 @@ class LevelsAdjustmentRasterNode extends AdjustmentRasterNode {
     }
     
     get parameters() {
-        return LevelsAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new LevelsAdjustmentParameters(LevelsAdjustmentRasterNodeApi.getParameters(this.handle));
     }
     
     get colourSpace() {
@@ -2085,11 +3137,11 @@ class LevelsAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefinitio
     }
     
     set parameters(params) {
-        LevelsAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, params);
+        LevelsAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, params.handle);
     }
 
     get parameters() {
-        return LevelsAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new LevelsAdjustmentParameters(LevelsAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
     
     setParameters(parameters) {
@@ -2111,11 +3163,70 @@ class LevelsAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefinitio
     }
 
     static create(params, colourSpace) {
-        return new LevelsAdjustmentRasterNodeDefinition(LevelsAdjustmentRasterNodeDefinitionApi.create(params, colourSpace));
+        return new LevelsAdjustmentRasterNodeDefinition(LevelsAdjustmentRasterNodeDefinitionApi.create(params.handle, colourSpace));
     }
 
     static createDefault(document) {
         return new LevelsAdjustmentRasterNodeDefinition(LevelsAdjustmentRasterNodeDefinitionApi.createDefault(document.handle));
+    }
+}
+
+
+class NormalsAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use NormalsAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new NormalsAdjustmentParameters(). Use NormalsAdjustmentParameters.create() instead.");
+            super(NormalsAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'NormalsAdjustmentParameters';
+    }
+
+    get isNormalsAdjustmentParameters() {
+        return true;
+    }
+
+    set rotation(value) {
+        NormalsAdjustmentParametersApi.setRotation(this.handle, value);
+    }
+
+    get rotation() {
+        return NormalsAdjustmentParametersApi.getRotation(this.handle);
+    }
+
+    set scale(value) {
+        NormalsAdjustmentParametersApi.setScale(this.handle, value);
+    }
+
+    get scale() {
+        return NormalsAdjustmentParametersApi.getScale(this.handle);
+    }
+
+    set flipX(value) {
+        NormalsAdjustmentParametersApi.setFlipX(this.handle, value);
+    }
+
+    get flipX() {
+        return NormalsAdjustmentParametersApi.getFlipX(this.handle);
+    }
+
+    set flipY(value) {
+        NormalsAdjustmentParametersApi.setFlipY(this.handle, value);
+    }
+
+    get flipY() {
+        return NormalsAdjustmentParametersApi.getFlipY(this.handle);
+    }
+
+    static create() {
+        return new NormalsAdjustmentParameters(NormalsAdjustmentParametersApi.create());
     }
 }
 
@@ -2134,7 +3245,7 @@ class NormalsAdjustmentRasterNode extends AdjustmentRasterNode {
     }
 
     get parameters() {
-        return NormalsAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new NormalsAdjustmentParameters(NormalsAdjustmentRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -2153,11 +3264,11 @@ class NormalsAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefiniti
     }
 
     set parameters(parameters) {
-        NormalsAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        NormalsAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return NormalsAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new NormalsAdjustmentParameters(NormalsAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -2166,11 +3277,46 @@ class NormalsAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefiniti
     }
 
     static create(parameters) {
-        return new NormalsAdjustmentRasterNodeDefinition(NormalsAdjustmentRasterNodeDefinitionApi.create(parameters));
+        return new NormalsAdjustmentRasterNodeDefinition(NormalsAdjustmentRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new NormalsAdjustmentRasterNodeDefinition(NormalsAdjustmentRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class PosteriseAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use PosteriseAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new PosteriseAdjustmentParameters(). Use PosteriseAdjustmentParameters.create() instead.");
+            super(PosteriseAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'PosteriseAdjustmentParameters';
+    }
+
+    get isPosteriseAdjustmentParameters() {
+        return true;
+    }
+
+    set levels(value) {
+        PosteriseAdjustmentParametersApi.setLevels(this.handle, value);
+    }
+
+    get levels() {
+        return PosteriseAdjustmentParametersApi.getLevels(this.handle);
+    }
+
+    static create() {
+        return new PosteriseAdjustmentParameters(PosteriseAdjustmentParametersApi.create());
     }
 }
 
@@ -2189,7 +3335,7 @@ class PosteriseAdjustmentRasterNode extends AdjustmentRasterNode {
     }
 
     get parameters() {
-        return PosteriseAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new PosteriseAdjustmentParameters(PosteriseAdjustmentRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -2208,11 +3354,11 @@ class PosteriseAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefini
     }
 
     set parameters(parameters) {
-        PosteriseAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        PosteriseAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return PosteriseAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new PosteriseAdjustmentParameters(PosteriseAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -2221,11 +3367,62 @@ class PosteriseAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefini
     }
 
     static create(parameters) {
-        return new PosteriseAdjustmentRasterNodeDefinition(PosteriseAdjustmentRasterNodeDefinitionApi.create(parameters));
+        return new PosteriseAdjustmentRasterNodeDefinition(PosteriseAdjustmentRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new PosteriseAdjustmentRasterNodeDefinition(PosteriseAdjustmentRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class RecolourAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use RecolourAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new RecolourAdjustmentParameters(). Use RecolourAdjustmentParameters.create() instead.");
+            super(RecolourAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'RecolourAdjustmentParameters';
+    }
+
+    get isRecolourAdjustmentParameters() {
+        return true;
+    }
+
+    set hue(value) {
+        RecolourAdjustmentParametersApi.setHue(this.handle, value);
+    }
+
+    get hue() {
+        return RecolourAdjustmentParametersApi.getHue(this.handle);
+    }
+
+    set saturation(value) {
+        RecolourAdjustmentParametersApi.setSaturation(this.handle, value);
+    }
+
+    get saturation() {
+        return RecolourAdjustmentParametersApi.getSaturation(this.handle);
+    }
+
+    set lightness(value) {
+        RecolourAdjustmentParametersApi.setLightness(this.handle, value);
+    }
+
+    get lightness() {
+        return RecolourAdjustmentParametersApi.getLightness(this.handle);
+    }
+
+    static create() {
+        return new RecolourAdjustmentParameters(RecolourAdjustmentParametersApi.create());
     }
 }
 
@@ -2244,7 +3441,7 @@ class RecolourAdjustmentRasterNode extends AdjustmentRasterNode {
     }
 
     get parameters() {
-        return RecolourAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new RecolourAdjustmentParameters(RecolourAdjustmentRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -2263,11 +3460,11 @@ class RecolourAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefinit
     }
 
     set parameters(parameters) {
-        RecolourAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        RecolourAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return RecolourAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new RecolourAdjustmentParameters(RecolourAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -2276,11 +3473,75 @@ class RecolourAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefinit
     }
 
     static create(parameters) {
-        return new RecolourAdjustmentRasterNodeDefinition(RecolourAdjustmentRasterNodeDefinitionApi.create(parameters));
+        return new RecolourAdjustmentRasterNodeDefinition(RecolourAdjustmentRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new RecolourAdjustmentRasterNodeDefinition(RecolourAdjustmentRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+const SELECTIVE_COLOUR_ADJUSTMENT_WEIGHTS_FIELDS = ['cyanWeight', 'magentaWeight', 'yellowWeight', 'blackWeight'];
+
+class SelectiveColourAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use SelectiveColourAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new SelectiveColourAdjustmentParameters(). Use SelectiveColourAdjustmentParameters.create() instead.");
+            super(SelectiveColourAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'SelectiveColourAdjustmentParameters';
+    }
+
+    get isSelectiveColourAdjustmentParameters() {
+        return true;
+    }
+
+    get weightsCount() {
+        return SelectiveColourAdjustmentParametersApi.getWeightsCount(this.handle);
+    }
+
+    setWeights(colour, value) {
+        SelectiveColourAdjustmentParametersApi.setWeights(this.handle, colour, value);
+    }
+
+    getWeights(colour) {
+        return SelectiveColourAdjustmentParametersApi.getWeights(this.handle, colour);
+    }
+
+    // The callback is invoked as callback(colour, weights), with colour a SelectiveColour, and returns an EnumerationResult.
+    enumerateWeights(callback) {
+        return SelectiveColourAdjustmentParametersApi.enumerateWeights(this.handle, callback);
+    }
+
+    // Whole-array assignment: params.weights = [{...}, ...] sends every element (any array-like with weightsCount object elements).
+    set weights(values) {
+        setStructArray(this.weightsCount, values, (colour, value) => this.setWeights(colour, value), 'SelectiveColourWeights');
+    }
+
+    // Array-like live view indexed by SelectiveColour: params.weights[i] = {...} and params.weights[i].cyanWeight = v both write through.
+    get weights() {
+        return liveStructArray(this.weightsCount, SELECTIVE_COLOUR_ADJUSTMENT_WEIGHTS_FIELDS, colour => this.getWeights(colour), (colour, value) => this.setWeights(colour, value));
+    }
+
+    set isRelative(value) {
+        SelectiveColourAdjustmentParametersApi.setIsRelative(this.handle, value);
+    }
+
+    get isRelative() {
+        return SelectiveColourAdjustmentParametersApi.getIsRelative(this.handle);
+    }
+
+    static create() {
+        return new SelectiveColourAdjustmentParameters(SelectiveColourAdjustmentParametersApi.create());
     }
 }
 
@@ -2299,7 +3560,7 @@ class SelectiveColourAdjustmentRasterNode extends AdjustmentRasterNode {
     }
 
     get parameters() {
-        return SelectiveColourAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new SelectiveColourAdjustmentParameters(SelectiveColourAdjustmentRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -2318,11 +3579,11 @@ class SelectiveColourAdjustmentRasterNodeDefinition extends AdjustmentRasterNode
     }
 
     set parameters(parameters) {
-        SelectiveColourAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        SelectiveColourAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return SelectiveColourAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new SelectiveColourAdjustmentParameters(SelectiveColourAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -2331,11 +3592,54 @@ class SelectiveColourAdjustmentRasterNodeDefinition extends AdjustmentRasterNode
     }
 
     static create(parameters) {
-        return new SelectiveColourAdjustmentRasterNodeDefinition(SelectiveColourAdjustmentRasterNodeDefinitionApi.create(parameters));
+        return new SelectiveColourAdjustmentRasterNodeDefinition(SelectiveColourAdjustmentRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new SelectiveColourAdjustmentRasterNodeDefinition(SelectiveColourAdjustmentRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class ShadowsHighlightsAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use ShadowsHighlightsAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new ShadowsHighlightsAdjustmentParameters(). Use ShadowsHighlightsAdjustmentParameters.create() instead.");
+            super(ShadowsHighlightsAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'ShadowsHighlightsAdjustmentParameters';
+    }
+
+    get isShadowsHighlightsAdjustmentParameters() {
+        return true;
+    }
+
+    set shadows(value) {
+        ShadowsHighlightsAdjustmentParametersApi.setShadows(this.handle, value);
+    }
+
+    get shadows() {
+        return ShadowsHighlightsAdjustmentParametersApi.getShadows(this.handle);
+    }
+
+    set highlights(value) {
+        ShadowsHighlightsAdjustmentParametersApi.setHighlights(this.handle, value);
+    }
+
+    get highlights() {
+        return ShadowsHighlightsAdjustmentParametersApi.getHighlights(this.handle);
+    }
+
+    static create() {
+        return new ShadowsHighlightsAdjustmentParameters(ShadowsHighlightsAdjustmentParametersApi.create());
     }
 }
 
@@ -2354,7 +3658,7 @@ class ShadowsHighlightsAdjustmentRasterNode extends AdjustmentRasterNode {
     }
 
     get parameters() {
-        return ShadowsHighlightsAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new ShadowsHighlightsAdjustmentParameters(ShadowsHighlightsAdjustmentRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -2373,11 +3677,11 @@ class ShadowsHighlightsAdjustmentRasterNodeDefinition extends AdjustmentRasterNo
     }
 
     set parameters(parameters) {
-        ShadowsHighlightsAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        ShadowsHighlightsAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return ShadowsHighlightsAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new ShadowsHighlightsAdjustmentParameters(ShadowsHighlightsAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -2386,11 +3690,78 @@ class ShadowsHighlightsAdjustmentRasterNodeDefinition extends AdjustmentRasterNo
     }
 
     static create(parameters) {
-        return new ShadowsHighlightsAdjustmentRasterNodeDefinition(ShadowsHighlightsAdjustmentRasterNodeDefinitionApi.create(parameters));
+        return new ShadowsHighlightsAdjustmentRasterNodeDefinition(ShadowsHighlightsAdjustmentRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new ShadowsHighlightsAdjustmentRasterNodeDefinition(ShadowsHighlightsAdjustmentRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class SplitToningAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use SplitToningAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new SplitToningAdjustmentParameters(). Use SplitToningAdjustmentParameters.create() instead.");
+            super(SplitToningAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'SplitToningAdjustmentParameters';
+    }
+
+    get isSplitToningAdjustmentParameters() {
+        return true;
+    }
+
+    set highlightsHue(value) {
+        SplitToningAdjustmentParametersApi.setHighlightsHue(this.handle, value);
+    }
+
+    get highlightsHue() {
+        return SplitToningAdjustmentParametersApi.getHighlightsHue(this.handle);
+    }
+
+    set highlightsSaturation(value) {
+        SplitToningAdjustmentParametersApi.setHighlightsSaturation(this.handle, value);
+    }
+
+    get highlightsSaturation() {
+        return SplitToningAdjustmentParametersApi.getHighlightsSaturation(this.handle);
+    }
+
+    set shadowsHue(value) {
+        SplitToningAdjustmentParametersApi.setShadowsHue(this.handle, value);
+    }
+
+    get shadowsHue() {
+        return SplitToningAdjustmentParametersApi.getShadowsHue(this.handle);
+    }
+
+    set shadowsSaturation(value) {
+        SplitToningAdjustmentParametersApi.setShadowsSaturation(this.handle, value);
+    }
+
+    get shadowsSaturation() {
+        return SplitToningAdjustmentParametersApi.getShadowsSaturation(this.handle);
+    }
+
+    set balance(value) {
+        SplitToningAdjustmentParametersApi.setBalance(this.handle, value);
+    }
+
+    get balance() {
+        return SplitToningAdjustmentParametersApi.getBalance(this.handle);
+    }
+
+    static create() {
+        return new SplitToningAdjustmentParameters(SplitToningAdjustmentParametersApi.create());
     }
 }
 
@@ -2409,7 +3780,7 @@ class SplitToningAdjustmentRasterNode extends AdjustmentRasterNode {
     }
 
     get parameters() {
-        return SplitToningAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new SplitToningAdjustmentParameters(SplitToningAdjustmentRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -2428,11 +3799,11 @@ class SplitToningAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefi
     }
 
     set parameters(parameters) {
-        SplitToningAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        SplitToningAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return SplitToningAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new SplitToningAdjustmentParameters(SplitToningAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -2441,11 +3812,46 @@ class SplitToningAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefi
     }
 
     static create(parameters) {
-        return new SplitToningAdjustmentRasterNodeDefinition(SplitToningAdjustmentRasterNodeDefinitionApi.create(parameters));
+        return new SplitToningAdjustmentRasterNodeDefinition(SplitToningAdjustmentRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new SplitToningAdjustmentRasterNodeDefinition(SplitToningAdjustmentRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class ThresholdAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use ThresholdAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new ThresholdAdjustmentParameters(). Use ThresholdAdjustmentParameters.create() instead.");
+            super(ThresholdAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'ThresholdAdjustmentParameters';
+    }
+
+    get isThresholdAdjustmentParameters() {
+        return true;
+    }
+
+    set threshold(value) {
+        ThresholdAdjustmentParametersApi.setThreshold(this.handle, value);
+    }
+
+    get threshold() {
+        return ThresholdAdjustmentParametersApi.getThreshold(this.handle);
+    }
+
+    static create() {
+        return new ThresholdAdjustmentParameters(ThresholdAdjustmentParametersApi.create());
     }
 }
 
@@ -2464,7 +3870,7 @@ class ThresholdAdjustmentRasterNode extends AdjustmentRasterNode {
     }
 
     get parameters() {
-        return ThresholdAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new ThresholdAdjustmentParameters(ThresholdAdjustmentRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -2483,11 +3889,11 @@ class ThresholdAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefini
     }
 
     set parameters(parameters) {
-        ThresholdAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        ThresholdAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return ThresholdAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new ThresholdAdjustmentParameters(ThresholdAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -2496,11 +3902,70 @@ class ThresholdAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefini
     }
 
     static create(parameters) {
-        return new ThresholdAdjustmentRasterNodeDefinition(ThresholdAdjustmentRasterNodeDefinitionApi.create(parameters));
+        return new ThresholdAdjustmentRasterNodeDefinition(ThresholdAdjustmentRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new ThresholdAdjustmentRasterNodeDefinition(ThresholdAdjustmentRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class ToneCompressionAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use ToneCompressionAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new ToneCompressionAdjustmentParameters(). Use ToneCompressionAdjustmentParameters.create() instead.");
+            super(ToneCompressionAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'ToneCompressionAdjustmentParameters';
+    }
+
+    get isToneCompressionAdjustmentParameters() {
+        return true;
+    }
+
+    set method(value) {
+        ToneCompressionAdjustmentParametersApi.setMethod(this.handle, value);
+    }
+
+    get method() {
+        return ToneCompressionAdjustmentParametersApi.getMethod(this.handle);
+    }
+
+    set exposure(value) {
+        ToneCompressionAdjustmentParametersApi.setExposure(this.handle, value);
+    }
+
+    get exposure() {
+        return ToneCompressionAdjustmentParametersApi.getExposure(this.handle);
+    }
+
+    set gamma(value) {
+        ToneCompressionAdjustmentParametersApi.setGamma(this.handle, value);
+    }
+
+    get gamma() {
+        return ToneCompressionAdjustmentParametersApi.getGamma(this.handle);
+    }
+
+    set colour(value) {
+        ToneCompressionAdjustmentParametersApi.setColour(this.handle, value);
+    }
+
+    get colour() {
+        return ToneCompressionAdjustmentParametersApi.getColour(this.handle);
+    }
+
+    static create() {
+        return new ToneCompressionAdjustmentParameters(ToneCompressionAdjustmentParametersApi.create());
     }
 }
 
@@ -2519,7 +3984,7 @@ class ToneCompressionAdjustmentRasterNode extends AdjustmentRasterNode {
     }
 
     get parameters() {
-        return ToneCompressionAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new ToneCompressionAdjustmentParameters(ToneCompressionAdjustmentRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -2538,11 +4003,11 @@ class ToneCompressionAdjustmentRasterNodeDefinition extends AdjustmentRasterNode
     }
 
     set parameters(parameters) {
-        ToneCompressionAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        ToneCompressionAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return ToneCompressionAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new ToneCompressionAdjustmentParameters(ToneCompressionAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -2551,11 +4016,70 @@ class ToneCompressionAdjustmentRasterNodeDefinition extends AdjustmentRasterNode
     }
 
     static create(parameters) {
-        return new ToneCompressionAdjustmentRasterNodeDefinition(ToneCompressionAdjustmentRasterNodeDefinitionApi.create(parameters));
+        return new ToneCompressionAdjustmentRasterNodeDefinition(ToneCompressionAdjustmentRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new ToneCompressionAdjustmentRasterNodeDefinition(ToneCompressionAdjustmentRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class ToneStretchAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use ToneStretchAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new ToneStretchAdjustmentParameters(). Use ToneStretchAdjustmentParameters.create() instead.");
+            super(ToneStretchAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'ToneStretchAdjustmentParameters';
+    }
+
+    get isToneStretchAdjustmentParameters() {
+        return true;
+    }
+
+    set method(value) {
+        ToneStretchAdjustmentParametersApi.setMethod(this.handle, value);
+    }
+
+    get method() {
+        return ToneStretchAdjustmentParametersApi.getMethod(this.handle);
+    }
+
+    set gamma(value) {
+        ToneStretchAdjustmentParametersApi.setGamma(this.handle, value);
+    }
+
+    get gamma() {
+        return ToneStretchAdjustmentParametersApi.getGamma(this.handle);
+    }
+
+    set stretchFactor(value) {
+        ToneStretchAdjustmentParametersApi.setStretchFactor(this.handle, value);
+    }
+
+    get stretchFactor() {
+        return ToneStretchAdjustmentParametersApi.getStretchFactor(this.handle);
+    }
+
+    set compression(value) {
+        ToneStretchAdjustmentParametersApi.setCompression(this.handle, value);
+    }
+
+    get compression() {
+        return ToneStretchAdjustmentParametersApi.getCompression(this.handle);
+    }
+
+    static create() {
+        return new ToneStretchAdjustmentParameters(ToneStretchAdjustmentParametersApi.create());
     }
 }
 
@@ -2574,7 +4098,7 @@ class ToneStretchAdjustmentRasterNode extends AdjustmentRasterNode {
     }
 
     get parameters() {
-        return ToneStretchAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new ToneStretchAdjustmentParameters(ToneStretchAdjustmentRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -2593,11 +4117,11 @@ class ToneStretchAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefi
     }
 
     set parameters(parameters) {
-        ToneStretchAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        ToneStretchAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return ToneStretchAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new ToneStretchAdjustmentParameters(ToneStretchAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -2606,11 +4130,54 @@ class ToneStretchAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefi
     }
 
     static create(parameters) {
-        return new ToneStretchAdjustmentRasterNodeDefinition(ToneStretchAdjustmentRasterNodeDefinitionApi.create(parameters));
+        return new ToneStretchAdjustmentRasterNodeDefinition(ToneStretchAdjustmentRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new ToneStretchAdjustmentRasterNodeDefinition(ToneStretchAdjustmentRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class VibranceAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use VibranceAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new VibranceAdjustmentParameters(). Use VibranceAdjustmentParameters.create() instead.");
+            super(VibranceAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'VibranceAdjustmentParameters';
+    }
+
+    get isVibranceAdjustmentParameters() {
+        return true;
+    }
+
+    set vibrance(value) {
+        VibranceAdjustmentParametersApi.setVibrance(this.handle, value);
+    }
+
+    get vibrance() {
+        return VibranceAdjustmentParametersApi.getVibrance(this.handle);
+    }
+
+    set saturation(value) {
+        VibranceAdjustmentParametersApi.setSaturation(this.handle, value);
+    }
+
+    get saturation() {
+        return VibranceAdjustmentParametersApi.getSaturation(this.handle);
+    }
+
+    static create() {
+        return new VibranceAdjustmentParameters(VibranceAdjustmentParametersApi.create());
     }
 }
 
@@ -2629,7 +4196,7 @@ class VibranceAdjustmentRasterNode extends AdjustmentRasterNode {
     }
 
     get parameters() {
-        return VibranceAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new VibranceAdjustmentParameters(VibranceAdjustmentRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -2648,11 +4215,11 @@ class VibranceAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefinit
     }
 
     set parameters(parameters) {
-        VibranceAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        VibranceAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return VibranceAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new VibranceAdjustmentParameters(VibranceAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -2661,11 +4228,54 @@ class VibranceAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDefinit
     }
 
     static create(parameters) {
-        return new VibranceAdjustmentRasterNodeDefinition(VibranceAdjustmentRasterNodeDefinitionApi.create(parameters));
+        return new VibranceAdjustmentRasterNodeDefinition(VibranceAdjustmentRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new VibranceAdjustmentRasterNodeDefinition(VibranceAdjustmentRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class WhiteBalanceAdjustmentParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use WhiteBalanceAdjustmentParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new WhiteBalanceAdjustmentParameters(). Use WhiteBalanceAdjustmentParameters.create() instead.");
+            super(WhiteBalanceAdjustmentParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'WhiteBalanceAdjustmentParameters';
+    }
+
+    get isWhiteBalanceAdjustmentParameters() {
+        return true;
+    }
+
+    set whiteBalance(value) {
+        WhiteBalanceAdjustmentParametersApi.setWhiteBalance(this.handle, value);
+    }
+
+    get whiteBalance() {
+        return WhiteBalanceAdjustmentParametersApi.getWhiteBalance(this.handle);
+    }
+
+    set tint(value) {
+        WhiteBalanceAdjustmentParametersApi.setTint(this.handle, value);
+    }
+
+    get tint() {
+        return WhiteBalanceAdjustmentParametersApi.getTint(this.handle);
+    }
+
+    static create() {
+        return new WhiteBalanceAdjustmentParameters(WhiteBalanceAdjustmentParametersApi.create());
     }
 }
 
@@ -2684,7 +4294,7 @@ class WhiteBalanceAdjustmentRasterNode extends AdjustmentRasterNode {
     }
 
     get parameters() {
-        return WhiteBalanceAdjustmentRasterNodeApi.getParameters(this.handle);
+        return new WhiteBalanceAdjustmentParameters(WhiteBalanceAdjustmentRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -2703,11 +4313,11 @@ class WhiteBalanceAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDef
     }
 
     set parameters(parameters) {
-        WhiteBalanceAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        WhiteBalanceAdjustmentRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return WhiteBalanceAdjustmentRasterNodeDefinitionApi.getParameters(this.handle);
+        return new WhiteBalanceAdjustmentParameters(WhiteBalanceAdjustmentRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -2716,7 +4326,7 @@ class WhiteBalanceAdjustmentRasterNodeDefinition extends AdjustmentRasterNodeDef
     }
 
     static create(parameters) {
-        return new WhiteBalanceAdjustmentRasterNodeDefinition(WhiteBalanceAdjustmentRasterNodeDefinitionApi.create(parameters));
+        return new WhiteBalanceAdjustmentRasterNodeDefinition(WhiteBalanceAdjustmentRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
@@ -2772,6 +4382,57 @@ class FilterRasterNodeDefinition extends EnclosureRasterNodeDefinition {
 }
 
 
+class AddNoiseFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use AddNoiseFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new AddNoiseFilterParameters(). Use AddNoiseFilterParameters.create() instead.");
+            super(AddNoiseFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'AddNoiseFilterParameters';
+    }
+
+    get isAddNoiseFilterParameters() {
+        return true;
+    }
+
+    set intensity(value) {
+        AddNoiseFilterParametersApi.setIntensity(this.handle, value);
+    }
+
+    get intensity() {
+        return AddNoiseFilterParametersApi.getIntensity(this.handle);
+    }
+
+    set noiseType(value) {
+        AddNoiseFilterParametersApi.setNoiseType(this.handle, value);
+    }
+
+    get noiseType() {
+        return AddNoiseFilterParametersApi.getNoiseType(this.handle);
+    }
+
+    set isMonochromatic(value) {
+        AddNoiseFilterParametersApi.setIsMonochromatic(this.handle, value);
+    }
+
+    get isMonochromatic() {
+        return AddNoiseFilterParametersApi.getIsMonochromatic(this.handle);
+    }
+
+    static create() {
+        return new AddNoiseFilterParameters(AddNoiseFilterParametersApi.create());
+    }
+}
+
+
 class AddNoiseFilterRasterNode extends FilterRasterNode {
     constructor(handle) {
         super(handle);
@@ -2786,7 +4447,7 @@ class AddNoiseFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return AddNoiseFilterRasterNodeApi.getParameters(this.handle);
+        return new AddNoiseFilterParameters(AddNoiseFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -2805,11 +4466,11 @@ class AddNoiseFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     set parameters(parameters) {
-        AddNoiseFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        AddNoiseFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return AddNoiseFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new AddNoiseFilterParameters(AddNoiseFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -2818,11 +4479,54 @@ class AddNoiseFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(parameters) {
-        return new AddNoiseFilterRasterNodeDefinition(AddNoiseFilterRasterNodeDefinitionApi.create(parameters));
+        return new AddNoiseFilterRasterNodeDefinition(AddNoiseFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new AddNoiseFilterRasterNodeDefinition(AddNoiseFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class BilateralBlurFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use BilateralBlurFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new BilateralBlurFilterParameters(). Use BilateralBlurFilterParameters.create() instead.");
+            super(BilateralBlurFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'BilateralBlurFilterParameters';
+    }
+
+    get isBilateralBlurFilterParameters() {
+        return true;
+    }
+
+    set radius(value) {
+        BilateralBlurFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return BilateralBlurFilterParametersApi.getRadius(this.handle);
+    }
+
+    set tolerance(value) {
+        BilateralBlurFilterParametersApi.setTolerance(this.handle, value);
+    }
+
+    get tolerance() {
+        return BilateralBlurFilterParametersApi.getTolerance(this.handle);
+    }
+
+    static create() {
+        return new BilateralBlurFilterParameters(BilateralBlurFilterParametersApi.create());
     }
 }
 
@@ -2841,7 +4545,7 @@ class BilateralBlurFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return BilateralBlurFilterRasterNodeApi.getParameters(this.handle);
+        return new BilateralBlurFilterParameters(BilateralBlurFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -2860,11 +4564,11 @@ class BilateralBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition
     }
     
     set parameters(params) {
-        BilateralBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, params);
+        BilateralBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, params.handle);
     }
 
     get parameters() {
-        return BilateralBlurFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new BilateralBlurFilterParameters(BilateralBlurFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -2873,11 +4577,46 @@ class BilateralBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition
     }
     
     static create(params) {
-        return new BilateralBlurFilterRasterNodeDefinition(BilateralBlurFilterRasterNodeDefinitionApi.create(params));
+        return new BilateralBlurFilterRasterNodeDefinition(BilateralBlurFilterRasterNodeDefinitionApi.create(params.handle));
     }
 
     static createDefault() {
         return new BilateralBlurFilterRasterNodeDefinition(BilateralBlurFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class BoxBlurFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use BoxBlurFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new BoxBlurFilterParameters(). Use BoxBlurFilterParameters.create() instead.");
+            super(BoxBlurFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'BoxBlurFilterParameters';
+    }
+
+    get isBoxBlurFilterParameters() {
+        return true;
+    }
+
+    set radius(value) {
+        BoxBlurFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return BoxBlurFilterParametersApi.getRadius(this.handle);
+    }
+
+    static create() {
+        return new BoxBlurFilterParameters(BoxBlurFilterParametersApi.create());
     }
 }
 
@@ -2896,7 +4635,7 @@ class BoxBlurFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return BoxBlurFilterRasterNodeApi.getParameters(this.handle);
+        return new BoxBlurFilterParameters(BoxBlurFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -2915,11 +4654,11 @@ class BoxBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
     
     set parameters(params) {
-        BoxBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, params);
+        BoxBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, params.handle);
     }
 
     get parameters() {
-        return BoxBlurFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new BoxBlurFilterParameters(BoxBlurFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -2928,11 +4667,46 @@ class BoxBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
     
     static create(params) {
-        return new BoxBlurFilterRasterNodeDefinition(BoxBlurFilterRasterNodeDefinitionApi.create(params));
+        return new BoxBlurFilterRasterNodeDefinition(BoxBlurFilterRasterNodeDefinitionApi.create(params.handle));
     }
 
     static createDefault() {
         return new BoxBlurFilterRasterNodeDefinition(BoxBlurFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class ClarityFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use ClarityFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new ClarityFilterParameters(). Use ClarityFilterParameters.create() instead.");
+            super(ClarityFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'ClarityFilterParameters';
+    }
+
+    get isClarityFilterParameters() {
+        return true;
+    }
+
+    set strength(value) {
+        ClarityFilterParametersApi.setStrength(this.handle, value);
+    }
+
+    get strength() {
+        return ClarityFilterParametersApi.getStrength(this.handle);
+    }
+
+    static create() {
+        return new ClarityFilterParameters(ClarityFilterParametersApi.create());
     }
 }
 
@@ -2951,7 +4725,7 @@ class ClarityFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return ClarityFilterRasterNodeApi.getParameters(this.handle);
+        return new ClarityFilterParameters(ClarityFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -2970,11 +4744,11 @@ class ClarityFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     set parameters(parameters) {
-        ClarityFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        ClarityFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return ClarityFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new ClarityFilterParameters(ClarityFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -2983,11 +4757,78 @@ class ClarityFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(parameters) {
-        return new ClarityFilterRasterNodeDefinition(ClarityFilterRasterNodeDefinitionApi.create(parameters));
+        return new ClarityFilterRasterNodeDefinition(ClarityFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new ClarityFilterRasterNodeDefinition(ClarityFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class DefringeFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use DefringeFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new DefringeFilterParameters(). Use DefringeFilterParameters.create() instead.");
+            super(DefringeFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'DefringeFilterParameters';
+    }
+
+    get isDefringeFilterParameters() {
+        return true;
+    }
+
+    set hue(value) {
+        DefringeFilterParametersApi.setHue(this.handle, value);
+    }
+
+    get hue() {
+        return DefringeFilterParametersApi.getHue(this.handle);
+    }
+
+    set removeComplementary(value) {
+        DefringeFilterParametersApi.setRemoveComplementary(this.handle, value);
+    }
+
+    get removeComplementary() {
+        return DefringeFilterParametersApi.getRemoveComplementary(this.handle);
+    }
+
+    set tolerance(value) {
+        DefringeFilterParametersApi.setTolerance(this.handle, value);
+    }
+
+    get tolerance() {
+        return DefringeFilterParametersApi.getTolerance(this.handle);
+    }
+
+    set radius(value) {
+        DefringeFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return DefringeFilterParametersApi.getRadius(this.handle);
+    }
+
+    set edgeBrightnessThreshold(value) {
+        DefringeFilterParametersApi.setEdgeBrightnessThreshold(this.handle, value);
+    }
+
+    get edgeBrightnessThreshold() {
+        return DefringeFilterParametersApi.getEdgeBrightnessThreshold(this.handle);
+    }
+
+    static create() {
+        return new DefringeFilterParameters(DefringeFilterParametersApi.create());
     }
 }
 
@@ -3006,7 +4847,7 @@ class DefringeFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return DefringeFilterRasterNodeApi.getParameters(this.handle);
+        return new DefringeFilterParameters(DefringeFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -3025,11 +4866,11 @@ class DefringeFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     set parameters(parameters) {
-        DefringeFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        DefringeFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return DefringeFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new DefringeFilterParameters(DefringeFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -3038,11 +4879,78 @@ class DefringeFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(parameters) {
-        return new DefringeFilterRasterNodeDefinition(DefringeFilterRasterNodeDefinitionApi.create(parameters));
+        return new DefringeFilterRasterNodeDefinition(DefringeFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new DefringeFilterRasterNodeDefinition(DefringeFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class DenoiseFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use DenoiseFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new DenoiseFilterParameters(). Use DenoiseFilterParameters.create() instead.");
+            super(DenoiseFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'DenoiseFilterParameters';
+    }
+
+    get isDenoiseFilterParameters() {
+        return true;
+    }
+
+    set luminance(value) {
+        DenoiseFilterParametersApi.setLuminance(this.handle, value);
+    }
+
+    get luminance() {
+        return DenoiseFilterParametersApi.getLuminance(this.handle);
+    }
+
+    set luminanceDetail(value) {
+        DenoiseFilterParametersApi.setLuminanceDetail(this.handle, value);
+    }
+
+    get luminanceDetail() {
+        return DenoiseFilterParametersApi.getLuminanceDetail(this.handle);
+    }
+
+    set luminanceContribution(value) {
+        DenoiseFilterParametersApi.setLuminanceContribution(this.handle, value);
+    }
+
+    get luminanceContribution() {
+        return DenoiseFilterParametersApi.getLuminanceContribution(this.handle);
+    }
+
+    set colours(value) {
+        DenoiseFilterParametersApi.setColours(this.handle, value);
+    }
+
+    get colours() {
+        return DenoiseFilterParametersApi.getColours(this.handle);
+    }
+
+    set coloursContribution(value) {
+        DenoiseFilterParametersApi.setColoursContribution(this.handle, value);
+    }
+
+    get coloursContribution() {
+        return DenoiseFilterParametersApi.getColoursContribution(this.handle);
+    }
+
+    static create() {
+        return new DenoiseFilterParameters(DenoiseFilterParametersApi.create());
     }
 }
 
@@ -3061,7 +4969,7 @@ class DenoiseFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return DenoiseFilterRasterNodeApi.getParameters(this.handle);
+        return new DenoiseFilterParameters(DenoiseFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -3080,11 +4988,11 @@ class DenoiseFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     set parameters(parameters) {
-        DenoiseFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        DenoiseFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return DenoiseFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new DenoiseFilterParameters(DenoiseFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -3093,11 +5001,46 @@ class DenoiseFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(parameters) {
-        return new DenoiseFilterRasterNodeDefinition(DenoiseFilterRasterNodeDefinitionApi.create(parameters));
+        return new DenoiseFilterRasterNodeDefinition(DenoiseFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new DenoiseFilterRasterNodeDefinition(DenoiseFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class DiffuseFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use DiffuseFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new DiffuseFilterParameters(). Use DiffuseFilterParameters.create() instead.");
+            super(DiffuseFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'DiffuseFilterParameters';
+    }
+
+    get isDiffuseFilterParameters() {
+        return true;
+    }
+
+    set intensity(value) {
+        DiffuseFilterParametersApi.setIntensity(this.handle, value);
+    }
+
+    get intensity() {
+        return DiffuseFilterParametersApi.getIntensity(this.handle);
+    }
+
+    static create() {
+        return new DiffuseFilterParameters(DiffuseFilterParametersApi.create());
     }
 }
 
@@ -3116,7 +5059,7 @@ class DiffuseFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return DiffuseFilterRasterNodeApi.getParameters(this.handle);
+        return new DiffuseFilterParameters(DiffuseFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -3135,11 +5078,11 @@ class DiffuseFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     set parameters(parameters) {
-        DiffuseFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        DiffuseFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return DiffuseFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new DiffuseFilterParameters(DiffuseFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -3148,11 +5091,70 @@ class DiffuseFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(parameters) {
-        return new DiffuseFilterRasterNodeDefinition(DiffuseFilterRasterNodeDefinitionApi.create(parameters));
+        return new DiffuseFilterRasterNodeDefinition(DiffuseFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new DiffuseFilterRasterNodeDefinition(DiffuseFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class DiffuseGlowFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use DiffuseGlowFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new DiffuseGlowFilterParameters(). Use DiffuseGlowFilterParameters.create() instead.");
+            super(DiffuseGlowFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'DiffuseGlowFilterParameters';
+    }
+
+    get isDiffuseGlowFilterParameters() {
+        return true;
+    }
+
+    set radius(value) {
+        DiffuseGlowFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return DiffuseGlowFilterParametersApi.getRadius(this.handle);
+    }
+
+    set intensity(value) {
+        DiffuseGlowFilterParametersApi.setIntensity(this.handle, value);
+    }
+
+    get intensity() {
+        return DiffuseGlowFilterParametersApi.getIntensity(this.handle);
+    }
+
+    set threshold(value) {
+        DiffuseGlowFilterParametersApi.setThreshold(this.handle, value);
+    }
+
+    get threshold() {
+        return DiffuseGlowFilterParametersApi.getThreshold(this.handle);
+    }
+
+    set opacity(value) {
+        DiffuseGlowFilterParametersApi.setOpacity(this.handle, value);
+    }
+
+    get opacity() {
+        return DiffuseGlowFilterParametersApi.getOpacity(this.handle);
+    }
+
+    static create() {
+        return new DiffuseGlowFilterParameters(DiffuseGlowFilterParametersApi.create());
     }
 }
 
@@ -3171,7 +5173,7 @@ class DiffuseGlowFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return DiffuseGlowFilterRasterNodeApi.getParameters(this.handle);
+        return new DiffuseGlowFilterParameters(DiffuseGlowFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -3190,11 +5192,11 @@ class DiffuseGlowFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
     
     set parameters(params) {
-        DiffuseGlowFilterRasterNodeDefinitionApi.setParameters(this.handle, params);
+        DiffuseGlowFilterRasterNodeDefinitionApi.setParameters(this.handle, params.handle);
     }
     
     get parameters() {
-        return DiffuseGlowFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new DiffuseGlowFilterParameters(DiffuseGlowFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -3203,11 +5205,62 @@ class DiffuseGlowFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(params) {
-        return new DiffuseGlowFilterRasterNodeDefinition(DiffuseGlowFilterRasterNodeDefinitionApi.create(params));
+        return new DiffuseGlowFilterRasterNodeDefinition(DiffuseGlowFilterRasterNodeDefinitionApi.create(params.handle));
     }
 
     static createDefault() {
         return new DiffuseGlowFilterRasterNodeDefinition(DiffuseGlowFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class DustAndScratchFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use DustAndScratchFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new DustAndScratchFilterParameters(). Use DustAndScratchFilterParameters.create() instead.");
+            super(DustAndScratchFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'DustAndScratchFilterParameters';
+    }
+
+    get isDustAndScratchFilterParameters() {
+        return true;
+    }
+
+    set radius(value) {
+        DustAndScratchFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return DustAndScratchFilterParametersApi.getRadius(this.handle);
+    }
+
+    set tolerance(value) {
+        DustAndScratchFilterParametersApi.setTolerance(this.handle, value);
+    }
+
+    get tolerance() {
+        return DustAndScratchFilterParametersApi.getTolerance(this.handle);
+    }
+
+    set isChannelTolerance(value) {
+        DustAndScratchFilterParametersApi.setIsChannelTolerance(this.handle, value);
+    }
+
+    get isChannelTolerance() {
+        return DustAndScratchFilterParametersApi.getIsChannelTolerance(this.handle);
+    }
+
+    static create() {
+        return new DustAndScratchFilterParameters(DustAndScratchFilterParametersApi.create());
     }
 }
 
@@ -3226,7 +5279,7 @@ class DustAndScratchFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return DustAndScratchFilterRasterNodeApi.getParameters(this.handle);
+        return new DustAndScratchFilterParameters(DustAndScratchFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -3245,11 +5298,11 @@ class DustAndScratchFilterRasterNodeDefinition extends FilterRasterNodeDefinitio
     }
 
     set parameters(parameters) {
-        DustAndScratchFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        DustAndScratchFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return DustAndScratchFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new DustAndScratchFilterParameters(DustAndScratchFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -3258,7 +5311,7 @@ class DustAndScratchFilterRasterNodeDefinition extends FilterRasterNodeDefinitio
     }
 
     static create(parameters) {
-        return new DustAndScratchFilterRasterNodeDefinition(DustAndScratchFilterRasterNodeDefinitionApi.create(parameters));
+        return new DustAndScratchFilterRasterNodeDefinition(DustAndScratchFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
@@ -3404,6 +5457,11 @@ class FieldBlurFilterParameters extends HandleObject {
     getBlurItem(index) {
         return FieldBlurFilterParametersApi.getBlurItem(this.handle, index);
     }
+
+    // The callback is invoked as callback(index, itemParameters) and returns an EnumerationResult.
+    enumerateBlurItems(callback) {
+        return FieldBlurFilterParametersApi.enumerateBlurItems(this.handle, callback);
+    }
     
     addBlurItem(itemParams) {
         return FieldBlurFilterParametersApi.addBlurItem(this.handle, itemParams);
@@ -3464,7 +5522,7 @@ class FieldBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     get parameters() {
-        return FieldBlurFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new FieldBlurFilterParameters(FieldBlurFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -3478,6 +5536,41 @@ class FieldBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
 
     static createDefault(doc) {
         return new FieldBlurFilterRasterNodeDefinition(FieldBlurFilterRasterNodeDefinitionApi.createDefault(doc.handle));
+    }
+}
+
+
+class GaussianBlurFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use GaussianBlurFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new GaussianBlurFilterParameters(). Use GaussianBlurFilterParameters.create() instead.");
+            super(GaussianBlurFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'GaussianBlurFilterParameters';
+    }
+
+    get isGaussianBlurFilterParameters() {
+        return true;
+    }
+
+    set radius(value) {
+        GaussianBlurFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return GaussianBlurFilterParametersApi.getRadius(this.handle);
+    }
+
+    static create() {
+        return new GaussianBlurFilterParameters(GaussianBlurFilterParametersApi.create());
     }
 }
 
@@ -3496,7 +5589,7 @@ class GaussianBlurFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return GaussianBlurFilterRasterNodeApi.getParameters(this.handle);
+        return new GaussianBlurFilterParameters(GaussianBlurFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -3515,11 +5608,11 @@ class GaussianBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition 
     }
     
     set parameters(parameters) {
-        GaussianBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        GaussianBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return GaussianBlurFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new GaussianBlurFilterParameters(GaussianBlurFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -3528,11 +5621,94 @@ class GaussianBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition 
     }
     
     static create(parameters) {
-        return new GaussianBlurFilterRasterNodeDefinition(GaussianBlurFilterRasterNodeDefinitionApi.create(parameters));
+        return new GaussianBlurFilterRasterNodeDefinition(GaussianBlurFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new GaussianBlurFilterRasterNodeDefinition(GaussianBlurFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class ShadowsHighlightsFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use ShadowsHighlightsFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new ShadowsHighlightsFilterParameters(). Use ShadowsHighlightsFilterParameters.create() instead.");
+            super(ShadowsHighlightsFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'ShadowsHighlightsFilterParameters';
+    }
+
+    get isShadowsHighlightsFilterParameters() {
+        return true;
+    }
+
+    set version(value) {
+        ShadowsHighlightsFilterParametersApi.setVersion(this.handle, value);
+    }
+
+    get version() {
+        return ShadowsHighlightsFilterParametersApi.getVersion(this.handle);
+    }
+
+    set shadowsStrength(value) {
+        ShadowsHighlightsFilterParametersApi.setShadowsStrength(this.handle, value);
+    }
+
+    get shadowsStrength() {
+        return ShadowsHighlightsFilterParametersApi.getShadowsStrength(this.handle);
+    }
+
+    set shadowsRange(value) {
+        ShadowsHighlightsFilterParametersApi.setShadowsRange(this.handle, value);
+    }
+
+    get shadowsRange() {
+        return ShadowsHighlightsFilterParametersApi.getShadowsRange(this.handle);
+    }
+
+    set shadowsRadius(value) {
+        ShadowsHighlightsFilterParametersApi.setShadowsRadius(this.handle, value);
+    }
+
+    get shadowsRadius() {
+        return ShadowsHighlightsFilterParametersApi.getShadowsRadius(this.handle);
+    }
+
+    set highlightsStrength(value) {
+        ShadowsHighlightsFilterParametersApi.setHighlightsStrength(this.handle, value);
+    }
+
+    get highlightsStrength() {
+        return ShadowsHighlightsFilterParametersApi.getHighlightsStrength(this.handle);
+    }
+
+    set highlightsRange(value) {
+        ShadowsHighlightsFilterParametersApi.setHighlightsRange(this.handle, value);
+    }
+
+    get highlightsRange() {
+        return ShadowsHighlightsFilterParametersApi.getHighlightsRange(this.handle);
+    }
+
+    set highlightsRadius(value) {
+        ShadowsHighlightsFilterParametersApi.setHighlightsRadius(this.handle, value);
+    }
+
+    get highlightsRadius() {
+        return ShadowsHighlightsFilterParametersApi.getHighlightsRadius(this.handle);
+    }
+
+    static create() {
+        return new ShadowsHighlightsFilterParameters(ShadowsHighlightsFilterParametersApi.create());
     }
 }
 
@@ -3551,7 +5727,7 @@ class ShadowsHighlightsFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return ShadowsHighlightsFilterRasterNodeApi.getParameters(this.handle);
+        return new ShadowsHighlightsFilterParameters(ShadowsHighlightsFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -3570,11 +5746,11 @@ class ShadowsHighlightsFilterRasterNodeDefinition extends FilterRasterNodeDefini
     }
     
     set parameters(parameters) {
-        ShadowsHighlightsFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        ShadowsHighlightsFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return ShadowsHighlightsFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new ShadowsHighlightsFilterParameters(ShadowsHighlightsFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -3583,11 +5759,54 @@ class ShadowsHighlightsFilterRasterNodeDefinition extends FilterRasterNodeDefini
     }
     
     static create(parameters) {
-        return new ShadowsHighlightsFilterRasterNodeDefinition(ShadowsHighlightsFilterRasterNodeDefinitionApi.create(parameters));
+        return new ShadowsHighlightsFilterRasterNodeDefinition(ShadowsHighlightsFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new ShadowsHighlightsFilterRasterNodeDefinition(ShadowsHighlightsFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class HighPassFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use HighPassFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new HighPassFilterParameters(). Use HighPassFilterParameters.create() instead.");
+            super(HighPassFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'HighPassFilterParameters';
+    }
+
+    get isHighPassFilterParameters() {
+        return true;
+    }
+
+    set radius(value) {
+        HighPassFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return HighPassFilterParametersApi.getRadius(this.handle);
+    }
+
+    set isMonochrome(value) {
+        HighPassFilterParametersApi.setIsMonochrome(this.handle, value);
+    }
+
+    get isMonochrome() {
+        return HighPassFilterParametersApi.getIsMonochrome(this.handle);
+    }
+
+    static create() {
+        return new HighPassFilterParameters(HighPassFilterParametersApi.create());
     }
 }
 
@@ -3606,7 +5825,7 @@ class HighPassFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return HighPassFilterRasterNodeApi.getParameters(this.handle);
+        return new HighPassFilterParameters(HighPassFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -3625,11 +5844,11 @@ class HighPassFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     set parameters(parameters) {
-        HighPassFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        HighPassFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return HighPassFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new HighPassFilterParameters(HighPassFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -3638,11 +5857,86 @@ class HighPassFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(parameters) {
-        return new HighPassFilterRasterNodeDefinition(HighPassFilterRasterNodeDefinitionApi.create(parameters));
+        return new HighPassFilterRasterNodeDefinition(HighPassFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new HighPassFilterRasterNodeDefinition(HighPassFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class LensBlurFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use LensBlurFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new LensBlurFilterParameters(). Use LensBlurFilterParameters.create() instead.");
+            super(LensBlurFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'LensBlurFilterParameters';
+    }
+
+    get isLensBlurFilterParameters() {
+        return true;
+    }
+
+    set radius(value) {
+        LensBlurFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return LensBlurFilterParametersApi.getRadius(this.handle);
+    }
+
+    set numberOfBlades(value) {
+        LensBlurFilterParametersApi.setNumberOfBlades(this.handle, value);
+    }
+
+    get numberOfBlades() {
+        return LensBlurFilterParametersApi.getNumberOfBlades(this.handle);
+    }
+
+    set bladeCurvature(value) {
+        LensBlurFilterParametersApi.setBladeCurvature(this.handle, value);
+    }
+
+    get bladeCurvature() {
+        return LensBlurFilterParametersApi.getBladeCurvature(this.handle);
+    }
+
+    set bloomThreshold(value) {
+        LensBlurFilterParametersApi.setBloomThreshold(this.handle, value);
+    }
+
+    get bloomThreshold() {
+        return LensBlurFilterParametersApi.getBloomThreshold(this.handle);
+    }
+
+    set bloomFactor(value) {
+        LensBlurFilterParametersApi.setBloomFactor(this.handle, value);
+    }
+
+    get bloomFactor() {
+        return LensBlurFilterParametersApi.getBloomFactor(this.handle);
+    }
+
+    set bloomColour(value) {
+        LensBlurFilterParametersApi.setBloomColour(this.handle, value);
+    }
+
+    get bloomColour() {
+        return LensBlurFilterParametersApi.getBloomColour(this.handle);
+    }
+
+    static create() {
+        return new LensBlurFilterParameters(LensBlurFilterParametersApi.create());
     }
 }
 
@@ -3661,7 +5955,7 @@ class LensBlurFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return LensBlurFilterRasterNodeApi.getParameters(this.handle);
+        return new LensBlurFilterParameters(LensBlurFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -3680,11 +5974,11 @@ class LensBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
     
     set parameters(params) {
-        LensBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, params);
+        LensBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, params.handle);
     }
 
     get parameters() {
-        return LensBlurFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new LensBlurFilterParameters(LensBlurFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -3693,11 +5987,86 @@ class LensBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(params) {
-        return new LensBlurFilterRasterNodeDefinition(LensBlurFilterRasterNodeDefinitionApi.create(params));
+        return new LensBlurFilterRasterNodeDefinition(LensBlurFilterRasterNodeDefinitionApi.create(params.handle));
     }
 
     static createDefault() {
         return new LensBlurFilterRasterNodeDefinition(LensBlurFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class BloomFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use BloomFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new BloomFilterParameters(). Use BloomFilterParameters.create() instead.");
+            super(BloomFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'BloomFilterParameters';
+    }
+
+    get isBloomFilterParameters() {
+        return true;
+    }
+
+    set shadowBlend(value) {
+        BloomFilterParametersApi.setShadowBlend(this.handle, value);
+    }
+
+    get shadowBlend() {
+        return BloomFilterParametersApi.getShadowBlend(this.handle);
+    }
+
+    set midtoneBlend(value) {
+        BloomFilterParametersApi.setMidtoneBlend(this.handle, value);
+    }
+
+    get midtoneBlend() {
+        return BloomFilterParametersApi.getMidtoneBlend(this.handle);
+    }
+
+    set highlightBlend(value) {
+        BloomFilterParametersApi.setHighlightBlend(this.handle, value);
+    }
+
+    get highlightBlend() {
+        return BloomFilterParametersApi.getHighlightBlend(this.handle);
+    }
+
+    set isStrong(value) {
+        BloomFilterParametersApi.setIsStrong(this.handle, value);
+    }
+
+    get isStrong() {
+        return BloomFilterParametersApi.getIsStrong(this.handle);
+    }
+
+    set method(value) {
+        BloomFilterParametersApi.setMethod(this.handle, value);
+    }
+
+    get method() {
+        return BloomFilterParametersApi.getMethod(this.handle);
+    }
+
+    set colour(value) {
+        BloomFilterParametersApi.setColour(this.handle, value);
+    }
+
+    get colour() {
+        return BloomFilterParametersApi.getColour(this.handle);
+    }
+
+    static create() {
+        return new BloomFilterParameters(BloomFilterParametersApi.create());
     }
 }
 
@@ -3716,7 +6085,7 @@ class BloomFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return BloomFilterRasterNodeApi.getParameters(this.handle);
+        return new BloomFilterParameters(BloomFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -3735,11 +6104,11 @@ class BloomFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
     
     set parameters(params) {
-        BloomFilterRasterNodeDefinitionApi.setParameters(this.handle, params);
+        BloomFilterRasterNodeDefinitionApi.setParameters(this.handle, params.handle);
     }
 
     get parameters() {
-        return BloomFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new BloomFilterParameters(BloomFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -3748,11 +6117,46 @@ class BloomFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(params) {
-        return new BloomFilterRasterNodeDefinition(BloomFilterRasterNodeDefinitionApi.create(params));
+        return new BloomFilterRasterNodeDefinition(BloomFilterRasterNodeDefinitionApi.create(params.handle));
     }
 
     static createDefault() {
         return new BloomFilterRasterNodeDefinition(BloomFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class PixelateFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use PixelateFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new PixelateFilterParameters(). Use PixelateFilterParameters.create() instead.");
+            super(PixelateFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'PixelateFilterParameters';
+    }
+
+    get isPixelateFilterParameters() {
+        return true;
+    }
+
+    set quantisation(value) {
+        PixelateFilterParametersApi.setQuantisation(this.handle, value);
+    }
+
+    get quantisation() {
+        return PixelateFilterParametersApi.getQuantisation(this.handle);
+    }
+
+    static create() {
+        return new PixelateFilterParameters(PixelateFilterParametersApi.create());
     }
 }
 
@@ -3771,7 +6175,7 @@ class PixelateFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return PixelateFilterRasterNodeApi.getParameters(this.handle);
+        return new PixelateFilterParameters(PixelateFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -3790,11 +6194,11 @@ class PixelateFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
     
     set parameters(params) {
-        PixelateFilterRasterNodeDefinitionApi.setParameters(this.handle, params);
+        PixelateFilterRasterNodeDefinitionApi.setParameters(this.handle, params.handle);
     }
 
     get parameters() {
-        return PixelateFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new PixelateFilterParameters(PixelateFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -3803,11 +6207,94 @@ class PixelateFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
     
     static create(params) {
-        return new PixelateFilterRasterNodeDefinition(PixelateFilterRasterNodeDefinitionApi.create(params));
+        return new PixelateFilterRasterNodeDefinition(PixelateFilterRasterNodeDefinitionApi.create(params.handle));
     }
 
     static createDefault() {
         return new PixelateFilterRasterNodeDefinition(PixelateFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class HalftoneFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use HalftoneFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new HalftoneFilterParameters(). Use HalftoneFilterParameters.create() instead.");
+            super(HalftoneFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'HalftoneFilterParameters';
+    }
+
+    get isHalftoneFilterParameters() {
+        return true;
+    }
+
+    set cellSize(value) {
+        HalftoneFilterParametersApi.setCellSize(this.handle, value);
+    }
+
+    get cellSize() {
+        return HalftoneFilterParametersApi.getCellSize(this.handle);
+    }
+
+    set screenAngle(value) {
+        HalftoneFilterParametersApi.setScreenAngle(this.handle, value);
+    }
+
+    get screenAngle() {
+        return HalftoneFilterParametersApi.getScreenAngle(this.handle);
+    }
+
+    set contrast(value) {
+        HalftoneFilterParametersApi.setContrast(this.handle, value);
+    }
+
+    get contrast() {
+        return HalftoneFilterParametersApi.getContrast(this.handle);
+    }
+
+    set screenType(value) {
+        HalftoneFilterParametersApi.setScreenType(this.handle, value);
+    }
+
+    get screenType() {
+        return HalftoneFilterParametersApi.getScreenType(this.handle);
+    }
+
+    set dotType(value) {
+        HalftoneFilterParametersApi.setDotType(this.handle, value);
+    }
+
+    get dotType() {
+        return HalftoneFilterParametersApi.getDotType(this.handle);
+    }
+
+    set greyComponentReplacement(value) {
+        HalftoneFilterParametersApi.setGreyComponentReplacement(this.handle, value);
+    }
+
+    get greyComponentReplacement() {
+        return HalftoneFilterParametersApi.getGreyComponentReplacement(this.handle);
+    }
+
+    set underColourRemoval(value) {
+        HalftoneFilterParametersApi.setUnderColourRemoval(this.handle, value);
+    }
+
+    get underColourRemoval() {
+        return HalftoneFilterParametersApi.getUnderColourRemoval(this.handle);
+    }
+
+    static create() {
+        return new HalftoneFilterParameters(HalftoneFilterParametersApi.create());
     }
 }
 
@@ -3826,7 +6313,7 @@ class HalftoneFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return HalftoneFilterRasterNodeApi.getParameters(this.handle);
+        return new HalftoneFilterParameters(HalftoneFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -3845,19 +6332,62 @@ class HalftoneFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
     
     set parameters(params) {
-        HalftoneFilterRasterNodeDefinitionApi.setParameters(this.handle, params);
+        HalftoneFilterRasterNodeDefinitionApi.setParameters(this.handle, params.handle);
     }
 
     get parameters() {
-        return HalftoneFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new HalftoneFilterParameters(HalftoneFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     static create(params) {
-        return new HalftoneFilterRasterNodeDefinition(HalftoneFilterRasterNodeDefinitionApi.create(params));
+        return new HalftoneFilterRasterNodeDefinition(HalftoneFilterRasterNodeDefinitionApi.create(params.handle));
     }
 
     static createDefault() {
         return new HalftoneFilterRasterNodeDefinition(HalftoneFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class MaximumBlurFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use MaximumBlurFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new MaximumBlurFilterParameters(). Use MaximumBlurFilterParameters.create() instead.");
+            super(MaximumBlurFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'MaximumBlurFilterParameters';
+    }
+
+    get isMaximumBlurFilterParameters() {
+        return true;
+    }
+
+    set radius(value) {
+        MaximumBlurFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return MaximumBlurFilterParametersApi.getRadius(this.handle);
+    }
+
+    set isCircular(value) {
+        MaximumBlurFilterParametersApi.setIsCircular(this.handle, value);
+    }
+
+    get isCircular() {
+        return MaximumBlurFilterParametersApi.getIsCircular(this.handle);
+    }
+
+    static create() {
+        return new MaximumBlurFilterParameters(MaximumBlurFilterParametersApi.create());
     }
 }
 
@@ -3876,7 +6406,7 @@ class MaximumBlurFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return MaximumBlurFilterRasterNodeApi.getParameters(this.handle);
+        return new MaximumBlurFilterParameters(MaximumBlurFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -3895,11 +6425,11 @@ class MaximumBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
     
     set parameters(params) {
-        MaximumBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, params);
+        MaximumBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, params.handle);
     }
 
     get parameters() {
-        return MaximumBlurFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new MaximumBlurFilterParameters(MaximumBlurFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
     
     setParameters(parameters) {
@@ -3908,11 +6438,46 @@ class MaximumBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(params) {
-        return new MaximumBlurFilterRasterNodeDefinition(MaximumBlurFilterRasterNodeDefinitionApi.create(params));
+        return new MaximumBlurFilterRasterNodeDefinition(MaximumBlurFilterRasterNodeDefinitionApi.create(params.handle));
     }
 
     static createDefault() {
         return new MaximumBlurFilterRasterNodeDefinition(MaximumBlurFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class MedianBlurFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use MedianBlurFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new MedianBlurFilterParameters(). Use MedianBlurFilterParameters.create() instead.");
+            super(MedianBlurFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'MedianBlurFilterParameters';
+    }
+
+    get isMedianBlurFilterParameters() {
+        return true;
+    }
+
+    set radius(value) {
+        MedianBlurFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return MedianBlurFilterParametersApi.getRadius(this.handle);
+    }
+
+    static create() {
+        return new MedianBlurFilterParameters(MedianBlurFilterParametersApi.create());
     }
 }
 
@@ -3931,7 +6496,7 @@ class MedianBlurFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return MedianBlurFilterRasterNodeApi.getParameters(this.handle);
+        return new MedianBlurFilterParameters(MedianBlurFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -3950,11 +6515,11 @@ class MedianBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
     
     set parameters(params) {
-        MedianBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, params);
+        MedianBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, params.handle);
     }
     
     get parameters() {
-        return MedianBlurFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new MedianBlurFilterParameters(MedianBlurFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
     
     setParameters(parameters) {
@@ -3963,11 +6528,54 @@ class MedianBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(params) {
-        return new MedianBlurFilterRasterNodeDefinition(MedianBlurFilterRasterNodeDefinitionApi.create(params));
+        return new MedianBlurFilterRasterNodeDefinition(MedianBlurFilterRasterNodeDefinitionApi.create(params.handle));
     }
 
     static createDefault() {
         return new MedianBlurFilterRasterNodeDefinition(MedianBlurFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class MinimumBlurFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use MinimumBlurFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new MinimumBlurFilterParameters(). Use MinimumBlurFilterParameters.create() instead.");
+            super(MinimumBlurFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'MinimumBlurFilterParameters';
+    }
+
+    get isMinimumBlurFilterParameters() {
+        return true;
+    }
+
+    set radius(value) {
+        MinimumBlurFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return MinimumBlurFilterParametersApi.getRadius(this.handle);
+    }
+
+    set isCircular(value) {
+        MinimumBlurFilterParametersApi.setIsCircular(this.handle, value);
+    }
+
+    get isCircular() {
+        return MinimumBlurFilterParametersApi.getIsCircular(this.handle);
+    }
+
+    static create() {
+        return new MinimumBlurFilterParameters(MinimumBlurFilterParametersApi.create());
     }
 }
 
@@ -3986,7 +6594,7 @@ class MinimumBlurFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return MinimumBlurFilterRasterNodeApi.getParameters(this.handle);
+        return new MinimumBlurFilterParameters(MinimumBlurFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -4005,11 +6613,11 @@ class MinimumBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
     
     set parameters(params) {
-        MinimumBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, params);
+        MinimumBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, params.handle);
     }
     
     get parameters() {
-        return MinimumBlurFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new MinimumBlurFilterParameters(MinimumBlurFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
     
     setParameters(parameters) {
@@ -4018,11 +6626,54 @@ class MinimumBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(params) {
-        return new MinimumBlurFilterRasterNodeDefinition(MinimumBlurFilterRasterNodeDefinitionApi.create(params));
+        return new MinimumBlurFilterRasterNodeDefinition(MinimumBlurFilterRasterNodeDefinitionApi.create(params.handle));
     }
 
     static createDefault() {
         return new MinimumBlurFilterRasterNodeDefinition(MinimumBlurFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class MotionBlurFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use MotionBlurFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new MotionBlurFilterParameters(). Use MotionBlurFilterParameters.create() instead.");
+            super(MotionBlurFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'MotionBlurFilterParameters';
+    }
+
+    get isMotionBlurFilterParameters() {
+        return true;
+    }
+
+    set radius(value) {
+        MotionBlurFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return MotionBlurFilterParametersApi.getRadius(this.handle);
+    }
+
+    set angle(value) {
+        MotionBlurFilterParametersApi.setAngle(this.handle, value);
+    }
+
+    get angle() {
+        return MotionBlurFilterParametersApi.getAngle(this.handle);
+    }
+
+    static create() {
+        return new MotionBlurFilterParameters(MotionBlurFilterParametersApi.create());
     }
 }
 
@@ -4041,7 +6692,7 @@ class MotionBlurFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return MotionBlurFilterRasterNodeApi.getParameters(this.handle);
+        return new MotionBlurFilterParameters(MotionBlurFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -4060,11 +6711,11 @@ class MotionBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
     
     set parameters(params) {
-        MotionBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, params);
+        MotionBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, params.handle);
     }
     
     get parameters() {
-        return MotionBlurFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new MotionBlurFilterParameters(MotionBlurFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
     
     setParameters(parameters) {
@@ -4073,11 +6724,62 @@ class MotionBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(params) {
-        return new MotionBlurFilterRasterNodeDefinition(MotionBlurFilterRasterNodeDefinitionApi.create(params));
+        return new MotionBlurFilterRasterNodeDefinition(MotionBlurFilterRasterNodeDefinitionApi.create(params.handle));
     }
 
     static createDefault() {
         return new MotionBlurFilterRasterNodeDefinition(MotionBlurFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class PinchPunchFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use PinchPunchFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new PinchPunchFilterParameters(). Use PinchPunchFilterParameters.create() instead.");
+            super(PinchPunchFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'PinchPunchFilterParameters';
+    }
+
+    get isPinchPunchFilterParameters() {
+        return true;
+    }
+
+    set intensity(value) {
+        PinchPunchFilterParametersApi.setIntensity(this.handle, value);
+    }
+
+    get intensity() {
+        return PinchPunchFilterParametersApi.getIntensity(this.handle);
+    }
+
+    set radius(value) {
+        PinchPunchFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return PinchPunchFilterParametersApi.getRadius(this.handle);
+    }
+
+    set position(value) {
+        PinchPunchFilterParametersApi.setPosition(this.handle, value);
+    }
+
+    get position() {
+        return livePoint(() => PinchPunchFilterParametersApi.getPosition(this.handle), value => PinchPunchFilterParametersApi.setPosition(this.handle, value));
+    }
+
+    static create() {
+        return new PinchPunchFilterParameters(PinchPunchFilterParametersApi.create());
     }
 }
 
@@ -4096,7 +6798,7 @@ class PinchPunchFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return PinchPunchFilterRasterNodeApi.getParameters(this.handle);
+        return new PinchPunchFilterParameters(PinchPunchFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -4115,11 +6817,11 @@ class PinchPunchFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     set parameters(parameters) {
-        PinchPunchFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        PinchPunchFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return PinchPunchFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new PinchPunchFilterParameters(PinchPunchFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -4128,11 +6830,54 @@ class PinchPunchFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(parameters) {
-        return new PinchPunchFilterRasterNodeDefinition(PinchPunchFilterRasterNodeDefinitionApi.create(parameters));
+        return new PinchPunchFilterRasterNodeDefinition(PinchPunchFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault(document) {
         return new PinchPunchFilterRasterNodeDefinition(PinchPunchFilterRasterNodeDefinitionApi.createDefault(document.handle));
+    }
+}
+
+
+class RadialBlurFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use RadialBlurFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new RadialBlurFilterParameters(). Use RadialBlurFilterParameters.create() instead.");
+            super(RadialBlurFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'RadialBlurFilterParameters';
+    }
+
+    get isRadialBlurFilterParameters() {
+        return true;
+    }
+
+    set angle(value) {
+        RadialBlurFilterParametersApi.setAngle(this.handle, value);
+    }
+
+    get angle() {
+        return RadialBlurFilterParametersApi.getAngle(this.handle);
+    }
+
+    set position(value) {
+        RadialBlurFilterParametersApi.setPosition(this.handle, value);
+    }
+
+    get position() {
+        return livePoint(() => RadialBlurFilterParametersApi.getPosition(this.handle), value => RadialBlurFilterParametersApi.setPosition(this.handle, value));
+    }
+
+    static create() {
+        return new RadialBlurFilterParameters(RadialBlurFilterParametersApi.create());
     }
 }
 
@@ -4151,7 +6896,7 @@ class RadialBlurFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return RadialBlurFilterRasterNodeApi.getParameters(this.handle);
+        return new RadialBlurFilterParameters(RadialBlurFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -4170,11 +6915,11 @@ class RadialBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
     
     set parameters(parameters) {
-        RadialBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        RadialBlurFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
     
     get parameters() {
-        return RadialBlurFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new RadialBlurFilterParameters(RadialBlurFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
     
     setParameters(parameters) {
@@ -4183,11 +6928,54 @@ class RadialBlurFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(parameters) {
-        return new RadialBlurFilterRasterNodeDefinition(RadialBlurFilterRasterNodeDefinitionApi.create(parameters));
+        return new RadialBlurFilterRasterNodeDefinition(RadialBlurFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault(document) {
         return new RadialBlurFilterRasterNodeDefinition(RadialBlurFilterRasterNodeDefinitionApi.createDefault(document.handle));
+    }
+}
+
+
+class RippleFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use RippleFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new RippleFilterParameters(). Use RippleFilterParameters.create() instead.");
+            super(RippleFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'RippleFilterParameters';
+    }
+
+    get isRippleFilterParameters() {
+        return true;
+    }
+
+    set intensity(value) {
+        RippleFilterParametersApi.setIntensity(this.handle, value);
+    }
+
+    get intensity() {
+        return RippleFilterParametersApi.getIntensity(this.handle);
+    }
+
+    set position(value) {
+        RippleFilterParametersApi.setPosition(this.handle, value);
+    }
+
+    get position() {
+        return livePoint(() => RippleFilterParametersApi.getPosition(this.handle), value => RippleFilterParametersApi.setPosition(this.handle, value));
+    }
+
+    static create() {
+        return new RippleFilterParameters(RippleFilterParametersApi.create());
     }
 }
 
@@ -4206,7 +6994,7 @@ class RippleFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return RippleFilterRasterNodeApi.getParameters(this.handle);
+        return new RippleFilterParameters(RippleFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -4225,11 +7013,11 @@ class RippleFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     set parameters(parameters) {
-        RippleFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        RippleFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return RippleFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new RippleFilterParameters(RippleFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -4238,11 +7026,62 @@ class RippleFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(parameters) {
-        return new RippleFilterRasterNodeDefinition(RippleFilterRasterNodeDefinitionApi.create(parameters));
+        return new RippleFilterRasterNodeDefinition(RippleFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault(document) {
         return new RippleFilterRasterNodeDefinition(RippleFilterRasterNodeDefinitionApi.createDefault(document.handle));
+    }
+}
+
+
+class SphericalFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use SphericalFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new SphericalFilterParameters(). Use SphericalFilterParameters.create() instead.");
+            super(SphericalFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'SphericalFilterParameters';
+    }
+
+    get isSphericalFilterParameters() {
+        return true;
+    }
+
+    set intensity(value) {
+        SphericalFilterParametersApi.setIntensity(this.handle, value);
+    }
+
+    get intensity() {
+        return SphericalFilterParametersApi.getIntensity(this.handle);
+    }
+
+    set radius(value) {
+        SphericalFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return SphericalFilterParametersApi.getRadius(this.handle);
+    }
+
+    set position(value) {
+        SphericalFilterParametersApi.setPosition(this.handle, value);
+    }
+
+    get position() {
+        return livePoint(() => SphericalFilterParametersApi.getPosition(this.handle), value => SphericalFilterParametersApi.setPosition(this.handle, value));
+    }
+
+    static create() {
+        return new SphericalFilterParameters(SphericalFilterParametersApi.create());
     }
 }
 
@@ -4261,7 +7100,7 @@ class SphericalFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return SphericalFilterRasterNodeApi.getParameters(this.handle);
+        return new SphericalFilterParameters(SphericalFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -4280,11 +7119,11 @@ class SphericalFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     set parameters(parameters) {
-        SphericalFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        SphericalFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return SphericalFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new SphericalFilterParameters(SphericalFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -4293,11 +7132,62 @@ class SphericalFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(parameters) {
-        return new SphericalFilterRasterNodeDefinition(SphericalFilterRasterNodeDefinitionApi.create(parameters));
+        return new SphericalFilterRasterNodeDefinition(SphericalFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault(document) {
         return new SphericalFilterRasterNodeDefinition(SphericalFilterRasterNodeDefinitionApi.createDefault(document.handle));
+    }
+}
+
+
+class TwirlFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use TwirlFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new TwirlFilterParameters(). Use TwirlFilterParameters.create() instead.");
+            super(TwirlFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'TwirlFilterParameters';
+    }
+
+    get isTwirlFilterParameters() {
+        return true;
+    }
+
+    set angle(value) {
+        TwirlFilterParametersApi.setAngle(this.handle, value);
+    }
+
+    get angle() {
+        return TwirlFilterParametersApi.getAngle(this.handle);
+    }
+
+    set radius(value) {
+        TwirlFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return TwirlFilterParametersApi.getRadius(this.handle);
+    }
+
+    set position(value) {
+        TwirlFilterParametersApi.setPosition(this.handle, value);
+    }
+
+    get position() {
+        return livePoint(() => TwirlFilterParametersApi.getPosition(this.handle), value => TwirlFilterParametersApi.setPosition(this.handle, value));
+    }
+
+    static create() {
+        return new TwirlFilterParameters(TwirlFilterParametersApi.create());
     }
 }
 
@@ -4316,7 +7206,7 @@ class TwirlFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return TwirlFilterRasterNodeApi.getParameters(this.handle);
+        return new TwirlFilterParameters(TwirlFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -4335,11 +7225,11 @@ class TwirlFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     set parameters(parameters) {
-        TwirlFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        TwirlFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return TwirlFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new TwirlFilterParameters(TwirlFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -4348,11 +7238,62 @@ class TwirlFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(parameters) {
-        return new TwirlFilterRasterNodeDefinition(TwirlFilterRasterNodeDefinitionApi.create(parameters));
+        return new TwirlFilterRasterNodeDefinition(TwirlFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault(document) {
         return new TwirlFilterRasterNodeDefinition(TwirlFilterRasterNodeDefinitionApi.createDefault(document.handle));
+    }
+}
+
+
+class UnsharpMaskFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use UnsharpMaskFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new UnsharpMaskFilterParameters(). Use UnsharpMaskFilterParameters.create() instead.");
+            super(UnsharpMaskFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'UnsharpMaskFilterParameters';
+    }
+
+    get isUnsharpMaskFilterParameters() {
+        return true;
+    }
+
+    set radius(value) {
+        UnsharpMaskFilterParametersApi.setRadius(this.handle, value);
+    }
+
+    get radius() {
+        return UnsharpMaskFilterParametersApi.getRadius(this.handle);
+    }
+
+    set threshold(value) {
+        UnsharpMaskFilterParametersApi.setThreshold(this.handle, value);
+    }
+
+    get threshold() {
+        return UnsharpMaskFilterParametersApi.getThreshold(this.handle);
+    }
+
+    set factor(value) {
+        UnsharpMaskFilterParametersApi.setFactor(this.handle, value);
+    }
+
+    get factor() {
+        return UnsharpMaskFilterParametersApi.getFactor(this.handle);
+    }
+
+    static create() {
+        return new UnsharpMaskFilterParameters(UnsharpMaskFilterParametersApi.create());
     }
 }
 
@@ -4371,7 +7312,7 @@ class UnsharpMaskFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return UnsharpMaskFilterRasterNodeApi.getParameters(this.handle);
+        return new UnsharpMaskFilterParameters(UnsharpMaskFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -4390,11 +7331,11 @@ class UnsharpMaskFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     set parameters(parameters) {
-        UnsharpMaskFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        UnsharpMaskFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return UnsharpMaskFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new UnsharpMaskFilterParameters(UnsharpMaskFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -4403,11 +7344,70 @@ class UnsharpMaskFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(parameters) {
-        return new UnsharpMaskFilterRasterNodeDefinition(UnsharpMaskFilterRasterNodeDefinitionApi.create(parameters));
+        return new UnsharpMaskFilterRasterNodeDefinition(UnsharpMaskFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new UnsharpMaskFilterRasterNodeDefinition(UnsharpMaskFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class VignetteFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use VignetteFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new VignetteFilterParameters(). Use VignetteFilterParameters.create() instead.");
+            super(VignetteFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'VignetteFilterParameters';
+    }
+
+    get isVignetteFilterParameters() {
+        return true;
+    }
+
+    set exposure(value) {
+        VignetteFilterParametersApi.setExposure(this.handle, value);
+    }
+
+    get exposure() {
+        return VignetteFilterParametersApi.getExposure(this.handle);
+    }
+
+    set hardness(value) {
+        VignetteFilterParametersApi.setHardness(this.handle, value);
+    }
+
+    get hardness() {
+        return VignetteFilterParametersApi.getHardness(this.handle);
+    }
+
+    set scale(value) {
+        VignetteFilterParametersApi.setScale(this.handle, value);
+    }
+
+    get scale() {
+        return VignetteFilterParametersApi.getScale(this.handle);
+    }
+
+    set shape(value) {
+        VignetteFilterParametersApi.setShape(this.handle, value);
+    }
+
+    get shape() {
+        return VignetteFilterParametersApi.getShape(this.handle);
+    }
+
+    static create() {
+        return new VignetteFilterParameters(VignetteFilterParametersApi.create());
     }
 }
 
@@ -4426,7 +7426,7 @@ class VignetteFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return VignetteFilterRasterNodeApi.getParameters(this.handle);
+        return new VignetteFilterParameters(VignetteFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -4445,11 +7445,11 @@ class VignetteFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     set parameters(parameters) {
-        VignetteFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        VignetteFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return VignetteFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new VignetteFilterParameters(VignetteFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -4458,11 +7458,54 @@ class VignetteFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(parameters) {
-        return new VignetteFilterRasterNodeDefinition(VignetteFilterRasterNodeDefinitionApi.create(parameters));
+        return new VignetteFilterRasterNodeDefinition(VignetteFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
         return new VignetteFilterRasterNodeDefinition(VignetteFilterRasterNodeDefinitionApi.createDefault());
+    }
+}
+
+
+class VoronoiFilterParameters extends HandleObject {
+    // Takes an existing handle. Calling with no arguments still works but is deprecated;
+    // use VoronoiFilterParameters.create() instead.
+    constructor(...args) {
+        if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+            super(args[0]);
+        }
+        else {
+            console.warn("Using deprecated new VoronoiFilterParameters(). Use VoronoiFilterParameters.create() instead.");
+            super(VoronoiFilterParametersApi.create());
+        }
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'VoronoiFilterParameters';
+    }
+
+    get isVoronoiFilterParameters() {
+        return true;
+    }
+
+    set cellSize(value) {
+        VoronoiFilterParametersApi.setCellSize(this.handle, value);
+    }
+
+    get cellSize() {
+        return VoronoiFilterParametersApi.getCellSize(this.handle);
+    }
+
+    set lineWidth(value) {
+        VoronoiFilterParametersApi.setLineWidth(this.handle, value);
+    }
+
+    get lineWidth() {
+        return VoronoiFilterParametersApi.getLineWidth(this.handle);
+    }
+
+    static create() {
+        return new VoronoiFilterParameters(VoronoiFilterParametersApi.create());
     }
 }
 
@@ -4481,7 +7524,7 @@ class VoronoiFilterRasterNode extends FilterRasterNode {
     }
 
     get parameters() {
-        return VoronoiFilterRasterNodeApi.getParameters(this.handle);
+        return new VoronoiFilterParameters(VoronoiFilterRasterNodeApi.getParameters(this.handle));
     }
 }
 
@@ -4500,11 +7543,11 @@ class VoronoiFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     set parameters(parameters) {
-        VoronoiFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters);
+        VoronoiFilterRasterNodeDefinitionApi.setParameters(this.handle, parameters.handle);
     }
 
     get parameters() {
-        return VoronoiFilterRasterNodeDefinitionApi.getParameters(this.handle);
+        return new VoronoiFilterParameters(VoronoiFilterRasterNodeDefinitionApi.getParameters(this.handle));
     }
 
     setParameters(parameters) {
@@ -4513,7 +7556,7 @@ class VoronoiFilterRasterNodeDefinition extends FilterRasterNodeDefinition {
     }
 
     static create(parameters) {
-        return new VoronoiFilterRasterNodeDefinition(VoronoiFilterRasterNodeDefinitionApi.create(parameters));
+        return new VoronoiFilterRasterNodeDefinition(VoronoiFilterRasterNodeDefinitionApi.create(parameters.handle));
     }
 
     static createDefault() {
@@ -4617,28 +7660,36 @@ class SpreadNode extends PhysicalNode {
 }
 
 class TextNode extends PhysicalNode {
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'TextNode';
-	}
+    get [Symbol.toStringTag]() {
+        return 'TextNode';
+    }
 
-	get isTextNode() {
-		return true;
-	}
+    get isTextNode() {
+        return true;
+    }
 
     // ArtboardInterfaceModule.ArtboardInterface
     #artboardInterface;
-	get artboardInterface() {
+    get artboardInterface() {
         if (!this.#artboardInterface)
             this.#artboardInterface = new ArtboardInterfaceModule.ArtboardInterface(TextNodeApi.getArtboardInterface(this.handle));
         return this.#artboardInterface;
-	}
+    }
 
+    /**
+    * @deprecated Use get isArtboardEnabled()
+    */
     get artboardEnabled() {
-        return this.artboardInterface.enabled;
+        console.warn("Using deprecated get artboardEnabled() property. Use get isArtboardEnabled() instead.");
+        return this.isArtboardEnabled;
+    }
+
+    get isArtboardEnabled() {
+        return this.artboardInterface.isArtboardEnabled;
     }
 
     get artboardDescription() {
@@ -4657,11 +7708,19 @@ class TextNode extends PhysicalNode {
         return this.artboardInterface.origin;
     }
 
+    /**
+    * @deprecated Use set isArtboardEnabled()
+    */
     set artboardEnabled(value) {
-        return this.document.setArtboardEnabled(value, this);
+        console.warn("Using deprecated set artboardEnabled() property. Use set isArtboardEnabled() instead.");
+        this.isArtboardEnabled = value;
     }
 
-	// BrushFillInterfaceModule.BrushFillInterface
+    set isArtboardEnabled(value) {
+        this.document.setArtboardEnabled(value, this);
+    }
+
+    // BrushFillInterfaceModule.BrushFillInterface
     #brushFillInterface;
     get brushFillInterface() {
         if (!this.#brushFillInterface)
@@ -4839,18 +7898,18 @@ class TextNode extends PhysicalNode {
      
 
     // StoryInterface
-	get storyInterface() {
-		return new StoryInterfaceModule.StoryInterface(TextNodeApi.getStoryInterface(this.handle));
-	}
+    get storyInterface() {
+        return new StoryInterfaceModule.StoryInterface(TextNodeApi.getStoryInterface(this.handle));
+    }
 
     getText(startPos = 0, maxLength = -1, format = StoryIoFormat.ClipboardDescriptions) {
-		return this.storyInterface.getText(startPos, maxLength, format);
-	}
+        return this.storyInterface.getText(startPos, maxLength, format);
+    }
 
     get text() {
         return this.getText();
     }
-	
+    
     get story() {
         return this.storyInterface.story;
     }
@@ -4859,14 +7918,13 @@ class TextNode extends PhysicalNode {
         return this.storyInterface.storyRange;
     }
     
-	setText(str) {
-		const selection = this.selfSelection;
-		const range = this.storyInterface.story.all;
-		const subSel = SelectionsModule.TextSelection.from(range);
-		selection.addSubSelectionForNode(this, subSel);
+    setText(str) {
+        const selection = this.selfSelection;
+        const subSel = SelectionsModule.TextSelection.create(this.storyRange);
+        selection.addSubSelectionForNode(this, subSel);
         const cmd = CommandsModule.DocumentCommand.createSetText(selection, str);
-		this.document.executeCommand(cmd);
-	}
+        this.document.executeCommand(cmd);
+    }
 
     // TextFrameInterfaceModule.TextFrameInterface
     #textFrameInterface;
@@ -4879,12 +7937,12 @@ class TextNode extends PhysicalNode {
 
     // TransparencyInterfaceModule.TransparencyInterface
     #transparencyInterface;
-	get transparencyInterface() {
+    get transparencyInterface() {
         if (!this.#transparencyInterface) {
             this.#transparencyInterface = new TransparencyInterfaceModule.TransparencyInterface(TextNodeApi.getTransparencyInterface(this.handle));
         }
-		return this.#transparencyInterface;
-	}
+        return this.#transparencyInterface;
+    }
 
     get transparencyFillDescriptor() {
         return this.transparencyInterface.fillDescriptor;
@@ -4912,204 +7970,280 @@ class TextNodeDefinition extends PhysicalNodeDefinition {
 
 
 class ArtTextNode extends TextNode {
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'ArtTextNode';
-	}
+    get [Symbol.toStringTag]() {
+        return 'ArtTextNode';
+    }
 
-	get isArtTextNode() {
-		return true;
-	}
+    get isArtTextNode() {
+        return true;
+    }
 }
 
 
 class ArtTextNodeDefinition extends TextNodeDefinition {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'ArtTextNodeDefinition';
-	}
+    get [Symbol.toStringTag]() {
+        return 'ArtTextNodeDefinition';
+    }
 
-	get isArtTextNodeDefinition() {
-		return true;
-	}
+    get isArtTextNodeDefinition() {
+        return true;
+    }
 
-	static createFromStoryBuilder(position, storyBuilder) {
-		return new ArtTextNodeDefinition(ArtTextNodeDefinitionApi.createFromStoryBuilder(position, storyBuilder.handle));
-	}
+    static createFromStoryBuilder(position, storyBuilder) {
+        return new ArtTextNodeDefinition(ArtTextNodeDefinitionApi.createFromStoryBuilder(position, storyBuilder.handle));
+    }
 }
 
 
 class FrameTextNode extends TextNode {
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'FrameTextNode';
-	}
+    get [Symbol.toStringTag]() {
+        return 'FrameTextNode';
+    }
 
-	get isFrameTextNode() {
-		return true;
-	}
+    get isFrameTextNode() {
+        return true;
+    }
 }
 
 
 class FrameTextNodeDefinition extends TextNodeDefinition {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'FrameTextNodeDefinition';
-	}
+    get [Symbol.toStringTag]() {
+        return 'FrameTextNodeDefinition';
+    }
 
-	get isFrameTextNodeDefinition() {
-		return true;
-	}
+    get isFrameTextNodeDefinition() {
+        return true;
+    }
 
-	static createFromStoryBuilder(frameBox, storyBuilder) {
-		return new FrameTextNodeDefinition(FrameTextNodeDefinitionApi.createFromStoryBuilder(frameBox, storyBuilder.handle));
-	}
+    static createFromStoryBuilder(frameBox, storyBuilder) {
+        return new FrameTextNodeDefinition(FrameTextNodeDefinitionApi.createFromStoryBuilder(frameBox, storyBuilder.handle));
+    }
 }
 
 
 class CurvePathTextNode extends TextNode {
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'CurvePathTextNode';
-	}
+    get [Symbol.toStringTag]() {
+        return 'CurvePathTextNode';
+    }
 
-	get isCurvePathTextNode() {
-		return true;
-	}
+    get isCurvePathTextNode() {
+        return true;
+    }
+}
+
+
+class CurvePathTextNodeDefinition extends TextNodeDefinition {
+    constructor(handle) {
+        super(handle);
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'CurvePathTextNodeDefinition';
+    }
+
+    get isCurvePathTextNodeDefinition() {
+        return true;
+    }
+
+    static createFromStoryBuilder(polyCurve, storyBuilder) {
+        return new CurvePathTextNodeDefinition(CurvePathTextNodeDefinitionApi.createFromStoryBuilder(polyCurve.handle, storyBuilder.handle));
+    }
 }
 
 
 class PolyCurveTextNode extends TextNode {
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'PolyCurveTextNode';
-	}
+    get [Symbol.toStringTag]() {
+        return 'PolyCurveTextNode';
+    }
 
-	get isPolyCurveTextNode() {
-		return true;
-	}
+    get isPolyCurveTextNode() {
+        return true;
+    }
+}
+
+
+class PolyCurveTextNodeDefinition extends TextNodeDefinition {
+    constructor(handle) {
+        super(handle);
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'PolyCurveTextNodeDefinition';
+    }
+
+    get isPolyCurveTextNodeDefinition() {
+        return true;
+    }
+
+    static createFromStoryBuilder(polyCurve, storyBuilder) {
+        return new PolyCurveTextNodeDefinition(PolyCurveTextNodeDefinitionApi.createFromStoryBuilder(polyCurve.handle, storyBuilder.handle));
+    }
 }
 
 
 class ShapePathTextNode extends TextNode {
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'ShapePathTextNode';
-	}
+    get [Symbol.toStringTag]() {
+        return 'ShapePathTextNode';
+    }
 
-	get isShapePathTextNode() {
-		return true;
-	}
+    get isShapePathTextNode() {
+        return true;
+    }
 
-	// ShapeInterfaceModule.ShapeInterface
-	#shapeInterface;
-	get shapeInterface() {
-		if (!this.#shapeInterface)
-			this.#shapeInterface = new ShapeInterfaceModule.ShapeInterface(ShapePathTextNodeApi.getShapeInterface(this.handle));
-		return this.#shapeInterface;
-	}
+    // ShapeInterfaceModule.ShapeInterface
+    #shapeInterface;
+    get shapeInterface() {
+        if (!this.#shapeInterface)
+            this.#shapeInterface = new ShapeInterfaceModule.ShapeInterface(ShapePathTextNodeApi.getShapeInterface(this.handle));
+        return this.#shapeInterface;
+    }
 
-	get shape() {
-		return this.shapeInterface.shape;
-	}
+    get shape() {
+        return this.shapeInterface.shape;
+    }
 
-	get shapeType() {
-		return this.shapeInterface.type;
-	}
+    get shapeType() {
+        return this.shapeInterface.type;
+    }
 
-	get shapeBoundingBox() {
-		return this.shapeInterface.boundingBox;
-	}
+    get shapeBoundingBox() {
+        return this.shapeInterface.boundingBox;
+    }
+}
+
+
+class ShapePathTextNodeDefinition extends TextNodeDefinition {
+    constructor(handle) {
+        super(handle);
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'ShapePathTextNodeDefinition';
+    }
+
+    get isShapePathTextNodeDefinition() {
+        return true;
+    }
+
+    static createFromStoryBuilder(shape, rectangle, storyBuilder) {
+        return new ShapePathTextNodeDefinition(ShapePathTextNodeDefinitionApi.createFromStoryBuilder(shape.handle, rectangle, storyBuilder.handle));
+    }
 }
 
 
 class TableTextNode extends TextNode {
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'TableTextNode';
-	}
+    get [Symbol.toStringTag]() {
+        return 'TableTextNode';
+    }
 
-	get isTableTextNode() {
-		return true;
-	}
+    get isTableTextNode() {
+        return true;
+    }
 }
 
 
 class TableTextNodeDefinition extends TextNodeDefinition {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'TableTextNodeDefinition';
-	}
+    get [Symbol.toStringTag]() {
+        return 'TableTextNodeDefinition';
+    }
 
-	get isTableTextNodeDefinition() {
-		return true;
-	}
+    get isTableTextNodeDefinition() {
+        return true;
+    }
 
-	static create(box, size) {
-		return new TableTextNodeDefinition(TableTextNodeDefinitionApi.create(box, size));
-	}
+    static create(box, size) {
+        return new TableTextNodeDefinition(TableTextNodeDefinitionApi.create(box, size));
+    }
 }
 
 
 class ShapeTextNode extends TextNode {
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'ShapeTextNode';
-	}
+    get [Symbol.toStringTag]() {
+        return 'ShapeTextNode';
+    }
 
-	get isShapeTextNode() {
-		return true;
-	}
+    get isShapeTextNode() {
+        return true;
+    }
 
-	// ShapeInterfaceModule.ShapeInterface
-	#shapeInterface;
-	get shapeInterface() {
-		if (!this.#shapeInterface)
-			this.#shapeInterface = new ShapeInterfaceModule.ShapeInterface(ShapeTextNodeApi.getShapeInterface(this.handle));
-		return this.#shapeInterface;
-	}
+    // ShapeInterfaceModule.ShapeInterface
+    #shapeInterface;
+    get shapeInterface() {
+        if (!this.#shapeInterface)
+            this.#shapeInterface = new ShapeInterfaceModule.ShapeInterface(ShapeTextNodeApi.getShapeInterface(this.handle));
+        return this.#shapeInterface;
+    }
 
-	get shape() {
-		return this.shapeInterface.shape;
-	}
+    get shape() {
+        return this.shapeInterface.shape;
+    }
 
-	get shapeType() {
-		return this.shapeInterface.type;
-	}
+    get shapeType() {
+        return this.shapeInterface.type;
+    }
 
-	get shapeBoundingBox() {
-		return this.shapeInterface.boundingBox;
-	}
+    get shapeBoundingBox() {
+        return this.shapeInterface.boundingBox;
+    }
+}
+
+
+class ShapeTextNodeDefinition extends TextNodeDefinition {
+    constructor(handle) {
+        super(handle);
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'ShapeTextNodeDefinition';
+    }
+
+    get isShapeTextNodeDefinition() {
+        return true;
+    }
+
+    static createFromStoryBuilder(shape, rectangle, storyBuilder) {
+        return new ShapeTextNodeDefinition(ShapeTextNodeDefinitionApi.createFromStoryBuilder(shape.handle, rectangle, storyBuilder.handle));
+    }
 }
 
 
@@ -5312,7 +8446,7 @@ class VectorNode extends PhysicalNode {
         if (!this.#pictureFrameInterface) {
             this.#pictureFrameInterface = new PictureFrameInterfaceModule.PictureFrameInterface(VectorNodeApi.getPictureFrameInterface(this.handle));
         }
-		return this.#pictureFrameInterface;
+        return this.#pictureFrameInterface;
     }
 
     get pictureFrameEnabled() {
@@ -5325,12 +8459,12 @@ class VectorNode extends PhysicalNode {
 
     // TransparencyInterfaceModule.TransparencyInterface
     #transparencyInterface;
-	get transparencyInterface() {
+    get transparencyInterface() {
         if (!this.#transparencyInterface) {
             this.#transparencyInterface = new TransparencyInterfaceModule.TransparencyInterface(VectorNodeApi.getTransparencyInterface(this.handle));
         }
-		return this.#transparencyInterface;
-	}
+        return this.#transparencyInterface;
+    }
 
     get transparencyFillDescriptor() {
         return this.transparencyInterface.fillDescriptor;
@@ -5445,6 +8579,194 @@ class VectorNodeDefinition extends PhysicalNodeDefinition {
     set currentLineDescriptorsIndex(index) {
         VectorNodeDefinitionApi.setCurrentLineDescriptorsIndex(this.handle, index);
     }
+
+    setPictureFrameEnabled(pictureFrameEnabled) {
+        this.pictureFrameEnabled = pictureFrameEnabled;
+        return this;
+    }
+
+    set pictureFrameEnabled(pictureFrameEnabled) {
+        VectorNodeDefinitionApi.setPictureFrameEnabled(this.handle, Boolean(pictureFrameEnabled));
+    }
+
+    get pictureFrameEnabled() {
+        return VectorNodeDefinitionApi.getPictureFrameEnabled(this.handle);
+    }
+}
+
+
+class MeasurementNode extends VectorNode {
+	constructor(handle) {
+		super(handle);
+	}
+
+	get [Symbol.toStringTag]() {
+		return 'MeasurementNode';
+	}
+
+	get isMeasurementNode() {
+		return true;
+	}
+
+	get factor() {
+		return MeasurementNodeApi.getFactor(this.handle);
+	}
+
+	get scaledUnitType() {
+		return MeasurementNodeApi.getScaledUnitType(this.handle);
+	}
+
+	// UnitType.number means "follow the document units" rather than a unit the user pinned.
+	get displayUnitType() {
+		return MeasurementNodeApi.getDisplayUnitType(this.handle);
+	}
+
+	get annotationOffset() {
+		return MeasurementNodeApi.getAnnotationOffset(this.handle);
+	}
+
+	get showEndpointMarkers() {
+		return MeasurementNodeApi.getShowEndpointMarkers(this.handle);
+	}
+
+	get useDocumentPrecision() {
+		return MeasurementNodeApi.getUseDocumentPrecision(this.handle);
+	}
+
+	get decimalPlaces() {
+		return MeasurementNodeApi.getDecimalPlaces(this.handle);
+	}
+
+	get spreadDistance() {
+		return MeasurementNodeApi.getSpreadDistance(this.handle);
+	}
+
+	// Returns {start, end} as Points in spread space.
+	get spreadEndpoints() {
+		return MeasurementNodeApi.getSpreadEndpoints(this.handle);
+	}
+}
+
+
+class MeasurementNodeDefinition extends VectorNodeDefinition {
+	constructor(handle) {
+		super(handle);
+	}
+
+	get [Symbol.toStringTag]() {
+		return 'MeasurementNodeDefinition';
+	}
+
+	get isMeasurementNodeDefinition() {
+		return true;
+	}
+
+	get annotationOffset() {
+		return MeasurementNodeDefinitionApi.getAnnotationOffset(this.handle);
+	}
+
+	set annotationOffset(offset) {
+		MeasurementNodeDefinitionApi.setAnnotationOffset(this.handle, offset);
+	}
+
+    setAnnotationOffset(offset) {
+		this.annotationOffset = offset;
+        return this;
+	}
+
+	get showEndpointMarkers() {
+		return MeasurementNodeDefinitionApi.getShowEndpointMarkers(this.handle);
+	}
+
+	set showEndpointMarkers(show) {
+		MeasurementNodeDefinitionApi.setShowEndpointMarkers(this.handle, show);
+	}
+
+	setShowEndpointMarkers(show) {
+		this.showEndpointMarkers = show;
+		return this;
+	}
+
+	// {start, end} as Points.
+	get endpoints() {
+		return MeasurementNodeDefinitionApi.getEndpoints(this.handle);
+	}
+
+	set endpoints(endpoints) {
+		MeasurementNodeDefinitionApi.setEndpoints(this.handle, endpoints.start, endpoints.end);
+	}
+
+	setEndpoints(start, end) {
+		MeasurementNodeDefinitionApi.setEndpoints(this.handle, start, end);
+		return this;
+	}
+
+	get factor() {
+		return MeasurementNodeDefinitionApi.getFactor(this.handle);
+	}
+
+	set factor(factor) {
+		MeasurementNodeDefinitionApi.setFactor(this.handle, factor);
+	}
+
+	setFactor(factor) {
+		this.factor = factor;
+		return this;
+	}
+
+	get scaledUnitType() {
+		return MeasurementNodeDefinitionApi.getScaledUnitType(this.handle);
+	}
+
+	set scaledUnitType(unitType) {
+		MeasurementNodeDefinitionApi.setScaledUnitType(this.handle, unitType);
+	}
+
+	setScaledUnitType(unitType) {
+		this.scaledUnitType = unitType;
+		return this;
+	}
+
+	get useDocumentPrecision() {
+		return MeasurementNodeDefinitionApi.getUseDocumentPrecision(this.handle);
+	}
+
+	set useDocumentPrecision(useDocumentPrecision) {
+		MeasurementNodeDefinitionApi.setDisplayPrecision(this.handle, useDocumentPrecision, this.decimalPlaces);
+	}
+
+	get decimalPlaces() {
+		return MeasurementNodeDefinitionApi.getDecimalPlaces(this.handle);
+	}
+
+	set decimalPlaces(decimalPlaces) {
+		MeasurementNodeDefinitionApi.setDisplayPrecision(this.handle, this.useDocumentPrecision, decimalPlaces);
+	}
+
+	setDisplayPrecision(useDocumentPrecision, decimalPlaces) {
+		MeasurementNodeDefinitionApi.setDisplayPrecision(this.handle, useDocumentPrecision, decimalPlaces);
+		return this;
+	}
+
+	// The label's whole text appearance - font, size and colours. Set to null to follow the document default.
+	// The getter hands back a mutable copy, so editing it does not affect the definition until it is set back.
+	get labelGlyphAtts() {
+		const handle = MeasurementNodeDefinitionApi.getLabelGlyphAtts(this.handle);
+		return handle ? new GlyphAtts(handle) : null;
+	}
+
+	set labelGlyphAtts(glyphAtts) {
+		MeasurementNodeDefinitionApi.setLabelGlyphAtts(this.handle, glyphAtts?.handle);
+	}
+
+	setLabelGlyphAtts(glyphAtts) {
+		this.labelGlyphAtts = glyphAtts;
+		return this;
+	}
+
+	static create(start, end, factor, unitType) {
+		return new MeasurementNodeDefinition(MeasurementNodeDefinitionApi.create(start, end, factor, unitType));
+	}
 }
 
 
@@ -5505,8 +8827,12 @@ class ImageNode extends VectorNode {
         return this.imageResourceInterface.imageFilePath;
     }
 
+    getImageFileSize(asBigInt) {
+        return this.imageResourceInterface.getImageFileSize(asBigInt);
+    }
+
     get imageFileSize() {
-        return this.imageResourceInterface.imageFileSize;
+        return this.getImageFileSize();
     }
 
     get imageFileType() {
@@ -5519,11 +8845,11 @@ class ImageNode extends VectorNode {
     
     // RasterInterfaceModule.RasterInterface
     #rasterInterface;
-	get rasterInterface() {
+    get rasterInterface() {
         if (!this.#rasterInterface)
             this.#rasterInterface = new RasterInterfaceModule.RasterInterface(ImageNodeApi.getRasterInterface(this.handle));
         return this.#rasterInterface;
-	}
+    }
 
     get rasterWidth() {
         return this.rasterInterface.width;
@@ -5593,23 +8919,31 @@ class PolyCurveNode extends VectorNode {
     }
 
     get [Symbol.toStringTag]() {
-		return 'PolyCurveNode';
-	}
+        return 'PolyCurveNode';
+    }
 
     get isPolyCurveNode() {
-		return true;
-	}
-	
+        return true;
+    }
+    
     // ArtboardInterfaceModule.ArtboardInterface
     #artboardInterface;
-	get artboardInterface() {
+    get artboardInterface() {
         if (!this.#artboardInterface)
             this.#artboardInterface = new ArtboardInterfaceModule.ArtboardInterface(PolyCurveNodeApi.getArtboardInterface(this.handle));
         return this.#artboardInterface;
-	}
+    }
 
+    /**
+    * @deprecated Use get isArtboardEnabled()
+    */
     get artboardEnabled() {
-        return this.artboardInterface.enabled;
+        console.warn("Using deprecated get artboardEnabled() property. Use get isArtboardEnabled() instead.");
+        return this.isArtboardEnabled;
+    }
+
+    get isArtboardEnabled() {
+        return this.artboardInterface.isArtboardEnabled;
     }
 
     get artboardDescription() {
@@ -5628,8 +8962,16 @@ class PolyCurveNode extends VectorNode {
         return this.artboardInterface.origin;
     }
 
+    /**
+    * @deprecated Use set isArtboardEnabled()
+    */
     set artboardEnabled(value) {
-        return this.document.setArtboardEnabled(value, this);
+        console.warn("Using deprecated set artboardEnabled() property. Use set isArtboardEnabled() instead.");
+        this.isArtboardEnabled = value;
+    }
+
+    set isArtboardEnabled(value) {
+        this.document.setArtboardEnabled(value, this);
     }
 }
 
@@ -5660,8 +9002,8 @@ class PolyCurveNodeDefinition extends VectorNodeDefinition {
         PolyCurveNodeDefinitionApi.setCurves(this.handle, curve.handle);
     }
     
-    static create(curve, brushFill, lineStyle, lineFill, transparencyFill) {
-        return new PolyCurveNodeDefinition(PolyCurveNodeDefinitionApi.create(curve.handle, brushFill.handle, lineStyle.handle, lineFill.handle, transparencyFill.handle));
+    static create(curve, brushFill, lineFill, lineStyle, transparencyFill) {
+        return new PolyCurveNodeDefinition(PolyCurveNodeDefinitionApi.create(curve.handle, brushFill.handle, lineFill.handle, lineStyle.handle, transparencyFill.handle));
     }
 
     static createDefault() {
@@ -5685,14 +9027,22 @@ class ShapeNode extends VectorNode {
 
     // ArtboardInterfaceModule.ArtboardInterface
     #artboardInterface;
-	get artboardInterface() {
+    get artboardInterface() {
         if (!this.#artboardInterface)
             this.#artboardInterface = new ArtboardInterfaceModule.ArtboardInterface(ShapeNodeApi.getArtboardInterface(this.handle));
         return this.#artboardInterface;
-	}
+    }
 
+    /**
+    * @deprecated Use get isArtboardEnabled()
+    */
     get artboardEnabled() {
-        return this.artboardInterface.enabled;
+        console.warn("Using deprecated get artboardEnabled() property. Use get isArtboardEnabled() instead.");
+        return this.isArtboardEnabled;
+    }
+
+    get isArtboardEnabled() {
+        return this.artboardInterface.isArtboardEnabled;
     }
 
     get artboardDescription() {
@@ -5711,8 +9061,16 @@ class ShapeNode extends VectorNode {
         return this.artboardInterface.origin;
     }
 
+    /**
+    * @deprecated Use set isArtboardEnabled()
+    */
     set artboardEnabled(value) {
-        return this.document.setArtboardEnabled(value, this);
+        console.warn("Using deprecated set artboardEnabled() property. Use set isArtboardEnabled() instead.");
+        this.isArtboardEnabled = value;
+    }
+
+    set isArtboardEnabled(value) {
+        this.document.setArtboardEnabled(value, this);
     }
 
     // ShapeInterfaceModule.ShapeInterface
@@ -5828,6 +9186,10 @@ class NodeCast extends HandleObject{
         return NodeCastApi.setDocumentNodeHandler(this.handle, callback);
     }
     
+    setDevelopNodeHandler(callback) {
+        return NodeCastApi.setDevelopNodeHandler(this.handle, callback);
+    }
+
     setEmbeddedDocumentNodeHandler(callback) {
         return NodeCastApi.setEmbeddedDocumentNodeHandler(this.handle, callback);
     }
@@ -6088,6 +9450,10 @@ class NodeCast extends HandleObject{
         return NodeCastApi.setSpreadNodeHandler(this.handle, callback);
     }
 
+    setMeasurementNodeHandler(callback) {
+        return NodeCastApi.setMeasurementNodeHandler(this.handle, callback);
+    }
+
     setTableTextNodeHandler(callback) {
         return NodeCastApi.setTableTextNodeHandler(this.handle, callback);
     }
@@ -6122,6 +9488,7 @@ class NodeFactory {
         this.#caster.setCurvesAdjustmentRasterNodeHandler(handle => nodes.push(new CurvesAdjustmentRasterNode(handle)));
         this.#caster.setColouredLogicalNodeHandler(handle => nodes.push(new ColouredLogicalNode(handle)));
         this.#caster.setDocumentNodeHandler(handle => nodes.push(new DocumentNode(handle)));
+        this.#caster.setDevelopNodeHandler(handle => nodes.push(new DevelopNode(handle)));
         this.#caster.setEmbeddedDocumentNodeHandler(handle => nodes.push(new EmbeddedDocumentNode(handle)));
         this.#caster.setEnclosureRasterNodeHandler(handle => nodes.push(new EnclosureRasterNode(handle)));
         this.#caster.setExposureAdjustmentRasterNodeHandler(handle => nodes.push(new ExposureAdjustmentRasterNode(handle)));
@@ -6187,6 +9554,7 @@ class NodeFactory {
         this.#caster.setShapeNodeHandler(handle => nodes.push(new ShapeNode(handle)));
         this.#caster.setShapePathTextNodeHandler(handle => nodes.push(new ShapePathTextNode(handle)));
         this.#caster.setShapeTextNodeHandler(handle => nodes.push(new ShapeTextNode(handle)));
+        this.#caster.setMeasurementNodeHandler(handle => nodes.push(new MeasurementNode(handle)));
         this.#caster.setTableTextNodeHandler(handle => nodes.push(new TableTextNode(handle)));
         this.#caster.setTextNodeHandler(handle => nodes.push(new TextNode(handle)));
         this.#caster.setVectorNodeHandler(handle => nodes.push(new VectorNode(handle)));
@@ -6208,6 +9576,7 @@ function createTypedNode(handle) {
 module.exports.ArtTextNode = ArtTextNode;
 module.exports.ArtTextNodeDefinition = ArtTextNodeDefinition;
 module.exports.CurvePathTextNode = CurvePathTextNode;
+module.exports.CurvePathTextNodeDefinition = CurvePathTextNodeDefinition;
 module.exports.DocumentNode = DocumentNode;
 module.exports.FrameTextNode = FrameTextNode;
 module.exports.FrameTextNodeDefinition = FrameTextNodeDefinition;
@@ -6224,6 +9593,7 @@ module.exports.PhysicalNodeDefinition = PhysicalNodeDefinition;
 module.exports.PolyCurveNode = PolyCurveNode;
 module.exports.PolyCurveNodeDefinition = PolyCurveNodeDefinition;
 module.exports.PolyCurveTextNode = PolyCurveTextNode;
+module.exports.PolyCurveTextNodeDefinition = PolyCurveTextNodeDefinition;
 module.exports.RasterNode = RasterNode;
 module.exports.RasterNodeDefinition = RasterNodeDefinition;
 module.exports.PatternRasterNode = PatternRasterNode;
@@ -6233,8 +9603,12 @@ module.exports.ContainerNodeDefinition = ContainerNodeDefinition;
 module.exports.ShapeNode = ShapeNode;
 module.exports.ShapeNodeDefinition = ShapeNodeDefinition;
 module.exports.ShapePathTextNode = ShapePathTextNode;
+module.exports.ShapePathTextNodeDefinition = ShapePathTextNodeDefinition;
 module.exports.ShapeTextNode = ShapeTextNode;
+module.exports.ShapeTextNodeDefinition = ShapeTextNodeDefinition;
 module.exports.SpreadNode = SpreadNode;
+module.exports.MeasurementNode = MeasurementNode;
+module.exports.MeasurementNodeDefinition = MeasurementNodeDefinition;
 module.exports.TableTextNode = TableTextNode;
 module.exports.TableTextNodeDefinition = TableTextNodeDefinition;
 module.exports.TextNode = TextNode;
@@ -6402,24 +9776,32 @@ module.exports.VignetteFilterParameters = VignetteFilterParameters;
 module.exports.VoronoiFilterParameters = VoronoiFilterParameters;
 
 // other bits
-module.exports.createTypedNode = createTypedNode;
 module.exports.AddNoiseType = AddNoiseType;
+module.exports.BloomMethod = BloomMethod;
 module.exports.ColourSpaceType = ColourSpaceType;
 module.exports.DepthOfFieldMode = DepthOfFieldMode;
+module.exports.DevelopDetailRefinementMethod = DevelopDetailRefinementMethod;
+module.exports.DevelopInvertMethod = DevelopInvertMethod;
+module.exports.DevelopNode = DevelopNode;
+module.exports.DevelopParameters = DevelopParameters;
+module.exports.DevelopToneCurveMethod = DevelopToneCurveMethod;
+module.exports.HalftoneDotType = HalftoneDotType;
+module.exports.HalftoneScreenType = HalftoneScreenType;
+module.exports.LineDescriptors = LineDescriptors;
+module.exports.NodeCast = NodeCast;
+module.exports.NodeChildType = NodeChildType;
 module.exports.PageBoundingBoxType = PageBoundingBoxType;
 module.exports.RasterExtendType = RasterExtendType;
 module.exports.RasterFormat = RasterFormat;
 module.exports.RasterResamplerType = RasterResamplerType;
 module.exports.ShadowsHighlightsVersion = ShadowsHighlightsVersion;
 module.exports.SelectiveColour = SelectiveColour;
+module.exports.SelectiveColourWeights = SelectiveColourWeights;
 module.exports.TonalRangeType = TonalRangeType;
 module.exports.ToneCompressionMethod = ToneCompressionMethod;
 module.exports.ToneStretchMethod = ToneStretchMethod;
-module.exports.BloomMethod = BloomMethod;
-module.exports.HalftoneScreenType = HalftoneScreenType;
-module.exports.HalftoneDotType = HalftoneDotType;
-module.exports.NodeChildType = NodeChildType;
-module.exports.NodeCast = NodeCast;
+module.exports.UnitType = UnitType;
+module.exports.createTypedNode = createTypedNode;
 module.exports.getNodeSiblings = getNodeSiblings;
 module.exports.getNodeChildren = getNodeChildren;
 module.exports.getNodesRecursive = getNodesRecursive;

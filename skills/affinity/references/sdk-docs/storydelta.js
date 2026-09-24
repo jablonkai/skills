@@ -1,6 +1,6 @@
 'use strict';
 
-const { FontWidth } = require('affinity:fonts');
+const { FontField, FontWidth } = require('affinity:fonts');
 const {
     CapsType,
     GlyphAttDoubleType,
@@ -20,7 +20,7 @@ const {
     TocRoleType,
     TypographicLineType
 } = require('affinity:story');
-const { HandleObject } = require('./handleobject.js');
+const { HandleObject } = require('/handleobject.js');
 
 class StoryDelta extends HandleObject {
 
@@ -231,9 +231,22 @@ class StoryDelta extends HandleObject {
     static createComposite(deltas) {
         return new StoryDelta(StoryDeltaApi.createCompositeDelta(deltas.map((d) => d.handle)));
     }
+
+    static createFromGlyphAtts(glyphAtts) {
+        return new StoryDelta(StoryDeltaApi.createSetAttsDelta(glyphAtts.handle, null));
+    }
+
+    static createFromParagraphAtts(paragraphAtts) {
+        return new StoryDelta(StoryDeltaApi.createSetAttsDelta(null, paragraphAtts.handle));
+    }
+
+    static createFromAtts(glyphAtts, paragraphAtts) {
+        return new StoryDelta(StoryDeltaApi.createSetAttsDelta(glyphAtts?.handle, paragraphAtts?.handle));
+    }
 }
 
 module.exports.CapsType = CapsType;
+module.exports.FontField = FontField;
 module.exports.FontWidth = FontWidth;
 module.exports.GlyphAttDoubleType = GlyphAttDoubleType;
 module.exports.GlyphAttStringType = GlyphAttStringType;

@@ -2,7 +2,10 @@
 
 const { EnumerationResult, UnitType } = require('affinity:common');
 const { DrawingScaleApi } = require('affinity:dom');
-const { HandleObject } = require('./handleobject.js');
+const { HandleObject } = require('/handleobject.js');
+
+// monkey patches:
+require('/units.js');
 
 class DrawingScale extends HandleObject {
     constructor(handle) {

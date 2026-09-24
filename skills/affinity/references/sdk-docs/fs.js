@@ -1,24 +1,41 @@
 'use strict';
 
-const { CopyOptions, DirectoryIteratorApi, FileApi, FileOrigin, FilePermissions, FileStatusApi, FileSystemApi, PathType, PermOptions } = require('affinity:fs');
-const { Buffer } = require('./buffer');
-const { Collection} = require('./collection.js');
-const { HandleObject } = require('./handleobject.js');
+const { CopyOptions, DirectoryIteratorApi, FileApi, FileOrigin, FilePermissions, FileStatusApi, FileSystemApi, FileSystemSpace, PathType, PermOptions } = require('affinity:fs');
+const { Buffer } = require('/buffer.js');
+const { Collection} = require('/collection.js');
+const { HandleObject } = require('/handleobject.js');
 
 class File extends HandleObject {
-    constructor(path, mode) {
-        super(FileApi.create());
-        if (path != null) { // checks for undefined too
-            this.open(path, mode);
+    constructor(handleOrPath, mode) {
+        if (arguments.length != 1 || typeof(arguments[0]) !== 'object') {
+            // handleOrPath refers to a path
+            // this is deprecated - the constructor should now take a single handle object
+            console.warn("Using deprecated File(path, mode) constructor. Use File.create(path, mode) instead.");
+            super(FileApi.create());
+            if (handleOrPath != null) { // checks for undefined too
+                this.open(handleOrPath, mode);
+            }
+        }
+        else {
+            // handleOrPath refers to a handle
+            super(handleOrPath);
         }
     }
         
     get [Symbol.toStringTag]() {
         return 'File';
     }
+
+    static create(path, mode) {
+        const file = new File(FileApi.create());
+        if (path != null) { // checks for undefined too
+            file.open(path, mode);
+        }
+        return file;
+    }
     
     static length(path) {
-        return new File(path, 'rb').length;
+        return File.create(path, 'rb').length;
     }
     
     static size(path) {
@@ -168,7 +185,7 @@ class File extends HandleObject {
     }
         
     static readAll(path) {
-        let f = new File(path, 'rb');
+        let f = File.create(path, 'rb');
         let buf = Buffer.create(f.length);
         f.read(buf, buf.length);
         f.close();
@@ -177,7 +194,7 @@ class File extends HandleObject {
     
     static readAllAsync(path, callback) {
         try {
-            const f = new File(path, 'rb');
+            const f = File.create(path, 'rb');
             return f.getLengthAsync((err, length) => {
                 if (err) {
                     f.close();
@@ -859,7 +876,7 @@ class FileSystemPromises
     static open(path, mode) {
         return new Promise((resolve, reject) => {
             try {
-                resolve(new File(path, mode));
+                resolve(File.create(path, mode));
             }
             catch (err) {
                 reject(err);
@@ -889,6 +906,7 @@ module.exports.PathType = PathType;
 module.exports.PermOptions = PermOptions;
 module.exports.FileSystemApi = FileSystemApi;
 module.exports.FileSystemPromises = FileSystemPromises;
+module.exports.FileSystemSpace = FileSystemSpace;
 
 // convenience names
 module.exports.fs = FileSystemApi;

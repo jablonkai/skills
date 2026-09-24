@@ -1,20 +1,20 @@
 'use strict';
-const {app} = require('/application');
-const {GaussianBlurFilterRasterNodeDefinition, ExposureAdjustmentRasterNodeDefinition, createTypedNode, Node, NodeChildType, AddNoiseType} = require('/nodes');
-const {PolyCurveNodeDefinition, ShapeNodeDefinition} = require("/nodes");
-const dommodule = require("affinity:dom");
-const {DocumentCommand, AddChildNodesCommandBuilder, InsertionMode} = require("/commands");
-const {Document, DocumentPromises} = require("/document.js");
-const {Shape, ShapeType} = require("/shapes");
-const {Fill, FillDescriptor} = require("/fills");
-const {BlendMode} = require("affinity:common");
-const {Rectangle, PolyCurve} = require("/geometry");
-const {LineStyleDescriptor, LineType} = require("/lineStyle");
-const {Colour, RGBA8, ColourSpaceType, SVG11} = require("/colours");
+const {app} = require('/application.js');
+const {GaussianBlurFilterRasterNodeDefinition, ExposureAdjustmentRasterNodeDefinition, createTypedNode, Node, NodeChildType, AddNoiseType} = require('/nodes.js');
+const {PolyCurveNodeDefinition, ShapeNodeDefinition} = require('/nodes.js');
+const dommodule = require('affinity:dom');
+const {DocumentCommand, AddChildNodesCommandBuilder, InsertionMode} = require('/commands.js');
+const {Document, DocumentPromises} = require('/document.js');
+const {Shape, ShapeType} = require('/shapes.js');
+const {Fill, FillDescriptor} = require('/fills.js');
+const {BlendMode} = require('affinity:common');
+const {Rectangle, PolyCurve} = require('/geometry.js');
+const {LineStyleDescriptor, LineType} = require('/linestyle.js');
+const {Colour, RGBA8, ColourSpaceType, SVG11} = require('/colours.js');
 const {ErrorCode} = require('affinity:common');
-const {Selection} = require("/selections");
-const {TestUtils} = require("/tests/testUtils");
-const {PixelReaderWriterRGBA8} = require("/pixelaccessor");
+const {Selection} = require('/selections.js');
+const {TestUtils} = require('/tests/testUtils.js');
+const {PixelReaderWriterRGBA8} = require('/pixelaccessor.js');
 
 function BisectCurves(curves) {
     let resCurves = [];
@@ -45,7 +45,7 @@ function UseCaseJitterCurve() {
     const lineStyle = LineStyleDescriptor.createDefault(3);
     const transFill = FillDescriptor.createSolid(SVG11.blue, BlendMode.ColourBurn);
     
-    let snd = ShapeNodeDefinition.create(cat, box, brushFill, lineStyle, lineFill, transFill);
+    let snd = ShapeNodeDefinition.create(cat, box, brushFill, lineFill, lineStyle, transFill);
     let acnBuilder = AddChildNodesCommandBuilder.create();
     acnBuilder.addNode(snd);
     let anCommand = acnBuilder.createCommand(false, NodeChildType.Main);
@@ -73,7 +73,7 @@ function UseCaseJitterCurve() {
         polyCurve.addCurve(c);
     }
     
-    let pcNodeDef = PolyCurveNodeDefinition.create(polyCurve, brushFill, lineStyle, lineFill, transFill);
+    let pcNodeDef = PolyCurveNodeDefinition.create(polyCurve, brushFill, lineFill, lineStyle, transFill);
     
     acnBuilder.addPolyCurveNode(pcNodeDef);
     

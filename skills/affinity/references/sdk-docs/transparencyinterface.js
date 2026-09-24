@@ -1,11 +1,11 @@
 'use strict';
 
 const { ContentType, TransparencyInterfaceApi } = require('affinity:dom');
-const { FillDescriptor } = require('./fills.js');
-const { HandleObject } = require('./handleobject.js');
+const { FillDescriptor } = require('/fills.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 // monkey patches:
 require('/geometry.js');

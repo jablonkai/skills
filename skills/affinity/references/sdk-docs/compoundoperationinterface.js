@@ -2,10 +2,10 @@
 
 const { CompoundOperationInterfaceApi } = require('affinity:dom');
 const { CompoundOperation } = require('affinity:dom');
-const { HandleObject } = require('./handleobject.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 class CompoundOperationInterface extends HandleObject {
     constructor(handle) {

@@ -1,9 +1,9 @@
 'use strict';
-const {app} = require('/application');
-const {TestUtils} = require("/tests/testUtils.js");
-const {AddChildNodesCommandBuilder, NodeChildType} = require('/commands');
-const {ContainerNodeDefinition} = require('/nodes');
-const {Document} = require('/document');
+const {app} = require('/application.js');
+const {TestUtils} = require('/tests/testUtils.js');
+const {AddChildNodesCommandBuilder, NodeChildType} = require('/commands.js');
+const {ContainerNodeDefinition} = require('/nodes.js');
+const {Document} = require('/document.js');
 
 
 function testContainerNode() {

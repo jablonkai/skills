@@ -1,10 +1,10 @@
 'use strict';
 
 const { TextVisibilityOptionsApi, VisibilityInterfaceApi, VisibilityTestOptionsApi } = require('affinity:dom');
-const { HandleObject } = require('./handleobject.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 class VisibilityInterface extends HandleObject {
     constructor(handle) {
@@ -36,7 +36,7 @@ class VisibilityInterface extends HandleObject {
     }
 
     testVisibility(options) {
-        return VisibilityInterfaceApi.testVisibility(this.handle, options);
+        return VisibilityInterfaceApi.testVisibility(this.handle, options.handle);
     }
 
     get node() {

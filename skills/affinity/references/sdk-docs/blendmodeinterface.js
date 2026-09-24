@@ -2,11 +2,11 @@
 
 const { AntialiasingMode, BlendModeInterfaceApi, BlendOptionsApi } = require('affinity:dom');
 const { BlendMode } = require('affinity:common');
-const { Spline } = require('./geometry.js');
-const { HandleObject } = require('./handleobject.js');
+const { Spline } = require('/geometry.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 class BlendOptions extends HandleObject {
     get [Symbol.toStringTag]() {

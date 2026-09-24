@@ -1,10 +1,13 @@
 'use strict';
 
 const { ConstraintType, PictureFrameInterfaceApi, SpatialAnchor } = require('affinity:dom');
-const { HandleObject } = require('./handleobject.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
+
+// monkey patches:
+require('/geometry.js');
 
 class PictureFrameInterface extends HandleObject {
     constructor(handle) {

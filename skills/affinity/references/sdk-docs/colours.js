@@ -1,9 +1,10 @@
 'use strict';
 
-const { ColourApi, ColourProfileApi, ColourProfileSetApi, ColourSpaceType, GradientApi } = require('affinity:colours');
+const coloursModule = require('affinity:colours');
+const { ColourApi, ColourProfileApi, ColourProfileSetApi, ColourSpaceType, GradientApi } = coloursModule;
 const { EnumerationResult } = require('affinity:common');
 const { RasterFormat, RasterIntent } = require('affinity:raster');
-const { HandleObject } = require('./handleobject.js');
+const { HandleObject } = require('/handleobject.js');
 
 class Colour extends HandleObject {
     constructor(handle) {
@@ -1139,3 +1140,18 @@ module.exports.HSLAf = HSLAf;
 module.exports.RGB = RGBA8;
 module.exports.IA = IA8;
 module.exports.HSL = HSLAf;
+
+module.exports.colourData = {};
+module.exports.colourData.CMYKA8 = coloursModule.CMYKA8;
+module.exports.colourData.CMYKAf = coloursModule.CMYKAf;
+module.exports.colourData.ColourStop = coloursModule.ColourStop;
+module.exports.colourData.HSLAf = coloursModule.HSLAf;
+module.exports.colourData.IA16 = coloursModule.IA16;
+module.exports.colourData.IA8 = coloursModule.IA8;
+module.exports.colourData.LABA16 = coloursModule.LABA16;
+module.exports.colourData.M16 = coloursModule.M16;
+module.exports.colourData.M8 = coloursModule.M8;
+module.exports.colourData.Mf = coloursModule.Mf;
+module.exports.colourData.RGBA16 = coloursModule.RGBA16;
+module.exports.colourData.RGBA8 = coloursModule.RGBA8;
+module.exports.colourData.RGBAuf = coloursModule.RGBAuf;

@@ -1,8 +1,8 @@
 'use strict';
 
 const { BufferApi } = require('affinity:buffer');
-const { SpanCollection } = require('./collection.js');
-const { HandleObject } = require('./handleobject.js');
+const { SpanCollection } = require('/collection.js');
+const { HandleObject } = require('/handleobject.js');
 
 // The highest codepoint that can be encoded with 1 byte in UTF-8
 const UTF8_1_MAX = 0x7F;

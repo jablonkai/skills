@@ -1,7 +1,7 @@
 'use strict';
-const {app} = require('/application');
-const {PictureFrameInterface} = require('/pictureFrameInterface');
-const {createTypedNode} = require('/node');
+const {app} = require('/application.js');
+const {PictureFrameInterface} = require('/pictureframeinterface.js');
+const {createTypedNode} = require('/node.js');
 
 function testPictureFrameInterface() {
     const doc = app.documents.current;

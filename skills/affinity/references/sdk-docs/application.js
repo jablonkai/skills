@@ -2,196 +2,211 @@
 
 const { ApplicationApi, ApplicationSettingsApi, BuildKind, UiParadigm } = require('affinity:application');
 const { UiApi } = require('affinity:ui');
-const { Document } = require('./document.js');
+const { Document } = require('/document.js');
 
-class AppDocuments {
-    get [Symbol.toStringTag]() {
-        return 'AppDocuments';
+class ApplicationDocuments {
+    static get [Symbol.toStringTag]() {
+        return 'ApplicationDocuments';
+    }
+
+    static toString() {
+        return ApplicationDocuments[Symbol.toStringTag];
     }
     
-    get all() {
+    static get all() {
         return Document.all;
     }
     
-    get current() {
+    static get current() {
         return Document.current;
     }
 
-    load(path) {
+    static load(path) {
         return Document.load(path);
     }
 }
 
 
 class ApplicationSettings {
-    get [Symbol.toStringTag]() {
+    static get [Symbol.toStringTag]() {
         return 'ApplicationSettings';
     }
 
-    get loadPSDWithEditableText() {
+    static toString() {
+        return ApplicationSettings[Symbol.toStringTag];
+    }
+
+    static get loadPSDWithEditableText() {
         return ApplicationSettingsApi.getLoadPSDWithEditableText();
     }
 
-    set loadPSDWithEditableText(value) {
+    static set loadPSDWithEditableText(value) {
         ApplicationSettingsApi.setLoadPSDWithEditableText(value);
     }
 
-    get undoLimit() {
+    static get undoLimit() {
         return ApplicationSettingsApi.getUndoLimit();
+    }
+
+    static get allowCodeGenerationFromStrings() {
+        return ApplicationSettingsApi.getAllowCodeGenerationFromStrings();
     }
 }
 
-const applicationSettings = new ApplicationSettings();
-
 
 class Application {
-    #documents;
-
-    constructor() {
-        this.#documents = new AppDocuments();
-    }
-
-    get [Symbol.toStringTag]() {
+    static get [Symbol.toStringTag]() {
         return 'Application';
     }
-    
-    get documents() {
-        return this.#documents;
+
+    static toString() {
+        return Application[Symbol.toStringTag];
+    }
+
+    static get documents() {
+        return ApplicationDocuments;
     }
     
-    alert(message, title) {
+    static alert(message, title) {
         return UiApi.alert(message, title);
     }
     
-    confirm(message, title) {
+    static confirm(message, title) {
         return UiApi.confirm(message, title);
     }
     
-    prompt(message, title, initialText) {
+    static prompt(message, title, initialText) {
         return UiApi.prompt(message, title, initialText);
     }
     
-    chooseFile() {
+    static chooseFile() {
         return UiApi.chooseFile();
     }
     
-    alertAsync(message, title, callback) {
+    static alertAsync(message, title, callback) {
         return UiApi.alertAsync(message, title, callback);
     }
     
-    confirmAsync(message, title, callback) {
+    static confirmAsync(message, title, callback) {
         return UiApi.confirmAsync(message, title, callback);
     }
     
-    promptAsync(message, title, initialText, callback) {
+    static promptAsync(message, title, initialText, callback) {
         return UiApi.promptAsync(message, title, initialText, callback);
     }
     
-    chooseFileAsync(callback) {
+    static chooseFileAsync(callback) {
         return UiApi.chooseFileAsync(callback);
     }
 
-    get compileDate() {
+    static get compileDate() {
         return ApplicationApi.getCompileDate();
     }
 
-    get platformName() {
+    static get platformName() {
         return ApplicationApi.getPlatformName();
     }
 
-    get shortVersion() {
+    static get shortVersion() {
         return ApplicationApi.getShortVersion();
     }
 
-    get version() {
+    static get version() {
         return ApplicationApi.getVersion();
     }
 
-    get buildVersion() {
+    static get buildVersion() {
         return ApplicationApi.getBuildVersion();
     }
 
-    get majorVersion() {
+    static get majorVersion() {
         return ApplicationApi.getMajorVersion();
     }
 
-    get minorVersion() {
+    static get minorVersion() {
         return ApplicationApi.getMinorVersion();
     }
 
-    get revisionVersion() {
+    static get revisionVersion() {
         return ApplicationApi.getRevisionVersion();
     }
 
-    get documentVersion() {
+    static get documentVersion() {
         return ApplicationApi.getDocumentVersion();
     }
 
-    get buildKind() {
+    static get buildKind() {
         return ApplicationApi.getBuildKind();
     }
 
-    get productCopyrightMessage() {
+    static get productCopyrightMessage() {
         return ApplicationApi.getProductCopyrightMessage();
     }
 
-    get productFullName() {
+    static get productFullName() {
         return ApplicationApi.getProductFullName();
     }
 
-    get productLongName() {
+    static get productLongName() {
         return ApplicationApi.getProductLongName();
     }
 
-    get productPrimaryFileExtension() {
+    static get productPrimaryFileExtension() {
         return ApplicationApi.getProductPrimaryFileExtension();
     }
 
-    get productVersionName() {
+    static get productVersionName() {
         return ApplicationApi.getProductVersionName();
     }
 
-    get productShortName() {
+    static get productShortName() {
         return ApplicationApi.getProductShortName();
     }
 
-    get suiteFullName() {
+    static get suiteFullName() {
         return ApplicationApi.getSuiteFullName();
     }
 
-    get uiParadigm() {
+    static get uiParadigm() {
         return ApplicationApi.getUiParadigm();
     }
     
-    get argC() {
+    static get argC() {
         return ApplicationApi.getArgC();
     }
     
-    get argV() {
+    static get argV() {
         return ApplicationApi.getArgV();
     }
 
-    get args() {
+    static get args() {
         return ApplicationApi.getArgV();
     }
 
-    get settings() {
-        return applicationSettings;
+    static get settings() {
+        return ApplicationSettings;
     }
     
     /**
     * @deprecated Use get userDesktopPath()
     */
-    get getUserDesktopPath() {
+    static get getUserDesktopPath() {
         console.warn("Using deprecated get getUserDesktopPath() property. Use get userDesktopPath() instead.");
         return this.userDesktopPath
     }
 
-    get userDesktopPath() {
+    static get userDesktopPath() {
         return ApplicationApi.getUserDesktopPath();
+    }
+
+    static get resourcesPath() {
+        return ApplicationApi.getResourcesPath();
     }
 }
 
-module.exports.app = new Application();
+module.exports.Application = Application;
 module.exports.BuildKind = BuildKind;
 module.exports.UiParadigm = UiParadigm;
+
+// for backwards compatibility
+module.exports.app = Application;

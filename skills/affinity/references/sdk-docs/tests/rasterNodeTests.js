@@ -1,7 +1,7 @@
 'use strict';
-const {app} = require('/application');
-const {GaussianBlurFilterRasterNodeDefinition, ExposureAdjustmentRasterNodeDefinition, createTypedNode, Node, NodeChildType, AddNoiseType} = require('/nodes');
-const {LevelsAdjustmentRasterNodeDefinition, BilateralBlurFilterRasterNodeDefinition, BoxBlurFilterRasterNodeDefinition, MedianBlurFilterRasterNodeDefinition} = require("/nodes");
+const {app} = require('/application.js');
+const {GaussianBlurFilterRasterNodeDefinition, ExposureAdjustmentRasterNodeDefinition, createTypedNode, Node, NodeChildType, AddNoiseType} = require('/nodes.js');
+const {LevelsAdjustmentRasterNodeDefinition, BilateralBlurFilterRasterNodeDefinition, BoxBlurFilterRasterNodeDefinition, MedianBlurFilterRasterNodeDefinition} = require('/nodes.js');
 const {DiffuseGlowFilterRasterNodeDefinition, LensBlurFilterRasterNodeDefinition, MaximumBlurFilterRasterNodeDefinition, MinimumBlurFilterRasterNodeDefinition,
     MotionBlurFilterRasterNodeDefinition, RadialBlurFilterRasterNodeDefinition, BrightnessContrastAdjustmentRasterNodeDefinition,
     ShadowsHighlightsAdjustmentRasterNodeDefinition, BlackAndWhiteAdjustmentRasterNodeDefinition, RecolourAdjustmentRasterNodeDefinition,
@@ -9,53 +9,53 @@ const {DiffuseGlowFilterRasterNodeDefinition, LensBlurFilterRasterNodeDefinition
     ThresholdAdjustmentRasterNodeDefinition, ClarityFilterRasterNodeDefinition, UnsharpMaskFilterRasterNodeDefinition,
     HighPassFilterRasterNodeDefinition, DenoiseFilterRasterNodeDefinition, DiffuseFilterRasterNodeDefinition, DustAndScratchFilterRasterNodeDefinition,
     AddNoiseFilterRasterNodeDefinition, RippleFilterRasterNodeDefinition, TwirlFilterRasterNodeDefinition, SphericalFilterRasterNodeDefinition,
-    PinchPunchFilterRasterNodeDefinition, PixelateFilterRasterNodeDefinition} = require("/nodes");
+    PinchPunchFilterRasterNodeDefinition, PixelateFilterRasterNodeDefinition} = require('/nodes.js');
 const {BilateralBlurFilterParameters, BoxBlurFilterParameters, DiffuseGlowFilterParameters, FieldBlurItemParameters, GaussianBlurFilterParameters, LensBlurFilterParameters,
     MaximumBlurFilterParameters, MedianBlurFilterParameters, MinimumBlurFilterParameters, MotionBlurFilterParameters, RadialBlurFilterParameters,
     LevelsAdjustmentChannelParameters, LevelsAdjustmentParameters, ExposureAdjustmentParameters, BrightnessContrastAdjustmentParameters,
     ShadowsHighlightsAdjustmentParameters, BlackAndWhiteAdjustmentParameters, RecolourAdjustmentParameters, PosteriseAdjustmentParameters,
     SplitToningAdjustmentParameters, ThresholdAdjustmentParameters, ClarityFilterParameters, UnsharpMaskFilterParameters,
     HighPassFilterParameters, DenoiseFilterParameters, DiffuseFilterParameters, DustAndScratchFilterParameters, AddNoiseFilterParameters,
-    RippleFilterParameters, TwirlFilterParameters, SphericalFilterParameters, PinchPunchFilterParameters, PixelateFilterParameters} = require("/nodes");
-const {WhiteBalanceAdjustmentParameters, WhiteBalanceAdjustmentRasterNodeDefinition} = require("/nodes");
-const {VibranceAdjustmentParameters, VibranceAdjustmentRasterNodeDefinition} = require("/nodes");
-const {NormalsAdjustmentParameters, NormalsAdjustmentRasterNodeDefinition} = require("/nodes");
-const {TonalRangeType, ColourBalanceValues, ColourBalanceAdjustmentParameters, ColourBalanceAdjustmentRasterNodeDefinition} = require("/nodes");
-const {CurvesAdjustmentParameters, CurvesAdjustmentRasterNodeDefinition} = require("/nodes");
-const {VignetteFilterParameters, VignetteFilterRasterNodeDefinition} = require("/nodes");
-const {DefringeFilterParameters, DefringeFilterRasterNodeDefinition} = require("/nodes");
-const {VoronoiFilterParameters, VoronoiFilterRasterNodeDefinition} = require("/nodes");
-const {EllipticalDepthOfFieldParameters, TiltShiftDepthOfFieldParameters, DepthOfFieldFilterParameters, DepthOfFieldFilterRasterNodeDefinition, DepthOfFieldMode} = require("/nodes");
-const {SelectiveColour, SelectiveColourWeights, SelectiveColourAdjustmentParameters, SelectiveColourAdjustmentRasterNodeDefinition} = require("/nodes");
-const {HSLShiftAdjustmentChannelParameters, HSLShiftAdjustmentColourRange, HSLShiftAdjustmentParameters, HSLShiftAdjustmentRasterNodeDefinition} = require("/nodes");
-const {FieldBlurFilterParameters, FieldBlurFilterRasterNode, FieldBlurFilterRasterNodeDefinition} = require("/nodes");
-const {ToneCompressionMethod, ToneCompressionAdjustmentParameters, ToneCompressionAdjustmentRasterNodeDefinition} = require("/nodes");
-const {ToneStretchMethod, ToneStretchAdjustmentParameters, ToneStretchAdjustmentRasterNodeDefinition} = require("/nodes");
-const {BloomMethod, BloomFilterParameters, BloomFilterRasterNodeDefinition} = require("/nodes");
-const {HalftoneScreenType, HalftoneDotType, HalftoneFilterParameters, HalftoneFilterRasterNodeDefinition} = require("/nodes");
-const {ShadowsHighlightsFilterRasterNodeDefinition, ShadowsHighlightsVersion} = require("/nodes");
-const {ShadowsHighlightsFilterParameters} = require("/nodes");
-const {PatternRasterNodeDefinition} = require("/nodes");
-const {Bitmap} = require("/rasterobject");
-const {Transform} = require("/geometry");
-const dommodule = require("affinity:dom");
-const {DocumentCommand, AddChildNodesCommandBuilder, InsertionMode} = require("/commands");
-const {Document, DocumentPromises} = require("/document.js");
-const {Shape, ShapeType} = require("/shapes");
-const {Fill, FillDescriptor} = require("/fills");
-const {BlendMode} = require("affinity:common");
-const {Rectangle, Spline, SplineProfile} = require("/geometry");
-const {LineStyleDescriptor, LineType} = require("/lineStyle");
-const {Colour, RGBA8, ColourSpaceType} = require("/colours");
+    RippleFilterParameters, TwirlFilterParameters, SphericalFilterParameters, PinchPunchFilterParameters, PixelateFilterParameters} = require('/nodes.js');
+const {WhiteBalanceAdjustmentParameters, WhiteBalanceAdjustmentRasterNodeDefinition} = require('/nodes.js');
+const {VibranceAdjustmentParameters, VibranceAdjustmentRasterNodeDefinition} = require('/nodes.js');
+const {NormalsAdjustmentParameters, NormalsAdjustmentRasterNodeDefinition} = require('/nodes.js');
+const {TonalRangeType, ColourBalanceValues, ColourBalanceAdjustmentParameters, ColourBalanceAdjustmentRasterNodeDefinition} = require('/nodes.js');
+const {CurvesAdjustmentParameters, CurvesAdjustmentRasterNodeDefinition} = require('/nodes.js');
+const {VignetteFilterParameters, VignetteFilterRasterNodeDefinition} = require('/nodes.js');
+const {DefringeFilterParameters, DefringeFilterRasterNodeDefinition} = require('/nodes.js');
+const {VoronoiFilterParameters, VoronoiFilterRasterNodeDefinition} = require('/nodes.js');
+const {EllipticalDepthOfFieldParameters, TiltShiftDepthOfFieldParameters, DepthOfFieldFilterParameters, DepthOfFieldFilterRasterNodeDefinition, DepthOfFieldMode} = require('/nodes.js');
+const {SelectiveColour, SelectiveColourWeights, SelectiveColourAdjustmentParameters, SelectiveColourAdjustmentRasterNodeDefinition} = require('/nodes.js');
+const {HSLShiftAdjustmentChannelParameters, HSLShiftAdjustmentColourRange, HSLShiftAdjustmentParameters, HSLShiftAdjustmentRasterNodeDefinition} = require('/nodes.js');
+const {FieldBlurFilterParameters, FieldBlurFilterRasterNode, FieldBlurFilterRasterNodeDefinition} = require('/nodes.js');
+const {ToneCompressionMethod, ToneCompressionAdjustmentParameters, ToneCompressionAdjustmentRasterNodeDefinition} = require('/nodes.js');
+const {ToneStretchMethod, ToneStretchAdjustmentParameters, ToneStretchAdjustmentRasterNodeDefinition} = require('/nodes.js');
+const {BloomMethod, BloomFilterParameters, BloomFilterRasterNodeDefinition} = require('/nodes.js');
+const {HalftoneScreenType, HalftoneDotType, HalftoneFilterParameters, HalftoneFilterRasterNodeDefinition} = require('/nodes.js');
+const {ShadowsHighlightsFilterRasterNodeDefinition, ShadowsHighlightsVersion} = require('/nodes.js');
+const {ShadowsHighlightsFilterParameters} = require('/nodes.js');
+const {PatternRasterNodeDefinition} = require('/nodes.js');
+const {Bitmap} = require('/rasterobject.js');
+const {Transform} = require('/geometry.js');
+const dommodule = require('affinity:dom');
+const {DocumentCommand, AddChildNodesCommandBuilder, InsertionMode} = require('/commands.js');
+const {Document, DocumentPromises} = require('/document.js');
+const {Shape, ShapeType} = require('/shapes.js');
+const {Fill, FillDescriptor} = require('/fills.js');
+const {BlendMode} = require('affinity:common');
+const {Rectangle, Spline, SplineProfile} = require('/geometry.js');
+const {LineStyleDescriptor, LineType} = require('/linestyle.js');
+const {Colour, RGBA8, ColourSpaceType} = require('/colours.js');
 const {ErrorCode} = require('affinity:common');
-const {Selection} = require("/selections");
-const {TestUtils} = require("/tests/testUtils");
+const {Selection} = require('/selections.js');
+const {TestUtils} = require('/tests/testUtils.js');
 
 
 function testExposureAdjustmentRasterNode() {
     let doc = TestUtils.newA4Empty();
     
-    let params = new ExposureAdjustmentParameters();
+    let params = ExposureAdjustmentParameters.create();
     params.exposure = 3.5;
     
     {
@@ -144,7 +144,7 @@ function testLevelsAdjustmentRasterNode() {
     param_bad2.outputBlackLevel = 12345;
     param_bad2.outputWhiteLevel = -1436273;
     
-    let params = new LevelsAdjustmentParameters();
+    let params = LevelsAdjustmentParameters.create();
     params.masterParameters.blackLevel = 0.2;
     params.masterParameters.whiteLevel = 0.8;
     params.masterParameters.gamma = 1.2;
@@ -339,7 +339,7 @@ function testCurvesAdjustmentRasterNode() {
 function testGaussianBlurFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
     
-    let parameters = new GaussianBlurFilterParameters();
+    let parameters = GaussianBlurFilterParameters.create();
     parameters.radius = 2.7;
     
     {
@@ -406,7 +406,7 @@ function testGaussianBlurFilterRasterNode() {
 function testMedianBlurFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
     
-    let params = new MedianBlurFilterParameters();
+    let params = MedianBlurFilterParameters.create();
     params.radius = 2.7;
     {
         let acnBuilder = AddChildNodesCommandBuilder.create();
@@ -472,7 +472,7 @@ function testMedianBlurFilterRasterNode() {
 function testBoxBlurFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
     
-    let params = new BoxBlurFilterParameters();
+    let params = BoxBlurFilterParameters.create();
     params.radius = 2.7;
     {
         let acnBuilder = AddChildNodesCommandBuilder.create();
@@ -538,7 +538,7 @@ function testBoxBlurFilterRasterNode() {
 function testBilateralBlurFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
     
-    let params = new BilateralBlurFilterParameters();
+    let params = BilateralBlurFilterParameters.create();
     params.radius = 2.7;
     params.tolerance = 0.23;
     
@@ -609,7 +609,7 @@ function testBilateralBlurFilterRasterNode() {
 function testDiffuseGlowFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
     
-    let params = new DiffuseGlowFilterParameters();
+    let params = DiffuseGlowFilterParameters.create();
     params.radius = 13.7;
     params.intensity = 0.66;
     params.threshold = 0.42;
@@ -926,7 +926,7 @@ function testTiltShiftDepthOfFieldFilterRasterNode() {
 function testLensBlurFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
     
-    let params = new LensBlurFilterParameters();
+    let params = LensBlurFilterParameters.create();
     params.radius = 5.2;
     params.numberOfBlades = 7;
     params.bladeCurvature = 0.13;
@@ -1013,7 +1013,7 @@ function testLensBlurFilterRasterNode() {
 function testMaximumBlurFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
     
-    let params = new MaximumBlurFilterParameters();
+    let params = MaximumBlurFilterParameters.create();
     params.radius = 2.7;
     params.isCircular = true;
     
@@ -1084,7 +1084,7 @@ function testMaximumBlurFilterRasterNode() {
 function testMinimumBlurFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
     
-    let params = new MinimumBlurFilterParameters();
+    let params = MinimumBlurFilterParameters.create();
     params.radius = 2.7;
     params.isCircular = true;
     
@@ -1155,7 +1155,7 @@ function testMinimumBlurFilterRasterNode() {
 function testMotionBlurFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
     
-    let params = new MotionBlurFilterParameters();
+    let params = MotionBlurFilterParameters.create();
     params.radius = 2.7;
     params.angle = 45.6*Math.PI/180.0;
     
@@ -1229,7 +1229,7 @@ function testRadialBlurFilterRasterNode() {
     
     let angle = 34.5*Math.PI/180.0;
     let position = {x: 123.4, y: 567.8};
-    let radialBlurParams = new RadialBlurFilterParameters();
+    let radialBlurParams = RadialBlurFilterParameters.create();
     radialBlurParams.angle = angle;
     radialBlurParams.position = position;
     
@@ -1304,7 +1304,7 @@ function testRadialBlurFilterRasterNode() {
 function testBrightnessContrastAdjustmentRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new BrightnessContrastAdjustmentParameters();
+    let params = BrightnessContrastAdjustmentParameters.create();
     params.brightness = -0.3;
     params.contrast = 0.6;
     params.isLinear = true;
@@ -1375,7 +1375,7 @@ function testBrightnessContrastAdjustmentRasterNode() {
 function testShadowsHighlightsAdjustmentRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new ShadowsHighlightsAdjustmentParameters();
+    let params = ShadowsHighlightsAdjustmentParameters.create();
     params.shadows = 0.3;
     params.highlights = -0.6;
 
@@ -1442,7 +1442,7 @@ function testShadowsHighlightsAdjustmentRasterNode() {
 function testBlackAndWhiteAdjustmentRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new BlackAndWhiteAdjustmentParameters();
+    let params = BlackAndWhiteAdjustmentParameters.create();
     params.red = 3.0;
     params.green = 2.5;
     params.blue = 0.0;
@@ -1525,7 +1525,7 @@ function testBlackAndWhiteAdjustmentRasterNode() {
 function testRecolourAdjustmentRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new RecolourAdjustmentParameters();
+    let params = RecolourAdjustmentParameters.create();
     params.hue = 179.0*Math.PI/180.0;
     params.saturation = 0.4;
     params.lightness = -0.1;
@@ -1596,7 +1596,7 @@ function testRecolourAdjustmentRasterNode() {
 function testPosteriseAdjustmentRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new PosteriseAdjustmentParameters();
+    let params = PosteriseAdjustmentParameters.create();
     params.levels = 115;
 
     {
@@ -1659,7 +1659,7 @@ function testPosteriseAdjustmentRasterNode() {
 function testSplitToningAdjustmentRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new SplitToningAdjustmentParameters();
+    let params = SplitToningAdjustmentParameters.create();
     params.highlightsHue = 270.0*Math.PI/180.0;
     params.highlightsSaturation = 0.8;
     params.shadowsHue = 125.0*Math.PI/180.0;
@@ -1759,7 +1759,7 @@ function testInvertAdjustmentRasterNode() {
 function testThresholdAdjustmentRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new ThresholdAdjustmentParameters();
+    let params = ThresholdAdjustmentParameters.create();
     params.threshold = 0.77;
 
     {
@@ -1822,7 +1822,7 @@ function testThresholdAdjustmentRasterNode() {
 function testClarityFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new ClarityFilterParameters();
+    let params = ClarityFilterParameters.create();
     params.strength = 0.6;
 
     {
@@ -1885,7 +1885,7 @@ function testClarityFilterRasterNode() {
 function testUnsharpMaskFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new UnsharpMaskFilterParameters();
+    let params = UnsharpMaskFilterParameters.create();
     params.radius = 23.0;
     params.threshold = 0.77;
     params.factor = 3.1;
@@ -1956,7 +1956,7 @@ function testUnsharpMaskFilterRasterNode() {
 function testHighPassFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new HighPassFilterParameters();
+    let params = HighPassFilterParameters.create();
     params.radius = 257.0;
     params.isMonochrome = true;
 
@@ -2023,7 +2023,7 @@ function testHighPassFilterRasterNode() {
 function testDenoiseFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new DenoiseFilterParameters();
+    let params = DenoiseFilterParameters.create();
     params.luminance = 0.4;
     params.luminanceDetail = 0.5;
     params.luminanceContribution = 0.6;
@@ -2102,7 +2102,7 @@ function testDenoiseFilterRasterNode() {
 function testDiffuseFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new DiffuseFilterParameters();
+    let params = DiffuseFilterParameters.create();
     params.intensity = 0.87;
 
     {
@@ -2165,7 +2165,7 @@ function testDiffuseFilterRasterNode() {
 function testDustAndScratchFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new DustAndScratchFilterParameters();
+    let params = DustAndScratchFilterParameters.create();
     params.radius = 666;
     params.tolerance = 0.12;
     params.isChannelTolerance = true;
@@ -2236,7 +2236,7 @@ function testDustAndScratchFilterRasterNode() {
 function testAddNoiseFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new AddNoiseFilterParameters();
+    let params = AddNoiseFilterParameters.create();
     params.intensity = 0.91;
     params.noiseType = AddNoiseType.Uniform;
     params.isMonochromatic = false;
@@ -2307,7 +2307,7 @@ function testAddNoiseFilterRasterNode() {
 function testBloomFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new BloomFilterParameters();
+    let params = BloomFilterParameters.create();
     params.shadowBlend = 0.25;
     params.midtoneBlend = 0.5;
     params.highlightBlend = 0.75;
@@ -2392,7 +2392,7 @@ function testBloomFilterRasterNode() {
 function testPixelateFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new PixelateFilterParameters();
+    let params = PixelateFilterParameters.create();
     params.quantisation = 8.5;
 
     {
@@ -2455,7 +2455,7 @@ function testPixelateFilterRasterNode() {
 function testHalftoneFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new HalftoneFilterParameters();
+    let params = HalftoneFilterParameters.create();
     params.cellSize = 32.0;
     params.screenAngle = Math.PI / 6;
     params.contrast = 75.0;
@@ -2544,7 +2544,7 @@ function testHalftoneFilterRasterNode() {
 function testRippleFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new RippleFilterParameters();
+    let params = RippleFilterParameters.create();
     params.intensity = 345.67;
     params.position = { x:123.4, y:567.8 };
 
@@ -2613,7 +2613,7 @@ function testRippleFilterRasterNode() {
 function testTwirlFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new TwirlFilterParameters();
+    let params = TwirlFilterParameters.create();
     params.angle = 345*Math.PI/180.0;
     params.radius = 77;
     params.position = { x: 123, y: 456 };
@@ -2684,7 +2684,7 @@ function testTwirlFilterRasterNode() {
 function testSphericalFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new SphericalFilterParameters();
+    let params = SphericalFilterParameters.create();
     params.intensity = 0.77;
     params.radius = 999.0;
     params.position = { x: 567, y: 234 };
@@ -2755,7 +2755,7 @@ function testSphericalFilterRasterNode() {
 function testPinchPunchFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new PinchPunchFilterParameters();
+    let params = PinchPunchFilterParameters.create();
     params.intensity = -0.66;
     params.radius = 666;
     params.position = { x: 666, y: 666 };
@@ -2826,7 +2826,7 @@ function testPinchPunchFilterRasterNode() {
 function testWhiteBalanceAdjustmentRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new WhiteBalanceAdjustmentParameters();
+    let params = WhiteBalanceAdjustmentParameters.create();
     params.whiteBalance = 0.3;
     params.tint = -0.3447;
 
@@ -2899,7 +2899,7 @@ function assertBalanceValueEqual(bv1, bv2) {
 function testColourBalanceAdjustmentRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new ColourBalanceAdjustmentParameters();
+    let params = ColourBalanceAdjustmentParameters.create();
     let values = params.values[Number(TonalRangeType.Shadows)]
     values.cyanRed = 0.87;
     values.magentaGreen = 0.76;
@@ -2981,7 +2981,7 @@ function testColourBalanceAdjustmentRasterNode() {
 function testVibranceAdjustmentRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new VibranceAdjustmentParameters();
+    let params = VibranceAdjustmentParameters.create();
     params.vibrance = -0.78;
     params.saturation = -0.23;
 
@@ -3048,7 +3048,7 @@ function testVibranceAdjustmentRasterNode() {
 function testNormalsAdjustmentRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new NormalsAdjustmentParameters();
+    let params = NormalsAdjustmentParameters.create();
     params.rotation = -1;
     params.scale = 1.56;
     params.flipX = true;
@@ -3123,7 +3123,7 @@ function testNormalsAdjustmentRasterNode() {
 function testVignetteFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new VignetteFilterParameters();
+    let params = VignetteFilterParameters.create();
     params.exposure = 3.14;
     params.hardness = 0.77;
     params.scale = 1.79;
@@ -3198,7 +3198,7 @@ function testVignetteFilterRasterNode() {
 function testDefringeFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new DefringeFilterParameters();
+    let params = DefringeFilterParameters.create();
     params.hue = 0.66 * Math.PI;
     params.removeComplementary = true;
     params.tolerance = 0.33;
@@ -3277,7 +3277,7 @@ function testDefringeFilterRasterNode() {
 function testVoronoiFilterRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new VoronoiFilterParameters();
+    let params = VoronoiFilterParameters.create();
     params.cellSize = 33.3;
     params.lineWidth = 7.7;
 
@@ -3351,7 +3351,7 @@ function assertColourWeightEqual(cw1, cw2) {
 function testSelectiveColourAdjustmentRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new SelectiveColourAdjustmentParameters();
+    let params = SelectiveColourAdjustmentParameters.create();
     let weight = params.weights[Number(SelectiveColour.Neutrals)];
     weight.cyanWeight = 0.7;
     weight.magentaWeight = 0.4;
@@ -3526,7 +3526,7 @@ function testHSLShiftAdjustmentRasterNode() {
 function testToneCompressionAdjustmentRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new ToneCompressionAdjustmentParameters();
+    let params = ToneCompressionAdjustmentParameters.create();
     params.method = ToneCompressionMethod.Filmic;
     params.exposure = 0.77;
     params.gamma = 0.66;
@@ -3601,7 +3601,7 @@ function testToneCompressionAdjustmentRasterNode() {
 function testToneStretchAdjustmentRasterNode() {
     let doc = TestUtils.newA4Empty();
 
-    let params = new ToneStretchAdjustmentParameters();
+    let params = ToneStretchAdjustmentParameters.create();
     params.method = ToneStretchMethod.Arcsinh;
     params.gamma = 0.77;
     params.stretchFactor = 0.66;
@@ -3690,7 +3690,7 @@ function testShadowsHighlightsFilterRasterNode() {
     
     // Test Default (New) mode - RasterNewShadowsHighlightsCommand, strength [-1,1], no radius
     {
-        let parameters = new ShadowsHighlightsFilterParameters();
+        let parameters = ShadowsHighlightsFilterParameters.create();
         parameters.version = ShadowsHighlightsVersion.Default;
         parameters.shadowsStrength = 0.5;
         parameters.shadowsRange = 0.3;
@@ -3721,7 +3721,7 @@ function testShadowsHighlightsFilterRasterNode() {
     
     // Test V16 (Legacy) mode - RasterShadowsHighlightsCommand, strength [0,1], has radius
     {
-        let parameters = new ShadowsHighlightsFilterParameters();
+        let parameters = ShadowsHighlightsFilterParameters.create();
         parameters.version = ShadowsHighlightsVersion.V16;
         parameters.shadowsStrength = 0.8;
         parameters.shadowsRange = 0.4;
@@ -3759,7 +3759,7 @@ function testShadowsHighlightsFilterRasterNode() {
         let newNode = doc.layers.first;
         let selection = Selection.create(doc, newNode);
         
-        let parameters = new ShadowsHighlightsFilterParameters();
+        let parameters = ShadowsHighlightsFilterParameters.create();
         parameters.version = ShadowsHighlightsVersion.V16;
         parameters.shadowsStrength = 0.3;
         parameters.shadowsRange = 0.2;
@@ -3895,3 +3895,4 @@ function testRasterNodes() {
 module.exports.testRasterNode = testRasterNode;
 module.exports.testRasterNodes = testRasterNodes;
 module.exports.testCurvesAdjustmentRasterNode = testCurvesAdjustmentRasterNode;
+module.exports.testExposureAdjustmentRasterNode = testExposureAdjustmentRasterNode;

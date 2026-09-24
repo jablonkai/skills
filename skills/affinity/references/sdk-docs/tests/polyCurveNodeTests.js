@@ -1,17 +1,17 @@
 'use strict';
-const {app} = require('/application');
-const {PolyCurveNodeDefinition} = require('/node');
-const {dommodule} = require("affinity:dom");
-const {DocumentCommand, AddChildNodesCommandBuilder} = require("/command");
-const {Document, DocumentPromises} = require("/document.js");
-const {PolyCurve, Curve, CurveBuilder, Rectangle} = require("/geometry.js");
-const {Fill, FillDescriptor} = require("/fill");
-const {BlendMode} = require("affinity:common");
-const {LineStyleDescriptor, LineType} = require("/lineStyleDescriptor");
-const {Colour, RGBA8} = require("/colour");
+const {app} = require('/application.js');
+const {PolyCurveNodeDefinition} = require('/node.js');
+const {dommodule} = require('affinity:dom');
+const {DocumentCommand, AddChildNodesCommandBuilder} = require('/command.js');
+const {Document, DocumentPromises} = require('/document.js');
+const {PolyCurve, Curve, CurveBuilder, Rectangle} = require('/geometry.js');
+const {Fill, FillDescriptor} = require('/fill.js');
+const {BlendMode} = require('affinity:common');
+const {LineStyleDescriptor, LineType} = require('/linestyle.js');
+const {Colour, RGBA8} = require('/colour.js');
 const {ErrorCode} = require('affinity:common');
 
-const {TestUtils} = require('/tests/testUtils');
+const {TestUtils} = require('/tests/testUtils.js');
 
 
 function testPolyCurveNodeDefault() {
@@ -89,7 +89,7 @@ function testPolyCurveNodeCreate() {
         
         const lineStyle = LineStyleDescriptor.createFromWeight(lineWeight);
         
-        let pcNodeDef = PolyCurveNodeDefinition.create(polyCurve, brushFill, lineStyle, lineFill, transFill);
+        let pcNodeDef = PolyCurveNodeDefinition.create(polyCurve, brushFill, lineFill, lineStyle, transFill);
         
         acnBuilder.addPolyCurveNode(pcNodeDef);
         
@@ -132,14 +132,14 @@ function testPolyCurveNodeFailure() {
         
         const lineStyle = LineStyleDescriptor.createFromWeight(lineWeight);
         
-        let pcNodeDef = PolyCurveNodeDefinition.create(polyCurve, brushFill, lineStyle, lineFill, transFill);
+        let pcNodeDef = PolyCurveNodeDefinition.create(polyCurve, brushFill, lineFill, lineStyle, transFill);
         
         try {
             acnBuilder.addPolyCurveNode(pcNodeDef);
             console.assert(false, "Failed.");
         } catch(err) {
             if (err.errorCode.value != ErrorCode.INVALID_OP)
-				console.log(err.stack);
+                console.log(err.stack);
         }
         doc.close();
         console.log("testPolyCurveNodeFailure OK");
@@ -205,7 +205,7 @@ function addPolyCurveDemo() {
         
         polyCurve.addCurve(curve);
         
-        let pcNodeDef = PolyCurveNodeDefinition.create(polyCurve, brushFill, lineStyle, lineFill, transFill);
+        let pcNodeDef = PolyCurveNodeDefinition.create(polyCurve, brushFill, lineFill, lineStyle, transFill);
         
         let nodeDef = pcNodeDef.asNodeDefinition();
         

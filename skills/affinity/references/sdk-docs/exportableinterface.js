@@ -1,11 +1,11 @@
 'use strict';
 
 const { ExportableInterfaceApi } = require('affinity:dom');
-const { ExportConfig } = require('./exportconfig.js');
-const { HandleObject } = require('./handleobject.js');
+const { ExportConfig } = require('/exportconfig.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 class ExportableInterface extends HandleObject {
     constructor(handle) {

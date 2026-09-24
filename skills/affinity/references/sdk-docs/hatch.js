@@ -2,7 +2,10 @@
 
 const { EnumerationResult } = require('affinity:common');
 const { HatchLineApi, HatchPatternApi } = require('affinity:hatches');
-const { HandleObject } = require('./handleobject.js');
+const { HandleObject } = require('/handleobject.js');
+
+// monkey patches:
+require('/geometry.js');
 
 class HatchLine extends HandleObject {
     constructor(handle) {

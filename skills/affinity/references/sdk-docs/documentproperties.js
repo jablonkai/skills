@@ -4,17 +4,22 @@ const { UnitType } = require('affinity:common');
 const {
     ArtboardDocumentPropertiesApi,
     DocumentPropertiesApi,
-    SpreadDocumentPropertiesApi,
     ImagePlacement,
-    SpatialAnchor
+    LTRB,
+    PageDocumentPropertiesApi,
+    PageOriginDelta,
+    SpatialAnchor,
+    SpreadDocumentPropertiesApi
 } = require('affinity:dom');
+
+const { Size } = require('affinity:geometry');
 
 const { RasterFormat, RasterResamplerType } = require('affinity:raster');
 
-const { Colour, ColourProfile } = require('./colours.js');
-const { DrawingScale } = require('./drawingscale.js');
-const { FillDescriptor } = require('./fills.js');
-const { HandleObject } = require('./handleobject.js');
+const { Colour, ColourProfile } = require('/colours.js');
+const { DrawingScale } = require('/drawingscale.js');
+const { FillDescriptor, makeFillDescriptor, SolidFill } = require('/fills.js');
+const { HandleObject } = require('/handleobject.js');
 
 class DocumentProperties extends HandleObject {
     constructor(handle) {
@@ -29,6 +34,23 @@ class DocumentProperties extends HandleObject {
         return new DocumentProperties(DocumentPropertiesApi.create());
     }
 
+    clone() {
+        return new DocumentProperties(DocumentPropertiesApi.clone(this.handle));
+    }
+
+    get dimensions() {
+        return DocumentPropertiesApi.getDimensions(this.handle);
+    }
+
+    set dimensions(dimensions) {
+        DocumentPropertiesApi.setDimensions(this.handle, dimensions);
+    }
+
+    setDimensions(dimensions) {
+        this.dimensions = dimensions;
+        return this;
+    }
+
     get colourFormat() {
         return DocumentPropertiesApi.getColourFormat(this.handle);
     }
@@ -39,6 +61,7 @@ class DocumentProperties extends HandleObject {
 
     setColourFormatAndProfile(rasterFormat, colourProfile) {
         DocumentPropertiesApi.setColourFormatAndProfile(this.handle, rasterFormat, colourProfile.handle);
+        return this;
     }
 
     get units() {
@@ -49,6 +72,11 @@ class DocumentProperties extends HandleObject {
         DocumentPropertiesApi.setUnits(this.handle, unitType);
     }
 
+    setUnits(unitType) {
+        this.units =  unitType;
+        return this;
+    }
+
     get shouldReflowPages() {
         return DocumentPropertiesApi.getShouldReflowPages(this.handle);
     }
@@ -57,16 +85,36 @@ class DocumentProperties extends HandleObject {
         DocumentPropertiesApi.setShouldReflowPages(this.handle, shouldReflowPages);
     }
 
+    setShouldReflowPages(shouldReflowPages) {
+        this.shouldReflowPages = shouldReflowPages;
+        return this;
+    }
+
     get dpi() {
         return DocumentPropertiesApi.getDpi(this.handle);
     }
 
-    get viewDpi() {
-        return DocumentPropertiesApi.getViewDpi(this.handle);
+    set dpi(dpi) {
+        DocumentPropertiesApi.setDpi(this.handle, dpi);
     }
 
+    #viewDpi = -1;
+    // Sets the DPI. The viewDpi parameter is deprecated and is no longer in use;
+    // it is retained only for backwards compatibility with old scripts.
     setDpi(dpi, viewDpi) {
-        DocumentPropertiesApi.setDpi(this.handle, dpi, viewDpi);
+        this.dpi = dpi;
+        if (viewDpi != undefined) {
+            this.#viewDpi = viewDpi;
+        }
+        return this;
+    }
+
+    /**
+    * @deprecated This property is no longer in use
+    */
+    get viewDpi() {
+        console.warn("Using deprecated DocumentProperties get viewDpi() function. This property is no longer in use.");
+        return this.#viewDpi;
     }
 
     get drawingScale() {
@@ -77,36 +125,95 @@ class DocumentProperties extends HandleObject {
         DocumentPropertiesApi.setDrawingScale(this.handle, drawingScale.handle);
     }
 
+    setDrawingScale(drawingScale) {
+        this.drawingScale = drawingScale;
+        return this;
+    }
+
+    get widthPixels() {
+        return this.dimensions.width;
+    }
+
+    set widthPixels(width) {
+        const dimensions = this.dimensions;
+        dimensions.width = width;
+        this.dimensions = dimensions;
+    }
+
+    get heightPixels() {
+        return this.dimensions.height;
+    }
+
+    set heightPixels(height) {
+        const dimensions = this.dimensions;
+        dimensions.height = height;
+        this.dimensions = dimensions;
+    }
+
+    /**
+    * @deprecated Use get widthPixels() instead
+    */
     get pageWidth() {
-        return DocumentPropertiesApi.getPageWidth(this.handle);
+        console.warn("Using deprecated DocumentProperties get pageWidth() function. Use get widthPixels() instead.");
+        return this.widthPixels;
     }
 
+    /**
+    * @deprecated Use set widthPixels() instead
+    */
     set pageWidth(width) {
-        DocumentPropertiesApi.setPageWidth(this.handle, width);
+        console.warn("Using deprecated DocumentProperties set pageWidth() function. Use set widthPixels() instead.");
+        this.widthPixels = width;
     }
 
+    /**
+    * @deprecated Use get heightPixels() instead
+    */
     get pageHeight() {
-        return DocumentPropertiesApi.getPageHeight(this.handle);
+        console.warn("Using deprecated DocumentProperties get pageHeight() function. Use get heightPixels() instead.");
+        return this.heightPixels;
     }
 
+    /**
+    * @deprecated Use set heightPixels() instead
+    */
     set pageHeight(height) {
-        DocumentPropertiesApi.setPageHeight(this.handle, height);
+        console.warn("Using deprecated DocumentProperties set pageHeight() function. Use set heightPixels() instead.");
+        this.heightPixels = height;
     }
 
+    #margin = new LTRB(0, 0, 0, 0);
+    /**
+    * @deprecated This property is no longer in use
+    */
     get margin() {
-        return DocumentPropertiesApi.getMargin(this.handle);
+        console.warn("Using deprecated DocumentProperties get margin() function. This property is no longer in use.");
+        return this.#margin;
     }
 
+    /**
+    * @deprecated This property is no longer in use
+    */
     set margin(margin) {
-        DocumentPropertiesApi.setMargin(this.handle, margin);
+        console.warn("Using deprecated DocumentProperties set margin() function. This property is no longer in use.");
+        this.#margin = margin;
     }
 
+    #marginFill = FillDescriptor.createNone();
+    /**
+    * @deprecated This property is no longer in use
+    */
     get marginFill() {
-        return new FillDescriptor(DocumentPropertiesApi.getMarginFill(this.handle));
+        console.warn("Using deprecated DocumentProperties get marginFill() function. This property is no longer in use.");
+        return this.#marginFill;
     }
 
-    set marginFill(fillDescriptor) {
-        DocumentPropertiesApi.setMarginFill(this.handle, fillDescriptor.handle);
+    /**
+    * @deprecated This property is no longer in use
+    */
+    set marginFill(marginFill) {
+        console.warn("Using deprecated DocumentProperties set marginFill() function. This property is no longer in use.");
+        this.#marginFill = marginFill;
     }
 
     get bleed() {
@@ -117,36 +224,74 @@ class DocumentProperties extends HandleObject {
         DocumentPropertiesApi.setBleed(this.handle, bleed);
     }
 
+    setBleed(bleed) {
+        this.bleed = bleed;
+        return this;
+    }
+
     get bleedFill() {
         return new FillDescriptor(DocumentPropertiesApi.getBleedFill(this.handle));
     }
 
-    set bleedFill(fillDescriptor) {
+    set bleedFill(fillDescriptorOrColour) {
+        const fillDescriptor = makeFillDescriptor(fillDescriptorOrColour);
         DocumentPropertiesApi.setBleedFill(this.handle, fillDescriptor.handle);
     }
 
+    setBleedFill(fillDescriptorOrColour) {
+        this.bleedFill = fillDescriptorOrColour;
+        return this;
+    }
+
+    #includeMargins = false;
+    /**
+    * @deprecated This property is no longer in use
+    */
     get includeMargins() {
-        return DocumentPropertiesApi.getIncludeMargins(this.handle);
+        console.warn("Using deprecated DocumentProperties get includeMargins() function. This property is no longer in use.");
+        return this.#includeMargins;
     }
 
+    /**
+    * @deprecated This property is no longer in use
+    */
     set includeMargins(includeMargins) {
-        DocumentPropertiesApi.setIncludeMargins(this.handle, includeMargins);
+        console.warn("Using deprecated DocumentProperties set includeMargins() function. This property is no longer in use.");
+        this.#includeMargins = includeMargins;
     }
 
+    #isRetina = false;
+    /**
+    * @deprecated This property is no longer in use
+    */
     get isRetina() {
-        return DocumentPropertiesApi.getIsRetina(this.handle);
+        console.warn("Using deprecated DocumentProperties get isRetina() function. This property is no longer in use.");
+        return this.#isRetina;
     }
 
+    /**
+    * @deprecated This property is no longer in use
+    */
     set isRetina(isRetina) {
-        DocumentPropertiesApi.setIsRetina(this.handle, isRetina);
+        console.warn("Using deprecated DocumentProperties set isRetina() function. This property is no longer in use.");
+        this.#isRetina = isRetina;
     }
 
+    #isPortrait = false;
+    /**
+    * @deprecated This property is no longer in use
+    */
     get isPortrait() {
-        return DocumentPropertiesApi.getIsPortrait(this.handle);
+        console.warn("Using deprecated DocumentProperties get isPortrait() function. This property is no longer in use.");
+        return this.#isPortrait;
     }
 
+    /**
+    * @deprecated This property is no longer in use
+    */
     set isPortrait(isPortrait) {
-        DocumentPropertiesApi.setIsPortrait(this.handle, isPortrait);
+        console.warn("Using deprecated DocumentProperties set isPortrait() function. This property is no longer in use.");
+        this.#isPortrait = isPortrait;
     }
 
     get isTransparent() {
@@ -157,12 +302,26 @@ class DocumentProperties extends HandleObject {
         DocumentPropertiesApi.setIsTransparent(this.handle, isTransparent);
     }
 
-    get saveHistory() {
-        return DocumentPropertiesApi.getSaveHistory(this.handle);
+    setIsTransparent(isTransparent) {
+        this.isTransparent = isTransparent;
+        return this;
     }
 
+    #saveHistory = false;
+    /**
+    * @deprecated This property is no longer in use
+    */
+    get saveHistory() {
+        console.warn("Using deprecated DocumentProperties get saveHistory() function. This property is no longer in use.");
+        return this.#saveHistory;
+    }
+
+    /**
+    * @deprecated This property is no longer in use
+    */
     set saveHistory(saveHistory) {
-        DocumentPropertiesApi.setSaveHistory(this.handle, saveHistory);
+        console.warn("Using deprecated DocumentProperties set saveHistory() function. This property is no longer in use.");
+        this.#saveHistory = saveHistory;
     }
 
     get isFacingPages() {
@@ -173,12 +332,22 @@ class DocumentProperties extends HandleObject {
         DocumentPropertiesApi.setIsFacingPages(this.handle, isFacingPages);
     }
 
+    setIsFacingPages(isFacingPages) {
+        this.isFacingPages = isFacingPages;
+        return this;
+    }
+
     get isFullSpreadStart() {
         return DocumentPropertiesApi.getIsFullSpreadStart(this.handle);
     }
 
     set isFullSpreadStart(isFullSpreadStart) {
         DocumentPropertiesApi.setIsFullSpreadStart(this.handle, isFullSpreadStart);
+    }
+
+    setIsFullSpreadStart(isFullSpreadStart) {
+        this.isFullSpreadStart = isFullSpreadStart;
+        return this;
     }
 
     get isVerticalStack() {
@@ -189,12 +358,22 @@ class DocumentProperties extends HandleObject {
         DocumentPropertiesApi.setIsVerticalStack(this.handle, isVerticalStack);
     }
 
+    setIsVerticalStack(isVerticalStack) {
+        this.isVerticalStack = isVerticalStack;
+        return this;
+    }
+
     get imageResourcePolicy() {
         return DocumentPropertiesApi.getImageResourcePolicy(this.handle);
     }
 
     set imageResourcePolicy(imageResourcePolicy) {
         DocumentPropertiesApi.setImageResourcePolicy(this.handle, imageResourcePolicy);
+    }
+
+    setImageResourcePolicy(imageResourcePolicy) {
+        this.imageResourcePolicy = imageResourcePolicy;
+        return this;
     }
 
     get linkTextFiles() {
@@ -205,12 +384,22 @@ class DocumentProperties extends HandleObject {
         DocumentPropertiesApi.setLinkTextFiles(this.handle, linkTextFiles);
     }
 
+    setLinkTextFiles(linkTextFiles) {
+        this.linkTextFiles = linkTextFiles;
+        return this;
+    }
+
     get preserveTextStyles() {
         return DocumentPropertiesApi.getPreserveTextStyles(this.handle);
     }
 
     set preserveTextStyles(preserveTextStyles) {
         DocumentPropertiesApi.setPreserveTextStyles(this.handle, preserveTextStyles);
+    }
+
+    setPreserveTextStyles(preserveTextStyles) {
+        this.preserveTextStyles = preserveTextStyles;
+        return this;
     }
 
     get assignColourProfile() {
@@ -221,6 +410,11 @@ class DocumentProperties extends HandleObject {
         DocumentPropertiesApi.setAssignColourProfile(this.handle, assignColourProfile);
     }
 
+    setAssignColourProfile(assignColourProfile) {
+        this.assignColourProfile = assignColourProfile;
+        return this;
+    }
+
     get resamplerType() {
         return DocumentPropertiesApi.getResamplerType(this.handle);
     }
@@ -229,6 +423,133 @@ class DocumentProperties extends HandleObject {
         DocumentPropertiesApi.setResamplerType(this.handle, resamplerType);
     }
 
+    setResamplerType(resamplerType) {
+        this.resamplerType = resamplerType;
+        return this;
+    }
+}
+
+class PageDocumentProperties extends HandleObject {
+    constructor(handle) {
+        super(handle);
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'PageDocumentProperties';
+    }
+
+    static create() {
+        return new PageDocumentProperties(PageDocumentPropertiesApi.create());
+    }
+
+    clone() {
+        return new PageDocumentProperties(PageDocumentPropertiesApi.clone(this.handle));
+    }
+
+    get moveFollowingPages() {
+        return PageDocumentPropertiesApi.getMoveFollowingPages(this.handle);
+    }
+
+    set moveFollowingPages(moveFollowingPages) {
+        PageDocumentPropertiesApi.setMoveFollowingPages(this.handle, moveFollowingPages);
+    }
+
+    setMoveFollowingPages(moveFollowingPages) {
+        this.moveFollowingPages = moveFollowingPages;
+        return this;
+    }
+
+    get pageOriginDelta() {
+        return PageDocumentPropertiesApi.getPageOriginDelta(this.handle);
+    }
+
+    set pageOriginDelta(pageOriginDelta) {
+        PageDocumentPropertiesApi.setPageOriginDelta(this.handle, pageOriginDelta);
+    }
+
+    setPageOriginDelta(pageOriginDelta) {
+        this.pageOriginDelta = pageOriginDelta;
+        return this;
+    }
+
+    get anchorType() {
+        return PageDocumentPropertiesApi.getAnchorType(this.handle);
+    }
+
+    set anchorType(anchorType) {
+        PageDocumentPropertiesApi.setAnchorType(this.handle, anchorType);
+    }
+
+    setAnchorType(anchorType) {
+        this.anchorType = anchorType;
+        return this;
+    }
+
+    get margin() {
+        return PageDocumentPropertiesApi.getMargin(this.handle);
+    }
+
+    set margin(margin) {
+        PageDocumentPropertiesApi.setMargin(this.handle, margin);
+    }
+
+    setMargin(margin) {
+        this.margin = margin;
+        return this;
+    }
+
+    get useMargin() {
+        return PageDocumentPropertiesApi.getUseMargin(this.handle);
+    }
+
+    set useMargin(useMargin) {
+        PageDocumentPropertiesApi.setUseMargin(this.handle, useMargin);
+    }
+
+    setUseMargin(useMargin) {
+        this.useMargin = useMargin;
+        return this;
+    }
+
+    get useMasterMargin() {
+        return PageDocumentPropertiesApi.getUseMasterMargin(this.handle);
+    }
+
+    set useMasterMargin(useMasterMargin) {
+        PageDocumentPropertiesApi.setUseMasterMargin(this.handle, useMasterMargin);
+    }
+
+    setUseMasterMargin(useMasterMargin) {
+        this.useMasterMargin = useMasterMargin;
+        return this;
+    }
+
+    get marginFill() {
+        return new FillDescriptor(PageDocumentPropertiesApi.getMarginFill(this.handle));
+    }
+
+    set marginFill(fillDescriptorOrColour) {
+        const fillDescriptor = makeFillDescriptor(fillDescriptorOrColour);
+        PageDocumentPropertiesApi.setMarginFill(this.handle, fillDescriptor.handle);
+    }
+
+    setMarginFill(fillDescriptor) {
+        this.marginFill = fillDescriptor;
+        return this;
+    }
+
+    get dimensions() {
+        return PageDocumentPropertiesApi.getDimensions(this.handle);
+    }
+
+    set dimensions(dimensions) {
+        PageDocumentPropertiesApi.setDimensions(this.handle, dimensions);
+    }
+
+    setDimensions(dimensions) {
+        this.dimensions = dimensions;
+        return this;
+    }
 }
 
 class ArtboardDocumentProperties extends HandleObject {
@@ -242,6 +563,10 @@ class ArtboardDocumentProperties extends HandleObject {
 
     static create() {
         return new ArtboardDocumentProperties(ArtboardDocumentPropertiesApi.create());
+    }
+
+    clone() {
+        return new ArtboardDocumentProperties(ArtboardDocumentPropertiesApi.clone(this.handle));
     }
 
     get margin() {
@@ -267,6 +592,20 @@ class ArtboardDocumentProperties extends HandleObject {
 
     setUseMargin(useMargin) {
         this.useMargin = useMargin;
+        return this;
+    }
+
+    get marginFill() {
+        return new FillDescriptor(ArtboardDocumentPropertiesApi.getMarginFill(this.handle));
+    }
+
+    set marginFill(fillDescriptorOrColour) {
+        const fillDescriptor = makeFillDescriptor(fillDescriptorOrColour);
+        ArtboardDocumentPropertiesApi.setMarginFill(this.handle, fillDescriptor.handle);
+    }
+
+    setMarginFill(fillDescriptor) {
+        this.marginFill = fillDescriptor;
         return this;
     }
 
@@ -336,6 +675,10 @@ class SpreadDocumentProperties extends ArtboardDocumentProperties {
         return new SpreadDocumentProperties(SpreadDocumentPropertiesApi.create());
     }
 
+    clone() {
+        return new SpreadDocumentProperties(SpreadDocumentPropertiesApi.clone(this.handle));
+    }
+
     get useMasterMargin() {
         return SpreadDocumentPropertiesApi.getUseMasterMargin(this.handle);
     }
@@ -390,10 +733,19 @@ class SpreadDocumentProperties extends ArtboardDocumentProperties {
 }
 
 module.exports.ArtboardDocumentProperties = ArtboardDocumentProperties;
+module.exports.Colour = Colour;
+module.exports.ColourProfile = ColourProfile;
 module.exports.DocumentProperties = DocumentProperties;
+module.exports.DrawingScale = DrawingScale;
+module.exports.FillDescriptor = FillDescriptor;
 module.exports.ImagePlacement = ImagePlacement;
+module.exports.LTRB = LTRB;
+module.exports.PageDocumentProperties = PageDocumentProperties;
+module.exports.PageOriginDelta = PageOriginDelta;
 module.exports.RasterFormat = RasterFormat;
 module.exports.RasterResamplerType = RasterResamplerType;
+module.exports.Size = Size;
+module.exports.SolidFill = SolidFill;
 module.exports.SpatialAnchor = SpatialAnchor;
 module.exports.SpreadDocumentProperties = SpreadDocumentProperties;
 module.exports.UnitType = UnitType;

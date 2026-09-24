@@ -2,12 +2,12 @@
 
 const { CurvesInterfaceApi, SubSelectionType } = require('affinity:dom');
 const { WindingOrder } = require('affinity:geometry');
-const { PolyCurve, PolyPolyCurve } = require('./geometry.js');
-const { HandleObject } = require('./handleobject.js');
+const { PolyCurve, PolyPolyCurve } = require('/geometry.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
-const SelectionsModule = require('./selections.js');
+const NodesModule = require('/nodes.js');
+const SelectionsModule = require('/selections.js');
 
 class CurvesInterface extends HandleObject {
     constructor(handle) {

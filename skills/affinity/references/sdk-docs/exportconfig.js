@@ -2,7 +2,7 @@
 
 const { ExportConfigApi, ExportFormatApi, ExportScaleApi, ExportScalePreset, ExportScaleSizeType, ExportSizeApi } = require('affinity:dom');
 const { EnumerationResult } = require('affinity:common');
-const { HandleObject } = require('./handleobject.js');
+const { HandleObject } = require('/handleobject.js');
 
 class ExportScale extends HandleObject {
     constructor(handle) {

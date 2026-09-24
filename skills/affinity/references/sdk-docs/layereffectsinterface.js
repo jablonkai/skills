@@ -2,11 +2,11 @@
 
 const { EnumerationResult } = require('affinity:common');
 const { LayerEffectsInterfaceApi } = require('affinity:dom');
-const { HandleObject } = require('./handleobject.js');
-const { createTypedLayerEffect } = require('./layereffects.js');
+const { HandleObject } = require('/handleobject.js');
+const { createTypedLayerEffect } = require('/layereffects.js');
 
 // cyclics:
-const NodesModule = require('./nodes.js');
+const NodesModule = require('/nodes.js');
 
 class LayerEffectsInterface extends HandleObject {
     constructor(handle) {

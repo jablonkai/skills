@@ -1,12 +1,12 @@
 'use strict';
 
-const { Collection } = require('/collection');
+const { Collection } = require('/collection.js');
 const { Dialog, DialogResult } = require('/dialog.js');
-const { Document } = require('/document');
-const { DocumentCommand, CompoundCommandBuilder } = require('/commands');
-const { Selection } = require('/selections');
-const { Transform } = require("/geometry");
-const { UnitType } = require("/units");
+const { Document } = require('/document.js');
+const { DocumentCommand, CompoundCommandBuilder } = require('/commands.js');
+const { Selection } = require('/selections.js');
+const { Transform } = require('/geometry.js');
+const { UnitType } = require('/units.js');
 
 const doc = Document.current;
 
@@ -64,8 +64,14 @@ function doOffsets(startPageIndex, endPageIndex, oddOffsets, evenOffsets) {
 }
 
 
+function enableBy(toggle, controls) {
+    const update = () => controls.forEach(c => c.isEnabled = toggle.value);
+    toggle.onValueChangedHandler = update;
+    update();
+}
+
 function buildDialog() {
-    const pages = Collection.range(1, doc.pageCount).toArray();
+    const pages= Collection.range(1, doc.pageCount).toArray();
     const dlg = Dialog.create("Adjust Page Items");
     const col = dlg.addColumn();
     const pagesGroup = col.addGroup("Page Range");
@@ -73,21 +79,20 @@ function buildDialog() {
     dlg.startPage.customSize = {width: 80, height: -1};
     dlg.endPage = pagesGroup.addComboBox("End page", pages);
     dlg.endPage.customSize = {width: 80, height: -1};
-    dlg.endPage.value = pages.length - 1;
+    dlg.endPage.selectedIndex = pages.length - 1;
+    dlg.pages = pages;
     
     const evenGroup = col.addGroup("Even Pages");
     dlg.evenPages = evenGroup.addSwitch("Enabled", true);
     dlg.evenH = evenGroup.addUnitValueEditor("Horizontal", UnitType.Pixel, doc.units, 0);
     dlg.evenV = evenGroup.addUnitValueEditor("Vertical", UnitType.Pixel, doc.units, 0);
-    dlg.evenH.setIsEnabledBy(dlg.evenPages);
-    dlg.evenV.setIsEnabledBy(dlg.evenPages);
+    enableBy(dlg.evenPages, [dlg.evenH, dlg.evenV]);
 
     const oddGroup = col.addGroup("Odd Pages");
     dlg.oddPages = oddGroup.addSwitch("Enabled", true);
     dlg.oddH = oddGroup.addUnitValueEditor("Horizontal", UnitType.Pixel, doc.units, 0);
     dlg.oddV = oddGroup.addUnitValueEditor("Vertical", UnitType.Pixel, doc.units, 0);
-    dlg.oddH.setIsEnabledBy(dlg.oddPages);
-    dlg.oddV.setIsEnabledBy(dlg.oddPages);
+    enableBy(dlg.oddPages, [dlg.oddH, dlg.oddV]);
     
     return dlg;
 }
@@ -106,9 +111,9 @@ function main() {
 
     const dlg = buildDialog();
 
-    while (dlg.runModal().value == DialogResult.Ok) {
-        const startPage = pages[dlg.startPage.value] - 1;
-        const endPage = pages[dlg.endPage.value] - 1;
+    while (dlg.runModal() == DialogResult.Ok) {
+        const startPage = dlg.pages[dlg.startPage.selectedIndex] - 1;
+        const endPage = dlg.pages[dlg.endPage.selectedIndex] - 1;
         if (startPage > endPage) {
             alert("Start page must be less than or equal to end page");
         }

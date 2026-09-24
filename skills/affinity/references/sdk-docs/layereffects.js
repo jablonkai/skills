@@ -20,10 +20,10 @@ const {
     StrokeFillType
 } = require('affinity:layereffects');
 const { StrokeAlignment } = require('affinity:linestyles');
-const { Colour } = require('./colours.js');
-const { FillDescriptor } = require('./fills.js');
-const { Spline } = require('./geometry.js');
-const { HandleObject } = require('./handleobject.js');
+const { Colour } = require('/colours.js');
+const { FillDescriptor } = require('/fills.js');
+const { Spline } = require('/geometry.js');
+const { HandleObject } = require('/handleobject.js');
 
 function createTypedLayerEffect(handle) {
     if (!handle)

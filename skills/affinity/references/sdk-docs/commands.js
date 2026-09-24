@@ -15,20 +15,20 @@ const {
     SetHatchFillAttributesCommandBuilderApi
 } = require('affinity:commands');
 const { BlendMode, EnumerationResult, UnitType } = require('affinity:common');
-const { AntialiasingMode, ContentType, NodeChildType, NodeMoveType, PageBoundingBoxType, PredefinedTagKey, RasterSelectionLogicalOperation, RasterSelectionOutlineAlignment, SpatialAnchor, VisibilityMode } = require('affinity:dom');
+const { AntialiasingMode, ContentType, NodeChildType, NodeMoveType, PageBoundingBoxType, PredefinedTagKey, RasterFillMode, RasterFloodFillSamplingSource, RasterSelectionLogicalOperation, RasterSelectionOutlineAlignment, SamplingSource, SpatialAnchor, VisibilityMode } = require('affinity:dom');
 const { FillMask } = require('affinity:fills');
 const { CurveNodeStyle, ShapeBoolParam, ShapeEnumParam, ShapeFloatParam, ShapeIntParam, WindingOrder } = require('affinity:geometry');
 const { BevelEmbossType, StrokeFillType } = require('affinity:layereffects');
 const { LineStyleMask, StrokeAlignment } = require('affinity:linestyles');
 const { RasterFormat } = require('affinity:raster');
-const { Colour } = require('./colours.js');
-const { DocumentProperties } = require('./documentproperties.js');
-const { FillDescriptor, SolidFill } = require('./fills.js');
-const { Transform } = require('./geometry.js');
-const { HandleObject } = require('./handleobject.js');
+const { Colour } = require('/colours.js');
+const { DocumentProperties } = require('/documentproperties.js');
+const { FillDescriptor, SolidFill } = require('/fills.js');
+const { Transform } = require('/geometry.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const NodesModule = require("./nodes.js");
+const NodesModule = require('/nodes.js');
 
 class Command extends HandleObject {
     constructor(handle) {
@@ -242,6 +242,10 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createShowAllCommand());
     }
 
+    static createUnlockAll() {
+        return new DocumentCommand(DocumentCommandApi.createUnlockAllCommand());
+    }
+
     static createSelectAll(selectOnCurrentLayerOnly) {
         return new DocumentCommand(DocumentCommandApi.createSelectAllCommand(selectOnCurrentLayerOnly));
     }
@@ -367,6 +371,50 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createSelectSubjectCommand());
     }
 
+    static createRasterAutoColours(selection) {
+        return new DocumentCommand(DocumentCommandApi.createRasterAutoColoursCommand(selection?.handle));
+    }
+
+    static createRasterAutoContrast(selection) {
+        return new DocumentCommand(DocumentCommandApi.createRasterAutoContrastCommand(selection?.handle));
+    }
+
+    static createRasterAutoLevels(selection) {
+        return new DocumentCommand(DocumentCommandApi.createRasterAutoLevelsCommand(selection?.handle));
+    }
+
+    static createRasterAutoWhiteBalance(selection) {
+        return new DocumentCommand(DocumentCommandApi.createRasterAutoWhiteBalanceCommand(selection?.handle));
+    }
+
+    static createRasterPolarToRectangular(selection) {
+        return new DocumentCommand(DocumentCommandApi.createRasterPolarToRectangularCommand(selection?.handle));
+    }
+
+    static createRasterRectangularToPolar(selection) {
+        return new DocumentCommand(DocumentCommandApi.createRasterRectangularToPolarCommand(selection?.handle));
+    }
+
+    static createRasterEdgeDetect(selection) {
+        return new DocumentCommand(DocumentCommandApi.createRasterEdgeDetectCommand(selection?.handle));
+    }
+
+    static createRasterHorizontalEdgeDetect(selection) {
+        return new DocumentCommand(DocumentCommandApi.createRasterHorizontalEdgeDetectCommand(selection?.handle));
+    }
+
+    static createRasterVerticalEdgeDetect(selection) {
+        return new DocumentCommand(DocumentCommandApi.createRasterVerticalEdgeDetectCommand(selection?.handle));
+    }
+
+    static createRasterFill(selection, mode, colour, opacity, blendMode) {
+        return new DocumentCommand(DocumentCommandApi.createRasterFillCommand(selection?.handle, mode, colour?.handle, opacity, blendMode));
+    }
+
+    static createRasterFloodFill(selection, point, tolerance, isContiguous, antialias, samplingSource, blendMode, colour) {
+        return new DocumentCommand(DocumentCommandApi.createRasterFloodFillCommand(selection?.handle, point, tolerance, isContiguous, antialias, samplingSource, blendMode, colour?.handle));
+    }
+
     static createSetEditable(selection, editable) {
         return new DocumentCommand(DocumentCommandApi.createSetEditableCommand(selection?.handle, editable));
     }
@@ -425,6 +473,30 @@ class DocumentCommand extends HandleObject {
     
     static createConvertToCurves(selection) {
         return new DocumentCommand(DocumentCommandApi.createConvertToCurvesCommand(selection?.handle));
+    }
+
+    static createSmoothCurves(selection) {
+        return new DocumentCommand(DocumentCommandApi.createSmoothCurvesCommand(selection?.handle));
+    }
+
+    static createBreakCurves(selection) {
+        return new DocumentCommand(DocumentCommandApi.createBreakCurvesCommand(selection?.handle));
+    }
+
+    static createJoinCurves(selection, isJoinStraight = false) {
+        return new DocumentCommand(DocumentCommandApi.createJoinCurvesCommand(selection?.handle, isJoinStraight));
+    }
+
+    static createReverseCurves(selection) {
+        return new DocumentCommand(DocumentCommandApi.createReverseCurvesCommand(selection?.handle));
+    }
+
+    static createMergeCurves(selection) {
+        return new DocumentCommand(DocumentCommandApi.createMergeCurvesCommand(selection?.handle));
+    }
+
+    static createSeparateCurves(selection) {
+        return new DocumentCommand(DocumentCommandApi.createSeparateCurvesCommand(selection?.handle));
     }
 
     static createSetBrushFillIsAnchoredToSpread(selection, anchoredToSpread, options) {
@@ -520,6 +592,14 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createFlattenCommand());
     }
 
+    static createMergeDown() {
+        return new DocumentCommand(DocumentCommandApi.createMergeDownCommand());
+    }
+
+    static createMergeSelected() {
+        return new DocumentCommand(DocumentCommandApi.createMergeSelectedCommand());
+    }
+
     static createMergeVisible() {
         return new DocumentCommand(DocumentCommandApi.createMergeVisibleCommand());
     }
@@ -545,23 +625,23 @@ class DocumentCommand extends HandleObject {
     }
 
     static createSetGaussianBlurFilterParameters(selection, gaussianBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createSetGaussianBlurFilterParametersCommand(selection?.handle, gaussianBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createSetGaussianBlurFilterParametersCommand(selection?.handle, gaussianBlurParameters.handle));
     }
     
     static createSetBilateralBlurFilterParameters(selection, bilateralBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createSetBilateralBlurFilterParametersCommand(selection?.handle, bilateralBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createSetBilateralBlurFilterParametersCommand(selection?.handle, bilateralBlurParameters.handle));
     }
     
     static createSetBoxBlurFilterParameters(selection, boxBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createSetBoxBlurFilterParametersCommand(selection?.handle, boxBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createSetBoxBlurFilterParametersCommand(selection?.handle, boxBlurParameters.handle));
     }
     
     static createSetMedianBlurFilterParameters(selection, medianBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createSetMedianBlurFilterParametersCommand(selection?.handle, medianBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createSetMedianBlurFilterParametersCommand(selection?.handle, medianBlurParameters.handle));
     }
     
     static createSetDiffuseGlowFilterParameters(selection, diffuseGlowParameters) {
-        return new DocumentCommand(DocumentCommandApi.createSetDiffuseGlowFilterParametersCommand(selection?.handle, diffuseGlowParameters));
+        return new DocumentCommand(DocumentCommandApi.createSetDiffuseGlowFilterParametersCommand(selection?.handle, diffuseGlowParameters.handle));
     }
     
     static createSetFieldBlurFilterParameters(selection, fieldBlurParameters) {
@@ -573,35 +653,35 @@ class DocumentCommand extends HandleObject {
     }
     
     static createSetLensBlurFilterParameters(selection, lensBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createSetLensBlurFilterParametersCommand(selection?.handle, lensBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createSetLensBlurFilterParametersCommand(selection?.handle, lensBlurParameters.handle));
     }
     
     static createSetMaximumBlurFilterParameters(selection, maximumBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createSetMaximumBlurFilterParametersCommand(selection?.handle, maximumBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createSetMaximumBlurFilterParametersCommand(selection?.handle, maximumBlurParameters.handle));
     }
     
     static createSetMinimumBlurFilterParameters(selection, minimumBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createSetMinimumBlurFilterParametersCommand(selection?.handle, minimumBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createSetMinimumBlurFilterParametersCommand(selection?.handle, minimumBlurParameters.handle));
     }
     
     static createSetMotionBlurFilterParameters(selection, motionBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createSetMotionBlurFilterParametersCommand(selection?.handle, motionBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createSetMotionBlurFilterParametersCommand(selection?.handle, motionBlurParameters.handle));
     }
     
     static createSetShadowsHighlightsFilterParameters(selection, parameters) {
-        return new DocumentCommand(DocumentCommandApi.createSetShadowsHighlightsFilterParametersCommand(selection?.handle, parameters));
+        return new DocumentCommand(DocumentCommandApi.createSetShadowsHighlightsFilterParametersCommand(selection?.handle, parameters.handle));
     }
     
     static createSetRadialBlurFilterParameters(selection, radialBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createSetRadialBlurFilterParametersCommand(selection?.handle, radialBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createSetRadialBlurFilterParametersCommand(selection?.handle, radialBlurParameters.handle));
     }
     
     static createSetExposureAdjustmentParameters(selection, exposureAdjustmentParameters) {
-        return new DocumentCommand(DocumentCommandApi.createSetExposureAdjustmentParametersCommand(selection?.handle, exposureAdjustmentParameters));
+        return new DocumentCommand(DocumentCommandApi.createSetExposureAdjustmentParametersCommand(selection?.handle, exposureAdjustmentParameters.handle));
     }
     
     static createSetLevelsAdjustmentParameters(selection, levelsAdjustmentParameters) {
-        return new DocumentCommand(DocumentCommandApi.createSetLevelsAdjustmentParametersCommand(selection?.handle, levelsAdjustmentParameters));
+        return new DocumentCommand(DocumentCommandApi.createSetLevelsAdjustmentParametersCommand(selection?.handle, levelsAdjustmentParameters.handle));
     }
     
     static createSetLevelsAdjustmentColourSpace(selection, colourSpace) {
@@ -609,119 +689,119 @@ class DocumentCommand extends HandleObject {
     }
     
     static createSetBrightnessContrastAdjustmentParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetBrightnessContrastAdjustmentParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetBrightnessContrastAdjustmentParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetShadowsHighlightsAdjustmentParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetShadowsHighlightsAdjustmentParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetShadowsHighlightsAdjustmentParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetBlackAndWhiteAdjustmentParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetBlackAndWhiteAdjustmentParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetBlackAndWhiteAdjustmentParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetRecolourAdjustmentParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetRecolourAdjustmentParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetRecolourAdjustmentParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetPosteriseAdjustmentParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetPosteriseAdjustmentParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetPosteriseAdjustmentParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetSplitToningAdjustmentParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetSplitToningAdjustmentParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetSplitToningAdjustmentParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetThresholdAdjustmentParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetThresholdAdjustmentParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetThresholdAdjustmentParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetClarityFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetClarityFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetClarityFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetUnsharpMaskFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetUnsharpMaskFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetUnsharpMaskFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetHighPassFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetHighPassFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetHighPassFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetDenoiseFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetDenoiseFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetDenoiseFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetDiffuseFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetDiffuseFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetDiffuseFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetDustAndScratchFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetDustAndScratchFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetDustAndScratchFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetAddNoiseFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetAddNoiseFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetAddNoiseFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetBloomFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetBloomFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetBloomFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetPixelateFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetPixelateFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetPixelateFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetHalftoneFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetHalftoneFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetHalftoneFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetRippleFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetRippleFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetRippleFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetTwirlFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetTwirlFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetTwirlFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetSphericalFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetSphericalFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetSphericalFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetPinchPunchFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetPinchPunchFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetPinchPunchFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetWhiteBalanceAdjustmentParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetWhiteBalanceAdjustmentParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetWhiteBalanceAdjustmentParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetColourBalanceAdjustmentParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetColourBalanceAdjustmentParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetColourBalanceAdjustmentParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetVibranceAdjustmentParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetVibranceAdjustmentParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetVibranceAdjustmentParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetNormalsAdjustmentParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetNormalsAdjustmentParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetNormalsAdjustmentParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetVignetteFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetVignetteFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetVignetteFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetDefringeFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetDefringeFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetDefringeFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetVoronoiFilterParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetVoronoiFilterParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetVoronoiFilterParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetSelectiveColourAdjustmentParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetSelectiveColourAdjustmentParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetSelectiveColourAdjustmentParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetHSLShiftAdjustmentParameters(selection, params) {
@@ -734,6 +814,10 @@ class DocumentCommand extends HandleObject {
     
     static createSetCurvesAdjustmentColourSpace(selection, colourSpace) {
         return new DocumentCommand(DocumentCommandApi.createSetCurvesAdjustmentColourSpaceCommand(selection?.handle, colourSpace));
+    }
+
+    static createSetDevelopParameters(selection, developParameters) {
+        return new DocumentCommand(DocumentCommandApi.createSetDevelopParametersCommand(selection?.handle, developParameters.handle));
     }
     
     static createSetBlendGamma(selection, gamma) {
@@ -753,15 +837,51 @@ class DocumentCommand extends HandleObject {
     }
     
     static createSetToneCompressionAdjustmentParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetToneCompressionAdjustmentParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetToneCompressionAdjustmentParametersCommand(selection?.handle, params.handle));
     }
     
     static createSetToneStretchAdjustmentParameters(selection, params) {
-        return new DocumentCommand(DocumentCommandApi.createSetToneStretchAdjustmentParametersCommand(selection?.handle, params));
+        return new DocumentCommand(DocumentCommandApi.createSetToneStretchAdjustmentParametersCommand(selection?.handle, params.handle));
     }
 
     static createRasterSelectAll() {
         return new DocumentCommand(DocumentCommandApi.createRasterSelectAllCommand());
+    }
+
+    static createRasterSelectReds() {
+        return new DocumentCommand(DocumentCommandApi.createRasterSelectRedsCommand());
+    }
+
+    static createRasterSelectGreens() {
+        return new DocumentCommand(DocumentCommandApi.createRasterSelectGreensCommand());
+    }
+
+    static createRasterSelectBlues() {
+        return new DocumentCommand(DocumentCommandApi.createRasterSelectBluesCommand());
+    }
+
+    static createRasterSelectMidtones() {
+        return new DocumentCommand(DocumentCommandApi.createRasterSelectMidtonesCommand());
+    }
+
+    static createRasterSelectShadows() {
+        return new DocumentCommand(DocumentCommandApi.createRasterSelectShadowsCommand());
+    }
+
+    static createRasterSelectHighlights() {
+        return new DocumentCommand(DocumentCommandApi.createRasterSelectHighlightsCommand());
+    }
+
+    static createRasterSelectTransparent() {
+        return new DocumentCommand(DocumentCommandApi.createRasterSelectTransparentCommand());
+    }
+
+    static createRasterSelectPartiallyTransparent() {
+        return new DocumentCommand(DocumentCommandApi.createRasterSelectPartiallyTransparentCommand());
+    }
+
+    static createRasterSelectOpaque() {
+        return new DocumentCommand(DocumentCommandApi.createRasterSelectOpaqueCommand());
     }
 
     static createRasterDeselect() {
@@ -777,7 +897,7 @@ class DocumentCommand extends HandleObject {
     }
 
     static createSetRasterSelectionFromPolygon(polygon, operation, isAntialias, featherRadius) {
-        return new DocumentCommand(DocumentCommandApi.createSetRasterSelectionFromPolygonCommand(polygon, operation, isAntialias, featherRadius));
+        return new DocumentCommand(DocumentCommandApi.createSetRasterSelectionFromPolygonCommand(polygon.handle, operation, isAntialias, featherRadius));
     }
 
     static createSetRasterSelectionFromObject(node, useIntensity, operation) {
@@ -808,24 +928,28 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createOutlineRasterSelectionCommand(radius, alignment, circular));
     }
     
+    static createRasterFloodSelect(point, tolerance, isContiguous, antialias, operation, samplingSource) {
+        return new DocumentCommand(DocumentCommandApi.createRasterFloodSelectCommand(point, tolerance, isContiguous, antialias, operation, samplingSource));
+    }
+    
     static createGaussianBlurFilter(selection, gaussianBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createGaussianBlurFilterCommand(selection?.handle, gaussianBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createGaussianBlurFilterCommand(selection?.handle, gaussianBlurParameters.handle));
     }
 
     static createBoxBlurFilter(selection, boxBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createBoxBlurFilterCommand(selection?.handle, boxBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createBoxBlurFilterCommand(selection?.handle, boxBlurParameters.handle));
     }
 
     static createBilateralBlurFilter(selection, bilateralBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createBilateralBlurFilterCommand(selection?.handle, bilateralBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createBilateralBlurFilterCommand(selection?.handle, bilateralBlurParameters.handle));
     }
 
     static createMedianBlurFilter(selection, medianBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createMedianBlurFilterCommand(selection?.handle, medianBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createMedianBlurFilterCommand(selection?.handle, medianBlurParameters.handle));
     }
 
     static createDiffuseGlowFilter(selection, diffuseGlowParameters) {
-        return new DocumentCommand(DocumentCommandApi.createDiffuseGlowFilterCommand(selection?.handle, diffuseGlowParameters));
+        return new DocumentCommand(DocumentCommandApi.createDiffuseGlowFilterCommand(selection?.handle, diffuseGlowParameters.handle));
     }
 
     static createFieldBlurFilter(selection, fieldBlurParameters) {
@@ -837,95 +961,95 @@ class DocumentCommand extends HandleObject {
     }
 
     static createLensBlurFilter(selection, lensBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createLensBlurFilterCommand(selection?.handle, lensBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createLensBlurFilterCommand(selection?.handle, lensBlurParameters.handle));
     }
 
     static createMaximumBlurFilter(selection, maximumBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createMaximumBlurFilterCommand(selection?.handle, maximumBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createMaximumBlurFilterCommand(selection?.handle, maximumBlurParameters.handle));
     }
 
     static createMinimumBlurFilter(selection, minimumBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createMinimumBlurFilterCommand(selection?.handle, minimumBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createMinimumBlurFilterCommand(selection?.handle, minimumBlurParameters.handle));
     }
 
     static createMotionBlurFilter(selection, motionBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createMotionBlurFilterCommand(selection?.handle, motionBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createMotionBlurFilterCommand(selection?.handle, motionBlurParameters.handle));
     }
 
     static createShadowsHighlightsFilter(selection, parameters) {
-        return new DocumentCommand(DocumentCommandApi.createShadowsHighlightsFilterCommand(selection?.handle, parameters));
+        return new DocumentCommand(DocumentCommandApi.createShadowsHighlightsFilterCommand(selection?.handle, parameters.handle));
     }
 
     static createRadialBlurFilter(selection, radialBlurParameters) {
-        return new DocumentCommand(DocumentCommandApi.createRadialBlurFilterCommand(selection?.handle, radialBlurParameters));
+        return new DocumentCommand(DocumentCommandApi.createRadialBlurFilterCommand(selection?.handle, radialBlurParameters.handle));
     }
 
     static createClarityFilter(selection, clarityFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createClarityFilterCommand(selection?.handle, clarityFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createClarityFilterCommand(selection?.handle, clarityFilterParameters.handle));
     }
 
     static createUnsharpMaskFilter(selection, unsharpMaskFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createUnsharpMaskFilterCommand(selection?.handle, unsharpMaskFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createUnsharpMaskFilterCommand(selection?.handle, unsharpMaskFilterParameters.handle));
     }
 
     static createHighPassFilter(selection, highPassFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createHighPassFilterCommand(selection?.handle, highPassFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createHighPassFilterCommand(selection?.handle, highPassFilterParameters.handle));
     }
 
     static createDenoiseFilter(selection, denoiseFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createDenoiseFilterCommand(selection?.handle, denoiseFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createDenoiseFilterCommand(selection?.handle, denoiseFilterParameters.handle));
     }
 
     static createDiffuseFilter(selection, diffuseFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createDiffuseFilterCommand(selection?.handle, diffuseFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createDiffuseFilterCommand(selection?.handle, diffuseFilterParameters.handle));
     }
 
     static createDustAndScratchFilter(selection, dustAndScratchFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createDustAndScratchFilterCommand(selection?.handle, dustAndScratchFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createDustAndScratchFilterCommand(selection?.handle, dustAndScratchFilterParameters.handle));
     }
 
     static createAddNoiseFilter(selection, addNoiseFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createAddNoiseFilterCommand(selection?.handle, addNoiseFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createAddNoiseFilterCommand(selection?.handle, addNoiseFilterParameters.handle));
     }
 
     static createBloomFilter(selection, bloomFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createBloomFilterCommand(selection?.handle, bloomFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createBloomFilterCommand(selection?.handle, bloomFilterParameters.handle));
     }
     
     static createPixelateFilter(selection, pixelateFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createPixelateFilterCommand(selection?.handle, pixelateFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createPixelateFilterCommand(selection?.handle, pixelateFilterParameters.handle));
     }
     
     static createHalftoneFilter(selection, halftoneFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createHalftoneFilterCommand(selection?.handle, halftoneFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createHalftoneFilterCommand(selection?.handle, halftoneFilterParameters.handle));
     }
 
     static createRippleFilter(selection, rippleFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createRippleFilterCommand(selection?.handle, rippleFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createRippleFilterCommand(selection?.handle, rippleFilterParameters.handle));
     }
 
     static createTwirlFilter(selection, twirlFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createTwirlFilterCommand(selection?.handle, twirlFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createTwirlFilterCommand(selection?.handle, twirlFilterParameters.handle));
     }
 
     static createSphericalFilter(selection, sphericalFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createSphericalFilterCommand(selection?.handle, sphericalFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createSphericalFilterCommand(selection?.handle, sphericalFilterParameters.handle));
     }
 
     static createPinchPunchFilter(selection, pinchPunchFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createPinchPunchFilterCommand(selection?.handle, pinchPunchFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createPinchPunchFilterCommand(selection?.handle, pinchPunchFilterParameters.handle));
     }
 
     static createVignetteFilter(selection, vignetteFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createVignetteFilterCommand(selection?.handle, vignetteFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createVignetteFilterCommand(selection?.handle, vignetteFilterParameters.handle));
     }
 
     static createDefringeFilter(selection, defringeFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createDefringeFilterCommand(selection?.handle, defringeFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createDefringeFilterCommand(selection?.handle, defringeFilterParameters.handle));
     }
 
     static createVoronoiFilter(selection, voronoiFilterParameters) {
-        return new DocumentCommand(DocumentCommandApi.createVoronoiFilterCommand(selection?.handle, voronoiFilterParameters));
+        return new DocumentCommand(DocumentCommandApi.createVoronoiFilterCommand(selection?.handle, voronoiFilterParameters.handle));
     }
 
     static createGroupTransform(selection, xDataOrNull, yDataOrNull) {
@@ -1521,6 +1645,34 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createSetTextFrameIgnoreBaselineGridCommand(selection?.handle, ignoreBaselineGrid));
     }
 
+    static createLinkTextFrame(srcNode, destNode) {
+        return new DocumentCommand(DocumentCommandApi.createLinkTextFrameCommand(srcNode.handle, destNode.handle));
+    }
+
+    static createUnlinkTextFrame(node) {
+        return new DocumentCommand(DocumentCommandApi.createUnlinkTextFrameCommand(node.handle));
+    }
+
+    static createSetMeasurementAnnotationOffset(node, offset) {
+        return new DocumentCommand(DocumentCommandApi.createSetMeasurementAnnotationOffsetCommand(node.handle, offset));
+    }
+
+    static createSetMeasurementShowEndpointMarkers(show) {
+        return new DocumentCommand(DocumentCommandApi.createSetMeasurementShowEndpointMarkersCommand(show));
+    }
+
+    static createSetMeasurementUnits(unitType) {
+        return new DocumentCommand(DocumentCommandApi.createSetMeasurementUnitsCommand(unitType));
+    }
+
+    static createSetMeasurementPrecision(useDocumentPrecision, decimalPlaces) {
+        return new DocumentCommand(DocumentCommandApi.createSetMeasurementPrecisionCommand(useDocumentPrecision, decimalPlaces));
+    }
+
+    static createPopulatePictureFrame(contentNode, selection) {
+        return new DocumentCommand(DocumentCommandApi.createPopulatePictureFrameCommand(contentNode.handle, selection?.handle));
+    }
+
     static createSetSpreadSizeWithAnchor(spreadNode, width, height, anchor) {
         return new DocumentCommand(DocumentCommandApi.createSetSpreadSizeWithAnchorCommand(spreadNode.handle, width, height, anchor));
     }
@@ -1536,6 +1688,35 @@ class DocumentCommand extends HandleObject {
     static createSetArtboardDocumentProperties(artboardInterface, artboardDocumentProperties) {
         return new DocumentCommand(DocumentCommandApi.createSetArtboardDocumentPropertiesCommand(artboardInterface.handle, artboardDocumentProperties.handle));
     }
+
+    static createSetPageDocumentProperties(spreadNode, page, pageDocumentProperties) {
+        return new DocumentCommand(DocumentCommandApi.createSetPageDocumentPropertiesCommand(spreadNode.handle, page, pageDocumentProperties.handle));
+    }
+
+    static createBoolOpUnion(selection) {
+        return new DocumentCommand(DocumentCommandApi.createBoolOpUnionCommand(selection?.handle));
+    }
+
+    static createBoolOpSubtract(selection) {
+        return new DocumentCommand(DocumentCommandApi.createBoolOpSubtractCommand(selection?.handle));
+    }
+
+    static createBoolOpIntersect(selection) {
+        return new DocumentCommand(DocumentCommandApi.createBoolOpIntersectCommand(selection?.handle));
+    }
+
+    static createBoolOpXor(selection) {
+        return new DocumentCommand(DocumentCommandApi.createBoolOpXorCommand(selection?.handle));
+    }
+
+    static createDivideShapes(selection) {
+        return new DocumentCommand(DocumentCommandApi.createDivideShapesCommand(selection?.handle));
+    }
+
+    static createFlipCanvas(isHorizontal) {
+        return new DocumentCommand(DocumentCommandApi.createFlipCanvasCommand(isHorizontal));
+    }
+
 }
 
 /**
@@ -1808,6 +1989,10 @@ class AddChildNodesCommandBuilder extends HandleObject {
     addTableTextNode(tableTextNodeDefinition) {
         AddChildNodesCommandBuilderApi.addTableTextNode(this.handle, tableTextNodeDefinition.handle);
     }
+
+    addMeasurementNode(measurementNodeDefinition) {
+        AddChildNodesCommandBuilderApi.addMeasurementNode(this.handle, measurementNodeDefinition.handle);
+    }
     
     createCommand(andSelect = true, childListType = NodeChildType.Main) {
         return new DocumentCommand(AddChildNodesCommandBuilderApi.createCommand(this.handle, andSelect, childListType));
@@ -1954,9 +2139,12 @@ module.exports.NodeChildType = NodeChildType;
 module.exports.NodeMoveType = NodeMoveType;
 module.exports.PageBoundingBoxType = PageBoundingBoxType;
 module.exports.PredefinedTagKey = PredefinedTagKey;
+module.exports.RasterFillMode = RasterFillMode;
+module.exports.RasterFloodFillSamplingSource = RasterFloodFillSamplingSource;
 module.exports.RasterFormat = RasterFormat;
 module.exports.RasterSelectionLogicalOperation = RasterSelectionLogicalOperation;
 module.exports.RasterSelectionOutlineAlignment = RasterSelectionOutlineAlignment;
+module.exports.SamplingSource = SamplingSource;
 module.exports.ShapeBoolParam = ShapeBoolParam;
 module.exports.ShapeEnumParam = ShapeEnumParam;
 module.exports.ShapeFloatParam = ShapeFloatParam;

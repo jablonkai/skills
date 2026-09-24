@@ -44,10 +44,10 @@ const {
     StoryIoFormat,
     WordPartType
 } = require('affinity:story');
-const { HandleObject } = require('./handleobject.js');
+const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
-const StoryModule = require('./story.js');
+const StoryModule = require('/story.js');
 
 function createTypedGlyph(glyphHandle) {
     const glyphType = GlyphApi.getGlyphType(glyphHandle);
@@ -107,17 +107,17 @@ function createTypedGlyph(glyphHandle) {
 
 class Glyph extends HandleObject {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'Glyph';
-	}
+        return 'Glyph';
+    }
     
     static GlyphType = GlyphType;
     static HardBreakType = HardBreakType;
-	static SoftBreakType = SoftBreakType;
-	static WordPartType = WordPartType;
+    static SoftBreakType = SoftBreakType;
+    static WordPartType = WordPartType;
     
     get isGlyph() {
         return true;
@@ -264,12 +264,12 @@ class AnchorGlyph extends Glyph {
 
 class CharGlyph extends Glyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'CharGlyph';
-	}
+        return 'CharGlyph';
+    }
     
     get isCharGlyph() {
         return true;
@@ -324,12 +324,12 @@ class CrossReferenceSubGlyph extends Glyph {
 
 class FieldGlyph extends Glyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'FieldGlyph';
-	}
+        return 'FieldGlyph';
+    }
     
     get isFieldGlyph() {
         return true;
@@ -418,12 +418,12 @@ class FillerTextGlyph extends FieldGlyph {
 
 class FormattableFieldGlyph extends FieldGlyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'FormattableFieldGlyph';
-	}
+        return 'FormattableFieldGlyph';
+    }
     
     get isFormattableFieldGlyph() {
         return true;
@@ -440,12 +440,12 @@ class FormattableFieldGlyph extends FieldGlyph {
 
 class CapturedDateTimeGlyph extends FormattableFieldGlyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'CapturedDateTimeGlyph';
-	}
+        return 'CapturedDateTimeGlyph';
+    }
     
     get isCapturedDateTimeGlyph() {
         return true;
@@ -484,12 +484,12 @@ class CustomFieldGlyph extends FormattableFieldGlyph {
 
 class DataMergeGlyph extends FormattableFieldGlyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'DataMergeGlyph';
-	}
+        return 'DataMergeGlyph';
+    }
     
     get isDataMergeGlyph() {
         return true;
@@ -502,12 +502,12 @@ class DataMergeGlyph extends FormattableFieldGlyph {
 
 class DataMergeFieldGlyph extends DataMergeGlyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'DataMergeFieldGlyph';
-	}
+        return 'DataMergeFieldGlyph';
+    }
     
     get isDataMergeFieldGlyph() {
         return true;
@@ -524,12 +524,12 @@ class DataMergeFieldGlyph extends DataMergeGlyph {
 
 class DataMergeSourceGlyph extends DataMergeGlyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'DataMergeSourceGlyph';
-	}
+        return 'DataMergeSourceGlyph';
+    }
     
     get isDataMergeSourceGlyph() {
         return true;
@@ -546,12 +546,12 @@ class DataMergeSourceGlyph extends DataMergeGlyph {
 
 class DocumentFieldGlyph extends FormattableFieldGlyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'DocumentFieldGlyph';
-	}
+        return 'DocumentFieldGlyph';
+    }
     
     get isDocumentFieldGlyph() {
         return true;
@@ -568,12 +568,12 @@ class DocumentFieldGlyph extends FormattableFieldGlyph {
 
 class RunningHeaderGlyph extends FormattableFieldGlyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'RunningHeaderGlyph';
-	}
+        return 'RunningHeaderGlyph';
+    }
     
     get isRunningHeaderGlyph() {
         return true;
@@ -586,12 +586,12 @@ class RunningHeaderGlyph extends FormattableFieldGlyph {
 
 class PageNumberGlyph extends FieldGlyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'PageNumberGlyph';
-	}
+        return 'PageNumberGlyph';
+    }
     
     get isPageNumberGlyph() {
         return true;
@@ -608,12 +608,12 @@ class PageNumberGlyph extends FieldGlyph {
 
 class RangenoteBodyGlyph extends FieldGlyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'RangenoteBodyGlyph';
-	}
+        return 'RangenoteBodyGlyph';
+    }
     
     get isRangenoteBodyGlyph() {
         return true;
@@ -630,12 +630,12 @@ class RangenoteBodyGlyph extends FieldGlyph {
 
 class RangenoteReferenceGlyph extends FieldGlyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'RangenoteReferenceGlyph';
-	}
+        return 'RangenoteReferenceGlyph';
+    }
     
     get isRangenoteReferenceGlyph() {
         return true;
@@ -656,12 +656,12 @@ class RangenoteReferenceGlyph extends FieldGlyph {
 
 class SectionNameGlyph extends FieldGlyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'SectionNameGlyph';
-	}
+        return 'SectionNameGlyph';
+    }
     
     get isSectionNameGlyph() {
         return true;
@@ -674,12 +674,12 @@ class SectionNameGlyph extends FieldGlyph {
 
 class GlyphIndexGlyph extends Glyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'GlyphIndexGlyph';
-	}
+        return 'GlyphIndexGlyph';
+    }
     
     get isGlyphIndexGlyph() {
         return true;
@@ -696,12 +696,12 @@ class GlyphIndexGlyph extends Glyph {
 
 class HardBreakGlyph extends Glyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'HardBreakGlyph';
-	}
+        return 'HardBreakGlyph';
+    }
     
     get isHardBreakGlyph() {
         return true;
@@ -714,12 +714,12 @@ class HardBreakGlyph extends Glyph {
 
 class IndentToHereGlyph extends Glyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'IndentToHereGlyph';
-	}
+        return 'IndentToHereGlyph';
+    }
     
     get isIndentToHereGlyph() {
         return true;
@@ -806,12 +806,12 @@ class NoteNumberGlyph extends Glyph {
 
 class PinGlyph extends Glyph {
     constructor(handle) {
-		super(handle);
-	}
+        super(handle);
+    }
 
     get [Symbol.toStringTag]() {
-		return 'PinGlyph';
-	}
+        return 'PinGlyph';
+    }
     
     get isPinGlyph() {
         return true;
@@ -823,19 +823,19 @@ class PinGlyph extends Glyph {
 
     get isInline() {
         return PinGlyphApi.isInline(this.handle);
-	}
+    }
 
     get isNote() {
         return PinGlyphApi.isNote(this.handle);
-	}
+    }
 
     get notePosition() {
         return PinGlyphApi.getNotePosition(this.handle);
-	}
+    }
 
     get noteType() {
         return PinGlyphApi.getNoteType(this.handle);
-	}
+    }
 }
 
 class RangenoteEndGlyph extends Glyph {
