@@ -1,8 +1,8 @@
 # Cavalry scripting reference
 
 Condensed from the official docs (https://cavalry.studio/docs/tech-info/scripting/ — the old
-docs.cavalry.scenegroup.co URLs redirect there) plus production experience. Cavalry scripts are
-JavaScript; modules: `api` (scene + filesystem + web), `cavalry` (math/geometry/color/text
+docs.cavalry.scenegroup.co URLs redirect there) plus production experience, checked against
+Cavalry 2.7.2. Cavalry scripts are JavaScript (V8 12.4 / ES2024 since 2.6); modules: `api` (scene + filesystem + web), `cavalry` (math/geometry/color/text
 utilities), `ui` (script windows), `render` (inside render scripts only), `console`.
 
 User scripts live in `~/Library/Application Support/Cavalry/Scripts/` (**Help ▸ Show Scripts
@@ -30,13 +30,16 @@ Folder**) and appear in the Scripts menu. The JavaScript Editor window runs ad-h
 | Function | Notes |
 |---|---|
 | `createComp(niceName) → id` | new comp |
-| `getActiveComp() → id` / `setActiveComp(id)` | |
+| `getComps() → [id]` | all comps — find one by `getNiceName` |
+| `getActiveComp() → id` / `setActiveComp(id)` | active comp = what `renderPNGFrame` renders |
 | `getCompLayers(topLevelOnly) → [id]` | enumerate layers |
 | `setFrame(f)` / `getFrame()` | move playhead (needed before `renderPNGFrame`) |
 | `play()` / `stop()` | stop playback before frame-loop renders |
 
-Comp attributes (names vary by version — use a trySet fallback chain):
-`resolution` `[w,h]`; `frameRate` or `fps`; `frameRangeEnd` or `endFrame` or `outFrame`.
+Comp attributes (2.7.2, layer type `compNode`): `resolution` `[w,h]`, `fps`, `startFrame`,
+`endFrame` (inclusive), `playbackStart`/`playbackEnd`, `backgroundColor` (hex, or `"#00000000"`
+/ `backgroundColor.a: 0` for transparent — default is opaque), `motionBlur`, `shutterAngle`.
+There is no `frameRate`/`frameRangeEnd` — and `api.set` would ignore them without an error.
 
 ## api — layers & attributes
 
@@ -46,8 +49,10 @@ Comp attributes (names vary by version — use a trySet fallback chain):
 | `primitive(type, name) → id` | `"rectangle"`, `"ellipse"`, `"polygon"`, `"star"`… |
 | `createEditable(path, name) → id` | editable shape from a `cavalry.Path` |
 | `deleteLayer(id)` / `duplicate(id, withInputConnections)` | |
-| `set(id, {attr: value, ...})` / `get(id, attr)` | |
-| `getAttributes(id)` / `getAttrType(id, attr)` / `getAttributeDefinition(id, attr)` | discovery |
+| `set(id, {attr: value, ...})` / `get(id, attr)` | `set` **silently ignores unknown names**; `get` returns `undefined` |
+| `hasAttribute(id, attr)` | works on nested paths (`position.y`, `backgroundColor.a`) — guard `set` with it |
+| `getAttributes(id)` / `getAttrType(id, attr)` / `getAttributeDefinition(id, attr)` | discovery (definition carries type, default, enum values) |
+| `getNiceName(id)` / `rename(id, name)` | |
 | `resetAttribute(id, attr)` | |
 | `getLayerType(id)` | |
 | `getBoundingBox(id, worldSpace) → {x,y,width,height,centre,left,right,top,bottom}` | measure real size |
@@ -56,16 +61,20 @@ Attribute discovery from the UI: right-click layer → *Copy Layer Id*; right-cl
 *Copy Scripting Path*.
 
 Common paths: `position` `[x,y]` (origin = comp centre, +y up), `position.x/.y`, `scale.x/.y`,
-`rotation`, `material.materialColor` (hex string), `material.alpha` (0–100),
-`generator.dimensions` `[w,h]`, `generator.radius` `[rx,ry]`; text: `text` or `string`,
-`fontSize`, `font.font`, `font.style`, `horizontalAlignment`/`verticalAlignment` (1 = centre),
-`autoWidth`/`autoHeight`.
+`rotation` (x/y/z — `rotation.z` for 2D), `material.materialColor` (hex string), `material.alpha` (0–100),
+`opacity`, `generator.dimensions` `[w,h]` (rectangle only), `generator.radius` `[rx,ry]`
+(ellipse); text: `text` (reads back as `{text, overrides}`), `fontSize`, `font.font`,
+`font.style`, `horizontalAlignment`/`verticalAlignment` (0 = left/top, 1 = centre),
+`autoWidth`/`autoHeight`, `letterSpacing`, `lineSpacing`. Sub-Mesh: `shapePosition`,
+`shapeRotation`, `shapeScale`, `shapeOpacity`, `shapeTimeOffset`, `levelMode` (default 3 =
+characters), `indexMode`. Stagger: `minimum`, `maximum`, `offset`, `graph`, `strength`.
 
 ## api — keyframes & easing
 
 | Function | Notes |
 |---|---|
-| `keyframe(id, frame, {attr: value, ...}) → keyframeId` | |
+| `keyframe(id, frame, {attr: value, ...})` | **scalar leaves only** — arrays and bare numbers on vectors (`rotation`) are silently dropped |
+| `getKeyframeTimes(id, attr)` / `isAnimatedAttribute(id, attr)` | verify keys landed |
 | `deleteKeyframe(id, attr, frame)` / `modifyKeyframe(id, data)` | |
 | `magicEasing(id, attr, frame, presetName)` | applies at that keyframe |
 
@@ -96,8 +105,10 @@ Presets: `SlowIn`, `SlowOut`, `SlowInSlowOut`, `VerySlowIn`, `VerySlowOut`,
 
 | Function | Notes |
 |---|---|
-| `renderPNGFrame(pathNoExt, scalePercent)` | renders the **current** frame; appends `.png`; 50 = half-size preview |
-| `renderSVGFrame(pathNoExt, scalePercent, skipComps)` | vector snapshot |
+| `renderPNGFrame(pathNoExt, scalePercent)` | renders the **current** frame of the active comp; appends `.png`; 50 = half-size preview; visible (soloed) layers only |
+| `renderSVGFrame(pathNoExt, scalePercent, skipComps)` | vector snapshot; `skipComps` drops comp backgrounds |
+| `soloLayers([ids])` | solo for per-layer renders; `soloLayers([])` clears |
+| `getRenderPath()` | the scene's render output folder |
 | `addRenderQueueItem(compId) → itemId` | then set its attrs (output path, format, range) |
 | `render(itemId)` / `renderAll()` | run queue jobs |
 
@@ -108,7 +119,8 @@ Transparent output: leave the comp background empty (no BG rect) — PNG frames 
 | Function | Notes |
 |---|---|
 | `newScene()` / `openScene(path, force)` | |
-| `saveScene()` / `saveSceneAs(path)` / `exportSceneAs(path)` | wrap in try/catch |
+| `saveScene()` / `saveSceneAs(path)` → bool / `exportSceneAs(path)` | check the result — false while a modal is open |
+| `getSceneFilePath()` | path of the open scene ("" if unsaved) |
 | `getSelection(sortByHierarchy)` / `select([ids])` / `invertSelection()` | |
 | `getSelectedKeyframes()` | |
 
@@ -116,13 +128,16 @@ Transparent output: leave the comp background empty (no BG rect) — PNG frames 
 
 | Function | Notes |
 |---|---|
-| `filePathExists(path)` / `listDirectory(path)` | |
+| `filePathExists(path)` / `isFile(path)` / `isDirectory(path)` | |
+| `listDirectoryPaths(path, includeDirectories)` → `[path]` | the documented one; `listDirectory(path)` also works in 2.7.2 but isn't in the typings |
 | `writeToFile(path, content, overwrite)` / `readFromFile(path)` | the feedback channel back to the caller |
 | `makeFolder(path)` / `deleteFilePath(path)` | |
 | `exec(scriptId, source)` | run JS from a string (scriptId = reverse-domain name) |
 | `load(path)` | run a JS file |
-| `runProcess(cmd, [args]) → object` | blocking system command (e.g. call ffmpeg from Cavalry) |
-| `runDetachedProcess(cmd, [args])` | non-blocking |
+| `runProcess(cmd, [args]) → {output, error}` | blocking system command; from a UI script (the bridge is one) it first raises a "trust this script" dialog — prefer running tools from the shell |
+| `runDetachedProcess(cmd, [args])` | non-blocking; same trust prompt |
+| `getPreferencesPath()` / `getTempFolder()` | where the bridge keeps its status and result files / scratch space |
+| `getCavalryVersion()` → `"2.7.2"` | branch on version when attribute names differ |
 
 ## api — WebClient / WebServer
 
@@ -134,7 +149,8 @@ auth: `setBasicAuthentication`, `setDigestAuthentication`, `setTokenAuthenticati
 
 `api.WebServer` (what the Cavalry Bridge uses): `listen(host, port)`, `stop()`, `postCount()`,
 `getNextPost()`, `getNewestPost()`, `clearPosts()`, `setResultForGet(text)` (static GET reply),
-`addCallbackObject({onPost: fn})`, `setHighFrequency()` (1 Hz poll) / `setRealtime()` (60 Hz).
+`addCallbackObject({onPost: fn})` (polls every 3 s by default), `setHighFrequency()` (1 Hz) /
+`setRealtime()` (60 Hz).
 No websockets; binary POST bodies unsupported.
 
 ## cavalry — utilities
@@ -142,8 +158,9 @@ No websockets; binary POST bodies unsupported.
 - **Math**: `random()`, `noise1d/2d/3d()`, `dist()`, `map()`, `norm()`, `clamp()`, `lerp()`,
   angle/vector conversions.
 - **Color**: `rgbToHex()`, `hexToRgba()`, `rgbToHsv()`, `hsvToHex()`, `nameThatColor()`.
-- **Text/fonts**: `fontExists(family)`, `getFontFamilies()`, `getFontStyles(family)`,
-  `measureText()`, `fontMetrics()`.
+- **Text/fonts**: `fontExists(family, style)` (both args required), `getFontFamilies()`,
+  `getFontStyles(family)`, `measureText(str, family, style, size)` (ink box),
+  `fontMetrics(family, style, size)`.
 - **`cavalry.Path`**: `moveTo`, `lineTo`, `cubicTo`, `quadTo`, `arcTo`, `close`, plus
   `addText()`, `addRect()`, `addEllipse()`, booleans (`unite`, `intersect`, `difference`),
   `pointAtParam()`, `tangentAtParam()`, `length()`. Feed into `api.createEditable(path, name)`.
@@ -157,10 +174,12 @@ Layouts: `ui.HLayout`, `ui.VLayout`, `ui.FlowLayout`, `ui.TabView`, `ui.PageView
 Widgets: `Button`, `Checkbox`, `ColorChip/ColorPicker/ColorWheel/ColorPalette`, `DropDown`,
 `FilePath`, `Image`, `ImageButton`, `Label`, `LineEdit`, `MultiLineEdit`, `NumericField`,
 `Slider`, `ProgressBar`, `List`, `Container`, `Draw` (custom drawing from `cavalry.Path`),
-`Modal` (dialogs), `Timer` (`onTimeout` polling).
+`Modal` (dialogs — since 2.6 also outside UI scripts). Polling timers are `new api.Timer(obj)`
+(`onTimeout`), not a ui widget.
 Widget callbacks: `onClick`, `onValueChanged`, `onValueCommitted`.
 App-level callbacks via `ui.addCallbackObject({...})`: `onSelectionChanged`, `onCompChanged`,
-`onAttrChanged`, `onLayerAdded`, `onAssetUpdated`.
+`onAttrChanged`, `onLayerAdded`, `onAssetUpdated`, and since 2.6 `onAttrConnected`,
+`onAttrDisconnected`, `onToolChanged`.
 Misc: `ui.scriptLocation` (script's folder), `ui.runFileScript(path)`,
 `ui.registerDragDropMimeType()` + `onDrop`.
 
@@ -178,12 +197,15 @@ For image sequences the hooks run before/after the whole sequence, not per frame
 
 ## Cavalry CLI
 
+**Not available in Cavalry 2.7.0–2.7.2** — the release notes tell CLI users to stay on 2.6.x
+until it is reinstated. On 2.7.x render through the app (bridge + `renderPNGFrame`, or the
+Render Queue). The rest of this section applies to **2.6.x and earlier** only.
+
 Binary: `/Applications/Cavalry.app/Contents/Applications/CavalryCLI.app/Contents/MacOS/cavalry-cli`.
 
 Commands: `render`, `list` (comp + render-queue ids), `version`, `auth`, `proxy`, and
-`--prompt` (interactive JS REPL). **`render`, `list` and `--prompt` require an Enterprise
-licence** — on Starter/Professional, render through the app (bridge + `renderPNGFrame`, or the
-Render Queue) instead.
+`--prompt` (interactive JS REPL). **`render`, `list` and `--prompt` required an Enterprise
+licence.**
 
 Render flags: `-s/--startFrame`, `-e/--endFrame`, `-n/--name`, `-d/--directory`,
 `--composition compNode#1`, `--format` (png, jpeg, svg, gif, apng, webm, webp, mp4, quicktime,
@@ -198,13 +220,14 @@ audio), `--scale`, `--assetSwap`.
 Cheap radial particle burst (confetti/sparks) — no particle system:
 
 ```js
+// needs cavalry-helpers.js loaded (setAttrs)
 var cols = ["#00ADEF", "#FFFFFF", "#DFF4FD", "#006BA6"];
 for (var i = 0; i < 16; i++) {
     var ang = (i / 16) * Math.PI * 2 + 0.2;
     var dist = 260 + (i % 4) * 70;
     var p = api.primitive("ellipse", "Spark " + i);
-    trySet(p, {"generator.dimensions": [18 + (i % 3) * 8, 18 + (i % 3) * 8]});
-    api.set(p, {"material.materialColor": cols[i % 4]});
+    var r = 9 + (i % 3) * 4;
+    setAttrs(p, {"generator.radius": [r, r], "material.materialColor": cols[i % 4]});
     api.keyframe(p, 0, {"scale.x": 0, "scale.y": 0});          // hidden until the burst
     api.keyframe(p, 184, {"position.x": 700, "position.y": 110, "scale.x": 0, "scale.y": 0});
     api.keyframe(p, 187, {"scale.x": 1, "scale.y": 1});
@@ -222,10 +245,10 @@ Running-gait loop (bob + rock, alternating every 8 frames):
 var step = 0;
 for (var f = startF; f <= endF; f += 8) {
     api.keyframe(layer, f, {"position.y": baseY + ((step % 2) ? 10 : 0),
-                            "rotation": ((step % 2) ? 5 : -3)});
+                            "rotation.z": ((step % 2) ? 5 : -3)});
     step++;
 }
-api.keyframe(layer, endF + 4, {"position.y": baseY, "rotation": 0});
+api.keyframe(layer, endF + 4, {"position.y": baseY, "rotation.z": 0});
 ```
 
 Piecewise-linear position lookup (for coordinating secondary elements — e.g. dust puffs at a

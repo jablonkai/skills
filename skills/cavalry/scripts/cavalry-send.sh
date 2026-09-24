@@ -9,7 +9,11 @@
 # Env: CAVALRY_BRIDGE_PORT (default 8731), CAVALRY_SEND_TIMEOUT seconds (default 30;
 # raise it for frame-loop renders), CAVALRY_BRIDGE_STATUS (default: whatever path
 # the bridge reports from GET /get). Completion is detected via the bridge's status
-# file; the final line of output is that status JSON ({"seq":N,"ok":true,...}).
+# file; the final line of output is that status JSON
+# ({"seq":N,"id":"...","ok":true,"error":null,...}). On failure "error" carries the
+# exception message and stack, and it is also printed to stderr. With a 2.x bridge
+# the sender waits on its own per-request result file, so several callers can
+# share one bridge; an older bridge falls back to watching the shared status file.
 set -euo pipefail
 
 PORT="${CAVALRY_BRIDGE_PORT:-8731}"
@@ -19,13 +23,13 @@ TIMEOUT="${CAVALRY_SEND_TIMEOUT:-30}"
 # of the path. CAVALRY_BRIDGE_STATUS overrides, mirroring FREECAD_BRIDGE_STATUS.
 # The `|| true` matters: without it a failed curl (bridge down) would fail the
 # pipeline under `set -e -o pipefail` and abort with no message at all.
-discover_status() {
+discover() {
     curl -s -m 3 "http://127.0.0.1:$PORT/get" 2>/dev/null \
         | python3 -c 'import json,sys
 try:
-    print(json.load(sys.stdin).get("status") or "")
+    print(json.load(sys.stdin).get(sys.argv[1]) or "")
 except Exception:
-    pass' 2>/dev/null || true
+    pass' "$1" 2>/dev/null || true
 }
 
 if [ $# -lt 1 ]; then
@@ -39,19 +43,23 @@ if [ "$1" = "--ping" ]; then
     exit 1
 fi
 
+# A per-request id: the bridge writes this job's result to its own file, so a
+# job sent by another caller at the same time is never mistaken for this one.
+REQ_ID="$$-$(date +%s)-$RANDOM"
+
 if [ "$1" = "-c" ]; then
     [ $# -ge 2 ] || { echo "usage: cavalry-send.sh -c '<code>'" >&2; exit 2; }
-    payload=$(python3 -c 'import json,sys; print(json.dumps({"code": sys.argv[1]}))' "$2")
+    payload=$(python3 -c 'import json,sys; print(json.dumps({"code": sys.argv[1], "id": sys.argv[2]}))' "$2" "$REQ_ID")
 else
-    # Guard locally: the bridge only logs "no file at ..." into Cavalry's Log
-    # window, which the caller cannot see, and a missing *directory* would make
-    # the cd below fail under set -e with a raw shell error.
+    # Guard locally: the bridge only reports "no file at ..." after the fact,
+    # and a missing *directory* would make the cd below fail under set -e with
+    # a raw shell error.
     [ -f "$1" ] || { echo "ERROR: script not found: $1" >&2; exit 2; }
     abs=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-    payload=$(python3 -c 'import json,sys; print(json.dumps({"path": sys.argv[1]}))' "$abs")
+    payload=$(python3 -c 'import json,sys; print(json.dumps({"path": sys.argv[1], "id": sys.argv[2]}))' "$abs" "$REQ_ID")
 fi
 
-STATUS="${CAVALRY_BRIDGE_STATUS:-$(discover_status)}"
+STATUS="${CAVALRY_BRIDGE_STATUS:-$(discover status)}"
 if [ -z "$STATUS" ]; then
     echo "ERROR: bridge did not report a status file path on 127.0.0.1:$PORT." >&2
     echo "       Is Cavalry running with an up-to-date Cavalry Bridge started?" >&2
@@ -59,7 +67,14 @@ if [ -z "$STATUS" ]; then
     exit 1
 fi
 
-before=$(cat "$STATUS" 2>/dev/null || true)
+RESULTS=$(discover results)
+if [ -n "$RESULTS" ]; then
+    WATCH="$RESULTS/$REQ_ID.json"
+    before=""
+else
+    WATCH="$STATUS"
+    before=$(cat "$STATUS" 2>/dev/null || true)
+fi
 
 if ! curl -s -m 5 -X POST "http://127.0.0.1:$PORT/post" --data-binary "$payload" >/dev/null; then
     echo "ERROR: bridge not reachable on 127.0.0.1:$PORT — is Cavalry running with Cavalry Bridge started?" >&2
@@ -68,10 +83,18 @@ fi
 
 elapsed=0
 while [ "$elapsed" -lt "$((TIMEOUT * 2))" ]; do
-    now=$(cat "$STATUS" 2>/dev/null || true)
+    now=$(cat "$WATCH" 2>/dev/null || true)
     if [ -n "$now" ] && [ "$now" != "$before" ]; then
+        if [ -n "$RESULTS" ]; then rm -f "$WATCH"; fi
         echo "$now"
-        case "$now" in *'"ok":true'*) exit 0 ;; *) exit 1 ;; esac
+        case "$now" in *'"ok":true'*) exit 0 ;; esac
+        printf '%s' "$now" | python3 -c 'import json,sys
+try:
+    e = json.load(sys.stdin).get("error")
+    if e: print("Cavalry error: " + e, file=sys.stderr)
+except Exception:
+    pass' || true
+        exit 1
     fi
     sleep 0.5
     elapsed=$((elapsed + 1))
