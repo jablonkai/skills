@@ -1,6 +1,6 @@
 # Simulation — rigid body, cloth, soft body, particles, fluid
 
-Verified on Blender 5.2.0 LTS. Physics is one of the areas where operators are unavoidable:
+Verified on Blender 5.2.2 LTS. Physics is one of the areas where operators are unavoidable:
 `rigidbody.*` and `ptcache.*` have no data-API equivalent.
 
 Every sim needs frames **stepped in order from the start**. Jumping to the last frame gives

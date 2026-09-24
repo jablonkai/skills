@@ -20,7 +20,9 @@ Blender (`/Applications/Blender.app`) is scriptable in **Python** against `bpy`,
 Blender GUI that executes whatever build script is POSTed to `127.0.0.1:8736`. Because it
 runs in the live session on the main thread, `bpy.data` writes are legal, the viewport
 updates as you build, and viewport screenshots work. Everything documented here was executed
-and verified on **Blender 5.2.0 LTS** (bundled Python 3.13).
+and verified on **Blender 5.2.2 LTS** (bundled Python 3.13) — the current stable release;
+5.2 is the LTS line, so this holds for every 5.2.x. Check `version` in the ping reply: on
+a newer release, trust the live session over these notes and probe before assuming.
 
 - [scripts/blender-bridge.py](scripts/blender-bridge.py) — the bridge to run inside Blender.
 - [scripts/blender-send.sh](scripts/blender-send.sh) — send a `.py` file (or `-c 'inline'`)
@@ -32,21 +34,24 @@ and verified on **Blender 5.2.0 LTS** (bundled Python 3.13).
 
 **Read [references/gotchas.md](references/gotchas.md) before writing anything.** Blender's
 API changed substantially in 5.x and most of what a model has memorised — `action.fcurves`,
-`scene.node_tree`, `mod["Socket_2"]`, `BLENDER_EEVEE_NEXT` — is now wrong.
+`scene.node_tree`, `mod["Socket_2"]`, `BLENDER_EEVEE_NEXT`, `use_nodes = True` — is now wrong
+or deprecated.
 
 ## The control loop
 
 1. **User starts the bridge** (one-time). This cannot be done remotely — if
    `bash scripts/blender-send.sh --ping` gets no answer, ask the user to do one of:
    - copy [scripts/blender-bridge.py](scripts/blender-bridge.py) to
-     `~/Library/Application Support/Blender/5.2/scripts/startup/blender_bridge.py` and
-     restart Blender — it then starts automatically on every launch (**recommended**), or
+     `~/Library/Application Support/Blender/5.2/scripts/startup/blender_bridge.py` (the
+     folder is the running `major.minor` version) and restart Blender — it then starts automatically on every launch (**recommended**), or
    - open the **Scripting** workspace, paste the file into the text editor, press
      **Run Script** (⌥P) — lasts for that session, or
    - install it as an add-on via Preferences ▸ Add-ons ▸ Install.
 
    A successful ping returns
-   `{"ok": true, "bridge": "blender", "version": "5.2.0 LTS", "file": null, ...}`.
+   `{"ok": true, "bridge": "blender", "bridge_version": "1.2.0", "version": "5.2.2 LTS", ...}`.
+   An older `bridge_version` means the user's installed copy is stale — ask them to
+   re-copy the file (older copies crash `metrics()` on cameras and empties).
 2. **Look before you build**: `bash scripts/blender-send.sh --state` returns objects and
    types, collections, materials, node groups, frame range, resolution, engine and whether
    the file has unsaved changes — cheaper than writing a script to ask.
@@ -55,7 +60,10 @@ API changed substantially in 5.x and most of what a model has memorised — `act
 4. **Send it**: `OUT=/path/to/outdir bash scripts/blender-send.sh /path/build.py`. The bridge
    runs it in the live session and returns the script's **captured stdout**; on error it
    returns the **traceback** and the sender exits non-zero. `BLENDER_SEND_TIMEOUT=900`
-   (seconds) for heavy renders and bakes.
+   (seconds) for heavy renders and bakes. The script runs inside Blender, so your shell's
+   environment does **not** reach it — parameterise a send with
+   `--arg quality=final --arg samples=128`, read back as `ARGS.get("quality", "preview")`
+   (values are strings).
 5. **Feedback**: returned stdout first; `metrics(...)` for structured geometry checks;
    `snapshot(...)` for a viewport PNG to Read; `render(...)` for the real thing.
 6. **Iterate**: inspect, fix, re-send. Scripts must be **re-runnable** — build inside
@@ -80,20 +88,22 @@ API changed substantially in 5.x and most of what a model has memorised — `act
 ## Injected namespace
 
 Pre-imported: `bpy`, `bmesh`, `mathutils`, `Vector`, `Matrix`, `Euler`, `Quaternion`,
-`math`, `os`, `json`, plus `OUT` (from `$OUT`, also `os.environ["OUT"]`) and these helpers:
+`math`, `os`, `json`, plus `OUT` (from `$OUT`, also `os.environ["OUT"]`), `ARGS` (the
+`--arg KEY=VALUE` strings as a dict) and these helpers:
 
 | Helper | Does |
 |---|---|
-| `stage(name)` | get-or-recreate a named collection, make it active — makes re-sends idempotent |
+| `stage(name)` | get-or-recreate a named collection, make it active — makes re-sends idempotent (also frees the meshes, materials and node groups its old objects leave orphaned) |
 | `sync()` | `view_layer.update()`; **required before reading `matrix_world`** |
 | `evaluated(ob)` | the depsgraph-evaluated object (modifier / geometry-nodes result) |
 | `frame(n)` | `frame_set(n)` + depsgraph update |
 | `metrics(objs, path=)` | dict + JSON: counts, verts/tris, world bbox, materials, frame range |
 | `snapshot(path, view=, shading=, fit=)` | viewport PNG (fast visual check) |
-| `render(path, engine=, samples=, ...)` | real EEVEE/Cycles still; restores every setting |
+| `render(path, engine=, samples=, ...)` | real EEVEE/Cycles still; restores every setting it touches |
 | `frame_view(objs, view=)` | aim the viewport (`ISO`/`FRONT`/`TOP`/`CAMERA`/…) |
 | `world_bounds(objs)` | world-space `(min, max)` |
 | `fcurves(ob)` / `fcurve(ob, path, i)` / `channelbag(ob)` | slotted-action F-curve access |
+| `gn_input(mod, name, value=, attribute=)` | read/set a geometry-nodes modifier input by name |
 | `ui_override(area)` | context override for the few `bpy.ops` that need an editor |
 
 ## Cheatsheet
@@ -120,7 +130,6 @@ sync()                                        # before ANY matrix_world read
 
 ```python
 m = bpy.data.materials.new("Shell")
-m.use_nodes = True
 b = m.node_tree.nodes["Principled BSDF"]
 b.inputs["Base Color"].default_value = (0.75, 0.2, 0.15, 1.0)
 b.inputs["Roughness"].default_value = 0.35
@@ -177,7 +186,9 @@ bpy.ops.wm.save_as_mainfile(filepath=OUT + "/hero.blend", copy=True)
 - **`snapshot(...)`** is the fast visual check — a viewport OpenGL PNG, no full render.
   `shading="RENDERED"` previews materials and lights.
 - **`render(...)`** for the deliverable. It raises a diagnostic `RuntimeError` if Blender
-  reported success but wrote nothing.
+  reported success but wrote nothing. It restores every setting it touched afterwards — so
+  when the user also wants a `.blend` that re-renders the same shot (F12), set resolution,
+  engine and samples on the scene yourself before saving.
 - **Hand-off**: a `.glb`/`.blend` in `$OUT` opens in whatever the user already has.
 
 ## Security

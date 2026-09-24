@@ -1,4 +1,4 @@
-# Blender scripting gotchas — verified on Blender 5.2.0 LTS (Python 3.13)
+# Blender scripting gotchas — verified on Blender 5.2.2 LTS (Python 3.13)
 
 Everything here was reproduced through the bridge on this machine. Most of it contradicts
 what older tutorials, forum answers, and pre-5.x training data will tell you — Blender's
@@ -38,15 +38,19 @@ Curves now live under `action.layers[i].strips[j].channelbag(slot)`. Use the bri
 The Blender 4.x idiom is gone:
 
 ```python
-mod["Socket_2"] = 120.0        # TypeError: id properties not supported for this type
+mod["Socket_2"] = 120.0        # AttributeError: bpy_struct: no __getitem__ support
 ```
 
-5.x routes them through a typed interface:
+5.2 exposes them as real RNA properties, keyed by the socket **identifier**:
 
 ```python
-mod.properties.inputs["Socket_2"]["value"] = 120.0
+mod.properties.inputs.Socket_2.value = 120.0      # getattr(inputs, ident) for a variable
+mod.properties.inputs.Socket_2.type = "ATTRIBUTE" # VALUE | ATTRIBUTE
+mod.properties.inputs.Socket_2.attribute_name = "heat"
 ob.update_tag()
 ```
+
+Or skip the identifier lookup: `gn_input(mod, "Density", 120.0)` sets it by interface name.
 
 ### 4. A render can report success and write nothing
 
@@ -59,7 +63,10 @@ scene.render.use_compositing = False   # or give the group a NodeGroupOutput
 scene.render.use_sequencer = False     # or the VSE renders instead of the 3D scene
 ```
 
-Always check the file exists. The bridge's `render()` / `snapshot()` raise a diagnostic
+Always check the file exists — at `scene.render.filepath` itself. In 5.2 a still written with
+`write_still=True` lands at the path exactly as given, while `render.frame_path()` still
+reports it with a frame number appended, so testing `frame_path()` reads as a failure even
+after a good render. The bridge's `render()` / `snapshot()` raise a diagnostic
 `RuntimeError` naming the likely cause instead of returning a phantom path.
 
 ### 5. Viewport navigation operators are no-ops from the bridge
@@ -104,7 +111,11 @@ scene.view_settings.view_transform = "AgX"              # works anyway
 ```
 
 Assign the value and catch the exception; do not gate on the enum list. Cycles is an add-on
-(enabled by default), which is why it is missing from the engine enum.
+(enabled by default), which is why it is missing from the engine enum. `--state` lists the
+engines that really accept assignment.
+
+`view_settings.look` is filtered by the current view transform: set `view_transform = "AgX"`
+**before** `look = "AgX - Medium High Contrast"`, or the look is rejected.
 
 ## Renamed / moved in 5.x
 
@@ -115,13 +126,19 @@ Assign the value and catch the exception; do not gate on the enum list. Cycles i
 | `glare.glare_type = "BLOOM"` | `glare.inputs["Type"]` — compositor settings became input sockets |
 | `BLENDER_EEVEE_NEXT` (4.2–4.5) | `BLENDER_EEVEE` |
 | `sky.sky_type = "NISHITA"` | `"SINGLE_SCATTERING"` / `"MULTIPLE_SCATTERING"` |
+| `ShaderNodeTexMusgrave` | `ShaderNodeTexNoise` with `noise_type` (`FBM`, `MULTIFRACTAL`, …) |
+| `mat.use_nodes = True` / `world.use_nodes` | deprecated — new materials and worlds already have a node tree |
+| `scene.use_nodes = True` (compositor) | deprecated — `render.use_compositing` + `compositing_node_group` |
+| Line Art `modifier.thickness` | `modifier.radius` (metres) |
+| VSE `fit_method="SCALE_TO_FIT"` | `"FIT"` / `"FILL"` / `"STRETCH"` / `"ORIGINAL"` |
+| ffmpeg `codec = "HEVC"` | `"H265"` |
 | object type `GPENCIL`, `bpy.ops.gpencil.*` | `GREASEPENCIL`, `bpy.data.grease_pencils` (Grease Pencil v3) |
 | `sequence_editor.sequences` | `sequence_editor.strips` (`.strips_all` for nested) |
 | `new_effect(..., frame_end=, seq1=, seq2=)` | `new_effect(..., length=, input1=, input2=)` |
 | `bpy.ops.export_scene.obj` | `bpy.ops.wm.obj_export` (same for stl/ply/usd/alembic) |
 | `mesh.auto_smooth_angle` | `bpy.ops.object.shade_auto_smooth()` — adds a `NODES` modifier |
 | `particles.child_nbr` | `child_percent` (viewport) / `rendered_child_count` (render) |
-| `mod["Socket_2"]` | `mod.properties.inputs["Socket_2"]["value"]` |
+| `mod["Socket_2"]` | `mod.properties.inputs.Socket_2.value` (or `gn_input(mod, name, v)`) |
 | `action.fcurves` | `action.layers[0].strips[0].channelbag(slot).fcurves` |
 
 Only FBX and glTF still live under `bpy.ops.import_scene` / `export_scene`; everything else

@@ -1,6 +1,6 @@
 # Rendering — engines, passes, compositor, output
 
-Verified on Blender 5.2.0 LTS.
+Verified on Blender 5.2.2 LTS.
 
 ## Engines
 
@@ -61,7 +61,7 @@ sc.display.shading.color_type = "OBJECT" # MATERIAL | OBJECT | RANDOM | SINGLE |
 ```python
 vs = sc.view_settings
 vs.view_transform = "AgX"         # AgX | Filmic | Standard | Khronos PBR Neutral | Raw
-vs.look = "AgX - Medium High Contrast"
+vs.look = "AgX - Medium High Contrast"   # set AFTER view_transform — looks are filtered by it
 vs.exposure = 0.2
 vs.gamma = 1.0
 sc.sequencer_colorspace_settings.name = "sRGB"
@@ -107,8 +107,7 @@ sc.render.image_settings.file_format = "OPEN_EXR_MULTILAYER"
 ```python
 g = bpy.data.node_groups.new("Comp", "CompositorNodeTree")
 sc.compositing_node_group = g
-sc.use_nodes = True
-sc.render.use_compositing = True
+sc.render.use_compositing = True          # sc.use_nodes is deprecated in 5.x — don't set it
 
 g.interface.new_socket("Image", in_out="INPUT",  socket_type="NodeSocketColor")
 g.interface.new_socket("Image", in_out="OUTPUT", socket_type="NodeSocketColor")
@@ -155,7 +154,7 @@ r.filepath = "/abs/path/out.png"
 r.image_settings.media_type = "IMAGE"     # IMAGE | MULTI_LAYER_IMAGE | VIDEO
 r.image_settings.file_format = "PNG"
 r.image_settings.color_mode = "RGBA"      # BW | RGB | RGBA
-r.image_settings.color_depth = "16"       # '8' | '16' (| '32' for EXR)
+r.image_settings.color_depth = "16"       # '8' | '10' | '12' | '16' | '32' (format-dependent)
 r.image_settings.compression = 15
 ```
 
@@ -170,9 +169,9 @@ TARGA_RAW TIFF OPEN_EXR_MULTILAYER FFMPEG`.
 r.image_settings.media_type = "VIDEO"
 r.image_settings.file_format = "FFMPEG"
 r.ffmpeg.format = "MPEG4"                 # MPEG4 | QUICKTIME | MKV | WEBM | AVI …
-r.ffmpeg.codec = "H264"                   # H264 | HEVC | VP9 | AV1 | PRORES | FFV1 …
+r.ffmpeg.codec = "H264"                   # H264 | H265 | AV1 | WEBM (VP9) | PRORES | FFV1 …
 r.ffmpeg.constant_rate_factor = "HIGH"    # LOSSLESS PERC_LOSSLESS HIGH MEDIUM LOW …
-r.ffmpeg.ffmpeg_preset = "GOOD"
+r.ffmpeg.ffmpeg_preset = "GOOD"           # BEST | GOOD | REALTIME
 r.ffmpeg.audio_codec = "AAC"
 ```
 
@@ -191,7 +190,8 @@ Raw form:
 ```python
 sc.render.filepath = "/abs/path/still.png"
 bpy.ops.render.render(write_still=True)
-os.path.exists(bpy.path.abspath(sc.render.frame_path()))   # ALWAYS verify
+os.path.exists(sc.render.filepath)        # ALWAYS verify — at the path you set
+# NOT frame_path(): in 5.2 it reports "still.png0001.png" although the file is "still.png"
 ```
 
 Animation:

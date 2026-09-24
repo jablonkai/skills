@@ -16,34 +16,44 @@ def link(name, data, location=(0, 0, 0)):
     return ob
 
 
-# ---- geometry: a rounded body on a backdrop ------------------------------------------
+# ---- geometry: a rounded body on a sweep backdrop -------------------------------------
 me = bpy.data.meshes.new("Body")
 bm = bmesh.new()
 bmesh.ops.create_cube(bm, size=2.0)
-bmesh.ops.bevel(bm, geom=list(bm.edges), offset=0.12, segments=6, affect="EDGES")
+bmesh.ops.bevel(bm, geom=list(bm.edges), offset=0.18, segments=5, profile=0.5,
+                affect="EDGES")
 bm.to_mesh(me)
 bm.free()
 body = link("Body", me, (0, 0, 1.0))
 body.data.shade_smooth()
+# Weighted normals keep the flat faces flat and the bevels round, without a subsurf
+# pass that would bloat the silhouette.
+wn = body.modifiers.new("WeightedNormal", "WEIGHTED_NORMAL")
+wn.keep_sharp = True
 
-sub = body.modifiers.new("Sub", "SUBSURF")
-sub.levels, sub.render_levels = 1, 2
-
-# a curved backdrop: a grid bent by a Simple Deform modifier
+# A photo-studio sweep: floor -> quarter-circle cove -> wall, as a profile in YZ that is
+# extruded along X. Building it in bmesh beats bending a plane with a deform modifier,
+# whose result depends on the grid's orientation and origin.
+profile = [(y, 0.0) for y in (-8.0, -4.0, 0.0, 2.0)]
+R = 3.0
+for i in range(1, 12):
+    a = math.radians(90 * i / 12)
+    profile.append((2.0 + R * math.sin(a), R - R * math.cos(a)))
+profile += [(2.0 + R, R), (2.0 + R, 10.0)]
 floor_me = bpy.data.meshes.new("Backdrop")
 bm = bmesh.new()
-bmesh.ops.create_grid(bm, x_segments=1, y_segments=32, size=6.0)
+left = [bm.verts.new((-16.0, y, z)) for y, z in profile]
+right = [bm.verts.new((16.0, y, z)) for y, z in profile]
+for i in range(len(profile) - 1):
+    bm.faces.new((left[i], left[i + 1], right[i + 1], right[i]))
+bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
 bm.to_mesh(floor_me)
 bm.free()
-floor = link("Backdrop", floor_me, (0, 2.0, 0))
-bend = floor.modifiers.new("Bend", "SIMPLE_DEFORM")
-bend.deform_method = "BEND"
-bend.angle = math.radians(90)
-bend.deform_axis = "X"
+floor = link("Backdrop", floor_me)
+floor_me.shade_smooth()
 
 # ---- materials ------------------------------------------------------------------------
 shell = bpy.data.materials.new("Shell")
-shell.use_nodes = True
 b = shell.node_tree.nodes["Principled BSDF"]
 b.inputs["Base Color"].default_value = (0.72, 0.18, 0.14, 1.0)
 b.inputs["Roughness"].default_value = 0.28
@@ -53,7 +63,6 @@ b.inputs["Coat Roughness"].default_value = 0.08
 body.data.materials.append(shell)
 
 paper = bpy.data.materials.new("Backdrop")
-paper.use_nodes = True
 pb = paper.node_tree.nodes["Principled BSDF"]
 pb.inputs["Base Color"].default_value = (0.85, 0.85, 0.87, 1.0)
 pb.inputs["Roughness"].default_value = 0.9
@@ -62,7 +71,6 @@ floor.data.materials.append(paper)
 # ---- world: dim, so the lights do the work --------------------------------------------
 world = bpy.data.worlds.new("StudioWorld")
 bpy.context.scene.world = world
-world.use_nodes = True
 bg = world.node_tree.nodes["Background"]
 bg.inputs["Color"].default_value = (0.02, 0.02, 0.025, 1.0)
 bg.inputs["Strength"].default_value = 1.0
@@ -113,11 +121,13 @@ sc.view_settings.look = "AgX - Medium High Contrast"
 # all back afterwards.
 root = bpy.context.view_layer.layer_collection
 hidden = [lc for lc in root.children if lc.collection is not coll and not lc.exclude]
-loose = [o for o in sc.collection.objects if not o.hide_render]
+# snapshot() is an OpenGL VIEWPORT render (obeys hide_viewport); render() obeys hide_render.
+loose = [(o, o.hide_render, o.hide_viewport) for o in sc.collection.objects
+         if not (o.hide_render and o.hide_viewport)]
 for lc in hidden:
     lc.exclude = True
-for o in loose:
-    o.hide_render = True
+for o, _, _ in loose:
+    o.hide_render = o.hide_viewport = True
 
 try:
     # ---- verify --------------------------------------------------------------------------
@@ -131,8 +141,8 @@ try:
 finally:
     for lc in hidden:
         lc.exclude = False
-    for o in loose:
-        o.hide_render = False
+    for o, was_render, was_viewport in loose:
+        o.hide_render, o.hide_viewport = was_render, was_viewport
 
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUTD, "product.blend"), copy=True)
 print("BLEND   ", os.path.join(OUTD, "product.blend"))

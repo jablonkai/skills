@@ -1,6 +1,6 @@
 # Video Sequence Editor — strips, effects, transitions
 
-Verified on Blender 5.2.0 LTS. `sequence_editor.sequences` was renamed to `.strips`, and
+Verified on Blender 5.2.2 LTS. `sequence_editor.sequences` was renamed to `.strips`, and
 `new_effect()` changed signature — the old keyword names raise `TypeError`.
 
 ## Setup
@@ -27,8 +27,8 @@ Otherwise an empty or partial sequencer silently produces an empty render.
 se.strips.new_effect(name, type, channel, frame_start, length=0,
                      input1=None, input2=None)
 se.strips.new_image(name, filepath, channel, frame_start, fit_method='ORIGINAL')
-se.strips.new_movie(name, filepath, channel, frame_start, fit_method='ORIGINAL')
-se.strips.new_sound(name, filepath, channel, frame_start)
+se.strips.new_movie(name, filepath, channel, frame_start, fit_method='ORIGINAL', stream=0)
+se.strips.new_sound(name, filepath, channel, frame_start, stream=0)
 se.strips.new_scene(name, scene, channel, frame_start)
 se.strips.new_meta(name, channel, frame_start)
 ```
@@ -55,8 +55,9 @@ title.color = (1, 1, 1, 1)
 # title.font = bpy.data.fonts.load("/path/Inter.ttf")
 ```
 
-Effect types: `ADD SUBTRACT ALPHA_OVER ALPHA_UNDER GAMMA_CROSS MULTIPLY OVER_DROP
-WIPE GLOW TRANSFORM COLOR SPEED MULTICAM ADJUSTMENT GAUSSIAN_BLUR TEXT COLORMIX CROSS`.
+Effect types: `CROSS ADD SUBTRACT ALPHA_OVER ALPHA_UNDER GAMMA_CROSS COMPOSITOR MULTIPLY
+WIPE GLOW COLOR SPEED MULTICAM ADJUSTMENT GAUSSIAN_BLUR TEXT COLORMIX`. There is no
+`TRANSFORM` or `OVER_DROP` effect any more — every strip has `.transform` built in.
 
 ## Media strips
 
@@ -69,7 +70,7 @@ snd = se.strips.new_sound(name="Music", filepath="/abs/track.wav",
                           channel=5, frame_start=1)
 ```
 
-`fit_method`: `SCALE_TO_FIT | SCALE_TO_FILL | FIT_TO_SCALE | ORIGINAL` (aliased as `FIT`).
+`fit_method`: `FIT | FILL | STRETCH | ORIGINAL`.
 
 An image strip covering several frames: extend `frame_final_duration` after creation, or
 append more entries to `img.elements`.
@@ -97,6 +98,7 @@ s.frame_final_duration
 s.frame_offset_start          # trim in
 s.frame_offset_end            # trim out
 s.channel
+s.connections                 # 5.2: strips linked to this one (e.g. a movie's sound)
 
 s.transform.offset_x = 10
 s.transform.offset_y = 0
@@ -106,8 +108,8 @@ s.transform.rotation = math.radians(3)
 s.transform.origin = (0.5, 0.5)
 s.crop.min_x = 0
 
-s.blend_type = "ALPHA_OVER"   # REPLACE CROSS ALPHA_OVER ALPHA_UNDER ADD SUBTRACT
-                              # MULTIPLY OVER_DROP GAMMA_CROSS COLOR_MIX
+s.blend_type = "ALPHA_OVER"   # REPLACE CROSS ALPHA_OVER ALPHA_UNDER ADD SUBTRACT MULTIPLY
+                              # SCREEN OVERLAY DARKEN LIGHTEN DIFFERENCE GAMMA_CROSS …
 s.blend_alpha = 1.0
 s.mute = False
 s.lock = False
@@ -136,7 +138,8 @@ meta = se.strips.new_meta(name="Act1", channel=6, frame_start=1)
 # move strips into meta.strips to group them
 
 mod = s.modifiers.new(name="CB", type="COLOR_BALANCE")
-# BRIGHT_CONTRAST | COLOR_BALANCE | CURVES | HUE_CORRECT | MASK | TONEMAP | WHITE_BALANCE
+# BRIGHT_CONTRAST COLOR_BALANCE COMPOSITOR CURVES HUE_CORRECT MASK TONEMAP WHITE_BALANCE
+# audio strips: SOUND_EQUALIZER PITCH ECHO
 ```
 
 ## Rendering the sequence

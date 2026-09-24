@@ -1,6 +1,6 @@
 # Modeling — bmesh, modifiers, curves, text, UV
 
-Verified on Blender 5.2.0 LTS. All vertex/face counts below are the real numbers this code
+Verified on Blender 5.2.2 LTS. All vertex/face counts below are the real numbers this code
 produced.
 
 ## bmesh — the way to author geometry from script

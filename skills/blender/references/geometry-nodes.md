@@ -1,6 +1,6 @@
 # Geometry Nodes — building trees from script
 
-Verified on Blender 5.2.0 LTS. The important 5.x change is how the **modifier exposes its
+Verified on Blender 5.2.2 LTS. The important 5.x change is how the **modifier exposes its
 inputs** — see "Driving the modifier" below; the 4.x idiom raises `TypeError`.
 
 ## A complete scatter tree
@@ -56,25 +56,27 @@ The interface assigns each socket a stable identifier (`Socket_0`, `Socket_1`, �
 #  ('Density',  'Socket_2', 'INPUT')]
 ```
 
-Then set the value — **Blender 5.x path**:
+Then set the value — **Blender 5.2 path** (inputs are real RNA properties now):
 
 ```python
-mod.properties.inputs["Socket_2"]["value"] = 120.0
+mod.properties.inputs.Socket_2.value = 120.0
+getattr(mod.properties.inputs, ident).value = 120.0     # identifier held in a variable
 ob.update_tag()
 ```
 
 `mod["Socket_2"] = 120.0` (the Blender 4.x idiom every tutorial shows) raises
-`TypeError: id properties not supported for this type`.
+`AttributeError: bpy_struct: no __getitem__ support for this type`.
 
-Each entry is an `IDPropertyGroup`; `to_dict()` shows what it holds:
+The bridge helper does the name → identifier lookup for you:
 
 ```python
-mod.properties.inputs["Socket_2"].to_dict()
-# {'value': 40.0, 'type': 1, 'attribute_name': ''}
+gn_input(mod, "Density", 120.0)          # set a constant; returns the value
+gn_input(mod, "Density")                 # read
+gn_input(mod, "Density", attribute="heat")   # drive it from a named attribute
 ```
 
-Set `attribute_name` (and the appropriate `type`) to drive the socket from a mesh attribute
-instead of a constant.
+Each input has `value`, `type` (`"VALUE"` | `"ATTRIBUTE"`) and `attribute_name`. Output
+attributes live under `mod.properties.outputs.<identifier>.attribute_name`.
 
 ## Fields — position, normal, and per-element math
 
@@ -158,5 +160,5 @@ print([t for t in dir(bpy.types) if t.startswith("GeometryNode")])
 ## Reusing a tree
 
 A node group is a data-block: assign the same `g` to a `NODES` modifier on many objects and
-give each one different `properties.inputs[...]` values. Instance it inside another tree with
+give each one different `gn_input(...)` values. Instance it inside another tree with
 a `GeometryNodeGroup` node whose `node_tree` you set.

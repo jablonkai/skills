@@ -1,6 +1,6 @@
 # Core API — data-blocks, scene graph, transforms, depsgraph
 
-Verified on Blender 5.2.0 LTS. `bpy`, `bmesh`, `mathutils`, `Vector`, `Matrix`, `Euler`,
+Verified on Blender 5.2.2 LTS. `bpy`, `bmesh`, `mathutils`, `Vector`, `Matrix`, `Euler`,
 `Quaternion`, `math`, `os`, `json` and the bridge helpers are pre-imported in every script.
 
 ## Data-blocks vs objects

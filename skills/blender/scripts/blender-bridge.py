@@ -10,9 +10,10 @@
 #   GET  /state        -> cheap scene summary (objects, collections, frame range, engine)
 #   POST /run  {code}  -> exec inline code   ; {path} -> exec a .py file
 #                         optional {out} sets the OUT dir (env + an injected global)
+#                         optional {args} -> injected ARGS dict of strings
 #
 # Install (any one):
-#   1. ~/Library/Application Support/Blender/5.2/scripts/startup/blender_bridge.py
+#   1. ~/Library/Application Support/Blender/<major.minor>/scripts/startup/blender_bridge.py
 #      -> starts automatically on every launch (recommended)
 #   2. Scripting workspace -> text editor -> paste -> Run Script (Alt+P)
 #   3. Preferences > Add-ons > Install... (it carries bl_info)
@@ -41,7 +42,7 @@ import threading
 import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-BRIDGE_VERSION = "1.1.0"
+BRIDGE_VERSION = "1.2.0"
 PORT = int(os.environ.get("BLENDER_BRIDGE_PORT", "8736"))
 
 _jobs = queue.Queue()
@@ -64,8 +65,7 @@ def stage(name, clear=True, activate=True):
     if coll is not None and clear:
         for child in list(coll.children):
             _purge_collection(child)
-        for ob in list(coll.objects):
-            bpy.data.objects.remove(ob, do_unlink=True)
+        _remove_objects(list(coll.objects))
     if coll is None:
         coll = bpy.data.collections.new(name)
     scene = bpy.context.scene
@@ -81,9 +81,34 @@ def stage(name, clear=True, activate=True):
 def _purge_collection(coll):
     for child in list(coll.children):
         _purge_collection(child)
-    for ob in list(coll.objects):
-        bpy.data.objects.remove(ob, do_unlink=True)
+    _remove_objects(list(coll.objects))
     bpy.data.collections.remove(coll)
+
+
+def _remove_objects(objs):
+    """Remove objs plus the data they leave orphaned (meshes, materials, node groups).
+
+    Without this every re-send stacks up "Shell.001", "Shell.002" ... because
+    removing an object leaves its mesh and materials behind with zero users.
+    Only blocks reachable from these objects AND left with no users go — the
+    rest of the user's file, including their own orphans, is untouched.
+    """
+    datas, owned = [], []
+    for ob in objs:
+        if ob.data is not None:
+            datas.append(ob.data)
+        owned.extend(s.material for s in ob.material_slots if s.material)
+        owned.extend(m.node_group for m in getattr(ob, "modifiers", ())
+                     if getattr(m, "node_group", None))
+    for ob in objs:
+        bpy.data.objects.remove(ob, do_unlink=True)
+    for batch in (datas, owned):
+        seen = {}
+        for idb in batch:
+            seen[idb.as_pointer()] = idb
+        orphans = [idb for idb in seen.values() if idb.users == 0]
+        if orphans:
+            bpy.data.batch_remove(orphans)
 
 
 def _find_layer_collection(root, target):
@@ -165,6 +190,10 @@ _VIEWS = {
 }
 
 
+# Object types whose bound_box is a placeholder, not geometry.
+_NO_GEOMETRY = {"CAMERA", "LIGHT", "SPEAKER", "EMPTY", "LIGHT_PROBE"}
+
+
 def sync():
     """Flush pending transform changes into matrix_world.
 
@@ -183,7 +212,7 @@ def world_bounds(objs):
     hi = mathutils.Vector((-math.inf,) * 3)
     found = False
     for ob in objs:
-        if ob.type in {"CAMERA", "LIGHT", "SPEAKER", "EMPTY"}:
+        if ob.type in _NO_GEOMETRY:
             continue
         for corner in ob.bound_box:
             world = ob.matrix_world @ mathutils.Vector(corner)
@@ -238,6 +267,30 @@ def frame_view(objs=None, view=None, margin=1.15, refit=True, aspect=None):
         return rv3d
 
 
+def _save_image_format(r):
+    img = r.image_settings
+    return (img.media_type, img.file_format, img.color_mode)
+
+
+def _set_png(r):
+    # file_format is gated by media_type: "PNG" is rejected while a VIDEO
+    # (FFMPEG) output is configured, so switch the media type first.
+    img = r.image_settings
+    img.media_type = "IMAGE"
+    img.file_format = "PNG"
+
+
+def _restore_image_format(r, saved):
+    img = r.image_settings
+    media_type, file_format, color_mode = saved
+    img.media_type = media_type      # before file_format, for the same reason
+    img.file_format = file_format
+    try:
+        img.color_mode = color_mode
+    except TypeError:
+        pass
+
+
 def snapshot(path, width=960, height=600, shading="MATERIAL", fit="all", view=None,
              objs=None, overlays=False):
     """Viewport OpenGL PNG — the fast visual feedback signal (no full render).
@@ -250,11 +303,11 @@ def snapshot(path, width=960, height=600, shading="MATERIAL", fit="all", view=No
     r = scene.render
     saved = (
         r.filepath, r.resolution_x, r.resolution_y, r.resolution_percentage,
-        r.image_settings.file_format,
     )
+    saved_format = _save_image_format(r)
     r.filepath = os.path.abspath(path)
     r.resolution_x, r.resolution_y, r.resolution_percentage = width, height, 100
-    r.image_settings.file_format = "PNG"
+    _set_png(r)
     try:
         if fit == "selected":
             frame_view(objs or bpy.context.selected_objects, view=view,
@@ -272,8 +325,8 @@ def snapshot(path, width=960, height=600, shading="MATERIAL", fit="all", view=No
                 space.shading.type, space.overlay.show_overlays = prev
         return _resolve_render_output(path, "snapshot()")
     finally:
-        (r.filepath, r.resolution_x, r.resolution_y, r.resolution_percentage,
-         r.image_settings.file_format) = saved
+        (r.filepath, r.resolution_x, r.resolution_y, r.resolution_percentage) = saved
+        _restore_image_format(r, saved_format)
 
 
 def render(path, engine=None, samples=None, frame=None, width=None, height=None,
@@ -283,8 +336,11 @@ def render(path, engine=None, samples=None, frame=None, width=None, height=None,
     r = scene.render
     saved = (
         r.filepath, r.engine, r.resolution_x, r.resolution_y,
-        r.resolution_percentage, r.image_settings.file_format, r.film_transparent,
+        r.resolution_percentage, r.film_transparent,
     )
+    saved_format = _save_image_format(r)
+    saved_samples = (scene.cycles.samples if hasattr(scene, "cycles") else None,
+                     scene.eevee.taa_render_samples)
     saved_frame = scene.frame_current
     try:
         if engine:
@@ -296,7 +352,7 @@ def render(path, engine=None, samples=None, frame=None, width=None, height=None,
         if transparent is not None:
             r.film_transparent = transparent
         r.resolution_percentage = 100
-        r.image_settings.file_format = "PNG"
+        _set_png(r)
         r.filepath = os.path.abspath(path)
         if samples is not None:
             if r.engine == "CYCLES":
@@ -309,8 +365,11 @@ def render(path, engine=None, samples=None, frame=None, width=None, height=None,
         return _resolve_render_output(path, "render()")
     finally:
         (r.filepath, r.engine, r.resolution_x, r.resolution_y,
-         r.resolution_percentage, r.image_settings.file_format,
-         r.film_transparent) = saved
+         r.resolution_percentage, r.film_transparent) = saved
+        _restore_image_format(r, saved_format)
+        if saved_samples[0] is not None:
+            scene.cycles.samples = saved_samples[0]
+        scene.eevee.taa_render_samples = saved_samples[1]
         scene.frame_set(saved_frame)
 
 
@@ -377,6 +436,38 @@ def fcurve(target, data_path, index=0, ensure=True):
     return cb.fcurves.new(data_path, index=index)
 
 
+def gn_input(mod, name, value=None, attribute=None):
+    """Read or set a geometry-nodes modifier input by its interface NAME.
+
+    Blender 5.2 exposes inputs as RNA properties keyed by socket identifier
+    (mod.properties.inputs.Socket_2.value); mod["Socket_2"] no longer works.
+    This looks the identifier up from the name. Pass value= for a constant,
+    or attribute="name" to drive the input from a named attribute.
+    Returns the current value (or attribute name).
+    """
+    ident = None
+    for item in mod.node_group.interface.items_tree:
+        if (item.item_type == "SOCKET" and item.in_out == "INPUT"
+                and item.name == name):
+            ident = item.identifier
+            break
+    if ident is None:
+        raise KeyError("node group %r has no input named %r"
+                       % (mod.node_group.name, name))
+    prop = getattr(mod.properties.inputs, ident)
+    if attribute is not None:
+        prop.type = "ATTRIBUTE"
+        prop.attribute_name = attribute
+    elif value is not None:
+        if hasattr(prop, "type"):
+            prop.type = "VALUE"
+        prop.value = value
+    mod.id_data.update_tag()
+    if hasattr(prop, "type") and prop.type == "ATTRIBUTE":
+        return prop.attribute_name
+    return prop.value
+
+
 def metrics(objs=None, path=None):
     """Structured geometry check — verify without eyeballing a picture."""
     scene = bpy.context.scene
@@ -390,12 +481,16 @@ def metrics(objs=None, path=None):
     lo = mathutils.Vector((math.inf,) * 3)
     hi = mathutils.Vector((-math.inf,) * 3)
     verts = tris = 0
+    has_bounds = False
     for ob in objs:
+        if ob.type in _NO_GEOMETRY:
+            continue
         for corner in ob.bound_box:
             world = ob.matrix_world @ mathutils.Vector(corner)
             for i in range(3):
                 lo[i] = min(lo[i], world[i])
                 hi[i] = max(hi[i], world[i])
+            has_bounds = True
         ev = ob.evaluated_get(dg)
         mesh = None
         try:
@@ -412,10 +507,12 @@ def metrics(objs=None, path=None):
         "types": sorted({o.type for o in objs}),
         "verts": verts,
         "tris": tris,
-        "bbox_min": [round(v, 4) for v in lo] if verts or objs else None,
-        "bbox_max": [round(v, 4) for v in hi] if verts or objs else None,
-        "materials": sorted({m.name for o in objs for m in o.data.materials
-                             if getattr(o.data, "materials", None) and m}),
+        "bbox_min": [round(v, 4) for v in lo] if has_bounds else None,
+        "bbox_max": [round(v, 4) for v in hi] if has_bounds else None,
+        # Empties have no data and cameras/lights have no material slots.
+        "materials": sorted({m.name for o in objs
+                             for m in getattr(o.data, "materials", None) or ()
+                             if m}),
         "frame_range": [scene.frame_start, scene.frame_end],
         "engine": scene.render.engine,
         "fps": scene.render.fps,
@@ -426,6 +523,17 @@ def metrics(objs=None, path=None):
     return data
 
 
+def _engines():
+    # RenderSettings.engine's enum_items reads back as ['BLENDER_EEVEE'] only;
+    # add-on engines (Cycles, Hydra, ...) are registered RenderEngine subclasses.
+    ids = ["BLENDER_EEVEE", "BLENDER_WORKBENCH"]
+    for cls in bpy.types.RenderEngine.__subclasses__():
+        ident = getattr(cls, "bl_idname", None)
+        if ident and ident not in ids:
+            ids.append(ident)
+    return ids
+
+
 def _state():
     scene = bpy.context.scene
     return {
@@ -433,8 +541,7 @@ def _state():
         "file": bpy.data.filepath or None,
         "scene": scene.name,
         "engine": scene.render.engine,
-        "engines": [i.identifier for i in
-                    bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items],
+        "engines": _engines(),
         "frame_range": [scene.frame_start, scene.frame_end, scene.frame_current],
         "fps": scene.render.fps,
         "resolution": [scene.render.resolution_x, scene.render.resolution_y],
@@ -452,6 +559,7 @@ _HELPERS = {
     "channelbag": channelbag,
     "fcurves": fcurves,
     "fcurve": fcurve,
+    "gn_input": gn_input,
     "frame_view": frame_view,
     "world_bounds": world_bounds,
     "stage": stage,
@@ -468,7 +576,7 @@ _HELPERS = {
 # Main-thread pump
 # --------------------------------------------------------------------------
 
-def _make_namespace(out):
+def _make_namespace(out, args=None):
     import bmesh as _bmesh
     ns = {
         "__name__": "__bridge__",
@@ -483,6 +591,7 @@ def _make_namespace(out):
         "os": os,
         "json": json,
         "OUT": out,
+        "ARGS": dict(args or {}),
     }
     ns.update(_HELPERS)
     return ns
@@ -493,7 +602,9 @@ def _execute(job):
     if out:
         os.makedirs(out, exist_ok=True)
         os.environ["OUT"] = out
-    ns = _make_namespace(out)
+    else:
+        os.environ.pop("OUT", None)   # don't leak the previous job's OUT
+    ns = _make_namespace(out, job.get("args"))
     code = job.get("code")
     filename = "<bridge>"
     if not code:

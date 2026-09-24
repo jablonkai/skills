@@ -1,6 +1,6 @@
 # Animation & rigging — keyframes, slotted actions, drivers, NLA, armatures
 
-Verified on Blender 5.2.0 LTS. **Read the first section before writing any animation code** —
+Verified on Blender 5.2.2 LTS. **Read the first section before writing any animation code** —
 `Action.fcurves` no longer exists and almost every example online still uses it.
 
 ## Keyframes

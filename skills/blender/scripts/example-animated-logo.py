@@ -32,7 +32,6 @@ cu.space_character = 1.05
 text = link("Logo", cu, (0, 0, 0))
 
 gold = bpy.data.materials.new("Gold")
-gold.use_nodes = True
 g = gold.node_tree.nodes["Principled BSDF"]
 g.inputs["Base Color"].default_value = (0.95, 0.72, 0.28, 1.0)
 g.inputs["Metallic"].default_value = 1.0
@@ -92,14 +91,11 @@ L(real.outputs["Geometry"], gout.inputs["Geometry"])
 mod = plane.modifiers.new("Scatter", "NODES")
 mod.node_group = gn
 
-# 5.x socket assignment — mod["Socket_2"] = ... raises TypeError.
-density_id = [it.identifier for it in gn.interface.items_tree
-              if it.item_type == "SOCKET" and it.name == "Density"][0]
-mod.properties.inputs[density_id]["value"] = 90.0
-plane.update_tag()
+# 5.2 socket assignment — mod["Socket_2"] = ... raises. gn_input() maps the interface name
+# to its identifier and sets mod.properties.inputs.<identifier>.value.
+gn_input(mod, "Density", 90.0)
 
 glow = bpy.data.materials.new("Glow")
-glow.use_nodes = True
 gb = glow.node_tree.nodes["Principled BSDF"]
 gb.inputs["Emission Color"].default_value = (1.0, 0.85, 0.5, 1.0)
 gb.inputs["Emission Strength"].default_value = 12.0
@@ -108,7 +104,6 @@ plane_me.materials.append(glow)
 # ---- world, light, camera ----------------------------------------------------------------
 world = bpy.data.worlds.new("LogoWorld")
 sc.world = world
-world.use_nodes = True
 bgn = world.node_tree.nodes["Background"]
 bgn.inputs["Color"].default_value = (0.01, 0.012, 0.02, 1.0)
 bgn.inputs["Strength"].default_value = 1.0
@@ -143,10 +138,11 @@ root = bpy.context.view_layer.layer_collection
 hidden = [lc for lc in root.children if lc.collection is not coll and not lc.exclude]
 # snapshot() is an OpenGL VIEWPORT render, so it obeys hide_viewport; render() obeys
 # hide_render. Set both or leftovers from the live session leak into one of the two.
-loose = [o for o in sc.collection.objects if not (o.hide_render and o.hide_viewport)]
+loose = [(o, o.hide_render, o.hide_viewport) for o in sc.collection.objects
+         if not (o.hide_render and o.hide_viewport)]
 for lc in hidden:
     lc.exclude = True
-for o in loose:
+for o, _, _ in loose:
     o.hide_render = o.hide_viewport = True
 
 try:
@@ -179,8 +175,8 @@ try:
 finally:
     for lc in hidden:
         lc.exclude = False
-    for o in loose:
-        o.hide_render = o.hide_viewport = False
+    for o, was_render, was_viewport in loose:
+        o.hide_render, o.hide_viewport = was_render, was_viewport
 
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUTD, "logo.blend"), copy=True)
 print("BLEND  ", os.path.join(OUTD, "logo.blend"))

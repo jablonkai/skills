@@ -1,15 +1,15 @@
 # Shading — materials, shader nodes, world, lights, cameras
 
-Verified on Blender 5.2.0 LTS.
+Verified on Blender 5.2.2 LTS.
 
 ## Principled BSDF
 
-`use_nodes = True` gives you a `Principled BSDF` wired to `Material Output`. Address inputs
+A new material already has a node tree — `Principled BSDF` wired to `Material Output`
+(`use_nodes` is deprecated in 5.x; don't set it). Address inputs
 **by name** — the 4.0 rename is still in force and 5.x added more:
 
 ```python
 m = bpy.data.materials.new("Metal")
-m.use_nodes = True
 bsdf = m.node_tree.nodes["Principled BSDF"]
 bsdf.inputs["Base Color"].default_value = (0.8, 0.5, 0.2, 1.0)   # RGBA, linear
 bsdf.inputs["Metallic"].default_value = 1.0
@@ -77,15 +77,16 @@ L(bump.outputs["Normal"], bsdf.inputs["Normal"])
 Useful node idnames: `ShaderNodeBsdfPrincipled`, `ShaderNodeBsdfDiffuse`,
 `ShaderNodeBsdfGlass`, `ShaderNodeBsdfTransparent`, `ShaderNodeEmission`,
 `ShaderNodeMixShader`, `ShaderNodeAddShader`, `ShaderNodeOutputMaterial`,
-`ShaderNodeTexImage`, `ShaderNodeTexNoise`, `ShaderNodeTexVoronoi`, `ShaderNodeTexWave`,
-`ShaderNodeTexMusgrave`, `ShaderNodeTexGradient`, `ShaderNodeTexChecker`,
+`ShaderNodeTexImage`, `ShaderNodeTexNoise` (`noise_type` covers the old Musgrave modes),
+`ShaderNodeTexVoronoi`, `ShaderNodeTexWave`, `ShaderNodeTexGradient`, `ShaderNodeTexChecker`,
 `ShaderNodeTexCoord`, `ShaderNodeUVMap`, `ShaderNodeMapping`, `ShaderNodeValToRGB`,
 `ShaderNodeMix` (set `data_type`), `ShaderNodeMath`, `ShaderNodeVectorMath`,
 `ShaderNodeBump`, `ShaderNodeNormalMap`, `ShaderNodeDisplacement`, `ShaderNodeAttribute`,
 `ShaderNodeObjectInfo`, `ShaderNodeFresnel`, `ShaderNodeLayerWeight`, `ShaderNodeGroup`.
 
-`ShaderNodeMix` uses numeric socket indices because the names repeat: inputs `[6]`/`[7]` are
-the A/B colour sockets, output `[2]` is the colour result.
+`ShaderNodeMix` uses numeric socket indices because the names repeat: with
+`data_type = "RGBA"`, inputs `[0]` is Factor, `[6]`/`[7]` are the A/B colour sockets, and
+output `[2]` is the colour result.
 
 ## Image textures
 
@@ -134,7 +135,6 @@ Socket types: `NodeSocketFloat`, `NodeSocketVector`, `NodeSocketColor`, `NodeSoc
 ```python
 w = bpy.data.worlds.new("Studio")
 bpy.context.scene.world = w
-w.use_nodes = True
 nt = w.node_tree                    # default nodes: Background -> World Output
 bg = nt.nodes["Background"]
 bg.inputs["Strength"].default_value = 1.5
