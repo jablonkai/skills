@@ -53,8 +53,11 @@ fi
 
 nohup "$BIN" "${args[@]}" >/dev/null 2>&1 &
 
+# The editor answers before the file has loaded (the window is briefly
+# Untitled), so with a file wait until it is the one open.
 for _ in $(seq 1 60); do
-  if out="$(node "$HERE/drawio-eval.mjs" --port "$PORT" --ping 2>/dev/null)"; then
+  if out="$(node "$HERE/drawio-eval.mjs" --port "$PORT" --ping 2>/dev/null)" &&
+     { [[ -z "${file:-}" ]] || grep -qF "\"path\": \"$file\"" <<<"$out"; }; then
     echo "$out"
     exit 0
   fi

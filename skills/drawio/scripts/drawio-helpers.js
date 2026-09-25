@@ -3,7 +3,7 @@
 // EditorUi (an App instance) is obtained through Draw.loadPlugin, which calls
 // back immediately once the editor has started.
 (function () {
-  if (window.D && window.D.__version === 1) return;
+  if (window.D && window.D.__version === 7) return;
 
   let ready = null;
   window.__drawioReady = function () {
@@ -17,7 +17,7 @@
   };
 
   const D = window.D = {
-    __version: 1,
+    __version: 7,
     ui: null,
     get graph() { return D.ui.editor.graph; },
     get model() { return D.ui.editor.graph.getModel(); },
@@ -91,8 +91,66 @@
       const g = c.geometry.clone(); g.width = w; g.height = h;
       D.model.setGeometry(c, g);
     },
+    // Undo what a layout left on edges — waypoints, pinned exit/entry anchors, label
+    // offsets and ELK's noEdgeStyle=1 (which makes them straight diagonals) — so they
+    // re-route orthogonally. Needed after moving cells a layout placed.
+    resetEdges(cells) {
+      const edges = cells ? [].concat(cells).map(D.cell) : D.cells(c => c.edge);
+      D.batch(() => {
+        for (const e of edges) {
+          const g = e.geometry.clone();
+          g.points = null; g.x = 0; g.y = 0; g.offset = null;
+          D.model.setGeometry(e, g);
+        }
+        for (const k of ['exitX', 'exitY', 'entryX', 'entryY', 'exitDx', 'exitDy', 'entryDx', 'entryDy', 'noEdgeStyle'])
+          D.graph.setCellStyles(k, null, edges);
+        D.graph.setCellStyles('edgeStyle', 'orthogonalEdgeStyle', edges);
+      });
+    },
+    // Straighten a top-to-bottom flowchart after a DOWN layout: the `main` ids go in one
+    // column, in that order, `o.spacing` (40) apart; every other top-level vertex goes in a column
+    // to the right, level with the node it branches off, or under it when that is a side
+    // node too. Edges are reset, and edges running back up the page leave and enter on the
+    // right so they don't cut through the main column. Returns the side node ids.
+    column(main, o) {
+      o = o || {};
+      const gap = o.gap || 80, spacing = o.spacing || 40, g = c => D.cell(c).geometry;
+      main = main.map(c => D.cell(c).id);
+      const inMain = new Set(main), top = D.graph.getDefaultParent();
+      const col = Math.max(...main.map(id => g(id).x + g(id).width / 2));
+      const x2 = col + Math.max(...main.map(id => g(id).width)) / 2 + gap;
+      const edges = D.cells(c => c.edge && c.source && c.target);
+      const side = D.cells(c => c.vertex && c.parent === top && !inMain.has(c.id)).map(c => c.id);
+      const placed = new Map();   // side id -> [x, y]
+      const clash = (x, y, w, h) => [...placed].some(([id, [px, py]]) =>
+        x < px + g(id).width && px < x + w && y < py + g(id).height + 20 && py < y + h + 20);
+      D.batch(() => {
+        let y = Math.min(...main.map(id => g(id).y));
+        for (const id of main) { D.move(id, col - g(id).width / 2, y); y += g(id).height + spacing; }
+        for (let progress = true; progress;) {
+          progress = false;
+          for (const id of side) {
+            if (placed.has(id)) continue;
+            const preds = edges.filter(e => e.target.id === id).map(e => e.source.id);
+            const from = preds.find(p => inMain.has(p)) || preds.find(p => placed.has(p));
+            if (!from) continue;
+            const w = g(id).width, h = g(id).height, f = g(from);
+            let x = x2, y = f.y + f.height / 2 - h / 2;
+            if (!inMain.has(from)) { x = f.x + (f.width - w) / 2; y = f.y + f.height + 50; }
+            while (clash(x, y, w, h)) y += 20;
+            D.move(id, x, y); placed.set(id, [x, y]); progress = true;
+          }
+        }
+      });
+      D.resetEdges();
+      const cy = c => { const q = g(c); return q.y + q.height / 2; };
+      const back = edges.filter(e => cy(e.target) < cy(e.source) - 1);
+      for (const [k, v] of [['exitX', 1], ['exitY', 0.5], ['entryX', 1], ['entryY', 0.5]]) D.setStyle(back, k, v);
+      return [...placed.keys()];
+    },
     remove(cells) { D.graph.removeCells([].concat(cells).map(D.cell), true); },
-    clear() { D.batch(() => D.graph.removeCells(D.cells(c => c.parent === D.graph.getDefaultParent()), true)); },
+    // Every layer's content goes; the layers themselves stay.
+    clear() { D.batch(() => D.graph.removeCells(D.cells(c => c.parent && c.parent.parent === D.model.root), true)); },
     select(cells) { D.graph.setSelectionCells([].concat(cells).map(D.cell)); },
     undo() { D.ui.editor.undoManager.undo(); },
     redo() { D.ui.editor.undoManager.redo(); },
@@ -102,11 +160,12 @@
     getXml() { return mxUtils.getPrettyXml(D.ui.editor.getGraphXml()); },
     // Whole file (all pages) as <mxfile>, uncompressed.
     fileXml() { return D.ui.getFileData(null, null, null, null, null, null, null, null, null, true); },
-    // Replace the current page with an <mxGraphModel> (or a bare <root>) string. One undo step.
+    // Replace the current page with an <mxGraphModel>, a bare <root>, or the first page of
+    // an <mxfile> (compressed pages included). One undo step.
     setXml(xml) {
       let node = mxUtils.parseXml(xml).documentElement;
-      if (node.nodeName === 'mxfile') node = node.getElementsByTagName('mxGraphModel')[0];
-      if (node.nodeName === 'root') { const w = mxUtils.parseXml('<mxGraphModel/>'); w.documentElement.appendChild(w.importNode(node, true)); node = w.documentElement; }
+      if (node && node.nodeName === 'mxfile') node = Editor.extractGraphModel(node);
+      if (node && node.nodeName === 'root') { const w = mxUtils.parseXml('<mxGraphModel/>'); w.documentElement.appendChild(w.importNode(node, true)); node = w.documentElement; }
       if (node == null || node.nodeName !== 'mxGraphModel') throw new Error('setXml expects <mxGraphModel>, <root> or <mxfile>');
       const tmp = new mxGraphModel();
       new mxCodec(node.ownerDocument).decode(node, tmp);
@@ -118,8 +177,28 @@
     // ---- layout & view ----------------------------------------------------
     // spec: verticalFlow | horizontalFlow | verticalTree | horizontalTree | radialTree | organic,
     // or an ELK layout array such as [{"layout":"elkLayered","config":{"elk.direction":"RIGHT"}}].
+    // An unknown or failing spec makes draw.io show an error dialog instead of calling
+    // back, so watch for that, close it and reject with its text.
     layout(spec) {
-      return new Promise(resolve => D.ui.executeLayoutSpec(spec, () => resolve(true)));
+      const ui = D.ui;
+      if (typeof spec === 'string' && spec.trim().startsWith('[')) spec = JSON.parse(spec);
+      if (ui.resolveLayoutList(spec) == null) return Promise.reject(new Error('unknown layout: ' + JSON.stringify(spec)));
+      if (ui.dialog) return Promise.reject(new Error('a dialog is open, close it first: ' + ui.dialog.container.innerText.slice(0, 200)));
+      return new Promise((resolve, reject) => {
+        let done = false;
+        ui.executeLayoutSpec(spec, () => { done = true; resolve(true); });
+        const t0 = Date.now();
+        (function poll() {
+          if (done) return;
+          if (ui.dialog) {
+            const text = ui.dialog.container.innerText.slice(0, 200);
+            ui.hideDialog();
+            return reject(new Error('layout failed: ' + text));
+          }
+          if (Date.now() - t0 > 30000) return reject(new Error('layout did not finish within 30s'));
+          setTimeout(poll, 100);
+        })();
+      });
     },
     fit() { D.ui.actions.get('fitWindow').funct(); },
 
@@ -137,7 +216,8 @@
       if (!page) throw new Error('no page ' + which);
       ui.selectPage(page);
     },
-    renamePage(name) { D.ui.renamePage(D.ui.currentPage, name); },
+    // ui.renamePage(page) opens the Rename dialog; the change it executes is public.
+    renamePage(name) { D.model.execute(new RenamePage(D.ui, D.ui.currentPage, name)); },
 
     // ---- saving -----------------------------------------------------------
     // Saves the open file to its own path. Resolves when the save has landed.
@@ -145,6 +225,7 @@
       const ui = D.ui, file = ui.getCurrentFile();
       if (!file || !file.fileObject || !file.fileObject.path)
         throw new Error('this window has no file on disk (Untitled) — reopen via drawio-start.sh <file.drawio>');
+      if (ui.dialog) throw new Error('a dialog is open, close it first: ' + ui.dialog.container.innerText.slice(0, 200));
       return new Promise((resolve, reject) => {
         ui.saveFile();
         const t0 = Date.now();
