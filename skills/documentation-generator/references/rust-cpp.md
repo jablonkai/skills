@@ -64,7 +64,9 @@ must uphold, and the `clippy::missing_safety_doc` lint enforces its presence.
 
 ### Doc-tests
 
-Every fenced code block in a doc comment is compiled and run by `cargo test`. This makes rustdoc
+Every fenced code block in a doc comment of a **library** target is compiled and run by `cargo test`
+(binary-only crates get no doc-tests — move the logic into a `lib.rs` if the examples matter). This
+makes rustdoc
 examples the only documentation in the codebase that cannot silently rot, which is worth exploiting:
 prefer a doc-test over prose whenever the example fits in a few lines.
 
@@ -94,9 +96,13 @@ Reach for `no_run` before `ignore`: it still catches signature changes.
 /// See [`Storage::upload`], [`crate::Config`], and [`Error::Io`] for the failure case.
 ```
 
-A link target can also be written as a reference definition (`` [`Error::Io`]: crate::Error::Io ``)
-when the same symbol is linked repeatedly, and the inline form `[text]` followed by
-`(crate::module::Item)` in parentheses gives the link custom text.
+Custom link text and reference-style definitions work too:
+
+```rust
+/// Fails with [the I/O variant](Error::Io); see also [`Config`].
+///
+/// [`Config`]: crate::config::Config
+```
 
 Enable the lint so a rename that orphans a link fails the build rather than shipping:
 

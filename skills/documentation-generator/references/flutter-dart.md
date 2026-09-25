@@ -50,6 +50,12 @@ Dart's conventions differ from most other stacks in two ways worth respecting:
 Unresolved references are a warning under the `comment_references` lint — enable it, because a
 broken reference is nearly always a renamed symbol whose docs were left behind.
 
+One known false positive: a library doc comment in a file that only `export`s its symbols (the
+usual `lib/<package>.dart` barrel) gets `comment_references` infos for every name it links, because
+the analyzer does not treat exports as in scope. `dart doc` resolves those links fine — confirm with
+`dart doc . --validate-links`, then leave the infos and say why. Do not add an `import` just to
+silence the lint: that is a code change made for a tooling quirk.
+
 ## Templates and macros
 
 Reuse a block of documentation across declarations without copying it:
@@ -72,17 +78,22 @@ Other dartdoc directives:
 |---|---|
 | `{@template name}` / `{@endtemplate}` | Define a reusable block |
 | `{@macro name}` | Insert a defined block |
-| `{@category Name}` | Group the declaration in the sidebar |
-| `{@image url}` | Embed an image |
+| `{@category Name}` / `{@subCategory Name}` | Group the declaration in the sidebar |
+| `{@youtube w h url}` / `{@animation w h url}` | Embed a video |
 | `{@tool snippet}` | Flutter's framework-only snippet tooling |
-| `{@nodoc}` | Exclude the declaration from output |
+| `@nodoc` | Exclude the declaration from output — no curly braces, unlike the others |
+
+Recent dartdoc releases also add `{@example /path/to/file.dart#region}`, which injects a region of a
+real file as a code block — the Dart equivalent of KDoc `@sample`, so point it at a file under
+`example/` or `test/` that the build compiles. It is new; check that `dart doc` on the project's SDK
+accepts it before relying on it, and fall back to a fenced block otherwise.
 
 ## Generating
 
 ```bash
 dart doc .                       # writes to doc/api
 dart doc . --output build/docs
-dart doc . --validate-links      # fails on broken references
+dart doc . --validate-links      # also reports broken links (warnings, not a failure)
 ```
 
 `dart doc` replaced the standalone `dartdoc` command; a project still calling `dartdoc` directly is

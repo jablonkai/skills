@@ -72,12 +72,15 @@ tests.
 Derivable only when the history has structure. Check first:
 
 ```bash
-git describe --tags --abbrev=0                        # last release tag
-git log --oneline "$(git describe --tags --abbrev=0)"..HEAD | head -50
-git log --oneline -30 | grep -cE '^[0-9a-f]+ (feat|fix|docs|chore|refactor|perf|test)(\(.+\))?!?:'
+last=$(git describe --tags --abbrev=0 2>/dev/null)    # empty when the repo has no tags yet
+range=${last:+$last..}HEAD
+git log --oneline "$range" | head -50
+git log --oneline "$range" | wc -l                                   # total
+git log --oneline "$range" | grep -cE '^[0-9a-f]+ (feat|fix|docs|chore|refactor|perf|test|build|ci|style)(\(.+\))?!?:'
 ```
 
-If most commits match the conventional-commit pattern, generation is reliable. If they do not, say
+With no tags there is no "since the last release"; say so, and ask whether the whole history or a
+date range is wanted. If most commits match the conventional-commit pattern, generation is reliable. If they do not, say
 so — a changelog built from "wip", "fixes", and "address review comments" is noise, and the honest
 output is a list of merged pull request titles instead.
 
@@ -111,9 +114,13 @@ if it changes behavior a user can observe.
 ### Tools
 
 ```bash
-git cliff --tag v1.4.0 --output CHANGELOG.md    # cliff.toml, conventional commits
-npx conventional-changelog-cli -p angular -i CHANGELOG.md -s
+git cliff --unreleased --tag v1.4.0 --prepend CHANGELOG.md   # adds only the new release on top
+npx conventional-changelog-cli -p angular -i CHANGELOG.md -s   # also prepends in place
 ```
+
+`git cliff --output CHANGELOG.md` regenerates the whole file from history and silently drops any
+hand-edited entries — use `--prepend` on an existing changelog, and `--output` only when creating
+one.
 
 `release-please` and `changesets` generate the changelog as part of the release PR instead — when
 either is configured, do not hand-write entries, because the next release run will overwrite them.
@@ -187,8 +194,8 @@ back-editing published docs breaks the guarantee that a version's docs match tha
 The point of deriving docs from code is that drift becomes detectable. Make it detectable in CI:
 
 - **Fail the build on doc warnings** once the backlog is clear — `-W` for Sphinx, `--strict` for
-  MkDocs, `failOnWarning` for Dokka, `#![deny(rustdoc::broken_intra_doc_links)]` for Rust,
-  `FAIL_ON_WARNINGS` for Doxygen.
+  MkDocs, `dokkaPublications.html { failOnWarning }` for Dokka, `#![deny(rustdoc::broken_intra_doc_links)]` for Rust,
+  `WARN_AS_ERROR = FAIL_ON_WARNINGS` for Doxygen.
 - **Run the executable examples** — doc-tests, Go example functions, doctests, `@sample` compilation.
   These fail loudly at exactly the moment the API changes.
 - **Lint the OpenAPI spec** in the same job that builds the API docs.

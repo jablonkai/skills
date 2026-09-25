@@ -59,21 +59,26 @@ VitePress) can consume directly.
 
 ### Enforcing docs in lint
 
-```json
-// eslint config
-{
-  "plugins": ["jsdoc"],
-  "rules": {
-    "jsdoc/require-jsdoc": ["warn", { "publicOnly": true }],
-    "jsdoc/require-param-description": "warn",
-    "jsdoc/require-returns-description": "warn",
-    "jsdoc/check-tag-names": ["warn", { "typed": true }]
-  }
-}
+ESLint 9+ uses flat config (`eslint.config.js`); match whatever format the project already has.
+
+```js
+// eslint.config.js
+import jsdoc from "eslint-plugin-jsdoc";
+
+export default [
+  jsdoc.configs["flat/recommended-typescript"],
+  {
+    rules: {
+      "jsdoc/require-jsdoc": ["warn", { publicOnly: true }],
+      "jsdoc/require-param-description": "warn",
+      "jsdoc/require-returns-description": "warn",
+    },
+  },
+];
 ```
 
-`typed: true` tells the plugin the project is TypeScript, so it stops asking for type annotations in
-comments.
+The `recommended-typescript` preset tells the plugin the project is TypeScript, so it stops asking
+for type annotations in comments.
 
 ### Package metadata
 
@@ -219,7 +224,7 @@ the Go equivalent of a doc-test and the best example format the language has.
 ### Generating and checking
 
 ```bash
-go doc ./...                          # terminal output
+go doc -all ./storage                 # one package at a time; go doc takes no ./... pattern
 go run golang.org/x/pkgsite/cmd/pkgsite@latest    # local pkg.go.dev
 go vet ./...                          # catches malformed example functions
 ```

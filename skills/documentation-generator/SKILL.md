@@ -1,6 +1,6 @@
 ---
 name: documentation-generator
-description: "Generate and update documentation from what the code already knows: API reference from doc comments (KDoc/Dokka, dartdoc, DocC, rustdoc, Doxygen), REST docs from an OpenAPI spec, README scaffolding from package metadata, changelogs from conventional commits, and architecture diagrams from module structure. Also fills in missing doc comments and finds docs that drifted from the implementation. Use when someone says 'generate the docs', 'document this API', 'add KDoc/dartdoc/DocC/rustdoc comments', 'set up Dokka', 'write the README', 'generate a changelog', 'the docs are out of date', or the Hungarian 'generáld a dokumentációt', 'dokumentáld ezt az API-t', 'írd meg a README-t', 'frissítsd a changelogot'. Not for prose docs written from scratch with the user (that is doc-coauthoring), not for looking up someone else's library docs (that is find-docs)."
+description: "Generate and update documentation from what the code already knows: API reference from doc comments (KDoc/Dokka, dartdoc, DocC, rustdoc, Doxygen), REST docs from an OpenAPI spec, README scaffolding from package metadata, changelogs from conventional commits, and architecture diagrams from module structure. Also fills in missing doc comments and finds docs that drifted from the implementation. Use when someone says 'generate the docs', 'document this API', 'add KDoc/dartdoc/DocC/rustdoc comments', 'write docstrings/TSDoc/Doxygen comments', 'set up Dokka', 'write the README', 'generate a changelog', 'the docs are out of date', or the Hungarian 'generáld a dokumentációt', 'dokumentáld ezt az API-t', 'írd meg a README-t', 'frissítsd a changelogot'. Not for prose docs written from scratch with the user (that is doc-coauthoring), not for looking up someone else's library docs (that is find-docs)."
 summary: "generate and refresh documentation from code — doc comments and API reference via Dokka, dartdoc, DocC, rustdoc and Doxygen, OpenAPI-driven REST docs, README scaffolding, conventional-commit changelogs, and architecture diagrams"
 category: documentation
 risk: low
@@ -70,8 +70,10 @@ idioms from toolchains that are not in play and buries the ones that are.
 
 **2. What documentation already exists?** Read the current docs before generating anything —
 a `docs/` directory, an existing README, three or four already-documented public symbols. Their
-voice, depth, and structure are already decided; matching them matters more than any convention in
-this skill. A generated page that reads nothing like its neighbours will be rewritten by hand.
+voice, depth, structure, and natural language are already decided; matching them matters more than
+any convention in this skill. A generated page that reads nothing like its neighbours will be
+rewritten by hand. Write in the language the existing docs use, not the language of the
+conversation — a Hungarian request on an English codebase still gets English doc comments.
 
 ```bash
 # existing docs, doc config, and the conventions already in use
@@ -150,6 +152,11 @@ Two checks worth doing every time:
   that does not compile is worse than no example.
 - **Do the links resolve?** Broken intra-doc links usually mean a symbol was renamed and its
   references were not — a drift signal, not a formatting nit.
+
+If the generator is not installed or cannot run (missing toolchain, no network for `npx`), say so in
+the report and list the exact command the user should run — do not install a toolchain globally
+without asking, and never describe output you did not produce. The source comments are still worth
+delivering on their own.
 
 Keep the output small: doc generators are verbose, so filter to warnings and errors rather than
 pasting the whole run. Never read the generated site back into context — it is build output, and
