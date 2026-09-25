@@ -47,8 +47,9 @@ belong to the resumption, not the launch site.
 - Enable `kotlinx-coroutines-debug` and `DebugProbes.install()` (or the
   `-Dkotlinx.coroutines.debug` JVM flag) in debug builds to get `Coroutine boundary` frames that
   stitch the launch site back in.
-- `StackTraceRecovery` adds the creation site automatically for suspend functions when the debug
-  agent is present.
+- Stack-trace recovery (on whenever assertions are enabled or `kotlinx.coroutines.debug` is set)
+  re-creates the exception at each suspension boundary so the trace shows the awaiting caller,
+  too — which is why the same exception can appear twice with different frames.
 
 Patterns worth checking:
 
@@ -74,8 +75,9 @@ Patterns worth checking:
   (waiting on I/O, a `Future`, or `runBlocking`).
 - Sources: disk/network I/O on main, `SharedPreferences.commit()`, large JSON parse, synchronous
   `ContentProvider` / binder call, database migration, oversized `onDraw`.
-- Pull with `adb bugreport`, or read `/data/anr/traces.txt` on debuggable builds; Play Console
-  Vitals aggregates them for released builds.
+- Pull with `adb bugreport` (the ANR dumps are under `FS/data/anr/` in the zip); on modern Android
+  each ANR is its own `/data/anr/anr_*` file — the single `traces.txt` is pre-Android 10. Play
+  Console Vitals aggregates them for released builds.
 
 ## Kotlin Multiplatform / Kotlin/Native (iOS)
 
@@ -86,9 +88,11 @@ Uncaught Kotlin exception: kotlin.IllegalStateException: Not initialized
 
 - `kfun:` frames are Kotlin/Native symbols. Line numbers require the framework built with debug
   info; release frameworks need the dSYM (see [symbolication.md](symbolication.md)).
-- Kotlin exceptions crossing into Swift/ObjC become `NSError` only for `@Throws`-annotated
-  functions; everything else **terminates the process** rather than propagating. An "unexplained"
-  iOS crash from shared code is usually an unannotated Kotlin exception.
+- Kotlin exceptions crossing into Swift/ObjC become `NSError` only when the function is annotated
+  `@Throws` **and** the exception is an instance of a listed class (or subclass); everything else
+  **terminates the process** rather than propagating. Suspend functions implicitly get
+  `@Throws(CancellationException::class)` only — any other exception still terminates. An
+  "unexplained" iOS crash from shared code is usually an undeclared Kotlin exception.
 - `expect`/`actual` failures: a symbol resolves on one platform and not another, or the `actual`
   has different nullability/threading assumptions than the `expect` contract implies. Check both
   actuals, not just the one you are debugging.
@@ -106,11 +110,11 @@ Uncaught Kotlin exception: kotlin.IllegalStateException: Not initialized
 | `IllegalStateException: Reading a state that was created after the snapshot was taken` | State created inside composition and read across a snapshot boundary; hoist it or wrap with `remember` |
 | `Snapshot` / `Composer` frames with no project frame nearby | The failing lambda is inlined — search for the composable named in the nearest `androidx.compose.runtime` frame's caller |
 | Crash on recomposition only after config change | State not `remember`ed / not `rememberSaveable`, so it is rebuilt into an invalid combination |
-| `IllegalArgumentException: Cannot round to nearest integer` / infinite constraints | Nested scrollable in an unbounded parent (a `LazyColumn` inside a `Column` with vertical scroll) |
+| `IllegalStateException: Vertically scrollable component was measured with an infinity maximum height constraints` | Nested scrollable in an unbounded parent (a `LazyColumn` inside a `Column` with `verticalScroll`) — give it a bounded height or merge into one lazy list |
 | Effects firing repeatedly | `LaunchedEffect(key)` given an unstable key that changes every recomposition |
 
-For deeper recomposition performance work, the `compose-recomposition-performance` and
-`compose-side-effects` skills go further than this diagnosis-oriented list.
+Layout Inspector's recomposition counts (and skip counts) confirm a recomposition loop faster
+than reading code; a count that climbs while the screen is idle is the signature.
 
 ## Useful commands
 

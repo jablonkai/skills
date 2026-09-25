@@ -25,14 +25,16 @@ java.lang.IllegalStateException: Fragment ProfileFragment{a1b2c3} not attached t
 
 **What failed** — `IllegalStateException` at `ProfileFragment.kt:114`, on the main thread.
 
-**Why** — `onViewCreated` collects the view model's error `Flow` in `lifecycleScope.launch { … }`.
-That scope survives view destruction (it is tied to the *fragment*, not the *view*), so an error
-emitted after the user navigated away reaches `showError`, which calls `requireContext()` on a
-detached fragment.
+**Why** — `onViewCreated` collects the view model's error `Flow` in `uiScope.launch { … }`, where
+`uiScope = CoroutineScope(Dispatchers.Main)` is a fragment field that is never cancelled. The
+collector therefore outlives the fragment itself, so an error emitted after the user navigated
+away reaches `showError`, which calls `requireContext()` on a detached fragment. (A plain
+`lifecycleScope` would have been cancelled at `onDestroy`, before detach — which is why the scope
+declaration is the thing to read first.)
 
-**Evidence** — `ProfileFragment.kt:62` is the collector inside `lifecycleScope.launch`; the frame
+**Evidence** — `ProfileFragment.kt:62` is the collector inside `uiScope.launch`; the frame
 above it is `kotlinx.coroutines.flow` machinery, confirming the emission path rather than a direct
-UI call. There is no `repeatOnLifecycle` in the frames.
+UI call. The `uiScope` field has no matching `cancel()` in `onDestroyView`/`onDestroy`.
 
 **Fix** — collect lifecycle-aware so collection stops at `STOPPED`:
 
@@ -191,9 +193,12 @@ below it is the entry point from our code.
 
 ```swift
 @MainActor func applyUpdates() { … }
-// or, at the call site:
-await MainActor.run { viewModel.applyUpdates() }
+// the completion handler is not async, so hop explicitly at the call site:
+Task { @MainActor in viewModel.applyUpdates() }   // or DispatchQueue.main.async { … }
 ```
+
+With `@MainActor` on the method, the Swift 6 compiler rejects the unhopped call outright, so the
+same mistake cannot come back silently.
 
 **Verify** — run with the Main Thread Checker enabled (scheme diagnostics); it now reports nothing
 on this path. Thread Sanitizer confirms the race is gone.
@@ -213,14 +218,17 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
 **What failed** — `unwrap()` at `importer.rs:142`.
 
-**Why** — the proximate cause is the unwrap; the root cause is in the payload: the file the
-importer opens does not exist. Line 142 joins a configured directory with a filename that came
-from user input without normalization, so a config value with a trailing separator produces a
-path that never resolves. The `unwrap` merely converts a recoverable error into a panic — and the
-error lost its context, so the message does not even say *which* path.
+**Why** — the proximate cause is the unwrap; the payload says what went wrong: a file the
+importer opens does not exist (confirmed). *Which* file, and why it is missing, the trace cannot
+say — the `io::Error` carries no path. Reading `importer.rs:142` shows the path is built from the
+job's configured source directory plus an entry name from the manifest; whether the directory is
+misconfigured or the manifest lists a file that was never uploaded is **likely one of the two,
+unverified** until the path is logged. The `unwrap` converts a recoverable error into a panic that
+kills the worker task.
 
 **Evidence** — `kind: NotFound` from an OS error, on the runtime worker; no path in the message
-means the `?`/`unwrap` chain crossed a boundary without `.context(…)`.
+means the error crossed a boundary without `.context(…)` — adding it is the first step of the
+diagnosis as well as part of the fix.
 
 **Fix** — propagate with context instead of unwrapping:
 

@@ -17,10 +17,11 @@ The relevant error-causing widget was:
   framework internals.
 - The library banner (`RENDERING LIBRARY`, `WIDGETS LIBRARY`, `GESTURE`, `SCHEDULER`) tells you
   which phase failed — layout, build, gesture dispatch, or frame scheduling.
-- `<asynchronous suspension>` marks an `await` boundary: frames below it are the caller chain
-  *before* the await, and the synchronous context is lost. Turn on
-  `Error.stackTraceCallback` / run in debug mode for better async chains, or wrap the failing call
-  so the error is thrown with a preserved `StackTrace` argument.
+- `<asynchronous suspension>` marks an `await` boundary: frames below it are the awaiting callers
+  the VM could reconstruct, not a synchronous call chain. Chains break where a future was not
+  directly awaited (`.then`, `Completer`, stream callbacks, `unawaited`). When the chain is cut,
+  rethrow with the original trace (`Error.throwWithStackTrace(e, st)`) or log `st` at the catch
+  site instead of creating a new exception.
 
 ## Layout and rendering errors
 

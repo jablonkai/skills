@@ -30,7 +30,7 @@ frame in your crate below them is the culprit.
 | `attempt to subtract with overflow` | Unsigned underflow (debug builds panic, release wraps — a release-only bug is often this) |
 | `already borrowed: BorrowMutError` | `RefCell` borrowed mutably while a shared borrow is live — usually a re-entrant call through a callback |
 | `cannot recursively acquire mutex` / hang | `Mutex` re-locked on the same thread; `parking_lot` or a redesign |
-| `called from async context` / blocking runtime | `block_on` or blocking I/O inside a Tokio worker — use `spawn_blocking` |
+| `Cannot start a runtime from within a runtime` / `Cannot block the current thread from within a runtime` | `block_on` / `blocking_*` called inside a Tokio worker — `.await` it, or move the blocking work to `spawn_blocking` |
 | `SIGSEGV` in a Rust binary | Almost always `unsafe` or an FFI boundary, not safe Rust |
 
 ## Rust — error chains
