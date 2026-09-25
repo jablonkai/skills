@@ -103,8 +103,8 @@ internal hostnames, or customer data. API docs are the most-copied text in a rep
 # Redocly — single self-contained HTML file, the usual default
 npx @redocly/cli build-docs openapi.yaml --output docs/api.html
 
-# Redocly preview with live reload
-npx @redocly/cli preview-docs openapi.yaml
+# Redocly CLI 2.x dropped `preview-docs`; to eyeball the result, open the built file
+open docs/api.html
 ```
 
 Other renderers, when the project already uses one: Swagger UI (interactive "try it" console),

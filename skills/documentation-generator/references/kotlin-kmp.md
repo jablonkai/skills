@@ -68,20 +68,23 @@ drift detector available: a broken link almost always means a symbol was renamed
 
 ## Samples that compile
 
-`@sample` inlines the body of a real function, so the example is compiled by the build and breaks CI
-when the API changes. Put samples in their own source set so they never ship in the artifact:
+`@sample` inlines the body of a real function. The example only stays honest if that function is
+compiled, so put samples in a source set the build already compiles but does not ship — the test
+source set is the usual home (the Kotlin standard library does exactly this). A bare
+`src/samples/kotlin` directory that no source set includes is never compiled, and its samples drift
+like any fenced block:
 
 ```kotlin
 // build.gradle.kts
 dokka {
     dokkaSourceSets.configureEach {
-        samples.from("src/samples/kotlin")
+        samples.from("src/test/kotlin/com/example/storage/samples")   // KMP: src/commonTest/kotlin/...
     }
 }
 ```
 
 ```kotlin
-// src/samples/kotlin/com/example/storage/samples/UploadSamples.kt
+// src/test/kotlin/com/example/storage/samples/UploadSamples.kt
 package com.example.storage.samples
 
 fun uploadAvatar() {
@@ -96,11 +99,12 @@ documented — a fenced block is never compiled and will drift.
 
 ## Dokka setup
 
-Dokka 2.x uses the `org.jetbrains.dokka` plugin with a `dokka { }` extension:
+Dokka 2.x uses the `org.jetbrains.dokka` plugin with a `dokka { }` extension. Use the version the
+project already pins; for a new setup take the latest stable 2.x (2.2.0 at the time of writing):
 
 ```kotlin
 plugins {
-    id("org.jetbrains.dokka") version "2.0.0"
+    id("org.jetbrains.dokka") version "2.2.0"
 }
 
 dokka {
@@ -130,6 +134,10 @@ Common tasks — check `./gradlew tasks --group documentation` for what the reso
 
 For a multi-module build, apply the plugin to the root project and add each module with the
 `dokka(project(":module"))` dependency so the modules cross-link into one site.
+
+On Dokka 2.0.x the new DSL is only active with `org.jetbrains.dokka.experimental.gradle.pluginMode=V2Enabled`
+in `gradle.properties`; from 2.1 it is the default. If `dokka { }` fails to resolve on 2.0.x, that
+flag is the reason.
 
 Older builds may still be on Dokka 1.x (`dokkaHtml`, `dokkaHtmlMultiModule`, `dokkaGfm`). Do not
 migrate the project's Dokka version as a side effect of a documentation request — that is a build
@@ -191,7 +199,9 @@ Kotlin has no built-in `missing_docs` warning. Two practical options:
 dokka {
     dokkaSourceSets.configureEach {
         reportUndocumented.set(true)
-        failOnWarning.set(false)   // true only once the backlog is cleared
+    }
+    dokkaPublications.html {
+        failOnWarning.set(false)   // publication-level in Dokka 2; true only once the backlog is cleared
     }
 }
 ```
