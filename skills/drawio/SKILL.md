@@ -19,7 +19,7 @@ same JavaScript runtime as diagrams.net (mxGraph + `EditorUi`). Started with a
 DevTools port, it can be driven live: a script runs **inside the editor window**, the
 user watches the shapes appear, and every change lands on the normal undo stack. When
 that isn't possible, draw.io files are plain XML and the app's CLI renders them
-headless. Everything here was run against **draw.io 31.4.5**; needs Node 22+.
+headless. Everything here was run against **draw.io 31.5.2**; needs Node 22+.
 
 - [scripts/drawio-start.sh](scripts/drawio-start.sh) — launch draw.io with the control
   port, opening or creating a `.drawio` file.
@@ -76,7 +76,10 @@ headless. Everything here was run against **draw.io 31.4.5**; needs Node 22+.
    coordinates. It is asynchronous — await it before reading positions or saving.
    Layouts run in one direction, so a long linear pipeline (8+ steps in a chain) comes
    out as one very wide row: use `'verticalFlow'`, or place stages by hand in two or
-   three rows (one container per stage) — whichever reads at 100% zoom.
+   three rows (one container per stage) — whichever reads at 100% zoom. Flowcharts
+   with decisions: the layout pushes the main path sideways at a decision, so follow it
+   with `D.column([...main path ids])`, which puts the main path in one column and the
+   branches beside their decisions (details in the api-reference).
 
 4. **Verify** — read back structure, then look:
    `node scripts/drawio-eval.mjs -c 'return D.dump()'` for ids, geometry and edge
@@ -100,6 +103,7 @@ D.batch(() => {
   D.edge('api', 'db', 'SQL', 'edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;');
 });
 await D.layout([{layout: 'elkLayered', config: {'elk.direction': 'RIGHT'}}]);
+// top-to-bottom flowchart instead: layout DOWN, then D.column(['start', 'check', 'pay', 'end'])
 D.fit();
 D.setStyle(['api'], 'fillColor', '#d5e8d4');     // restyle
 D.setXml(xmlString);                             // replace page from <mxGraphModel>, ids kept
@@ -115,16 +119,27 @@ then change only what was asked — the user's layout is part of their work.
 1. Write the XML following [references/file-format.md](references/file-format.md):
    `<mxfile>` → `<diagram>` per page → `<mxGraphModel>` → cells `0`, `1`, then shapes
    and edges. Readable ids, uncompressed content.
-2. For more than ~8 nodes, don't compute coordinates: write them at 0,0 and let draw.io
-   lay out a copy — `bash scripts/drawio-export.sh draft.drawio final.drawio --layout
-   horizontalFlow` (any preset or ELK JSON works).
+2. Place the nodes. Processes, pipelines and trees over ~8 nodes: write them at 0,0 and
+   let draw.io lay out a copy — `bash scripts/drawio-export.sh draft.drawio final.drawio
+   --layout verticalFlow` (any preset or ELK JSON works). Architecture diagrams — a
+   container plus a message bus or shared database — come out with edges looping round
+   the cluster, so place those by hand in tiers (see *Layout by hand* in the format
+   reference); that is quicker than repairing an auto-layout.
 3. Validate: `xmllint --noout final.drawio`, then render
    `drawio-export.sh final.drawio /tmp/check.png -b 10` and look at it.
 4. Hand over the `.drawio` (plus PNG/SVG if asked). `.drawio.svg` / `.drawio.png` with
-   the diagram embedded: add `-e` to the export.
+   the diagram embedded: add `-e` to the export. The SVG keeps `html=1` labels as
+   `<foreignObject>` with a PNG fallback — fine in browsers, raster text in tools that
+   import SVG (Figma, Illustrator). People who edit the diagram should get the `.drawio`.
 
 Mermaid is often the quickest source for flowcharts and sequence diagrams:
-`drawio-export.sh flow.mmd flow.drawio` gives a fully editable draw.io diagram.
+`drawio-export.sh flow.mmd flow.drawio` gives a fully editable draw.io diagram. The
+converted page is named `pageWithNumber` — rename it before handing it over
+(`sed -i '' 's/name="pageWithNumber"/name="Login flow"/' flow.drawio`). It keeps
+Mermaid's lavender styling; restyle with the [palette](references/file-format.md#palette)
+when the diagram should match others. Like the `--layout` round-trip, the conversion
+writes `grid="0" page="0"` and off-grid coordinates — set `grid="1" page="1"` if people
+will edit it by hand.
 
 ## Diagram quality
 
@@ -146,4 +161,5 @@ A diagram is read, not executed, so the layout carries the meaning:
   `drawio-start.sh` or ask the user.
 - Don't quit, kill or reload a draw.io the user started, and don't save over a file
   whose unsaved changes you didn't make — check `D.info().modified` before your first
-  edit and ask if it is already `true`.
+  edit and ask if it is already `true`. Changes your own earlier script made in this
+  task don't count: re-running or fixing up your build is fine.

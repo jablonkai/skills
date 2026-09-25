@@ -34,7 +34,7 @@ esac
 
 mkdir -p "$(dirname "$out")"
 # The CLI prints Electron sandbox noise on stderr; keep only real messages.
-"$BIN" -x "${fmt[@]}" "$@" -o "$out" "$in" 2>&1 | grep -v -e sandbox_extension -e '^$' || true
+"$BIN" -x "${fmt[@]}" "$@" -o "$out" "$in" 2>&1 | grep -v -e sandbox_extension -e task_policy_set -e ' -> ' -e '^$' || true
 
 if [[ ! -s "$out" ]]; then
   echo "export failed: $out was not written" >&2

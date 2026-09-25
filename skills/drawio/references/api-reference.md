@@ -1,6 +1,6 @@
 # draw.io live API reference
 
-Everything here was run against **draw.io desktop 31.4.5** through
+Everything here was run against **draw.io desktop 31.5.2** through
 [drawio-eval.mjs](../scripts/drawio-eval.mjs). Scripts run in the editor window's
 renderer, so the whole draw.io JavaScript runtime (mxGraph plus draw.io's `EditorUi`,
 `Graph`, `Editor`) is available — the `D` helpers are a thin layer over it.
@@ -58,8 +58,10 @@ printed. Use that form for scripts kept on disk (it passes `node --check`).
 | `D.setLabel(c, text)` | labels are HTML when the style has `html=1` — escape `<`/`&` in plain text. |
 | `D.setStyle(cells, key, value)` | sets one style key on one or many cells; `value = null` removes the key. |
 | `D.move(c, x, y)`, `D.resize(c, w, h)` | geometry edits, undoable. |
+| `D.resetEdges(edges?)` | undoes what a layout left on edges (all by default): waypoints, `exit*`/`entry*` anchors, label offsets, ELK's `noEdgeStyle=1`; sets them orthogonal. Call it after moving cells a layout placed. |
+| `D.column(mainIds, {spacing, gap}?)` | straightens a top-to-bottom flowchart after a layout — see [Layouts](#layouts). Returns the ids it placed in the side column. |
 | `D.remove(cells)` | removes cells and their connected edges. |
-| `D.clear()` | empties the current page. |
+| `D.clear()` | empties the current page — every layer's content; the layers stay. |
 | `D.select(cells)` | selects in the UI so the user sees what changed. |
 | `D.undo()`, `D.redo()` | the editor's undo stack. |
 
@@ -69,19 +71,19 @@ printed. Use that form for scripts kept on disk (it passes `node --check`).
 |------|-------|
 | `D.getXml()` | current page as pretty `<mxGraphModel>` |
 | `D.fileXml()` | whole file as uncompressed `<mxfile>` (all pages) |
-| `D.setXml(xml)` | replaces the current page. Accepts `<mxGraphModel>`, bare `<root>`, or `<mxfile>` (first page). Keeps your ids. One undo step. |
+| `D.setXml(xml)` | replaces the current page. Accepts `<mxGraphModel>`, bare `<root>`, or `<mxfile>` (first page, compressed or not). Keeps your ids. One undo step. |
 | `D.importXml(xml, dx?, dy?)` | adds an `<mxGraphModel>` fragment to the page, **re-assigning ids**; returns the new ids. |
 
 **Layout, view, pages, save**
 
 | Call | Notes |
 |------|-------|
-| `await D.layout(spec)` | see [Layouts](#layouts). Asynchronous — always `await` it before reading positions or saving. |
+| `await D.layout(spec)` | see [Layouts](#layouts). Asynchronous — always `await` it before reading positions or saving. Rejects on an unknown spec, a layout error (and closes draw.io's error dialog), or a dialog already open. |
 | `D.fit()` | zoom the window to the diagram. |
 | `D.pages()` | `[{index, name, current}]` |
 | `D.addPage(name)` | appends and switches to it; returns its index. |
-| `D.selectPage(indexOrName)`, `D.renamePage(name)` | |
-| `await D.save()` | saves to the file's own path and resolves with it once written; throws for an Untitled window or if a dialog appears. |
+| `D.selectPage(indexOrName)`, `D.renamePage(name)` | `renamePage` renames the current page without a dialog (draw.io's own `ui.renamePage` opens one). |
+| `await D.save()` | saves to the file's own path and resolves with it once written; throws for an Untitled window, or if a dialog is open or appears. |
 
 ## Raw mxGraph / EditorUi calls
 
@@ -110,10 +112,10 @@ created the cells, or it silently does nothing.
 ## Menu actions
 
 `ui.actions.get(name).funct()` runs a menu command on the current selection. Present in
-31.4.5: `fitWindow`, `fitPage`, `resetView`, `zoomIn`, `zoomOut`, `selectAll`,
+31.5.2: `fitWindow`, `fitPage`, `resetView`, `zoomIn`, `zoomOut`, `selectAll`,
 `selectVertices`, `selectEdges`, `autosize`, `toFront`, `toBack`, `group`, `ungroup`,
 `duplicate`, `delete`, `deleteAll`, `lockUnlock`, `alignCellsLeft`, `undo`, `redo`.
-Avoid actions that open dialogs (`editStyle`, `editData`, `save` on Untitled) — a modal
+Avoid actions and `ui` methods that open dialogs (`editStyle`, `editData`, `save` on Untitled, `ui.renamePage`) — a modal
 blocks the next script until someone closes it; `ui.hideDialog()` closes it.
 
 ## Layouts
@@ -125,9 +127,29 @@ the CLI's `--layout`:
   `radialTree`, `organic`
 - ELK arrays, e.g. `[{"layout":"elkLayered","config":{"elk.direction":"RIGHT"}}]`,
   `elk.spacing.nodeNode`, `elk.layered.spacing.nodeNodeBetweenLayers` — lays out
-  containers (swimlanes) and their children together.
+  containers (swimlanes) and their children together. Pass the array itself or its
+  JSON string.
 
 Tree layouts need a single root; use the flow presets or ELK for graphs with cycles.
+ELK sizes nodes to their labels, so widths can grow past what you set.
+
+**Keeping a flowchart's main path in one column.** No preset or ELK option does this
+reliably — at a decision ELK is as likely to push the "yes" branch sideways as the "no",
+and it leaves uneven gaps. Let ELK order the rows, then straighten with `D.column`:
+
+```js
+await D.layout([{layout: 'elkLayered', config: {'elk.direction': 'DOWN'}}]);
+D.column(['start', 'check', 'inStock', 'pay', 'paid', 'pack', 'ship', 'end']);   // main path, top to bottom
+```
+
+It stacks the listed ids in one column (`{spacing: 40}` apart), puts every other
+top-level vertex in a column to the right — level with the decision it branches off, or
+under the side node it follows — resets the edges (see `D.resetEdges`) and sends edges
+that run back up the page (retry, re-check) out and in on the right, clear of the main
+column. Plain centre-aligning the main path instead collides with the side branches.
+Then look at it: two branches off one decision, or a side path that rejoins the main
+path, may still want a hand move.
+
 Hand-placed coordinates are fine for small diagrams (≤ ~8 nodes) — use a 10px grid and
 keep 40–60px gaps.
 
