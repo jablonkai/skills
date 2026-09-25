@@ -1,6 +1,6 @@
 ---
 name: code-analyzer
-description: "Audit an entire project for bugs, security vulnerabilities, code quality problems, performance issues, missing tests, documentation gaps, and concrete improvement or feature ideas — then produce a prioritized, actionable report with file:line references. Read-only by default; only edits or commits when the user explicitly asks for a fix afterwards. Use when someone says 'review my project', 'audit the codebase', 'find bugs', 'check for security issues', 'what could be improved', 'suggest improvements', 'are there any vulnerabilities', 'do a code quality review', or the Hungarian equivalents 'nézd át a projektet', 'auditáld a kódot', 'találj hibákat', 'milyen biztonsági problémák vannak', 'javasolj fejlesztéseket', 'mit lehetne javítani'. Trigger this skill whenever the user wants a holistic assessment of a project rather than a fix to one specific thing — even if they don't say the word 'audit'."
+description: "Audit an entire project for bugs, security vulnerabilities, code quality problems, performance issues, missing tests, documentation gaps, and concrete improvement or feature ideas — then produce a prioritized, actionable report with file:line references. Read-only by default; only edits or commits when the user explicitly asks for a fix afterwards. Use when someone says 'review my project', 'audit the codebase', 'find bugs', 'check for security issues', 'what could be improved', 'suggest improvements', 'are there any vulnerabilities', 'do a code quality review', or the Hungarian equivalents 'nézd át a projektet', 'auditáld a kódot', 'találj hibákat', 'milyen biztonsági problémák vannak', 'javasolj fejlesztéseket', 'mit lehetne javítani'. Trigger whenever the user wants a holistic assessment of a project rather than a fix to one specific thing — even without the word 'audit'. Not for reviewing a single diff or PR, debugging one known error, or carrying out a refactor."
 summary: "holistic read-only project audit for bugs, security vulnerabilities, code quality issues, performance risks, missing tests, documentation gaps, and prioritized improvement ideas"
 category: code-quality
 risk: low
@@ -11,7 +11,7 @@ tags:
   - code-quality
   - refactoring
   - bugs
-allowed-tools: Bash, Read, Grep, Glob, Edit, Write
+allowed-tools: Bash, Read, Grep, Glob, Agent, Edit, Write
 argument-hint: "[focus: security|quality|performance|tests|docs|ideas|all]"
 ---
 
@@ -21,7 +21,7 @@ argument-hint: "[focus: security|quality|performance|tests|docs|ideas|all]"
 
 Give the user a clear, prioritized picture of the health of their project: what's broken, what's risky, what's messy, what's missing, and what could be added. The output is a structured report — not a pile of speculation. Every finding points at a real file, names the concern in plain terms, and proposes a direction.
 
-This is a diagnostic skill, not a refactor skill. Do not edit code, run formatters, or commit anything as part of the audit. Only after the user reads the report and explicitly picks something to fix do you change code.
+This is a diagnostic skill, not a refactor skill. The audit's only write is the report file itself — do not edit code, run formatters, or commit anything as part of the audit. Only after the user reads the report and explicitly picks something to fix do you change code.
 
 ## When to use
 
@@ -84,24 +84,17 @@ Skip these by default unless the user says otherwise: `node_modules/`, `.git/`, 
 
 ### Step 3: Let the existing tools do the boring work
 
-Before reading code yourself, run the tools the project already configures and capture their output. This is faster, more reliable, and produces signals everyone trusts. Examples (only run what's actually configured or installed in the project):
+Before reading code yourself, run the tools the project already configures and capture their output. This is faster, more reliable, and produces signals everyone trusts. See [references/tooling.md](references/tooling.md) for per-stack commands (JS/TS, Python, Go, Rust, Dart/Flutter, Kotlin/Gradle, Swift, C/C++, and more), secret-scanning patterns, and which commands have side effects worth avoiding.
 
-- JS/TS: `npm audit --json`, `npx eslint . --format json`, `npx tsc --noEmit`
-- Python: `pip-audit`, `ruff check .`, `mypy .`, `bandit -r .`
-- Go: `go vet ./...`, `staticcheck ./...`, `govulncheck ./...`
-- Rust: `cargo clippy -- -D warnings`, `cargo audit`
-- Dart/Flutter: `flutter analyze`, `dart pub outdated`
-- Generic: `gitleaks detect`, `trufflehog filesystem .` (secrets), `git grep -nE "TODO|FIXME|HACK|XXX"`
+If a tool isn't installed, note in the report that "running `<tool>` would surface more issues here" and move on (see Critical constraints — do not auto-install).
 
-If a tool isn't installed, just note in the report that "running `<tool>` would surface more issues here" and move on (see Critical constraints — do not auto-install).
+If **none** of the standard tools for the project's primary language are installed or configured, that absence is itself a finding worth surfacing under tooling/DX — it means correctness signals the team probably assumes are in place actually aren't.
 
-If **none** of the standard tools for the project's primary language are installed or configured, that absence is itself a finding worth surfacing in the report under tooling/DX — it means correctness signals the rest of the team probably assumes are in place actually aren't.
-
-For long-running scans, prefer JSON output and parse a summary into the report rather than dumping raw logs at the user.
+Summarize tool output into the report (counts plus the handful of findings that matter) rather than dumping raw logs at the user.
 
 ### Step 4: Read the code with intent
 
-Now do the manual / LLM-driven pass. Spawn parallel `Agent` (Explore) subagents per area when the codebase is non-trivial — security pass, quality pass, performance pass, etc. — so each one can dig deeply without being distracted. For small codebases, one focused pass is fine.
+Now do the manual / LLM-driven pass. For a non-trivial codebase, spawn parallel general-purpose subagents per dimension — security pass, correctness pass, quality/performance pass — so each one can dig deeply without being distracted; ask each to return findings in the entry format from Step 6 with file:line references. (Explore agents are good for mapping where things live, but they locate code rather than judge it, so don't hand them the review itself.) For small codebases — a few dozen files — one focused pass by yourself is faster and more coherent.
 
 For each dimension below, look for **concrete, locatable** findings — not vibes. Every finding must point at a real location: usually a file (with a line range when possible), but for project-level absences — no `.gitignore`, no `LICENSE`, no test directory, no CI config — `Where: project root` (or the missing path, e.g. `Where: tests/ (missing)`) is fine and expected. The rule is "no hand-wavy findings", not "must always be a single line".
 
@@ -116,7 +109,7 @@ For each dimension below, look for **concrete, locatable** findings — not vibe
 **Security**
 - Injection: SQL, NoSQL, OS command, path traversal, template, LDAP
 - Cross-site scripting (unescaped output to HTML/DOM)
-- Hardcoded secrets, API keys, tokens, private keys (also in commit history if the repo is small enough to grep)
+- Hardcoded secrets, API keys, tokens, private keys (also in commit history if the repo is small enough to grep). When reporting one, **redact the value** — show the first 4 characters and the type (`AKIA…` AWS access key), never the full secret. The report is a file in the repo that may be committed, pasted into an issue, or shared; copying the secret into it spreads the leak.
 - Weak crypto: MD5/SHA1 for security, custom crypto, weak random for tokens
 - Insecure defaults: permissive CORS, missing auth checks, debug routes in production code paths
 - Insecure deserialization, SSRF, open redirects
@@ -164,26 +157,36 @@ This is the most speculative dimension. Only suggest features when there's a rea
 
 Assign each finding two attributes. These let the user filter and decide what to act on:
 
-- **Severity**: `critical` (data loss, security breach, broken core flow), `high` (real bug, common-case failure, exploitable in plausible conditions), `medium` (correctness or quality issue with workaround), `low` (style, minor smell), `info` (idea, observation)
+- **Severity**: `critical` (data loss, security breach, broken core flow), `high` (real bug, common-case failure, exploitable in plausible conditions), `medium` (correctness or quality issue with workaround), `low` (style, minor smell), `info` (idea, observation — these go in the Ideas section)
 - **Confidence**: `high` (you can point at the exact misbehaving line and say what's wrong), `medium` (the pattern is suspicious and likely wrong, but verifying needs running the code), `low` (this might be intentional — flag for the maintainer to confirm)
 
 If you find yourself writing many `low confidence / low severity` items, stop. They make the report unreadable and obscure the things that matter. Cut anything that doesn't change the user's plan for the week.
 
+**Verify before you publish.** A false positive in the critical/high tier costs the user more trust than a missed low. For every critical and high finding — and for everything a subagent reported, since you haven't seen that code yourself — reopen the cited file and confirm that:
+
+- the line number points at the code the finding describes (subagents and tool output often drift by a few lines, or cite a file that was since refactored)
+- the problem is real in context — the input isn't already validated upstream, the "unused" function isn't called via reflection or a route table, the "missing" test isn't in a differently named directory
+- the severity matches the exploit path or failure scenario you can actually describe
+
+Drop or downgrade anything that doesn't survive this check.
+
 ### Step 6: Produce the report
 
-Save the report to `CODE_AUDIT_<YYYY-MM-DD>_<HHMM>_<auditor>.md` at the project root — e.g. `CODE_AUDIT_2026-06-29_1430_claude-opus-4-8.md`. The timestamp records when the audit ran and `<auditor>` records who ran it, so repeated audits pile up side by side instead of silently overwriting the last one. Build the name from the local clock and the auditor's identity:
+Save the report to `CODE_AUDIT_<YYYY-MM-DD>_<HHMM>_<auditor>.md` at the project root — e.g. `CODE_AUDIT_2026-06-29_1430_claude-opus-5-5.md` — unless the user asked for it inline or somewhere else. The timestamp records when the audit ran and `<auditor>` records who ran it, so repeated audits pile up side by side instead of silently overwriting the last one. Build the name from the local clock and the auditor's identity:
 
 ```bash
 date +%Y-%m-%d_%H%M        # the date + time component, e.g. 2026-06-29_1430
 ```
 
-For `<auditor>`, use the model id when an agent runs the audit (e.g. `claude-opus-4-8`), or the git `user.name` (slugified, lowercase, spaces → `-`) when a human does. (Or print inline if the user prefers.) Use this structure exactly — it's a contract the user can skim quickly:
+For `<auditor>`, use the model id when an agent runs the audit (e.g. `claude-opus-5-5`), or the git `user.name` (slugified, lowercase, spaces → `-`) when a human does.
+
+Write the report in the language the user wrote their request in (a Hungarian request gets a Hungarian report); keep the section headings, ids, and category/severity tokens as below so reports stay comparable. Use this structure exactly — it's a contract the user can skim quickly:
 
 ```markdown
 # Code audit — <project name> — <YYYY-MM-DD HH:MM>
 
 ## Executive summary
-<3–6 lines: scope of audit, headline counts (critical/high/medium/low), the single biggest concern, and the single highest-leverage improvement>
+<3–6 lines: scope of audit (and any scoping defaults you chose), headline counts (critical/high/medium/low/ideas), the single biggest concern, and the single highest-leverage improvement>
 
 ## Findings
 
@@ -234,12 +237,14 @@ Audit complete. Report at CODE_AUDIT_<YYYY-MM-DD>_<HHMM>_<auditor>.md.
 
 Want me to:
   1. Fix specific findings — name the ids, e.g. "fix SEC-01, BUG-02, Q-03"
-  2. Open GitHub issues for the high/critical items (uses `gh issue create`)
+  2. Open GitHub issues for the high/critical items (via `gh issue create`)
   3. Drill into one finding in more depth
   4. Re-run the audit with different scope or focus
 ```
 
 Wait for direction. If the user picks fixes, treat each finding as an independent small task — read the relevant code, make the smallest change, and confirm before moving on. Do not bundle unrelated fixes into one mega-commit.
+
+The report file is untracked; mention that so the user can decide whether to commit it, move it, or add `CODE_AUDIT_*.md` to `.gitignore` — don't do any of those yourself.
 
 **Non-interactive use**: skip the menu. State the absolute path to the report and stop — the calling system will read the report and decide what to do next.
 
@@ -255,8 +260,9 @@ These shape the quality of the report more than any single rule above:
 
 ## Critical constraints
 
-- Read-only audit. Do not run formatters, do not edit files, do not commit, do not push as part of the audit pass.
+- Read-only audit. Apart from writing the report, do not run formatters, do not edit files, do not commit, do not push as part of the audit pass.
 - Do not run package installers, dependency updates, or anything that mutates `node_modules` / `.venv` / lockfiles. If a tool isn't installed, note it; don't install it silently.
+- Never copy a full secret value into the report or your reply — redact it (see Security in Step 4).
 - Every finding must be locatable — a real file (with a line range when possible) or a named project-level location like `project root` or `tests/ (missing)`. If you can't point at any concrete location, the finding doesn't go in the report.
 - Don't pad the report. If a category has no findings, write "None" — that's useful information.
 - Don't claim something is a vulnerability unless you can describe how it would be exploited and what the impact is. Lower the severity if the exploit path is hand-wavy.
