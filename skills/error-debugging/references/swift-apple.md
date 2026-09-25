@@ -92,5 +92,6 @@ demangle with `xcrun swift-demangle`.
 xcrun swift-demangle '$s5MyApp16ProfileViewModelC4loadyyF'
 xcrun simctl spawn booted log stream --predicate 'process == "MyApp"'   # simulator logs
 log show --last 10m --predicate 'process == "MyApp"'                    # macOS logs
-xcodebuild test -scheme MyApp -destination 'platform=iOS Simulator,name=iPhone 15'
+xcrun simctl list devices available | head                              # pick a real simulator name
+xcodebuild test -scheme MyApp -destination 'platform=iOS Simulator,name=<simulator>'
 ```

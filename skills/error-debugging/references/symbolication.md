@@ -25,11 +25,11 @@ The mapping file is produced per build variant and is **build-specific**:
 app/build/outputs/mapping/<variant>/mapping.txt
 ```
 
-Retrace with the bundled tool (R8 ships with the Android Gradle plugin):
+Retrace with the R8 retrace tool shipped in the SDK command-line tools:
 
 ```bash
-# R8 (preferred, AGP 7+)
-java -jar "$ANDROID_HOME"/cmdline-tools/latest/lib/r8.jar retrace \
+# R8 retrace (preferred; reads both R8 and ProGuard mapping files)
+"$ANDROID_HOME"/cmdline-tools/latest/bin/retrace \
   app/build/outputs/mapping/release/mapping.txt stacktrace.txt
 
 # ProGuard-era projects
@@ -74,16 +74,22 @@ dwarfdump --uuid MyApp.app.dSYM
 # Symbolicate a single address
 atos -o MyApp.app.dSYM/Contents/Resources/DWARF/MyApp -arch arm64 -l <load-address> <address>
 
-# Whole report (path varies by Xcode version)
-/Applications/Xcode.app/Contents/SharedFrameworks/DVTFoundation.framework/Versions/A/Resources/symbolicatecrash \
-  report.ips MyApp.app.dSYM > symbolicated.txt
+# Find the dSYM for a UUID anywhere Spotlight has indexed (archives, DerivedData)
+mdfind "com_apple_xcode_dsym_uuids == <UUID-with-dashes>"
 ```
+
+For a whole report, open it in Xcode (drag the `.ips` onto *Devices and Simulators → View Device
+Logs*, or open it directly) with the matching archive or dSYM present — Xcode symbolicates it.
+The legacy `symbolicatecrash` script only understands the old `.crash` text format, not the JSON
+`.ips` format; for scripted work, symbolicate the crashing thread's frames one by one with `atos`.
+The load address comes from that image's line in *Binary Images* (legacy) or its `base` field in
+`usedImages` (JSON `.ips`).
 
 Notes:
 
 - Xcode symbolicates automatically when the archive is still in the Organizer — check there first.
-- With Bitcode-era or App Store-recompiled builds, download the dSYMs from App Store Connect
-  rather than using the local ones.
+- For old Bitcode builds (pre-Xcode 14) the App Store recompiled the binary; download the dSYMs
+  from App Store Connect rather than using the local ones.
 - Swift symbols come out mangled (`$s5MyApp...`); demangle with `swift demangle` or
   `xcrun swift-demangle`.
 

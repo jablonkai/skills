@@ -53,6 +53,7 @@ description — descriptions are often wrong or absent:
 | Signal in the trace | Platform | Reference |
 |---|---|---|
 | `at com.foo.Bar.baz(Bar.kt:42)`, `Caused by:`, `FATAL EXCEPTION` | Kotlin / Java / Android | [kotlin-android-kmp.md](references/kotlin-android-kmp.md) |
+| `ANR in`, `Input dispatching timed out`, `"main" prio=5 tid=1` thread dump | Android ANR | [kotlin-android-kmp.md](references/kotlin-android-kmp.md) |
 | `kfun:`, `Uncaught Kotlin exception`, `kotlin.Throwable`, `ObjCException` | Kotlin/Native (KMP on iOS) | [kotlin-android-kmp.md](references/kotlin-android-kmp.md) |
 | `androidx.compose.*`, `Snapshot`, "recomposition", `Composer` frames | Compose / CMP | [kotlin-android-kmp.md](references/kotlin-android-kmp.md) |
 | `FlutterError`, `RenderFlex`, `package:flutter/src/...`, `<asynchronous suspension>` | Flutter / Dart | [flutter-dart.md](references/flutter-dart.md) |
@@ -61,8 +62,10 @@ description — descriptions are often wrong or absent:
 | `SIGSEGV`, `AddressSanitizer:`, `#0 0x...`, `ndk-stack`, core dump | C / C++ / NDK | [rust-cpp.md](references/rust-cpp.md) |
 | `Traceback (most recent call last)`, `at Object.<anonymous>`, `goroutine 1 [running]` | Python / JS / Go | [other-languages.md](references/other-languages.md) |
 
-Load exactly one platform reference — the one that matches. Loading all of them wastes context
-and mixes idioms that do not apply.
+Load the one platform reference that matches. Loading all of them wastes context and mixes
+idioms that do not apply. The exception is a trace that crosses a boundary — a Kotlin/Native
+exception terminating an iOS app, a Flutter `PlatformException` carrying a native trace, a JNI
+crash — where the second side's reference is needed too.
 
 **2. Is the trace readable, or does it need symbolication first?**
 
@@ -108,10 +111,11 @@ guess dressed up as an answer.
 
 ### Step 3: Locate the failing frame
 
-Read the trace from the bottom up, then answer:
+Frame order differs by platform: JVM, Swift, Rust, Go, JS and native traces list the throwing
+frame **first**; Python lists it **last**. Orient yourself before reading, then answer:
 
-- **Where did it throw?** The topmost frame in the user's own code — not the framework frame
-  above it. Framework frames tell you the mechanism; your frames tell you the mistake.
+- **Where did it throw?** The frame closest to the throw that is in the user's own code — not the
+  framework frame next to it. Framework frames tell you the mechanism; your frames tell you the mistake.
 - **What is the deepest `Caused by:`?** In chained exceptions the last cause is usually the
   real one; the outer wrappers are transport.
 - **Which frames belong to the project?** Filter to the app's package/module prefix. Everything
@@ -125,8 +129,11 @@ available:
 grep -n "<symbol>" -r <src-dir>
 ```
 
-Use symbol-aware tools (Serena) to read the enclosing function and its callers instead of
-reading whole files.
+Use symbol-aware tools (Serena, LSP) when available to read the enclosing function and its
+callers instead of reading whole files.
+
+If the source is **not** available (a trace from a third-party app, a snippet with no repo),
+say so up front and mark every conclusion that depends on unseen code as likely or speculative.
 
 ### Step 4: Trace back to the root cause
 
@@ -209,7 +216,7 @@ The skill supports three modes; pick from what the user asked for:
 |---|---|---|
 | `explain-error` | "what does this mean" | Steps 1–4, plain-language explanation, no code changes |
 | `analyze` (default) | "why does this crash", bare trace paste | Steps 1–6, full report with proposed fix |
-| `suggest-fixes` | "fix this" | Steps 1–7, applies the change and verifies it |
+| `fix` | "fix this", "javítsd" | Steps 1–7, applies the change and verifies it |
 
 ## Critical constraints
 
