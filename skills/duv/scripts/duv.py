@@ -10,7 +10,7 @@ prints them as CSV (default), Markdown or the raw JSON:
     runner         one runner: header, personal bests, every performance
     search-runner  find runner IDs by name ("Smith" or "Smith, John")
     search-event   find event IDs by name ("Spartathlon" or "York,100,USA")
-    event          finisher list of one event
+    event          finisher list of one event (HTML page: its JSON twin needs a login)
     event-detail   metadata of one event (organizer, venue, limits, editions)
     calendar       races in a year (past or future) with optional filters
     get            any DUV JSON URL, pretty-printed, for endpoints not wrapped here
@@ -38,7 +38,9 @@ from __future__ import annotations
 
 import argparse
 import csv
+import html
 import json
+import re
 import shutil
 import ssl
 import subprocess
@@ -87,12 +89,31 @@ def fetch_text(url: str, delay: float) -> str:
         req = urllib.request.Request(url, headers={"User-Agent": "duv-skill/1.0"})
         with urllib.request.urlopen(req, timeout=90) as resp:
             return resp.read().decode("utf-8-sig", errors="replace")
+    except urllib.error.HTTPError as exc:
+        return http_error_body(url, exc.code, exc.read().decode("utf-8-sig", errors="replace"))
     except urllib.error.URLError as exc:
         if not isinstance(exc.reason, ssl.SSLError) or not shutil.which("curl"):
-            raise
-    proc = subprocess.run(["curl", "-sL", "--max-time", "90", url],
-                          capture_output=True, check=True)
-    return proc.stdout.decode("utf-8-sig", errors="replace")
+            sys.exit(f"error: cannot reach {url}: {exc.reason}")
+    proc = subprocess.run(["curl", "-sSL", "--max-time", "90", "-w", "\n%{http_code}", url],
+                          capture_output=True)
+    if proc.returncode:
+        sys.exit(f"error: curl failed for {url}: {proc.stderr.decode(errors='replace').strip()}")
+    body, _, code = proc.stdout.decode("utf-8-sig", errors="replace").rpartition("\n")
+    return body if code.startswith("2") else http_error_body(url, int(code), body)
+
+
+def http_error_body(url: str, code: int, body: str) -> str:
+    """Keep a JSON body that arrives with an error status, otherwise exit.
+
+    meventdetail.php answers 404 for many events yet sends the complete JSON
+    payload, so the status alone can't be trusted. A 401 is a real refusal:
+    DUV now wants a login token for mgetresultevent.php.
+    """
+    if code != 401 and body.lstrip().startswith("{"):
+        return body
+    sys.exit(f"error: HTTP {code} for {url}"
+             + ("\n       DUV now requires a login token for this endpoint; "
+                "use its HTML twin instead." if code == 401 else ""))
 
 
 def fetch_json(endpoint: str, params: dict, delay: float) -> dict:
@@ -227,9 +248,12 @@ def resolve_runner(args) -> str:
         return args.id
     hits = fetch_json("json/msearchrunner.php", {"sname": args.name}, args.delay)
     matches = hits.get("Hitlist", [])
+    if not matches:
+        sys.exit(f"error: no runner matches {args.name!r}; try without accents, or surname only")
     if len(matches) != 1:
         listing = "\n".join(f"  {h['PersonID']:>8}  {h['LastName']}, {h['FirstName']}  "
-                            f"{h.get('Nationality', '')}  b.{h.get('YOB', '')}  {h.get('Club', '')}"
+                            f"{h.get('Nationality', '')}  b.{h.get('YOB') if h.get('YOB') not in (None, '', '0') else '?'}  "
+                            f"{h.get('Club', '')}  active {h.get('ActivRange', '')}"
                             for h in matches[:30])
         sys.exit(f"error: {len(matches)} runners match {args.name!r}; pass --id\n{listing}")
     return matches[0]["PersonID"]
@@ -256,8 +280,10 @@ def cmd_runner(args) -> None:
     pbs = []
     for entry in payload.get("AllPBs", []):
         for dist, detail in entry.items():
-            pbs.append({"dist": dist, "pb": detail.get("PB", ""),
-                        "years": ", ".join(y for y in detail if y != "PB")})
+            years = [y for y in detail if y != "PB"]
+            pb_year = next((y for y in years if detail[y].get("Perf") == detail.get("PB")), "")
+            pbs.append({"dist": dist, "pb": detail.get("PB", ""), "pb_year": pb_year,
+                        "years_ranked": ", ".join(years)})
     summary = [
         f"# {header.get('PersonName', '')}  (DUV id {runner_id})",
         f"Nationality: {header.get('NationalityShort', '')}  DOB: {header.get('DOB', '')}  "
@@ -283,6 +309,9 @@ def cmd_search_runner(args) -> None:
              "yob": h.get("YOB", ""), "gender": h.get("Gender", ""), "club": h.get("Club", ""),
              "city": h.get("City", ""), "active": h.get("ActivRange", "")}
             for h in payload.get("Hitlist", [])]
+    if not rows:
+        print(f"note: no runner matches {args.name!r}; try without accents, "
+              "or surname only", file=sys.stderr)
     emit(rows, args.format, args.out, payload)
 
 
@@ -297,21 +326,59 @@ def cmd_search_event(args) -> None:
     emit(rows, args.format, args.out, payload)
 
 
+def html_cells(row: str) -> list[str]:
+    """Text of each <td> in one table row, tags and entities stripped."""
+    return [html.unescape(re.sub(r"<[^>]+>", "", cell)).replace("\xa0", " ").strip()
+            for cell in re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)]
+
+
+# Result-table headers of getresultevent.php (language=EN) -> output column.
+EVENT_COLUMNS = {"Rank": "rank", "Performance": "perf", "Surname, first name": "name",
+                 "Club": "club", "Nat.": "nat", "YOB": "yob", "M/F": "gender",
+                 "Rank M/F": "rank_gender", "Cat": "cat", "Cat. Rank": "rank_cat",
+                 "Avg.Speed km/h": "speed_kmh", "Age graded performance": "age_graded"}
+
+
 def cmd_event(args) -> None:
-    payload = fetch_json("json/mgetresultevent.php", {"event": args.id}, args.delay)
-    hdr = payload.get("EvtHeader", {})
-    print(f"# {hdr.get('EventName', '').strip()}  {hdr.get('EvtDate', '')}  "
-          f"{hdr.get('City', '')} ({hdr.get('Country', '')})  {hdr.get('EvtDistance', '')}  "
-          f"finishers: {hdr.get('FinisherCnt', '')}  ranking-eligible: {hdr.get('RecordEligible', '')}",
-          file=sys.stderr)
-    rows = [{"rank": r.get("RankTotal", ""), "perf": r.get("Performance", "").strip(),
-             "last_name": r.get("LastName", ""), "first_name": r.get("FirstName", ""),
-             "nat": r.get("Nationality", ""), "gender": r.get("Gender", ""),
-             "yob": r.get("YOB", ""), "cat": r.get("Cat", ""), "rank_gender": r.get("RankMW", ""),
-             "rank_cat": r.get("RankCat", ""), "club": r.get("Club", ""),
-             "person_id": r.get("PersonID", "")}
-            for r in payload.get("Resultlist", [])]
-    emit(rows, args.format, args.out, payload)
+    # json/mgetresultevent.php answers 401 (Bearer token) since 2026, so this
+    # scrapes the HTML result page instead. It serves 2000 rows per `page`.
+    rows, page = [], 1
+    while True:
+        text = fetch_text(f"{BASE}getresultevent.php?event={args.id}&language=EN&page={page}",
+                          args.delay)
+        if page == 1:
+            info = dict(re.findall(r"<b>([^<:]+):\s*</b></td>\s*<td[^>]*>(.*?)</td>", text, re.S))
+            info = {k: html.unescape(re.sub(r"<[^>]+>|\s+", " ", v)).strip() for k, v in info.items()}
+            if "Event" not in info:
+                sys.exit(f"error: no event {args.id!r} on DUV (check the id with search-event)")
+            total = re.search(r"(\d+) search results", text)
+            print(f"# {info.get('Event', '')}  {info.get('Date', '')}  {info.get('Distance', '')}  "
+                  f"finishers: {info.get('Finishers', '')}  "
+                  f"ranking-eligible: {info.get('Ranking eligible', '')}", file=sys.stderr)
+            heads = [re.sub(r"<[^>]+>|\s+", " ", h).strip()
+                     for h in re.findall(r"<th[^>]*>(.*?)</th>", text, re.S)]
+            # the name header also carries an "Original name" toggle link
+            cols = ["name" if h.endswith("first name") else EVENT_COLUMNS.get(h, h) for h in heads]
+        for tr in re.findall(r"<tr class='(?:odd|even)'>(.*?)</tr>", text, re.S):
+            rec = dict(zip(cols, html_cells(tr)))
+            orig = re.search(r"class='hideSpan'>(.*?)</span>", tr, re.S)
+            if orig:  # the name cell also holds the original-script name, hidden
+                rec["name"] = rec.get("name", "").replace(
+                    html.unescape(re.sub(r"<[^>]+>", "", orig.group(1))).replace("\xa0", " ").strip(), "").strip()
+            last, _, first = rec.pop("name", "").partition(",")
+            runner = re.search(r"getresultperson\.php\?runner=(\d+)", tr)
+            rows.append({"rank": rec.get("rank", ""), "perf": rec.get("perf", ""),
+                         "last_name": last.strip(), "first_name": first.strip(),
+                         **{k: v for k, v in rec.items() if k not in ("rank", "perf")},
+                         "person_id": runner.group(1) if runner else ""})
+        more = f"page={page + 1}'" in text
+        if not more or (args.pages != "all" and page >= int(args.pages)):
+            if more:
+                print(f"note: stopped after page {page} ({len(rows)} of "
+                      f"{total.group(1) if total else '?'} rows; use --pages all)", file=sys.stderr)
+            break
+        page += 1
+    emit(rows, args.format, args.out, rows)
 
 
 def cmd_event_detail(args) -> None:
@@ -437,8 +504,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("name", help='"Spartathlon" (name or town) or "York,100,USA"')
     p.set_defaults(func=cmd_search_event)
 
-    p = sub.add_parser("event", parents=[common], help="finisher list")
+    p = sub.add_parser("event", parents=[common], help="finisher list (scraped from HTML)")
     p.add_argument("--id", required=True, help="DUV event id")
+    p.add_argument("--pages", default="all", help="how many 2000-row pages to fetch (default all)")
     p.set_defaults(func=cmd_event)
 
     p = sub.add_parser("event-detail", parents=[common], help="event metadata + editions")

@@ -73,7 +73,7 @@ age group the athlete was in on that day, and the same athlete can hold several 
   race result, which matters when the user wants records set in dedicated races.
 - `Club` is free text as entered with the result — prefixes like `(NR)` are part of the club
   string, not a DUV marker.
-- `PerfID` identifies the single performance; `EventID` → `json/mgetresultevent.php`,
+- `PerfID` identifies the single performance; `EventID` → `getresultevent.php` (HTML; the JSON twin needs a login),
   `PersonID` → `json/mgetresultperson.php`.
 
 ## Bulk download with the shipped script
