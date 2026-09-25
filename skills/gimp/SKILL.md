@@ -20,7 +20,7 @@ pixels and filters. Drive it through GIMP's own **Script-Fu server** — a TCP e
 GIMP ships with, so there is nothing to install — which hands each script to GIMP's
 `python-fu-eval`. The script runs against the *live* GIMP: the canvas updates, the layer
 stack is the one the user is looking at, and nothing happens headless. Every call in
-this skill was run against **GIMP 3.2.4**.
+this skill was run against **GIMP 3.2.6**.
 
 - [scripts/gimp-send.sh](scripts/gimp-send.sh) — send a `.py` file (or `-c 'inline code'`)
   and print its captured output; `--ping` checks the connection, `--scheme` evaluates
@@ -39,7 +39,7 @@ this skill was run against **GIMP 3.2.4**.
 ## The control loop
 
 1. **Check the connection**: `bash scripts/gimp-send.sh --ping` →
-   `{"ok": true, "bridge": "gimp", "port": 10008, "reply": "3.2.4 | open images: 2"}`.
+   `{"ok": true, "bridge": "gimp", "port": 10008, "reply": "3.2.6 | open images: 2"}`.
 
    If nothing answers, there are two different situations and they need different moves:
 
@@ -56,8 +56,10 @@ this skill was run against **GIMP 3.2.4**.
 
 2. **Write a build script** to the scratchpad and send it:
    `OUT=/path/to/outdir bash scripts/gimp-send.sh /path/build.py`. `OUT` arrives both as
-   a global and as `os.environ["OUT"]`; `GIMP_SEND_TIMEOUT=600` (seconds) covers batches
-   and big exports.
+   a global and as `os.environ["OUT"]` — and it is the **only** variable that crosses
+   into GIMP: `SRC=... bash gimp-send.sh` gives the script a `KeyError`, because it runs
+   in GIMP's process, not your shell's. Write input paths into the script as absolute
+   literals. `GIMP_SEND_TIMEOUT=600` (seconds) covers batches and big exports.
 
 3. **Read the feedback.** The sender returns the script's captured stdout/stderr, and on
    failure the Python traceback, exiting non-zero — so `print(...)` is your channel back.
@@ -222,13 +224,22 @@ come from calling the export plug-in through the PDB — see
   `selection.bounds`. Unpack the tuple; don't index into it blindly.
 - **Resource names are localised** — on a Hungarian GIMP the gradients are
   `Előtérből háttérbe (RGB)`, not `FG to BG (RGB)`. List them at runtime
-  (`gimp-*-get-list` via the PDB) instead of hard-coding English names.
+  (`Gimp.gradients_get_list("")` and siblings) instead of hard-coding English names.
 - **`image.delete()` discards unsaved changes without asking.** Call it only on images
   your own script created; never on the user's.
 - **Group edits with `image.undo_group_start()` / `undo_group_end()`** so one Ctrl+Z
   undoes the whole build rather than four hundred individual operations.
-- **No state survives a send** — each one is a new `python-fu-eval` process. Version
-  your images (`"poster_v2"`) so re-runs don't fight the previous attempt.
+- **No state survives a send** — each one is a new `python-fu-eval` process, and the
+  script gets a fresh namespace with only `OUT` in it: import `os`, `json` and the `gi`
+  repositories yourself. Version your images (`"poster_v2"`) so re-runs don't fight the
+  previous attempt.
+- **A failed send leaves its half-built image open.** Call
+  `image.set_file(Gio.File.new_for_path(OUT + "/poster_v2.xcf"))` right after creating
+  it; the next send can then find its own leftovers in `Gimp.get_images()` by
+  `get_file()` and `delete()` them, without touching anything the user opened.
+- **`flatten()` fills transparency with the context background colour**, which is
+  whatever an earlier fill left there. Set it (`Gimp.context_set_background`) before
+  flattening, or use `merge_visible_layers(Gimp.MergeType.CLIP_TO_IMAGE)` to keep alpha.
 - **`--batch` needs `--batch-interpreter` in GIMP 3**; without it GIMP prints a list of
   interpreters and quits. `gimp-start.sh` already passes it.
 - **A dead GIMP can leave the port bound.** The `script-fu-server` plug-in is its own
@@ -236,7 +247,9 @@ come from calling the export plug-in through the PDB — see
   nothing is behind it. `--ping` sees through this (the connection closes mid-reply, and
   the orphan then exits) — if it reports that, just start GIMP again.
 - **GIMP 2.10 tutorials do not port.** `gimpfu`, `pdb.gimp_*`, RGB tuples and the
-  `plug-in-gauss` filters are all gone; check `lookup_procedure` for `None` before
+  `plug-in-gauss` filters are all gone, and surviving calls changed shape —
+  `edit_bucket_fill(fill_type, x, y)` now takes its threshold from
+  `Gimp.context_set_sample_threshold`. Check `lookup_procedure` for `None` before
   trusting a procedure name you read somewhere.
 - **Tools are not scriptable** — no transform widget, no free select, no menu-action
   trigger. Fills, paint calls, selections and GEGL filters are the whole vocabulary; see

@@ -1,7 +1,9 @@
 # GIMP bridge recipes
 
 Working patterns for the bridge in [SKILL.md](../SKILL.md). Each one assumes the
-preamble from [api-reference.md](api-reference.md) and an `OUT` directory.
+preamble from [api-reference.md](api-reference.md), `import glob, json, os`, and an `OUT`
+directory — scripts run in a fresh namespace, so a snippet pasted without its imports
+fails with `NameError`.
 
 - [Work on the image the user already has open](#work-on-the-image-the-user-already-has-open)
 - [Batch-process a folder](#batch-process-a-folder)
@@ -49,7 +51,7 @@ Still through the live session — open, edit, export, close, one file at a time
 memory does not grow without bound:
 
 ```python
-import glob, os
+import glob, json, os
 
 sources = sorted(glob.glob("/photos/*.jpg"))
 results = []
@@ -86,29 +88,37 @@ Don't add `Gimp.Display.new` inside the loop — a hundred windows is not a feat
 
 ## Export every layer as its own file
 
+Keep one layer per duplicate, pad it to the canvas, and save **without flattening** — a
+flatten would paint every transparent pixel with the context background colour, which is
+exactly what a per-layer export for web or animation must not do:
+
 ```python
-image = Gimp.get_images()[0]
+source = Gimp.file_load(Gimp.RunMode.NONINTERACTIVE, Gio.File.new_for_path(SRC_XCF))
 written = []
-for index, layer in enumerate(image.get_layers()):
-    single = image.duplicate()
-    # Index, not name: layer names are not unique, and "bg" would export twice.
+for index, layer in enumerate(source.get_layers()):          # topmost first
+    single = source.duplicate()
     for position, other in enumerate(single.get_layers()):
-        other.set_visible(position == index)
-    single.flatten()
-    safe = layer.get_name().replace("/", "_").strip() or "layer_%02d" % index
+        if position != index:                                 # by index: names repeat
+            single.remove_layer(other)
+    keep = single.get_layers()[0]
+    keep.set_visible(True)
+    if not keep.has_alpha():
+        keep.add_alpha()
+    keep.resize_to_image_size()          # text and cropped layers -> full canvas, transparent pad
+    safe = layer.get_name().replace("/", "_").strip() or "layer"
     path = os.path.join(OUT, "%02d_%s.png" % (index, safe))
-    Gimp.file_save(Gimp.RunMode.NONINTERACTIVE, single,
-                   Gio.File.new_for_path(path), None)
-    single.delete()
+    Gimp.file_save(Gimp.RunMode.NONINTERACTIVE, single, Gio.File.new_for_path(path), None)
+    single.delete()                      # ours, so closing it is safe
     written.append(path)
+source.delete()                          # loaded by this script, not the user's
 print(written)
 ```
 
-`image.get_layers()` is top level only — recurse through `group.get_children()` when the
-document has groups. `flatten()` composites onto the image's background, so layers with
-transparency come out on white; keep the alpha by exporting the duplicate without
-flattening it, or by adding an alpha-preserving flatten
-(`single.merge_visible_layers(Gimp.MergeType.CLIP_TO_IMAGE)`).
+GIMP renames duplicate layer names on load (`shape`, `shape #1`), but index-based
+selection is what keeps two same-named layers from overwriting each other's file.
+`get_layers()` is top level only — recurse through `group.get_children()` when the
+document has groups. To export from the image the user has open, use
+`Gimp.get_images()[0]` as `source` and skip the final `delete()`.
 
 ## Photo adjustments as a non-destructive stack
 
@@ -118,8 +128,8 @@ photos, and it costs nothing to build them that way:
 ```python
 layer = image.get_layers()[0]
 for op, props in [
-    ("gegl:brightness-contrast", {"brightness": 0.05, "contrast": 1.12}),
-    ("gegl:hue-chroma",          {"chroma": 8.0}),
+    ("gegl:brightness-contrast", {"brightness": 0.05, "contrast": 1.12}),  # offset, multiplier
+    ("gegl:hue-chroma",          {"chroma": 8.0}),                         # -100..100
     ("gegl:unsharp-mask",        {"std-dev": 1.2, "scale": 0.6}),
 ]:
     f = Gimp.DrawableFilter.new(layer, op, op.split(":")[1])
