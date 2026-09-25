@@ -1,6 +1,6 @@
 # GIMP 3 Python API reference
 
-Every call here was run against **GIMP 3.2.4** through the bridge described in
+Every call here was run against **GIMP 3.2.6** through the bridge described in
 [SKILL.md](../SKILL.md). GIMP 3 dropped the old `gimpfu` module: scripts now talk to
 libgimp through GObject Introspection, which means real classes and methods instead of
 `pdb.gimp_image_new(...)` strings.
@@ -33,10 +33,10 @@ from gi.repository import Babl, Gegl, Gimp, Gio, GLib
 Gegl.init(None)          # needed before GEGL colours and buffers behave
 ```
 
-`python-fu-eval` already imports `Gimp`, `Gegl`, `Babl`, `Gio` and `GLib` into the
-namespace your script inherits, but import them yourself anyway — a script that only
-works because of the host's imports is a script that breaks the first time it is run
-anywhere else.
+The bridge runs every script in a **fresh namespace**: nothing is pre-imported except
+the `OUT` global. Import `gi` and the repositories as above, and the standard library
+too — a recipe that uses `os`, `json` or `glob` without importing them dies with a
+`NameError` on the first line that touches them.
 
 Types worth knowing:
 
@@ -149,8 +149,13 @@ ok, non_empty, x1, y1, x2, y2 = image.get_selection().bounds(image)
 layer.fill(Gimp.FillType.FOREGROUND)        # whole layer, ignores the selection
 layer.edit_fill(Gimp.FillType.FOREGROUND)   # respects the selection
 layer.edit_clear()
-layer.edit_bucket_fill(Gimp.FillType.FOREGROUND, 15.0, False, False, 0, 100.0, 100.0)
+layer.edit_bucket_fill(Gimp.FillType.FOREGROUND, 100.0, 100.0)   # fill_type, x, y only
 ```
+
+Bucket fill takes just the fill type and the seed point; everything else is context
+state — `Gimp.context_set_sample_threshold(0.06)` (0–1, not 0–255),
+`context_set_sample_merged(True)`, `context_set_sample_criterion(...)`. The GIMP 2
+eight-argument form raises `takes exactly 4 arguments (8 given)`.
 
 `Gimp.FillType`: `FOREGROUND`, `BACKGROUND`, `WHITE`, `TRANSPARENT`, `PATTERN`,
 `CIELAB_MIDDLE_GRAY`.
@@ -240,7 +245,7 @@ pixelize.update()
 layer.merge_filter(pixelize)
 ```
 
-Discover operations and their properties instead of guessing — GIMP 3.2 ships 261 GEGL
+Discover operations and their properties instead of guessing — GIMP 3.2 ships about 260 GEGL
 ops and the legacy `plug-in-gauss` style procedures are gone:
 
 ```python
@@ -252,7 +257,13 @@ ops and the legacy `plug-in-gauss` style procedures are gone:
 Useful ops: `gegl:gaussian-blur`, `gegl:unsharp-mask`, `gegl:dropshadow`,
 `gegl:pixelize`, `gegl:brightness-contrast`, `gegl:hue-chroma`, `gegl:levels`,
 `gegl:noise-reduction`, `gegl:motion-blur-linear`, `gegl:long-shadow`,
-`gegl:color-overlay`, `gegl:edge-sobel`, `gegl:waterpixels`.
+`gegl:color-overlay`, `gegl:edge-sobel`, `gegl:waterpixels`, `gegl:vignette`,
+`gegl:saturation`.
+
+Ranges are not what GIMP's dialogs show: `gegl:brightness-contrast` takes `contrast` as a
+multiplier (default `1.0`, range −5…5) and `brightness` as an offset (−3…3, so `0.05` is a
+visible nudge), while `gegl:hue-chroma` works in −100…100. Read `minimum`/`maximum` off
+`list_properties` before picking a value.
 
 ## Masks and channels
 
@@ -306,17 +317,13 @@ find out what they mean.
 ## Resources: fonts, brushes, patterns, gradients
 
 ```python
-def resource_names(procedure_name):
-    proc = Gimp.get_pdb().lookup_procedure(procedure_name)
-    config = proc.create_config()
-    config.set_property("filter", "")
-    return [r.get_name() for r in proc.run(config).get_core_object_array(1)]
-
-resource_names("gimp-fonts-get-list")       # 2855 on a stock macOS GIMP 3.2
-resource_names("gimp-brushes-get-list")
-resource_names("gimp-patterns-get-list")
-resource_names("gimp-gradients-get-list")
+[f.get_name() for f in Gimp.fonts_get_list("")]          # thousands: every system font
+[b.get_name() for b in Gimp.brushes_get_list("Hardness")] # the argument is a name filter
+Gimp.patterns_get_list(""); Gimp.gradients_get_list(""); Gimp.palettes_get_list("")
 ```
+
+These return resource objects, ready for `Gimp.context_set_brush(...)` and friends, so
+there is no need to go through the `gimp-*-get-list` PDB procedures.
 
 Resource names are **localised**: on a Hungarian GIMP the first gradient is
 `Előtérből háttérbe (RGB)`, not `FG to BG (RGB)`. Look names up from this list rather
@@ -366,7 +373,10 @@ config.set_property("quality", 0.85)          # 0–1
 proc.run(config)
 ```
 
-Flatten a **duplicate** for flat exports so the live image keeps its stack:
+Flatten a **duplicate** for flat exports so the live image keeps its stack. `flatten()`
+fills transparent areas with the **context background colour** — whatever the last
+`context_set_background` left there — so set it (usually white) first, or use
+`merge_visible_layers(Gimp.MergeType.CLIP_TO_IMAGE)` to keep alpha for PNG:
 
 ```python
 flat = image.duplicate(); flat.flatten()

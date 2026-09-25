@@ -22,6 +22,7 @@ Used as a library by gimp-send.sh; runnable on its own for raw Scheme:
 import argparse
 import json
 import os
+import shutil
 import socket
 import struct
 import sys
@@ -100,7 +101,7 @@ _saved = (sys.stdout, sys.stderr)
 _res = {{"ok": True, "output": "", "error": None}}
 try:
     sys.stdout = sys.stderr = _buf
-    with open(_script) as _fh:
+    with open(_script, encoding="utf-8") as _fh:
         _code = _fh.read()
     exec(compile(_code, _script, "exec"),
          {{"__name__": "__main__", "__file__": _script, "OUT": _out}})
@@ -110,7 +111,7 @@ except BaseException:
 finally:
     sys.stdout, sys.stderr = _saved
     _res["output"] = _buf.getvalue()
-    with open(_result, "w") as _fh:
+    with open(_result, "w", encoding="utf-8") as _fh:
         json.dump(_res, _fh)
 '''
 
@@ -125,24 +126,28 @@ def run_python(script_path, out="", host=DEFAULT_HOST, port=DEFAULT_PORT,
     """
     script_path = os.path.abspath(script_path)
     workdir = tempfile.mkdtemp(prefix="gimp-send-")
-    boot_path = os.path.join(workdir, "bootstrap.py")
-    result_path = os.path.join(workdir, "result.json")
-    with open(boot_path, "w") as fh:
-        fh.write(_BOOTSTRAP.format(script=repr(script_path), out=repr(out),
-                                   result=repr(result_path)))
+    try:
+        boot_path = os.path.join(workdir, "bootstrap.py")
+        result_path = os.path.join(workdir, "result.json")
+        with open(boot_path, "w", encoding="utf-8") as fh:
+            fh.write(_BOOTSTRAP.format(script=repr(script_path), out=repr(out),
+                                       result=repr(result_path)))
 
-    command = "(python-fu-eval RUN-NONINTERACTIVE %s)" % _scheme_string(
-        "exec(open(%r).read())" % boot_path)
-    error, message = send_scheme(command, host=host, port=port, timeout=timeout)
+        command = "(python-fu-eval RUN-NONINTERACTIVE %s)" % _scheme_string(
+            "exec(open(%r, encoding='utf-8').read())" % boot_path)
+        error, message = send_scheme(command, host=host, port=port, timeout=timeout)
 
-    if os.path.exists(result_path):
-        with open(result_path) as fh:
-            return json.load(fh)
-    # No result file: the failure happened before the bootstrap could write one
-    # (bad Scheme call, python-fu-eval missing, GIMP killed mid-run), so the
-    # server's own message is all the diagnosis there is.
-    return {"ok": not error, "output": "",
-            "error": message or "python-fu-eval produced no result file"}
+        if os.path.exists(result_path):
+            with open(result_path, encoding="utf-8") as fh:
+                return json.load(fh)
+        # No result file: the failure happened before the bootstrap could write
+        # one (bad Scheme call, python-fu-eval missing, GIMP killed mid-run), so
+        # the server's own message is all the diagnosis there is.
+        return {"ok": not error, "output": "",
+                "error": message or "python-fu-eval produced no result file"}
+    finally:
+        # One directory per send; without this every call leaves one behind.
+        shutil.rmtree(workdir, ignore_errors=True)
 
 
 def ping(host=DEFAULT_HOST, port=DEFAULT_PORT):
@@ -183,11 +188,16 @@ def main():
             stream.write(message.rstrip() + "\n")
             return 1 if error else 0
         script = args.python
-        if args.code is not None:
+        inline = args.code is not None
+        if inline:
             handle, script = tempfile.mkstemp(prefix="gimp-inline-", suffix=".py")
-            with os.fdopen(handle, "w") as fh:
+            with os.fdopen(handle, "w", encoding="utf-8") as fh:
                 fh.write(args.code)
-        result = run_python(script, args.out, args.host, args.port, args.timeout)
+        try:
+            result = run_python(script, args.out, args.host, args.port, args.timeout)
+        finally:
+            if inline:
+                os.remove(script)
     except GimpNotReachable as exc:
         sys.stderr.write("ERROR: %s\n" % exc)
         sys.stderr.write("       Run scripts/gimp-start.sh, or in a GIMP that is already "
