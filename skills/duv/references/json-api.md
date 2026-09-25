@@ -2,9 +2,13 @@
 
 The endpoints that power DUV's mobile app. Undocumented but stable, public, and far easier to
 consume than the HTML pages: no regex parsing, IDs are plain fields, and rankings are paginated
-instead of capped. Prefer them for everything they cover; fall back to the HTML endpoints in
+instead of capped. **Exception (2026):** `mgetresultevent.php` now answers `401 {"error":
+"Unauthorized"}` with `WWW-Authenticate: Bearer` — the app authenticates it, anonymous callers
+can't. Use the HTML `getresultevent.php` for finisher lists (`duv.py event` does). If another
+endpoint starts returning 401, treat it the same way: fall back to its HTML twin. Prefer them for everything they cover; fall back to the HTML endpoints in
 [endpoints.md](endpoints.md) only for the few pages with no JSON twin (`geteventlist.php`,
-`getresultclub.php`, `recordsGER.php`, `bulk_search.php`, `getresulteventalltime.php`).
+`getresultclub.php`, `recordsGER.php`, `bulk_search.php`, `getresulteventalltime.php`) and for
+finisher lists (`getresultevent.php`, see below).
 
 `scripts/duv.py` wraps all of these — read [../SKILL.md](../SKILL.md) for the subcommand list.
 This file is for when you need a field the script doesn't surface, or want to call the API
@@ -36,7 +40,7 @@ directly.
 | `msearchrunner.php` | `sname` | `HitCnt`, `Hitlist[]` of runners | `searchrunner.php` |
 | `mgetresultperson.php` | `runner` | `PersonHeader`, `AllPerfs[]`, `AllPBs[]`, `CompTable[]` | `getresultperson.php` |
 | `msearchevent.php` | `sname` | `HitCnt`, `Hitlist[]` of events (full metadata) | `searchevent.php` |
-| `mgetresultevent.php` | `event` | `EvtHeader`, `Resultlist[]` | `getresultevent.php` |
+| `mgetresultevent.php` | `event` | **401 — needs a Bearer token**; use the HTML twin | `getresultevent.php` |
 | `meventdetail.php` | `event` | `raceDetails`, `editions[]`, `winnerList[]`, `gpsTracks[]` | `eventdetail.php` |
 | `mgetintbestlist.php` | `year dist gender nat cat label page` | `Pagination`, `RankingList[]` | `getintbestlist.php` |
 | `mbestperfcountry.php` | `nat dist type cat` | `Records{}` keyed by age group | `bestperfcountry.php` |
@@ -90,11 +94,14 @@ json/msearchevent.php?sname=York,100,USA&language=EN
   Startdate, Length, Duration, City, Country, EventType, IAULabel, RecordProof, PromOrg, URL …`,
   so a search result is usually enough without a detail call. Newest first.
 
-## `mgetresultevent.php`
+## `mgetresultevent.php` — login required
 
 ```
-json/mgetresultevent.php?event=100580&language=EN
+json/mgetresultevent.php?event=100580&language=EN   # -> HTTP 401 since 2026
 ```
+
+Kept for reference in case access reopens; today scrape `getresultevent.php` instead
+([endpoints.md](endpoints.md)). The fields below were the JSON shape before the lock.
 
 - `EvtHeader` — `EvtID, EventName, EvtDate, City, Country, EvtDistance ("54km trail race"),
   EvtDist, NormLen, EvtType, FinisherCnt ("334 (231 M, 103 F)"), RecordEligible, Resultsource,
@@ -110,6 +117,10 @@ json/mgetresultevent.php?event=100580&language=EN
 ```
 json/meventdetail.php?event=100580&language=EN
 ```
+
+- **Answers HTTP 404 for many events while still sending the full, valid payload** (seen on
+  events without valuations/GPS tracks). Read the body regardless of status — `curl -f`,
+  `requests.raise_for_status()` or a bare `urlopen` throw the data away. `duv.py` handles it.
 
 - `raceDetails` — organizer/contact block (`PromOrg, Contact, Address, Phone, Email, URL`),
   `Startdate, Enddate, Length, Duration, AltitudeDiff, City, Country, CountryName, CourseDesc,

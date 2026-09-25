@@ -3,7 +3,8 @@
 Per-endpoint parameters and response shapes for the **HTML** pages. Most of these have a JSON
 twin under `json/m*.php` that is easier to consume — see [json-api.md](json-api.md) and prefer it.
 Come here for the pages without one (`geteventlist.php`, `getresultclub.php`, `recordsGER.php`,
-`bulk_search.php`, `getresulteventalltime.php`, `multiplefinish.php`), or when a user pastes an
+`bulk_search.php`, `getresulteventalltime.php`, `multiplefinish.php`), for `getresultevent.php`
+(its JSON twin now needs a login), or when a user pastes an
 HTML URL and you need to understand its parameters. Value vocabularies shared across endpoints
 (country/nation, distance, surface, year, gender, age category, IAU label) live in
 [parameters.md](parameters.md); records pages are in [records.md](records.md).
@@ -69,7 +70,20 @@ curl -sL "https://statistik.d-u-v.org/searchevent.php?sname=Spartathlon&language
 curl -s "https://statistik.d-u-v.org/getresultevent.php?event=100580&language=EN"
 ```
 
-- `event=<id>` is the main param.
+- `event=<id>` is the main param; `page=N` pages through the list — **2000 rows per page**, and the
+  `N search results` line above the table gives the total. Comrades-size fields (18 000+) take ten
+  pages; a small race is one.
+- This is the finisher-list source now that `json/mgetresultevent.php` answers 401.
+  `duv.py event --id <id>` scrapes it (all pages by default, `--pages 1` for just the top 2000).
+- Result table (`<table id="Resultlist">`, rows `<tr class='odd|even'>`), 12 columns: `Rank |
+  Performance | Surname, first name | Club | Nat. | YOB | M/F | Rank M/F | Cat | Cat. Rank |
+  Avg.Speed km/h | Age graded performance`. The name cell also holds a hidden
+  `<span class='hideSpan'>` with the original-script name (Greek, Cyrillic …) — drop it or keep it
+  as a separate field. Gender is `M`/`F` here (not `W`).
+- Header block: `Date` (`28.-29.09.2024` for multi-day), `Event` (`41. Spartathlon (GRE)` —
+  edition, name, host country), `Distance` (`246km  road race`), `Finishers` (`194 (159 M, 35 F)`),
+  `Ranking eligible`, `Source`. Parse `<b>Label: </b></td><td>value</td>`.
+- An unknown event id answers HTTP 400.
 - Each finisher row links to `getresultperson.php?runner=<id>`.
 - The header gives date, event name, distance/type, finisher count, ranking eligibility, and source,
   but it may not expose the start town as a clean field.

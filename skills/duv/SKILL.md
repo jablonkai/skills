@@ -37,7 +37,7 @@ python3 scripts/duv.py rankings --year 2024 --dist 100km --gender W --nat HUN
 python3 scripts/duv.py rankings --year all --dist 24h --gender M --pages all --primary-only --out 24h.csv
 python3 scripts/duv.py runner --name "Berces, Edit"          # or --id 5752
 python3 scripts/duv.py search-event "Spartathlon"            # or "York,100,USA"
-python3 scripts/duv.py event --id 100580                     # finisher list
+python3 scripts/duv.py event --id 100580                     # finisher list (scraped HTML)
 python3 scripts/duv.py event-detail --id 100580              # organizer, venue, editions
 python3 scripts/duv.py calendar --year 2024 --country HUN --dist 100km
 python3 scripts/duv.py get "json/msearchrunner.php?sname=Jablonkai"   # any JSON URL, raw
@@ -48,6 +48,9 @@ that trip up hand-written calls — the UTF-8 BOM some responses carry, and the 
 answers an **unrecognised parameter value with an empty 200 body** rather than an error. If
 Python's `urllib` can't verify the site certificate (a bare python.org install on macOS) it
 silently retries through `curl`.
+An HTTP 401 means DUV has put that endpoint behind a login — switch to its HTML twin rather
+than retrying. A 404 from `meventdetail.php` is *not* an error: the body is the full payload, and
+the script uses it.
 
 ## Records — the most asked-for thing
 
@@ -76,7 +79,7 @@ stand-alone race record), scheme differences, and how to phrase the answer.
 | Runner ID from a name | `msearchrunner.php?sname=Surname,Given` |
 | Profile, PBs, every result, year-by-year comparison | `mgetresultperson.php?runner=<id>` — PBs only for ranking-eligible distances; odd distances (81 km, 111 km) live in `AllPerfs` |
 | Event ID from a name or town | `msearchevent.php?sname=Name,100,HUN` — hits already carry full metadata |
-| Finisher list | `mgetresultevent.php?event=<id>` |
+| Finisher list | `getresultevent.php?event=<id>` (HTML, 2000 rows per `page`) — the JSON twin `mgetresultevent.php` now answers 401 (needs a login token); `duv.py event` scrapes the HTML |
 | Host town, organizer, limits, every past edition | `meventdetail.php?event=<id>` — `editions[]` walks a race's history |
 | Top-N in a year / all-time list | `mgetintbestlist.php` — 400 rows per `page`, no hard cap; rows carry athlete, nation, date and venue, so don't follow links |
 | National / continental records | `mbestperfcountry.php` — see above |
