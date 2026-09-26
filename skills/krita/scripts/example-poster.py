@@ -30,8 +30,9 @@ def push(node, image, x=0, y=0):
 
 
 doc = app.createDocument(W, H, "poster_v1", "RGBA", "U8", "", 300.0)
-view = app.activeWindow().addView(doc)   # show it — and paint* needs a view
-doc.setBatchmode(True)                   # no export/save dialogs
+view = app.activeWindow().addView(doc)   # show it — and paint* needs a view (without
+doc.setBatchmode(True)                   # one, paintAbility() crashes Krita); no dialogs
+doc.rootNode().childNodes()[0].setVisible(False)   # the default layer is opaque white
 
 # --- background: a gradient painted with QPainter -----------------------------
 bg = doc.createNode("background", "paintlayer")
@@ -114,7 +115,9 @@ json.dump(metrics, open(os.path.join(OUT, "metrics.json"), "w"), indent=2)
 print("METRICS", json.dumps(metrics))
 
 # --- deliverables ---------------------------------------------------------------
-doc.exportImage(os.path.join(OUT, "poster.png"), InfoObject())
+ok = doc.exportImage(os.path.join(OUT, "poster.png"), InfoObject())
 doc.saveAs(os.path.join(OUT, "poster.kra"))
 doc.waitForDone()
-print("wrote", OUT)
+print("exported" if ok else "EXPORT FAILED", "->", OUT)
+# The document stays open for the user. To close it, doc.setModified(False) first —
+# a modified document with a view asks "save changes?" and blocks the send.
