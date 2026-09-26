@@ -1,7 +1,7 @@
 ---
 name: github-issues
-description: "Create, view, close, comment on, label, triage, and list GitHub issues with standardized structure. Use when someone says 'create an issue', 'file a bug', 'report this', 'open an issue for this', 'triage issues', 'label issue #N', 'close #N', 'list open issues', 'hozz létre egy issue-t', or wants to manage GitHub issues in any way. Enforces issue templates with required sections (Summary, Proposed Solution), applies GitHub's default label taxonomy, and validates labels exist before use."
-summary: "standardized issue creation, labeling, triage, commenting, and issue management through the GitHub CLI"
+description: "Create, view, close, comment on, label, triage, and list GitHub issues with standardized structure — including batch-filing issues from a code audit or review report (e.g. a CODE_AUDIT_*.md from code-analyzer). Use when someone says 'create an issue', 'file a bug', 'open an issue for this', 'turn the audit findings into issues', 'open issues for the high/critical items', 'triage issues', 'label issue #N', 'close #N as duplicate', 'list open issues', 'hozz létre egy issue-t', 'csinálj issue-kat az audit alapján', or wants to manage GitHub issues in any way. Checks for duplicates first, enforces templates with required sections (Summary, Proposed Solution), and validates labels exist before use. Not for implementing an issue (github-do-issue) or opening pull requests (github-commit-pr)."
+summary: "standardized issue creation (including batch filing from audit reports), labeling, triage, commenting, and issue management through the GitHub CLI"
 category: project-management
 risk: low
 tags:
@@ -11,7 +11,7 @@ tags:
   - project-management
   - triage
 allowed-tools: Bash, Read, Grep, Glob
-argument-hint: "[create <title> | view <number> | close <number> [reason] | comment <number> <text> | assign <number> <user> [--remove] | label <number> <label> [--remove] | triage | list [--label <label>]]"
+argument-hint: "[create <title> | from-audit [<file>] [<ids or severities>] | view <number> | close <number> [reason] | comment <number> <text> | assign <number> <user> [--remove] | label <number> <label> [--remove] | triage | list [--label <label>]]"
 ---
 
 # github-issues
@@ -24,23 +24,22 @@ Standardize GitHub issue creation and management across any project. Ensure ever
 
 Before any operation, verify the environment:
 
-1. **Detect repository context:**
+1. **Check `gh` is installed and authenticated** — `gh auth status`. If it isn't, stop and point the user to `gh auth login`; every later step would fail anyway.
+
+2. **Detect repository context:**
 
 ```bash
-git remote get-url origin
+gh repo view --json nameWithOwner --jq .nameWithOwner
 ```
 
-Parse `owner` and `repo` from the remote URL. Supports both formats:
-- SSH: `git@github.com:owner/repo.git`
-- HTTPS: `https://github.com/owner/repo.git`
+Store the result as `REPO="owner/repo"`. `gh` resolves the remote itself (SSH or HTTPS, and the configured base repo in a fork). If it fails — not a git repository, or no GitHub remote — ask the user for `owner/repo`.
 
-Store the result as `REPO="owner/repo"`. If not in a git repository or no remote is configured, ask the user to specify `owner/repo` manually and store it as `REPO`.
-
-Perform this parsing step **before** running any `gh issue` or `gh label` commands. When constructing `gh issue` or `gh label` commands, include `-R "$REPO"` so they always target the correct repository, regardless of whether the user is inside a local clone.
+Do this **before** any `gh issue` or `gh label` command, and pass `-R "$REPO"` to each of them so they always target the correct repository, regardless of the current directory.
 
 ## When to use
 
 - Creating a new GitHub issue (with a duplicate check first — updating an existing issue when one already covers the request)
+- Filing a batch of issues from an audit or review report file
 - Viewing issue details
 - Closing issues with explanation
 - Commenting on existing issues
@@ -53,10 +52,11 @@ Load these on demand — don't read them up front:
 
 - [references/issue-templates.md](references/issue-templates.md) — title rules, the enhancement and bug body templates, the body-section rules, and type detection from title/context. Read before writing or rewriting an issue body.
 - [references/labels.md](references/labels.md) — the type/status label taxonomy, how to validate a label exists before applying it, and the `--add-label` vs `--label` rule. Read before applying or changing labels.
+- [references/audit-import.md](references/audit-import.md) — turning an audit/review report into issues: parsing findings, category→label mapping, per-finding duplicate check, the batch review table, and the closing question about deleting the report. Read for `from-audit`.
 
 ## Operations
 
-Based on `$ARGUMENTS`, perform ONE of these operations:
+Based on `$ARGUMENTS`, perform ONE of these operations. If the request is to file issues from a report file — "open issues for the audit findings", "csinálj issue-kat az audit alapján", or picking option 2 after a code-analyzer audit — use `from-audit`, even when the user said "create".
 
 ### `create <title>`
 
@@ -113,6 +113,18 @@ EOF
 3. If the new context changes the categorization (e.g. it turns out to be a bug, not just an enhancement), add the appropriate label with `--add-label` (never `--label`, which would wipe existing labels).
 4. Output the issue URL and a one-line note of what you changed.
 
+### `from-audit [<file>] [<ids or severities>]`
+
+Batch-create issues from the findings of an audit or review report — follow [references/audit-import.md](references/audit-import.md) end to end. In short:
+
+1. Locate the report (the given path, else the newest `CODE_AUDIT_*.md` at the repo root — confirm it if more than one exists) and parse every finding.
+2. Settle the scope — the ids or severities the user named, otherwise propose Critical + High and ask.
+3. Run the `create` step-2 duplicate check **per finding**, and look up the available labels once.
+4. Draft every issue from the templates, making each body self-contained (the report may be deleted afterwards).
+5. Show **one** review table for the whole batch — finding id, proposed title, labels, and action (create / update #N / skip) — and wait for confirmation.
+6. Create/update the confirmed issues and report a finding → issue URL table.
+7. **Ask whether to delete the audit file.** Never delete it on your own — see the reference for what to tell the user before they answer.
+
 ### `view <number>`
 
 1. Display the issue details:
@@ -136,25 +148,19 @@ gh issue view <number> -R "$REPO" --json title,labels,state
 ```
 
 2. If the issue is already closed, inform the user and stop.
-3. **If closing as duplicate**, require the user to specify the original issue number. Verify the original issue exists, then validate the `duplicate` label and close:
+3. **If closing as duplicate**, require the user to specify the original issue number. Verify the original exists, then close with GitHub's native duplicate reason — it records the link in the issue timeline:
 
 ```bash
 gh issue view <original> -R "$REPO" --json number,title,state
-gh label list -R "$REPO" --json name --jq '.[].name' | grep -q '^duplicate$'
-gh issue comment <number> -R "$REPO" --body "Closing as duplicate of #<original>."
-gh issue close <number> -R "$REPO" --reason "not planned"
-gh issue edit <number> -R "$REPO" --add-label "duplicate"
+gh issue close <number> -R "$REPO" --duplicate-of <original> --comment "Closing as duplicate of #<original>."
 ```
 
-If the `duplicate` label does not exist, ask the user whether to create it or skip labeling — the comment and close are sufficient on their own.
+If the repository has a `duplicate` label, also add it (`gh issue edit <number> -R "$REPO" --add-label "duplicate"`); if it doesn't, skip it — the close reason already carries the meaning. On an old `gh` without `--duplicate-of` (it fails with "unknown flag"), fall back to `--reason "not planned"` plus the comment.
 
-Note: `gh issue close --reason` only accepts `completed` or `not planned`. For duplicates, use `not planned` — the `duplicate` label and comment provide the actual context.
-
-4. **For other closures**, add a comment explaining why, then close:
+4. **For other closures**, close with a comment explaining why, and pick the reason — `completed` (done/fixed) or `not planned` (won't fix, invalid, obsolete):
 
 ```bash
-gh issue comment <number> -R "$REPO" --body "<reason>"
-gh issue close <number> -R "$REPO"
+gh issue close <number> -R "$REPO" --reason "<completed|not planned>" --comment "<reason>"
 ```
 
 5. If the user provides a reason in the arguments, use it. Otherwise, ask for a reason before closing — never close silently.
@@ -268,12 +274,13 @@ If `--label <label>` is specified in the arguments, add `--label "<label>"` to f
 | Scenario | Detection | Action |
 |----------|-----------|--------|
 | `gh` not installed | `command -v gh` fails | Direct user to https://cli.github.com |
+| `gh` not authenticated | `gh auth status` fails | Ask the user to run `gh auth login` |
 | Not in a git repo | `git rev-parse --show-toplevel` fails | Ask user for `owner/repo` manually |
 | No remote configured | `git remote get-url origin` fails | Ask user for `owner/repo` manually |
 | Issue not found | `gh issue view` exits non-zero | Verify the issue number and repository |
 | Label not found | Label not in `gh label list` output | Show available labels, suggest closest match |
 | Permission denied | `gh` returns 403/404 | Check repo access and authentication scopes |
-| Rate limited | `gh` returns 429 | Wait and retry, or inform the user |
+| Rate limited | `gh` returns 429, or 403 mentioning "secondary rate limit" (common when creating many issues in a row) | Pause, then retry once; in a batch, report which items were not created yet |
 
 ## Constraints
 
@@ -287,3 +294,4 @@ These rules keep issue quality high and prevent accidental damage to existing la
 - Use `--add-label` (not `--label`) when editing issues — `--label` replaces all existing labels, which can silently remove important categorization
 - Do not create new labels without user confirmation — labels are shared across the entire repository and affect everyone's workflow
 - Include specific file paths and code references in issue bodies when context is available — actionable issues with concrete pointers get resolved faster
+- Never delete a source report (audit file) without the user's explicit yes — it may hold findings that were not filed

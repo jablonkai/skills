@@ -3,6 +3,12 @@
 Every new issue MUST follow one of these structures. Pick the template that matches the issue type,
 pre-fill "Summary" from context, and ask the user for any missing required section before creating.
 
+**The project's own templates win.** If the repository ships issue forms or templates
+(`.github/ISSUE_TEMPLATE/*.md|*.yml`), follow their sections and any labels they preset instead of
+the ones below — maintainers wrote them for their triage flow. Check with
+`ls .github/ISSUE_TEMPLATE 2>/dev/null` in a local clone, or
+`gh api repos/$REPO/contents/.github/ISSUE_TEMPLATE --jq '.[].name'` without one.
+
 ## Title
 
 - Start with a short, descriptive summary (max 72 characters)
