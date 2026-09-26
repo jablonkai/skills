@@ -56,8 +56,11 @@ stays open after the merge.
 Related-but-not-closed issues are different — reference them without a keyword (`Related to #7`) so
 GitHub links them without closing them.
 
-Closing keywords go in the **PR body**, never the commit message — GitHub only processes closing
-keywords from the PR body on the default branch.
+Closing keywords go in the **PR body**, not the commit message. The PR body is where GitHub links
+the issue in the PR sidebar and closes it on merge; a keyword in a commit message also closes the
+issue whenever that commit reaches the default branch — including via a cherry-pick or a rebase
+nobody meant as "done". Keywords only act when the PR targets the **default branch**; for a PR into
+another base, write `Related to #N` and tell the user the issue will need closing by hand.
 
 3. If the issue has labels, apply matching labels to the PR after creation:
 
@@ -74,5 +77,7 @@ EOF
 )"
 ```
 
-- **Title:** first line of the commit summary without the `type:` prefix, max 70 chars
+- **Title:** the commit subject as-is, conventional prefix included (`fix(auth): refresh expired
+  token`), max 70 chars. A squash merge uses the PR title as the commit subject on the base branch,
+  so stripping `type:` here would leave a non-conventional commit in the shared history
 - **Base branch:** detected in pre-flight or taken from `$ARGUMENTS`

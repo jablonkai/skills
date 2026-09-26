@@ -2,7 +2,7 @@
 allowed-tools: Bash, Read, Grep, Glob, Task
 argument-hint: '[<base-branch>] [--issue <number>] [--no-merge]'
 category: git
-description: 'Commit changes, create a feature branch, open a GitHub pull request, wait for CI, and merge the PR once GitHub Actions go green — or push new commits to an existing PR and merge after CI succeeds. Ships one issue per commit and per PR: when the working tree holds work for several issues it stages them one at a time instead of bundling them into a single review. Use whenever someone says ''commit and push'', ''create a PR'', ''open a pull request'', ''send for review'', ''push my changes'', ''commit issue #12'', ''merge when CI passes'', or is done with their work and ready to ship it. Also triggers for ''commitold be'', ''nyiss PR-t'', ''mergeld ha zöld a CI'', or any variation of wanting to get changes into a pull request and landed. Handles conventional commit messages, issue linking with auto-close keywords (Closes #N), sensitive file detection, PR template integration, and auto-merge with branch cleanup.'
+description: 'Commit changes, create a feature branch, open a GitHub pull request, wait for CI, and merge the PR once GitHub Actions go green — or push new commits to an existing PR and merge after CI succeeds. Ships one issue per commit and per PR: when the working tree holds work for several issues it stages them one at a time instead of bundling them into a single review. Use whenever someone says ''commit and push'', ''create a PR'', ''open a pull request'', ''send for review'', ''push my changes'', ''commit issue #12'', ''merge when CI passes'', or is done with their work and ready to ship it. Also triggers for ''commitold be'', ''nyiss PR-t'', ''mergeld ha zöld a CI'', or any variation of wanting to get changes into a pull request and landed. Handles conventional commit messages, issue linking with auto-close keywords (Closes #N), sensitive file detection, PR template integration, auto-merge with branch cleanup, and local validation in place of CI when GitHub billing stops the Actions run.'
 name: github-commit-pr
 risk: medium
 summary: "end-to-end workflow for committing changes, pushing a branch, and opening or updating a GitHub pull request"
@@ -55,10 +55,10 @@ Two exceptions, both explicit: the user says the changes really are one unit of 
 
 Load each one at the step that needs it — don't read them up front:
 
-- [references/sensitive-files.md](references/sensitive-files.md) — the pre-staging secret scan: patterns to flag and how to handle a hit
+- [references/sensitive-files.md](references/sensitive-files.md) — the pre-staging secret scan: file names that are always secrets, a content scan for keys pasted into ordinary files, and how to handle a hit
 - [references/commit-conventions.md](references/commit-conventions.md) — conventional commit format and branch-name derivation
 - [references/pr-body.md](references/pr-body.md) — PR template discovery, default body structure, issue linking and closing keywords
-- [references/ci-and-merge.md](references/ci-and-merge.md) — the CI watch snippet, mergeability interpretation, merge strategy selection and confirmation
+- [references/ci-and-merge.md](references/ci-and-merge.md) — the CI watch snippet, billing-failure detection and local validation, mergeability interpretation, merge strategy selection and confirmation
 
 ## Delegating to subagents
 
@@ -127,10 +127,10 @@ If the current branch is NOT the base branch:
 1. Check if a PR already exists for this branch:
 
 ```bash
-gh pr view --json number,title,url,body 2>/dev/null
+gh pr view --json number,title,url,state 2>/dev/null
 ```
 
-2. If a PR exists → go to **"Push to existing PR"** flow.
+2. If an **open** PR exists (`state: OPEN`) → go to **"Push to existing PR"** flow. `gh pr view` also returns a branch's merged or closed PR; pushing onto one of those goes nowhere a reviewer will look, so treat it like "no PR" and tell the user the old one is already `MERGED`/`CLOSED`.
 3. If no PR exists → ask the user: continue on this branch or create a new one? If continuing, skip to "New PR flow" Step 3 (no branch creation needed).
 
 ### New PR flow
@@ -151,7 +151,7 @@ If the diff is large, delegate the read instead of pulling it all inline — see
 
 ### Step 2: Check for sensitive files
 
-Before staging, scan the `git status` output for secrets and credentials — patterns and handling in [references/sensitive-files.md](references/sensitive-files.md). If anything is flagged, warn the user and ask before staging; never stage a sensitive file silently.
+Before staging, check both the changed file **names** and the added **content** for secrets — a key hard-coded into an ordinary source file never shows up in `git status`. Patterns, the scan command and handling are in [references/sensitive-files.md](references/sensitive-files.md). A name like `test_token.sh` is only a hint: look at the content before flagging it. If anything real is flagged, warn the user and ask before staging; never stage a secret silently — a "don't ask" pre-approval covers the commit message and the merge, not publishing a credential.
 
 ### Step 3: Propose commit message
 
@@ -210,14 +210,16 @@ EOF
 )"
 ```
 
-Title and base-branch rules are in [references/pr-body.md](references/pr-body.md).
+Title and base-branch rules are in [references/pr-body.md](references/pr-body.md) — the title keeps the conventional `type(scope):` prefix, because a squash merge turns it into the commit subject on the base branch.
 
 ### Step 9: Watch CI
 
-Wait for the GitHub Actions run triggered by the push to finish, selecting the run by **commit**, not by branch — snippet and failure handling in [references/ci-and-merge.md](references/ci-and-merge.md).
+Wait for every GitHub Actions run triggered by the push to finish, selecting runs by **commit**, not by branch — snippet and failure handling in [references/ci-and-merge.md](references/ci-and-merge.md).
 
-- If the run **succeeds** → continue to Step 10.
-- If the run **fails** → root-cause it (delegating when the logs are long), fix via `github-fix-action-error`, push, and re-watch. Repeat until green or the user aborts.
+- If all runs **succeed** → continue to Step 10.
+- If a run **fails**, classify the failure first:
+  - **GitHub billing / spending limit** — jobs with zero executed steps and a "job was not started … payments / spending limit / billing" annotation. The code never ran, so there is nothing to fix: run the workflows' checks locally (plus the repo's own pre-commit validation), and if they all pass, the PR may be merged on that basis — say in the merge confirmation and the report that CI did not run and what was validated locally instead.
+  - **Anything else** — root-cause it (delegating when the logs are long), fix via `github-fix-action-error`, push, and re-watch. Repeat until green or the user aborts.
 
 ### Step 10: Merge the PR
 
@@ -227,7 +229,7 @@ Follow the merge procedure in [references/ci-and-merge.md](references/ci-and-mer
 
 ### Step 11: Report
 
-Output the PR URL, the final CI status, and the merge outcome (merged via squash / merge skipped per --no-merge / merge blocked by ...).
+Output the PR URL, the final CI status (green / skipped by GitHub billing — validated locally with `<commands>`), and the merge outcome (merged via squash / merge skipped per --no-merge / merge blocked by ...).
 
 If changes were deliberately left in the working tree for another issue, say so and name what's next — that leftover diff is the next run's job, not an oversight:
 
@@ -282,7 +284,7 @@ If rebase has conflicts, stop and report — do not force-push or auto-resolve.
 
 ### Step 5: Watch CI
 
-Same as New PR flow Step 9 — see [references/ci-and-merge.md](references/ci-and-merge.md). Selecting the run by commit matters most here: pushing twice in quick succession is exactly when `--branch ... --limit 1` returns the earlier run.
+Same as New PR flow Step 9, including the billing-failure path — see [references/ci-and-merge.md](references/ci-and-merge.md). Selecting runs by commit matters most here: pushing twice in quick succession is exactly when `--branch ... --limit 1` returns the earlier run.
 
 ### Step 6: Merge the PR
 
@@ -296,7 +298,7 @@ Show the existing PR URL, the new commit summary, the final CI status, and the m
 Pushed to PR #<number>: <pr-title>
 New commit: <type>: <summary>
 URL: <pr-url>
-CI: <success|fixed after N attempts>
+CI: <success|fixed after N attempts|not run (GitHub billing) — local: <commands> passed>
 Merge: <merged via squash|skipped per --no-merge|blocked by required reviewers|declined by user>
 ```
 
@@ -312,7 +314,7 @@ Do NOT modify the PR title or body.
 | No changes to commit | `git status` shows clean tree | Abort unless PR from existing commits |
 | Tree spans several issues | Changed files don't tell one story; more than one issue named | Show the grouping, commit the first issue only, leave the rest in the tree |
 | Unrelated file staged | `git status --short` shows a path outside this issue's scope | `git restore --staged <path>` before committing |
-| Sensitive files detected | Pattern match on `git status` output | Warn user, ask to exclude before staging |
+| Sensitive file or secret detected | Secret-by-nature file name (`.env`, `*.pem`, …) or a content-scan hit in the diff / untracked files | Warn user with file and line, ask to exclude or fix before staging; if they can't be asked, ship nothing containing it |
 | Pre-commit hook failure | `git commit` exits non-zero | Read output, fix issue, create new commit |
 | Push rejected | `git push` exits non-zero | Report error, do not force-push |
 | Branch already exists | `git checkout -b` fails | Append numeric suffix (e.g., `-2`) |
@@ -323,7 +325,11 @@ Do NOT modify the PR title or body.
 | Branch is BEHIND base | `mergeStateStatus: BEHIND` | Offer `gh pr update-branch <number>`, re-watch CI, then retry merge |
 | Merge conflicts with base | `mergeable: CONFLICTING` | Stop and ask user to resolve manually |
 | Changes requested on PR | `reviewDecision: CHANGES_REQUESTED` | Stop and let the user address the review before merging |
-| Required check still pending | `mergeStateStatus: UNSTABLE` after our watched run passed | Investigate the pending check (likely a separate required workflow); do not merge until it lands |
+| CI blocked by GitHub billing | Failed jobs ran 0 steps; annotation mentions payments / spending limit / billing | Run the workflows' checks locally; all pass → merge after confirmation, stating CI did not run; any fail → fix, don't merge |
+| Required check blocks merge | `mergeStateStatus: BLOCKED` with a pending or failed required check | Wait for it or fix it; after a billing failure, report the block and let the user decide on `--admin` |
+| Non-required check red or pending | `mergeStateStatus: UNSTABLE` | Name the check (`gh pr checks`) and ask before merging |
+| Mergeability not computed yet | `mergeable: UNKNOWN` | Wait a few seconds and query again |
+| Branch's PR already merged/closed | `gh pr view` returns `state: MERGED` or `CLOSED` | Treat as no PR; open a new one |
 | User declines merge confirmation | User answers "n" to merge prompt | Skip merge, report PR URL and CI status, exit cleanly |
 
 ## Constraints
@@ -342,7 +348,8 @@ These boundaries protect the user's repository and team workflow:
 - The PR body must reflect the actual changes from the diff, not boilerplate — reviewers rely on it to understand the change
 - Issue closing keywords (`Closes #N`) go in the PR body, not in the commit message — GitHub only processes closing keywords from the PR body on the default branch
 - When pushing to an existing PR, do not modify the PR title or body — only push the new commit
-- Do not merge a PR until the watched GitHub Actions run has actually finished green — `gh run watch --exit-status` is the gate, never trust an in-flight or pending status. The watched run must be the one for the commit you just pushed (`gh run list --commit "$(git rev-parse HEAD)"`), not merely the latest on the branch
+- Do not merge a PR until the watched GitHub Actions runs have actually finished green — `gh run watch --exit-status` is the gate, never trust an in-flight or pending status. The watched runs must be the ones for the commit you just pushed (`gh run list --commit "$(git rev-parse HEAD)"`), not merely the latest on the branch
+- The one exception: when CI failed only because GitHub refused to start the jobs for billing reasons (zero steps executed, billing annotation), the PR may be merged after the workflows' checks pass **locally** — local validation replaces CI, it never gets skipped. A user's hunch about quota is not the signal; a job that ran and failed is a real failure
 - Always confirm with the user once before merging — merging is shared state, visible to collaborators, and reverts are messy; the confirmation is the user's final chance to pause
 - Do not use `gh pr merge --admin` to bypass branch protection unless the user explicitly asks — protection rules exist to enforce review and quality gates, and bypassing them silently undermines the team's process
 - Respect `--no-merge` in `$ARGUMENTS` — when set, push and report but never call `gh pr merge`, so the user can hand the PR off for human review
