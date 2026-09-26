@@ -1,7 +1,7 @@
 ---
 name: github-fix-action-error
-description: "Diagnose and fix the most recent failing GitHub Actions CI run on the current branch. Fetches the failing run's logs via the GitHub CLI, locates the root cause (failing test, compile error, lint violation, etc.), applies a targeted fix in the local working tree, and — only after user confirmation — commits and pushes. Use when someone says 'fix the CI', 'fix the failing action', 'the build is red', 'javítsd a CI hibát', 'piros a build', or pastes a failing Actions run URL for the current branch. Refuses to run on protected branches (main, master, develop)."
-summary: "diagnose the latest failing GitHub Actions run on the current branch, apply a targeted fix locally, and — after user approval — commit and push; refuses to run on main/master/develop"
+description: "Diagnose and fix the most recent failing GitHub Actions CI run on the current branch. Fetches the failing run's logs via the GitHub CLI, locates the root cause (failing test, compile error, lint violation, broken workflow file, etc.), applies a targeted fix in the local working tree, and — only after user confirmation — commits and pushes. Recognizes infrastructure flakes and already-fixed failures instead of patching code. Use when someone says 'fix the CI', 'fix the failing action', 'the build is red', 'why did the workflow fail', 'javítsd a CI hibát', 'piros a build', or pastes a failing Actions run URL for the current branch. Refuses to run on protected branches (main, master, develop, or the repo's default branch). Not for opening or merging PRs — use github-commit-pr for that."
+summary: "diagnose the latest failing GitHub Actions run on the current branch, apply a targeted fix locally, and — after user approval — commit and push; refuses to run on main/master/develop or the default branch"
 category: development-workflow
 risk: medium
 tags:
@@ -17,45 +17,32 @@ allowed-tools: Bash, Read, Grep, Glob, Edit, Write
 
 ## Purpose
 
-Close the loop between a red CI run and a green one. The skill identifies the most recent failing GitHub Actions run on the current branch, pulls the logs, finds the underlying problem in the code, fixes it locally, and — after the user approves — commits and pushes the fix so CI can re-run.
-
-## When to use
-
-- User says "fix the CI", "fix the failing workflow", "make the build green", or the Hungarian equivalents ("javítsd a CI-t", "piros a build, nézd meg")
-- User pastes a failing Actions run URL and wants it fixed
-- User references a failing check and asks for a fix
+Close the loop between a red CI run and a green one. The skill identifies the most recent failing GitHub Actions run on the current branch, pulls the relevant part of its logs, finds the underlying problem in the code, fixes it locally, and — after the user approves — commits and pushes the fix so CI can re-run.
 
 ## Prerequisites
 
 Verify the environment before doing anything else:
 
-1. **Inside a git repository**
-
 ```bash
-git rev-parse --show-toplevel
+git rev-parse --show-toplevel   # inside a git repo?
+gh auth status                  # gh installed and logged in?
+git status --porcelain          # clean-enough working tree?
 ```
 
-If not, abort with a clear message.
-
-2. **Clean-enough working tree**
-
-```bash
-git status --porcelain
-```
-
-If there are uncommitted changes, show them to the user and ask whether to proceed. Mixing the user's in-flight work with an automated fix makes the resulting commit hard to review — prefer to pause and let the user stash or commit first.
+- Not a repo, `gh` missing (point to https://cli.github.com) or not authenticated (`gh auth login`) → stop with a clear message.
+- Uncommitted changes → show them and ask whether to proceed. Mixing the user's in-flight work with an automated fix makes the resulting commit hard to review — prefer to pause and let the user stash or commit first.
 
 ## Workflow
 
 ### Step 1: Safety check — branch
 
-Get the current branch:
-
 ```bash
-git rev-parse --abbrev-ref HEAD
+BRANCH=$(git branch --show-current)
+DEFAULT=$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
 ```
 
-If the branch is `main`, `master`, or `develop`, **refuse and stop** with a message like:
+- Empty `BRANCH` means a detached HEAD — stop and ask the user to check out the branch CI ran on.
+- If `BRANCH` is `main`, `master`, `develop`, or equal to `DEFAULT` (repos name it `trunk`, `production`, …), **refuse and stop**:
 
 ```
 Refusing to run on protected branch '<name>'.
@@ -63,74 +50,91 @@ This skill commits and pushes a fix directly; that's unsafe on shared branches.
 Switch to a feature branch (or open one from the failing commit) and try again.
 ```
 
-Do not continue. Do not offer a "force" escape hatch — the whole point of the guard is that these branches should go through PR review.
+Do not offer a "force" escape hatch — these branches should go through PR review. Offering to create a fix branch for the user is fine; it doesn't bypass anything.
 
-### Step 2: Find the latest failing run
+### Step 2: Find the failing run — and make sure it's still relevant
+
+If the user pasted a run URL (`…/actions/runs/<RUN_ID>[/job/<JOB_ID>]`), take `RUN_ID` from it and confirm with `gh run view "$RUN_ID" --json headBranch,headSha,conclusion,workflowName` that it belongs to `BRANCH`. If it's from another branch, say so and stop — fixing it here would push to the wrong place.
+
+Otherwise list recent runs rather than only failures, because "the most recent failure" is often already stale:
 
 ```bash
-gh run list --branch "$BRANCH" --status failure --limit 1 \
-  --json databaseId,displayTitle,workflowName,headSha,conclusion,createdAt
+gh run list --branch "$BRANCH" --limit 20 \
+  --json databaseId,workflowName,displayTitle,headSha,status,conclusion,createdAt,url
 ```
 
-If the command returns an empty list, tell the user there are no failing runs on this branch and stop. It's worth checking for other non-success states too — a run may be `cancelled` or `timed_out` rather than `failure`. If nothing useful is found, stop.
+Runs come newest first. For each workflow, look at its **newest** run:
 
-Extract the `databaseId` as `RUN_ID`. Show the user a one-line summary so they know which run is being inspected:
+- `success` → that workflow is already green; older failures of it are not something to fix. If every workflow's newest run is green, report "nothing to fix — the latest runs pass" and stop.
+- `in_progress` / `queued` on the current HEAD → a fix may already be under test; tell the user and suggest `gh run watch <id>` instead of patching blind.
+- `failure`, `timed_out`, `startup_failure` → candidate. `cancelled` is usually a superseded or manually stopped run, not a code defect — mention it but don't treat it as one.
+
+If nothing is red, stop. Otherwise take the newest candidate as `RUN_ID` (if several workflows are red, handle each in turn) and show a one-line summary:
 
 ```
 Inspecting run <RUN_ID>: <workflowName> — "<displayTitle>" (sha <short-sha>)
 ```
 
-### Step 3: Download and scan the logs
+### Step 3: Read the failure — narrowly
+
+Find what failed first, then pull only that log. Full `--log` output of a CI run is routinely thousands of lines and buries the signal:
 
 ```bash
-gh run view "$RUN_ID" --log
+gh run view "$RUN_ID"                       # jobs, failed steps, annotations (lint/compiler annotations often name file:line)
+gh run view "$RUN_ID" --log-failed | tail -n 200
 ```
 
-This can be large. Before fixing anything, narrow to the failing portion:
+Grep the failed log instead of reading it whole when it is still long: `FAIL`, `error:`, `Error:`, `✗`, `AssertionError`, `Traceback`, `error TS`, `error[E`, `FAILED`, `npm ERR!`, `##[error]`. Use `--job <JOB_ID>` to focus on one job.
 
-- `gh run view "$RUN_ID" --log-failed` returns only the failed steps' logs — prefer this when available
-- Search for common failure markers: `FAIL`, `error:`, `Error:`, `✗`, `failed`, `AssertionError`, `Traceback`, `error TS`, `error[E`, `FAILED`, `npm ERR!`
+Special cases:
 
-Identify:
+- `startup_failure`, or a run with no jobs → the workflow file itself is invalid (YAML error, unknown action/input, bad `uses:` ref). There are no logs; the annotation or the run page names the problem, and the fix goes in `.github/workflows/`.
+- "log not found" → logs expired or were deleted; ask the user to re-run, then diagnose the fresh run.
+- Several failed jobs → check whether they share one root cause (typically: one compile error breaks every matrix leg). Different causes → fix them one at a time and say so.
 
-- **Which job/step failed** (workflow name, job name, step name)
-- **The failure category** — test failure, compile/type error, lint/format violation, dependency install failure, script error, flaky infrastructure (network, runner), missing secret
-- **The concrete signal** — test name, file path, line number, stack frame, rule name
+Identify the failing job/step, the **category** (test failure, compile/type error, lint/format, dependency install, script error, workflow config, infrastructure) and the **concrete signal** (test name, file:line, stack frame, rule id).
 
-If the failure looks like infrastructure flake (runner lost, network timeout, rate limit, missing secret) rather than a code defect, surface that to the user and suggest re-running the workflow (`gh run rerun <RUN_ID>`) instead of patching code. Do not invent a fix.
+If it is an infrastructure flake — runner lost, network timeout / `ECONNRESET` / 5xx from a registry, rate limit, GitHub outage, billing or spending-limit refusal, missing secret on a fork PR — tell the user and suggest `gh run rerun "$RUN_ID" --failed` instead of patching code. Don't rerun it yourself unless asked, and don't invent a code fix for a problem that isn't in the code.
 
 ### Step 4: Locate the problem in the code
 
-Map the log signal back to the repo:
+Compare the tree CI ran with the local one first:
 
-- Test failure → open the test file, understand the assertion, then trace to the production code under test
-- Compile/type error → open the reported file at the reported line
-- Lint/format → open the file; if the tool can autofix (`eslint --fix`, `ruff --fix`, `cargo fmt`, `gofmt -w`, `./gradlew spotlessApply`), prefer running it over hand-editing
-- Missing import / undefined symbol / failing build script → read surrounding code and recent commits (`git log -n 5 --oneline`) to understand what changed
+```bash
+git fetch --quiet && git rev-parse HEAD "@{u}"   # vs. headSha from Step 2
+```
 
-If the log points at files that don't exist locally or the local commit differs from the one CI ran (`headSha` from Step 2 vs. `git rev-parse HEAD`), tell the user. Fixing against a different tree than CI ran against is unreliable.
+- Local **behind** the upstream → `git pull --ff-only` before editing, or the fix lands on a stale tree.
+- Local **ahead** (unpushed commits) → they may already fix the failure; check. Either way the Step 8 push will carry them too — say so in the summary.
+- Log names files that don't exist locally → tell the user; fixing against a different tree than CI ran is unreliable.
+
+Then map the signal back to the repo:
+
+- Test failure → open the test, understand the assertion, trace to the production code under test. Decide which side is wrong before editing.
+- Compile/type error → the reported file at the reported line.
+- Lint/format → if the tool autofixes (`eslint --fix`, `ruff check --fix`, `cargo fmt`, `gofmt -w`, `./gradlew spotlessApply`, `dart format`), run it on the affected files rather than hand-editing.
+- Environment mismatch (passes locally, fails in CI: timezone, locale, OS, tool version) → read the workflow file; the fix may belong in the code (don't depend on local TZ) or in the workflow (pin the version).
+- Anything else → read surrounding code and recent commits (`git log -n 5 --oneline`) to see what changed.
 
 ### Step 5: Apply a focused fix
 
 Make the smallest change that addresses the root cause:
 
-- Do not reformat, rename, or refactor unrelated code
-- Do not silence a real failure (e.g., deleting an assertion, adding a blanket try/except, disabling a lint rule file-wide, marking a test `skip`) unless the user explicitly asks for that. If the test is genuinely wrong, fix the test; if the production code is wrong, fix the code. Explain which and why.
-- If the fix is non-obvious or has multiple plausible interpretations, pause and discuss with the user before editing
+- Do not reformat, rename, or refactor unrelated code.
+- Do not silence a real failure — deleting an assertion, blanket try/except, disabling a lint rule file-wide, marking a test skipped, adding `continue-on-error`, or loosening a check in the workflow — unless the user explicitly asks. If the test is wrong, fix the test; if the code is wrong, fix the code. Say which and why.
+- If the fix is non-obvious or has several plausible interpretations, pause and discuss before editing.
 
 ### Step 6: Verify locally when feasible
 
-Before asking the user to approve a push, re-run the same check locally if it's cheap and available:
+Re-run the check CI ran — read the failing step's `run:` line in the workflow to get the exact command:
 
-- Test failure → run the specific test file or test name
-- Type error → `npx tsc --noEmit`, `cargo check`, `mypy`, `go build ./...`, etc.
-- Lint → the same linter CI runs
+- Test failure → the specific test file or test name, then the full suite step if cheap
+- Type/compile error → `npx tsc --noEmit`, `cargo check`, `mypy`, `go build ./...`, `./gradlew compileKotlin`, …
+- Lint → the same linter with the same config CI uses
 
-If local verification passes, say so. If the check can't be reproduced locally (needs secrets, specific OS, large services), say that too and flag that CI is the real gate.
+Report the result. If the check can't run locally (secrets, OS, services), say so and flag that CI is the real gate.
 
 ### Step 7: Summarize and ask for approval
-
-Present a concise summary:
 
 ```
 Failing run: <RUN_ID> — <workflowName> / <jobName> / <stepName>
@@ -138,74 +142,68 @@ Root cause: <one-sentence diagnosis>
 
 Files changed:
 - <path>  (<what changed, in a few words>)
-- <path>  (<what changed, in a few words>)
 
 Local verification: <passed | not runnable — reason>
+Also pushed: <unpushed local commits, if any — otherwise omit>
 
-Commit and push? [Y/n]
+Commit and push? [y/N]
 ```
 
-Wait for the user. Do not push without an explicit affirmative. Anything other than `y`/`Y`/`yes` (or the Hungarian `i`/`igen`) means stop — let the user iterate or take over.
+Wait for the user. Only an explicit yes (`y`, `yes`, `i`, `igen`, "go ahead", …) counts; anything else means stop and let the user iterate or take over. If the original request already pre-approved committing and pushing ("fix it and push", "előre jóváhagyom"), that counts as the yes — still print the summary, then continue.
 
 ### Step 8: Commit and push
-
-On approval:
 
 ```bash
 git add -- <files you actually edited>
 git commit -m "<generated message>"
-git push
+git push            # branch already has an upstream: CI ran on it
 ```
 
-Prefer `git add -- <path>` with the specific files; avoid `git add -A` / `git add .` to prevent sweeping in unrelated work. Do not amend. Do not force-push. Do not `--no-verify` — if a pre-commit hook fires, treat it the same as any other failure: fix the underlying issue and make a new commit.
+Stage only the specific files — never `git add -A` / `git add .`. Do not amend, force-push, or use `--no-verify`: if a pre-commit hook fails, fix what it reports and commit again. A non-fast-forward rejection means someone else pushed — stop and tell the user rather than rebasing on your own.
 
-**Commit message**: use a Conventional-Commits-flavored subject that names the fix, not the CI symptom. Match the repo's existing style if one is visible in `git log --oneline -n 20`.
+**Commit message**: a Conventional-Commits subject that names the fix, not the CI symptom; match the repo's style (`git log --oneline -n 20`).
 
-Good examples:
+- Good: `fix(parser): handle trailing comma in object literal`, `fix(ci): pin node to 20 to match lockfile`, `test(user-service): correct expected timestamp format`
+- Poor: `fix CI`, `fix failing test`, `attempt 3`
 
-- `fix(parser): handle trailing comma in object literal`
-- `fix(ci): pin node to 20 to match lockfile`
-- `test(user-service): correct expected timestamp format`
-
-Poor examples (don't do these):
-
-- `fix CI` — says nothing about what changed
-- `fix failing test` — same
-- `attempt 3` — noise
-
-After pushing, report:
+Then report:
 
 ```
 Pushed <short-sha> to origin/<branch>.
 Watch the re-run with: gh run watch
 ```
 
-Do not poll CI yourself unless the user asks — the push is the hand-off.
+Don't poll CI unless the user asks — the push is the hand-off.
 
 ## Error handling
 
 | Scenario | Detection | Action |
 |----------|-----------|--------|
-| `gh` not installed | `command -v gh` fails | Direct user to https://cli.github.com |
+| `gh` missing / not logged in | `gh auth status` fails | Point to https://cli.github.com or `gh auth login`; stop |
 | Not in a git repo | `git rev-parse` fails | Abort with clear message |
-| Protected branch | branch is main/master/develop | Refuse and stop (Step 1) |
+| Detached HEAD | `git branch --show-current` empty | Ask the user to check out the branch |
+| Protected branch | main/master/develop or repo default | Refuse and stop (Step 1) |
 | Dirty working tree | `git status --porcelain` non-empty | Show changes, ask whether to proceed |
-| No failing runs | `gh run list` empty | Report "nothing to fix" and stop |
-| Local HEAD ≠ CI sha | `headSha` vs. `git rev-parse HEAD` | Warn user; fixing against different tree is unreliable |
-| Infrastructure flake | Log shows runner/network/secret issue, not code | Suggest `gh run rerun`, do not patch code |
-| Ambiguous root cause | Multiple plausible fixes | Pause, ask user which interpretation is right |
-| Can't reproduce locally | Needs secrets/services/OS | Note it explicitly in the summary; CI will be the real gate |
-| Pre-commit hook fails | `git commit` non-zero | Fix the hook's complaint, create a new commit (never `--no-verify`) |
+| No failing runs / already green | newest run per workflow is `success` | Report "nothing to fix" and stop |
+| Run still in progress | newest run `in_progress`/`queued` | Suggest `gh run watch`; don't patch blind |
+| Pasted run from another branch | `headBranch` ≠ current branch | Say so and stop |
+| Invalid workflow file | `startup_failure`, no jobs | Fix the YAML in `.github/workflows/` |
+| Logs expired | `--log-failed` returns not found | Ask to re-run, diagnose the fresh run |
+| Local HEAD ≠ CI sha | `headSha` vs. `HEAD` / `@{u}` | Pull if behind; flag unpushed commits if ahead |
+| Infrastructure flake | runner/network/billing/secret, not code | Suggest `gh run rerun --failed`; do not patch code |
+| Ambiguous root cause | Multiple plausible fixes | Pause, ask which interpretation is right |
+| Can't reproduce locally | Needs secrets/services/OS | Note it in the summary; CI is the real gate |
+| Pre-commit hook fails | `git commit` non-zero | Fix the complaint, new commit (never `--no-verify`) |
 | Push rejected (non-fast-forward) | `git push` non-zero | Stop and tell the user; do not force-push |
 
 ## Critical constraints
 
 These boundaries exist because this skill writes to shared history:
 
-- Never run on `main`, `master`, or `develop` — no override
-- Never push without explicit user approval in Step 7
+- Never run on `main`, `master`, `develop` or the default branch — no override
+- Never push without explicit user approval (Step 7)
 - Never force-push, amend published commits, or skip hooks
-- Never silence a failure (delete assertions, blanket-catch, skip tests, disable lint rules) as a shortcut; fix the real cause or hand back to the user
-- Never include changes unrelated to the CI fix in the same commit — if you notice other issues, mention them separately and let the user decide
-- Never invent a fix for an infrastructure flake; recommend a rerun instead
+- Never silence a failure (delete assertions, blanket-catch, skip tests, disable lint rules, `continue-on-error`) as a shortcut
+- Never include changes unrelated to the CI fix in the same commit — mention other issues separately
+- Never patch code for an infrastructure flake or an already-green workflow
 - Stop and ask whenever the diagnosis is ambiguous — a wrong guess costs more than a clarifying question
