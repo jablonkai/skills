@@ -4,8 +4,9 @@
 
 Write a conventional commit message based on the diff:
 
-- **Format:** `<type>: <short summary>`
-- **Types:** `feat`, `fix`, `refactor`, `docs`, `style`, `chore`, `test`, `ci`
+- **Format:** `<type>(<optional scope>): <short summary>` — add a scope when the repo's history
+  uses them (`git log --oneline -10` shows the house style; match it)
+- **Types:** `feat`, `fix`, `refactor`, `docs`, `style`, `chore`, `test`, `ci`, `build`, `perf`
 - **Summary:** imperative mood, lowercase, no period, max 72 chars
 - Add a body (blank line + wrapped paragraphs) for complex changes
 
@@ -28,8 +29,8 @@ EOF
 If the commit fails due to a pre-commit hook, read the hook output, fix the issue, re-stage, and
 create a NEW commit — do not amend, and never pass `--no-verify`.
 
-Issue closing keywords (`Closes #N`) belong in the PR body, not the commit message: GitHub only
-processes them from the PR body.
+Issue closing keywords (`Closes #N`) belong in the PR body, not the commit message — see
+[pr-body.md](pr-body.md) for why.
 
 A commit message that needs "and" to describe two unrelated changes ("add dark mode and fix token
 refresh") is the tell that the staged set spans two issues. Unstage the second one and give it its
