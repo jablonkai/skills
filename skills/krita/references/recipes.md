@@ -12,6 +12,7 @@ run through the bridge (`krita-send.sh`) unless a recipe says otherwise.
 - [Probing what you don't know yet](#probing-what-you-dont-know-yet)
 - [Editing the user's open document safely](#editing-the-users-open-document-safely)
 - [Long jobs and timeouts](#long-jobs-and-timeouts)
+- [A send hangs or times out](#a-send-hangs-or-times-out)
 - [What the API cannot do](#what-the-api-cannot-do)
 
 ## Batch-process a folder
@@ -23,23 +24,28 @@ holds its whole image in memory, and a hundred left open will bring the session 
 import glob, os, json
 from krita import Krita, InfoObject
 
-app = Krita.instance(); app.setBatchmode(True)
-OUT = globals().get("OUT") or os.environ["OUT"]
+app = Krita.instance()
+was_batch = app.batchmode(); app.setBatchmode(True)   # app-wide: restore it for the user
 report = []
-for path in sorted(glob.glob("/photos/*.kra")):
-    doc = app.openDocument(path)
-    doc.setBatchmode(True)
-    doc.scaleImage(1600, int(1600 * doc.height() / doc.width()),
-                   int(doc.xRes()), int(doc.yRes()), "Bicubic")   # ints, not the floats
-                                                                  # xRes() hands you
-    doc.refreshProjection(); doc.waitForDone()
-    out = os.path.join(OUT, os.path.splitext(os.path.basename(path))[0] + ".jpg")
-    cfg = InfoObject(); cfg.setProperty("quality", 88)
-    ok = doc.exportImage(out, cfg)
-    doc.close()                                  # frees the image
-    report.append({"src": path, "out": out, "ok": ok})
+try:
+    for path in sorted(glob.glob("/photos/*.kra")):
+        doc = app.openDocument(path)             # no view: stays off the user's screen
+        doc.setBatchmode(True)
+        doc.scaleImage(1600, int(1600 * doc.height() / doc.width()),
+                       int(doc.xRes()), int(doc.yRes()), "Bicubic")   # ints, not floats
+        doc.refreshProjection(); doc.waitForDone()
+        out = os.path.join(OUT, os.path.splitext(os.path.basename(path))[0] + ".jpg")
+        cfg = InfoObject(); cfg.setProperty("quality", 88)
+        ok = doc.exportImage(out, cfg)
+        doc.setModified(False); doc.close()      # frees the image, never asks to save
+        report.append({"src": path, "out": out, "ok": ok})
+finally:
+    app.setBatchmode(was_batch)
 print(json.dumps(report, indent=1))
 ```
+
+`OUT` is injected by the bridge. `app.setBatchmode` is application-wide, so a script that
+leaves it on silently suppresses dialogs in the user's own session afterwards.
 
 Report per-file success and print it: `exportImage` returns a bool, and a batch that
 silently skipped three files is the failure mode worth catching.
@@ -88,18 +94,25 @@ layer.enableAnimation()
 for t in range(48):
     doc.setCurrentTime(t)
     if t:
-        app.action("add_blank_frame").trigger()   # without this you overwrite frame 0
+        app.action("add_blank_frame").trigger()   # without this no keyframe is made
+        doc.waitForDone()                         # without this pixels land a frame early
     push(layer, draw_frame(t))                    # your QImage per frame
     doc.refreshProjection(); doc.waitForDone()
     doc.projection(0, 0, doc.width(), doc.height()).save(f"{OUT}/frames{t:04d}.png")
 doc.setFullClipRangeStartTime(0); doc.setFullClipRangeEndTime(47)
 doc.saveAs(OUT + "/anim.kra")
 print("keyframes:", all(layer.hasKeyframeAtTime(t) for t in range(48)))
+# content check: frame t must hold what draw_frame(t) drew, not frame t+1's image
+print("frame 0 pixel:", bytes(layer.pixelDataAtTime(0, 0, 1, 1, 0).toHex()))
 ```
 
-That `hasKeyframeAtTime` check is worth keeping: the loop without `add_blank_frame` writes
-plausible-looking PNGs and a `.kra` that animates nothing, and the assertion is the only
-thing that tells them apart.
+Keep both checks. Without `add_blank_frame` the loop writes plausible PNGs and a `.kra`
+that animates nothing, which `hasKeyframeAtTime` catches; without the `waitForDone()` after
+it, every key exists but holds the next frame's pixels, which only a content check catches.
+
+Leave the animated document **open** at the end of the script: closing it in the same send
+that created the keyframes crashes Krita a moment later (5.3.4). If it has to go, close it
+from a separate send.
 
 The video encoders are a GUI feature (Krita shells out to ffmpeg), not part of the Python
 API. Write each frame out inside the loop — `doc.projection(0, 0, doc.width(),
@@ -123,14 +136,18 @@ print(f.configuration().properties())         # bind f — a chained temporary d
 print(sorted(app.resources("preset"))[:40])
 print(app.activeDocument().activeNode().paintAbility())
 print([n.name() for n in app.activeDocument().rootNode().childNodes()])   # localized names
+print(hasattr(app.activeDocument().activeNode(), "setPinnedToTimeline"))  # instance, not class
 ```
+
+Check members with `hasattr` on a **live object**: PyQt resolves methods lazily, so the
+same check on the class (`hasattr(Node, ...)`) can report `False` for a method that works.
 
 ## Editing the user's open document safely
 
 Scripted edits are not reliably undoable step by step, so treat the user's artwork as
 precious:
 
-- work on `doc.activeDocument()` only when the task is explicitly about the open file;
+- work on `app.activeDocument()` only when the task is explicitly about the open file;
 - duplicate what you are about to change (`node.duplicate()`, then add the copy) or add a
   new layer instead of overwriting an existing one;
 - prefer filter *masks* and filter *layers* over `filter.apply()` when the user may want
@@ -146,6 +163,29 @@ UI. For big jobs: raise the timeout (`KRITA_SEND_TIMEOUT=900`), split the work i
 several sends (per file, per frame batch), and print progress so a partial run is still
 informative. `doc.lock()` / `doc.unlock()` around a burst of edits avoids recomposing
 after every single change.
+
+## A send hangs or times out
+
+When `krita-send.sh` reports a timeout, first suspect a **modal dialog** — an unsaved-changes
+prompt from `close()`, a format-options box from an export without batch mode. A modal
+dialog runs its own nested event loop, so the bridge keeps answering, and it can tell you
+what is on screen:
+
+```python
+from PyQt5.QtWidgets import QApplication, QLabel
+m = QApplication.activeModalWidget()
+print(m and (type(m).__name__, [l.text() for l in m.findChildren(QLabel)]))
+```
+
+Tell the user what the dialog asks rather than clicking it blind; if it is your own
+unsaved-changes prompt on a scratch document, `m.button(QMessageBox.No)` (or `Discard`)
+dismissed via `QTimer.singleShot(0, button.click)` releases the stuck script. Then fix the
+cause — `setModified(False)` before `close()`, `setBatchmode(True)` before export.
+
+If the bridge doesn't answer at all, check whether Krita is still running: a crash leaves
+no traceback, only a report in `~/Library/Logs/DiagnosticReports/krita-*.ips` on macOS.
+The known triggers are `paint*`/`paintAbility()` without a view and closing a freshly
+animated document.
 
 ## What the API cannot do
 

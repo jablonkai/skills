@@ -57,6 +57,10 @@ def _run(code, filename, out):
           "Krita": Krita, "krita_instance": instance, "OUT": out}
     if out:
         os.environ["OUT"] = out
+    else:
+        # The environment outlives the send: without this, a script sent without
+        # OUT would silently write into the previous send's output folder.
+        os.environ.pop("OUT", None)
     buf = io.StringIO()
     saved_out, saved_err = sys.stdout, sys.stderr
     result = {"ok": True, "output": "", "error": None}

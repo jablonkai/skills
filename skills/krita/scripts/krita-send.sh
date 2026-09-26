@@ -43,11 +43,19 @@ else
         'import json,os;print(json.dumps({"path":os.environ["SCRIPT"],"out":os.environ.get("OUT","")}))')
 fi
 
-resp=$(curl -s -m "$TIMEOUT" -X POST "$BASE/run" --data-binary "$payload") || {
+rc=0
+resp=$(curl -s -m "$TIMEOUT" -X POST "$BASE/run" --data-binary "$payload") || rc=$?
+if [ "$rc" -eq 28 ]; then
+    echo "ERROR: no reply within ${TIMEOUT}s. The script may still be running inside" >&2
+    echo "       Krita, or it is blocked on a modal dialog (e.g. close() of a modified" >&2
+    echo "       document) — the bridge still answers during one, so --ping and" >&2
+    echo "       QApplication.activeModalWidget() can tell you which." >&2
+    exit 1
+elif [ "$rc" -ne 0 ]; then
     echo "ERROR: bridge not reachable on 127.0.0.1:$PORT — start Krita (with the" >&2
     echo "       krita_bridge plugin enabled), or run scripts/krita-install-bridge.sh." >&2
     exit 1
-}
+fi
 
 # Print captured output, then the traceback (if any) to stderr; exit reflects ok.
 printf '%s' "$resp" | python3 -c '

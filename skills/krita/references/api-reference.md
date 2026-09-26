@@ -1,13 +1,15 @@
 # Krita (libkis) Python API reference
 
-Every member listed here was checked by introspection against a running **Krita 5.3.3**
-(Python 3.13, PyQt5 5.15.11); signatures are the PyQt ones, which differ from the C++ docs
+Every member listed here was checked by introspection against a running **Krita 5.3.4**
+(Python 3.13, PyQt5 5.15.11; first written on 5.3.3); signatures are the PyQt ones, which differ from the C++ docs
 in places (`paintLine` is the loud example). The upstream C++ reference is at
 <https://api.kde.org/legacy/krita/html/annotated.html> — treat anything it lists that
-isn't here as *not present in 5.3.3* until you have probed for it
-(see [recipes.md](recipes.md#probing-what-you-dont-know-yet)), because several documented
-members (`Krita.blendingModes`, `Document.gridConfig`, `Node.setPinnedToTimeline`,
-`Shape.isSelectable`) only exist on master.
+isn't here as *not present in 5.3.x* until you have probed for it
+(see [recipes.md](recipes.md#probing-what-you-dont-know-yet)), because some documented
+members (`Krita.blendingModes`, `Shape.isSelectable`) only exist on master. Probe on an
+**instance**, not the class: PyQt binds members lazily, so `hasattr(Node, "x")` can say
+`False` for a method every node has (`setPinnedToTimeline`, `gridConfig` both exist on
+5.3.4 and fail the class check).
 
 Everything runs in the live session through the bridge, so the objects here *are* the
 documents and layers the user is looking at.
@@ -37,8 +39,8 @@ app = Krita.instance()                 # the singleton application
 
 | Call | Returns / effect |
 |---|---|
-| `app.version()` | `"5.3.3"` (plus git sha for dev builds) |
-| `app.createDocument(w, h, name, colorModel, colorDepth, profile, resolution)` | new `Document` with one transparent layer; `profile=""` means the default |
+| `app.version()` | `"5.3.4 (git e7e52a7)"` |
+| `app.createDocument(w, h, name, colorModel, colorDepth, profile, resolution)` | new `Document` with one **opaque white** paint layer; `profile=""` means the default |
 | `app.openDocument(filename)` | loads a file into a new `Document` (no view attached) |
 | `app.activeDocument()` / `app.setActiveDocument(doc)` | the document of the active view |
 | `app.documents()` | every open `Document` |
@@ -53,11 +55,11 @@ app = Krita.instance()                 # the singleton application
 | `app.recentDocuments()`, `app.icon(name)`, `app.notifier()` | misc |
 | `app.addExtension(ext)`, `app.addDockWidgetFactory(f)` | plugin registration (startup only) |
 
-Verified vocabulary on 5.3.3 — colour models `RGBA`, `XYZA`, `LABA`, `CMYKA`, `GRAYA`,
+Verified vocabulary on 5.3.4 — colour models `RGBA`, `XYZA`, `LABA`, `CMYKA`, `GRAYA`,
 `YCbCrA`, `A`; depths `U8`, `U16`, `F16`, `F32`; scaling strategies `Bicubic`, `Bilinear`,
 `BSpline`, `Bell`, `Hermite`, `Lanczos3`, `Mitchell`, `NearestNeighbor`.
 
-There is **no** API that lists blending modes (`Krita.blendingModes()` is master-only) —
+There is **no** API that lists blending modes in 5.3.x (`Krita.blendingModes()` is master-only) —
 use the ids the Layers docker shows: `normal`, `multiply`, `screen`, `overlay`, `add`,
 `subtract`, `darken`, `lighten`, `erase`, `dissolve`, `color`, `saturation`, `luminize`, …
 `node.blendingMode()` after setting one by hand is the reliable way to learn an exotic id.
@@ -99,8 +101,9 @@ doc.createCloneLayer(name, source_node)
 A created node is **not** in the tree until `parent.addChildNode(node, above)` — pass
 `None` as `above` to put it on top of that parent's children.
 
-`createDocument` already gives you one paint layer, and **its name is translated** — on a
-Hungarian Krita it is `Háttér`, not `Background`. Reach it as
+`createDocument` already gives you one paint layer, filled **opaque white**, and **its name
+is translated** — on a Hungarian Krita it is `Háttér`, not `Background`. Hide it
+(`setVisible(False)`) or fill it yourself when the export needs transparency. Reach it as
 `doc.rootNode().childNodes()[0]`; `nodeByName("Background")` returns `None` on most
 installations and is the classic way to waste a debugging round.
 
@@ -126,14 +129,21 @@ doc.pixelData(x, y, w, h)                       # raw merged bytes
 doc.save()                                      # to fileName()
 doc.saveAs(path)                                # .kra keeps layers; other extensions flatten
 doc.exportImage(path, InfoObject())             # format from the extension
-doc.close()
+doc.setModified(False); doc.close()             # see "Closing" below
 doc.setBatchmode(True)                          # suppress format dialogs — set it first
 doc.modified(), doc.setModified(bool), doc.setAutosave(bool)
 doc.lock(), doc.unlock(), doc.tryBarrierLock()  # for long multi-step edits
 ```
 
+**Closing.** `doc.close()` on a modified document that has a view opens a modal
+*"save changes?"* box — `setBatchmode(True)` does not suppress it — and the bridge call
+blocks until the sender times out. Save first or call `doc.setModified(False)`. A document
+opened with `openDocument` and never shown closes without asking. Closing an **animated**
+document in the same send that created its keyframes crashes Krita shortly after
+(`KisNodeModel::processUpdateQueue`, verified on 5.3.4); close it from a later send.
+
 `doc.selection()`, `doc.setSelection(sel)` hold the global selection; `doc.guidesConfig()`
-and `doc.setHorizontalGuides([...])` cover guides (`gridConfig()` is master-only).
+and `doc.setHorizontalGuides([...])` cover guides (`doc.gridConfig()` / `setGridConfig()` cover the grid).
 
 ## Node — layers and masks
 
@@ -162,7 +172,8 @@ node.layerStyleToAsl(), node.setLayerStyleFromAsl(asl)
 ```
 
 `node.save()` writes the file but returns `None` through PyQt (the C++ `bool` is lost), so
-check the file exists instead of the return value. `setPinnedToTimeline` is master-only.
+check the file exists instead of the return value. `node.setPinnedToTimeline(True)` keeps an
+animated layer visible in the Timeline docker even when it isn't selected.
 
 Blend-mode ids are Krita's own (`"normal"`, `"multiply"`, `"add"`, `"screen"`,
 `"overlay"`, `"erase"`, …), not CSS names.
@@ -191,9 +202,10 @@ the foreground, since it would otherwise be invisible); `fillStyle` ∈ `None`,
 `ForegroundColor`, `BackgroundColor`, `Pattern`.
 
 These use *the active view's* preset, colour, size, opacity and blending mode, so set
-them first (see [Views](#views-windows-actions)) — and they need a view: on a document
-that was never added to a window, `paintAbility()` reports `UNPAINTABLE`. Check it before
-a long stroke loop rather than wondering why nothing appeared.
+them first (see [Views](#views-windows-actions)) — and they need a view. On a document
+that was never added to a window, **`paintAbility()` and the `paint*` calls crash Krita**
+(null `KisView`, verified on 5.3.4), so `win.addView(doc)` comes first, then check
+`paintAbility() == "PAINT"` before a long stroke loop.
 
 For deterministic geometry that must not depend on the user's preset, draw with QPainter
 and push pixels instead.
@@ -262,7 +274,7 @@ looks innocent. Bind the filter to a name and keep it alive as long as you use i
 
 Filter ids are **not** identifier-shaped: it is `"gaussian blur"` with a space, and
 `app.filter("gaussianblur")` silently returns `None` (then `AttributeError` on the next
-call). The 52 ids in 5.3.3 include `blur`, `gaussian blur`, `motion blur`, `lens blur`,
+call). The 52 ids in 5.3.4 include `blur`, `gaussian blur`, `motion blur`, `lens blur`,
 `unsharp`, `sharpen`, `levels`, `perchannel`, `hsvadjustment`, `colorbalance`, `invert`,
 `desaturate`, `posterize`, `threshold`, `pixelize`, `oilpaint`, `raindrops`, `noise`,
 `edge detection`, `emboss`, `gradientmap`, `halftone`, `dodge`, `burn`, `roundcorners`,
@@ -320,9 +332,8 @@ node.pixelDataAtTime(x, y, w, h, time)
 
 **Creating keyframes is not in the API.** `enableAnimation()` + `setCurrentTime(t)` +
 `setPixelData(...)` looks like it works — the projection changes, the frames you save look
-right — but `hasKeyframeAtTime(t)` stays `False` for every `t` except 0: you have been
-overwriting one keyframe the whole time, and the saved `.kra` animates nothing. The frame
-has to be created through the timeline action first:
+right — but `hasKeyframeAtTime(t)` stays `False`: no keyframe was ever made, and the saved
+`.kra` animates nothing. The frame has to be created through the timeline action first:
 
 ```python
 app.setActiveDocument(doc); doc.setActiveNode(layer)   # the action follows these
@@ -331,11 +342,16 @@ for t in range(n):
     doc.setCurrentTime(t)
     if t:
         app.action("add_blank_frame").trigger()        # or "add_duplicate_frame"
+        doc.waitForDone()                              # the action is asynchronous
     layer.setPixelData(frame_bytes, 0, 0, w, h)
     doc.refreshProjection(); doc.waitForDone()
 ```
 
-Verified: `hasKeyframeAtTime` is then `True` for every frame. The action needs an **active
+The `waitForDone()` after the action is not optional. Without it `hasKeyframeAtTime` is
+still `True` for every frame, but each frame's pixels land in the **previous** frame —
+frame 0 shows frame 1, the last frame is empty. So verify content, not just keys: compare
+`layer.pixelDataAtTime(x, y, 1, 1, t)` (or the projection after `setCurrentTime(t)`)
+against what you drew for `t`. The action needs an **active
 view**, so add the document to a window first. `render_animation` also exists as an action
 but opens the render dialog — save each frame's projection and encode with ffmpeg instead,
 see [recipes.md](recipes.md#animation-frames-and-turning-them-into-video).
@@ -362,7 +378,7 @@ lists them.
 ## Resources and brush presets
 
 ```python
-presets = app.resources("preset")            # {name: Resource} — 144 on a default 5.3.3
+presets = app.resources("preset")            # {name: Resource} — 144 on a default 5.3.4
 view.setCurrentBrushPreset(presets["b) Basic-5 Size"])
 view.setBrushSize(40); view.setPaintingOpacity(0.8); view.setPaintingFlow(1.0)
 view.setCurrentBlendingMode("multiply"); view.setEraserMode(False)
@@ -372,7 +388,7 @@ Preset names are exactly what the Brush Presets docker shows, prefixes and all
 (`"a) Eraser Circle"`, `"b) Airbrush Soft"`, `"b) Basic-5 Size"`) — misspell one and the
 `KeyError` is the only warning you get, so match against
 `sorted(app.resources("preset"))` rather than typing a remembered name. The other resource
-types that answer on 5.3.3: `pattern`, `gradient`, `brush`, `palette`, `workspace`.
+types that answer on 5.3.4: `pattern`, `gradient`, `brush`, `palette`, `workspace`.
 
 ## Views, windows, actions
 

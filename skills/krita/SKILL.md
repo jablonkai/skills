@@ -20,7 +20,7 @@ Drive it through the **Krita Bridge** — a pykrita plugin running inside a *liv
 executes whatever script is POSTed to `127.0.0.1:8737`. Because the script runs in the
 running session on the GUI thread, the canvas updates as you build, the user watches it
 happen, and the main-thread-only parts of the API are safe. Every call below was run
-against **Krita 5.3.3** (Python 3.13, PyQt5 5.15.11).
+against **Krita 5.3.4** (Python 3.13, PyQt5 5.15.11); the skill was first written on 5.3.3.
 
 - [scripts/krita-install-bridge.sh](scripts/krita-install-bridge.sh) — install the bridge
   plugin into the user's resource folder and enable it in `kritarc` (one-time).
@@ -39,7 +39,7 @@ against **Krita 5.3.3** (Python 3.13, PyQt5 5.15.11).
 ## The control loop
 
 1. **Make sure the bridge is up**: `bash scripts/krita-send.sh --ping` →
-   `{"ok": true, "bridge": "krita", "version": "5.3.3 (git 858d352)", "documents": [...]}`.
+   `{"ok": true, "bridge": "krita", "version": "5.3.4 (git e7e52a7)", "documents": [...]}`.
    If nothing answers, either Krita isn't running (ask the user to start it — the bridge
    auto-starts with it once installed) or the plugin isn't installed yet:
 
@@ -102,11 +102,13 @@ layer.setBlendingMode("multiply")        # Krita's blend-mode ids, not CSS names
 layer.setOpacity(180)                    # 0–255, not a percentage
 ```
 
-A new document already contains one paint layer, **named in the user's language**
-(`Háttér` on a Hungarian Krita) — take it as `doc.rootNode().childNodes()[0]`, never by
-name. Work on the open document instead with `doc = app.activeDocument()`, or open a file
-with `doc = app.openDocument(path)` (add a view to make it visible), and `doc.close()`
-when a batch is done — every open document keeps its whole image in memory.
+A new document already contains one paint layer, **filled opaque white** and **named in
+the user's language** (`Háttér` on a Hungarian Krita) — take it as
+`doc.rootNode().childNodes()[0]`, never by name, and hide or fill it when the result needs
+transparency. Work on the open document instead with `doc = app.activeDocument()`, or open
+a file with `doc = app.openDocument(path)` (add a view to make it visible). Close batch
+documents when done — every open document keeps its whole image in memory — but read
+[Closing documents](#closing-documents) first: a careless `close()` hangs or crashes.
 
 ### Brush strokes with the real paint engine
 
@@ -130,9 +132,10 @@ layer.paintEllipse(QRectF(300, 300, 400, 400), "ForegroundColor", "None")
 ```
 
 `paintLine` takes **`QPoint`** — a `QPointF` raises `TypeError`, even though the rect-based
-calls want `QRectF`. Without a view `paintAbility()` reports `UNPAINTABLE` and nothing is
-drawn, and everything inherits the user's active preset, colour and blending mode, so set
-what matters explicitly. For geometry that must look identical every run, draw it with
+calls want `QRectF`. Add the view **before** touching `paintAbility()` or any `paint*` call:
+on a document that has no view they don't fail politely, they crash Krita (5.3.4
+dereferences the missing view). Everything inherits the user's active preset, colour and
+blending mode, so set what matters explicitly. For geometry that must look identical every run, draw it with
 QPainter instead:
 
 ### Pixels: paint with QPainter, push once
@@ -215,6 +218,20 @@ doc.waitForDone()
 Animation, per-layer export, and batch folder processing are in
 [references/recipes.md](references/recipes.md).
 
+### Closing documents
+
+```python
+doc.setModified(False)   # or save first — then close() can't ask anything
+doc.close()
+```
+
+`setBatchmode(True)` does **not** cover closing: a modified document that has a view pops a
+modal *"save changes?"* box, the send blocks until `KRITA_SEND_TIMEOUT`, and Krita keeps
+waiting for a click. And **never close an animated document in the send that created its
+keyframes** — Krita crashes a moment later in the Layers docker, even after
+`setModified(False)`, a drained event loop, or `file_close`. Leave it open for the user, or
+close it from a later send.
+
 ## Verification
 
 - **Returned stdout** is the immediate signal — `print(...)` comes straight back through
@@ -233,11 +250,16 @@ Animation, per-layer export, and batch folder processing are in
   the active view, and selections all stick. Version your documents
   (`createDocument(..., "poster_v2", ...)`) so a re-send doesn't fight the previous one.
 - **`setBatchmode(True)` before any export or save** — otherwise Krita may block on a
-  format-options dialog that nobody is there to click, and the send times out.
+  format-options dialog that nobody is there to click, and the send times out. It does not
+  cover `close()` — see [Closing documents](#closing-documents).
+- **A send that times out usually means a modal dialog**, not a dead bridge: a dialog runs
+  a nested event loop, so the bridge still answers and
+  `QApplication.activeModalWidget()` names it — see
+  [references/recipes.md](references/recipes.md#a-send-hangs-or-times-out).
 - **`refreshProjection()` + `waitForDone()`** before every read/export; without it you can
   export a canvas that is one composite behind.
 - **Opacity is 0–255**, blend modes are Krita's own ids (`"normal"`, `"multiply"`,
-  `"add"`, `"erase"`, …). There is no API listing them in 5.3.3 — `app.blendingModes()`
+  `"add"`, `"erase"`, …). There is no API listing them in 5.3.x — `app.blendingModes()`
   exists only on master, so take ids from the Layers docker.
 - **Don't chain `app.filter("x").configuration()`** — the `Filter` temporary is collected
   and its `InfoObject` dies with it: `RuntimeError: wrapped C/C++ object of type
@@ -245,9 +267,11 @@ Animation, per-layer export, and batch folder processing are in
 - **Ints where you expect floats**: `xRes()`/`yRes()` return floats but `scaleImage` and
   `setResolution` take ints and PyQt raises `TypeError` instead of rounding — `int(...)`.
 - **`node.save()` returns `None`**, not the documented bool; check the file exists.
-- **Keyframes can't be created from the API** — `setCurrentTime` + `setPixelData` just
-  overwrites frame 0 while every save *looks* right. Trigger `add_blank_frame` per frame;
-  see [references/api-reference.md](references/api-reference.md#animation).
+- **Keyframes can't be created from the API** — `setCurrentTime` + `setPixelData` never
+  makes one while every save *looks* right. Trigger `add_blank_frame` per frame **and
+  `doc.waitForDone()` after it** — the action is asynchronous, and without the wait every
+  frame's pixels land one frame early; see
+  [references/api-reference.md](references/api-reference.md#animation).
 - **`setPixelData` wants the node's colour space**, not RGBA-in-any-order: with `"RGBA"` /
   `"U8"` documents the `Format_ARGB32` buffer works as-is; for U16/F32 documents build the
   bytes to match, or convert the document first.
@@ -257,9 +281,10 @@ Animation, per-layer export, and batch folder processing are in
   runs gets silently reverted — quit Krita first (the installer refuses otherwise).
 - **Env vars don't reach a GUI-launched Krita** (`open -a krita`), so
   `KRITA_BRIDGE_PORT` only takes effect when Krita is started from a terminal.
-- **`paint*` needs a view and inherits the user's brush state** — preset, size, opacity,
-  blending mode and foreground colour all come from the active view, so set what matters
-  and check `paintAbility() == "PAINT"` first. `paintLine` insists on `QPoint` while the
+- **`paint*` needs a view and inherits the user's brush state** — without a view even
+  `paintAbility()` crashes Krita; with one, preset, size, opacity, blending mode and
+  foreground colour all come from the active view, so set what matters and check
+  `paintAbility() == "PAINT"` first. `paintLine` insists on `QPoint` while the
   rect calls take `QRectF`. Tools, the transform widget and canvas input stay
   unscriptable; `app.action(id).trigger()` is the only door to menu commands, it acts on
   the active document, and it reports nothing back.
