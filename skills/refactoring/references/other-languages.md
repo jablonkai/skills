@@ -18,8 +18,8 @@ the discipline in `SKILL.md` are unchanged; what differs is the tooling and the 
 
 ```bash
 npx tsc --noEmit                       # the type checker is the refactoring safety net
+npx eslint .                           # the rest (ESLint 9 flat config picks files itself)
 npx eslint . --fix                     # auto-fixable rules
-npx eslint . --ext .ts,.tsx            # the rest
 npx prettier --write .
 npx knip                               # unused files, exports and dependencies
 npx depcheck                           # unused dependencies
@@ -146,7 +146,7 @@ most of what this skill looks for.
 | Instead of | Prefer | Why |
 |---|---|---|
 | `if err == nil { ... }` wrapping the body | `if err != nil { return ... }` early | Go's canonical shape: errors out, happy path unindented |
-| `errors.New(fmt.Sprintf(...))` | `fmt.Errorf("...: %w", err) ` | Wrapping preserves the chain for `errors.Is`/`As` |
+| `errors.New(fmt.Sprintf(...))` | `fmt.Errorf(...)`, with `%w` when wrapping an `err` | `%w` preserves the chain for `errors.Is`/`As` |
 | Repeated struct literals across call sites | A constructor function with defaults | One place to add a field |
 | Large interfaces defined next to the implementation | Small interfaces defined at the consumer | "Accept interfaces, return structs" |
 | `interface{}` / `any` parameters | Generics (1.18+) or a concrete type | Type safety without reflection |

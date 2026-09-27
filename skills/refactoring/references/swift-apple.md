@@ -32,8 +32,7 @@ below), `redundant_optional_initialization`.
 `swiftlint analyze` finds unused declarations, but needs a compiler log:
 
 ```bash
-xcodebuild -scheme <S> -destination '<D>' clean build \
-  OTHER_SWIFT_FLAGS="-D DEBUG" > /tmp/xcodebuild.log
+xcodebuild -scheme <S> -destination '<D>' clean build > /tmp/xcodebuild.log
 swiftlint analyze --compiler-log-path /tmp/xcodebuild.log
 ```
 
@@ -41,8 +40,9 @@ Also turn on the compiler's own upcoming-feature and strict-concurrency warnings
 they mark exactly the code that will need to change anyway:
 
 ```swift
-// Package.swift
+// Package.swift — Swift 5 language mode on a 5.10+ toolchain
 swiftSettings: [.enableUpcomingFeature("StrictConcurrency")]
+// or adopt Swift 6 mode outright (tools-version 6.0): .swiftLanguageMode(.v6)
 ```
 
 ## Swift idioms worth refactoring toward

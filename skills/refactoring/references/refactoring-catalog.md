@@ -56,10 +56,10 @@ makes them safe; performing them as a single edit forfeits it.
 3. Delete the function.
 
 **Rename**
-Use the reference-aware tool (Serena's `rename_symbol`, or the IDE). Never find/replace: it hits
-comments, strings, and unrelated identifiers with the same name, and misses dynamic references. When
-the tool reports success the rename is complete across declarations, references, and overrides —
-no re-verification needed for the rename itself.
+Use a reference-aware tool (Serena's `rename_symbol`, an LSP rename, the IDE). Blind find/replace
+hits comments, strings, and unrelated identifiers with the same name, and misses dynamic references.
+A symbolic rename covers declarations, references, and overrides, but not strings, config files,
+or reflection — grep for the old name as a string afterwards, then compile and test as for any step.
 
 **Guard clause / early return**
 1. Take the outermost condition wrapping the whole body.
@@ -163,18 +163,19 @@ each stack.
 
 Small steps make rollback trivial, which is the entire reason for small steps.
 
-- **A step went red:** revert that step and redo it. `git checkout -- <path>` if uncommitted, or
-  `git reset --hard HEAD` if the step was the only uncommitted work. Do not debug forward — a
-  refactoring that needs debugging has stopped being a refactoring.
-- **A committed step went wrong:** `git revert <sha>`. This is why each refactoring is its own
-  commit.
+- **A step went red:** revert that step and redo it. If each green step was staged (`git add -A`),
+  `git restore .` drops only the unstaged work of the step in progress — no commit needed, and
+  nothing earlier is lost. Avoid `git reset --hard`: it also throws away every staged step. Do not
+  debug forward — a refactoring that needs debugging has stopped being a refactoring.
+- **A committed step went wrong:** `git revert <sha>`. When the user wants commits, one per
+  refactoring is what makes this surgical.
 - **The whole direction was wrong:** revert the range and report what you learned. A refactoring
   abandoned after two hours with a clear explanation is a better outcome than one landed half-done.
 - **Something broke after landing:** a small, single-purpose commit is `git bisect`-friendly and
   revertable in isolation. A 40-file mixed commit is neither, which is the real cost of batching.
 
-Always confirm the working tree is clean and committed *before* starting — rollback needs a known
-good point to return to.
+Always establish a known-good point *before* starting — a clean tree, or the user's pending work
+committed or stashed at their say-so. Rollback needs somewhere to return to.
 
 ## Sequencing a large refactoring
 

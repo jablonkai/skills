@@ -31,11 +31,12 @@ Useful detekt rules for this work, if not already on: `LongMethod`, `LongParamet
 `UnusedImports`, `TooManyFunctions`. Prefer raising an existing threshold conversation over
 suppressing findings — a suppression is a decision that outlives the person who made it.
 
-Add `-Werror` locally (not permanently) to surface deprecations that mark exactly the code worth
-modernizing:
+Deprecation warnings mark exactly the code worth modernizing. Surface them from a clean compile
+rather than making them fatal (a temporary `allWarningsAsErrors.set(true)` in `compilerOptions`
+works too, but revert it before finishing):
 
 ```bash
-./gradlew compileKotlin -Pkotlin.compiler.execution.strategy=in-process --console=plain
+./gradlew compileKotlin --rerun-tasks --console=plain 2>&1 | grep -iE '^w:.*deprecat'
 ```
 
 ## Kotlin idioms worth refactoring toward
@@ -107,18 +108,18 @@ Source-set placement rules of thumb:
 
 ## Compose and Compose Multiplatform
 
-Do not reimplement the Compose guidance here — the dedicated skills are more precise and are kept
-current:
+When these dedicated skills are installed, prefer them — they are more precise and kept current.
+When they are not, the one-line gist in each row is the rule to apply:
 
 | Refactoring | Skill |
 |---|---|
-| State in the wrong place; local `remember` vs hoisted vs ViewModel | `compose-state-hoisting` |
-| A screen composable that both collects state and renders layout | `compose-state-holder-ui-split` |
-| Boolean/`enum` flags controlling which children render | `compose-slot-api-pattern` |
-| Modifier chain order, layout wrappers, hardcoded root layouts | `compose-modifier-and-layout-style` |
-| Recomposing too often; unstable parameters | `compose-recomposition-performance`, `compose-stability-diagnostics` |
-| Frame-rate state read in composition | `compose-state-deferred-reads` |
-| `LaunchedEffect`/`DisposableEffect` misuse | `compose-side-effects` |
+| State in the wrong place — hoist to the lowest common owner; UI state in a ViewModel/state holder | `compose-state-hoisting` |
+| Screen that both collects state and renders — split into a stateful route and a stateless screen | `compose-state-holder-ui-split` |
+| Boolean/`enum` flags choosing children — replace with `@Composable` slot parameters | `compose-slot-api-pattern` |
+| Modifier chains — accept a `modifier` parameter, apply it first on the root, order matters | `compose-modifier-and-layout-style` |
+| Recomposing too often — stable/immutable parameters, lambdas over values | `compose-recomposition-performance`, `compose-stability-diagnostics` |
+| Frame-rate state read in composition — defer the read into a lambda modifier | `compose-state-deferred-reads` |
+| Effect misuse — keys that match what the effect depends on, cleanup in `onDispose` | `compose-side-effects` |
 
 The refactoring that is *not* covered there and belongs here: extracting a large composable into
 smaller ones. The rule is the same as for any function — extract along the axis of change, give the
