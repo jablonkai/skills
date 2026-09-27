@@ -43,8 +43,13 @@ are no frames — you send the event objects themselves and the app runs continu
            "deckled_edges": true, "paper_scale": 100, "visible": true}}
 ```
 
+`deckled_edges: false` does not remove the torn border (8.3.4, live): exports keep a
+transparent deckled edge whatever you send. Flatten onto white, or crop, if the user
+wants a clean rectangle.
+
 In batch this event is fragile — see the placement rules in SKILL.md. Over the
-WebSocket it just works, and it replaces the artwork the user has open.
+WebSocket it replaces the artwork the user has open, and swallows the message after it —
+wait for a bookmark echo before painting ([websocket.md](websocket.md#behaviour-notes)).
 
 ### SET_PAPER
 
@@ -62,7 +67,8 @@ size/water/opacity/paint type.
 
 ```json
 {"event_type": "SET_BRUSH", "tool": "WATERCOLOR", "preset": "Watercolor/Round",
- "size": 40, "size_px": 40,        // use one or the other
+ "size": 40, "size_px": 40,        // use one or the other — neither is the painted
+                                   // width in pixels; it varies per preset (see below)
  "water": 55, "opacity": 60, "pressure": 100,
  "paint_type": "PAINT",            // BLEND | PAINT | PAINT_BLEND | PAINT_MIX | ERASE
  "glaze_mode": "TRANSPARENT",      // WATERCOLOR only: TRANSPARENT | SEMI-OPAQUE | OPAQUE
@@ -74,6 +80,11 @@ size/water/opacity/paint type.
  "multi_color_brush": false, "rotate_multi_color_brush": false,
  "smudge": true, "spacing": 50, "opacity_multiplier": 2}   // override preset (needs "preset")
 ```
+
+Painted width is preset-dependent and not linear in either size field — measured on
+8.3.4 with full pressure: Round `size_px` 50 → ~6 px, 200 → ~150 px; Mop `size_px` 200 →
+~50 px; Flat `size_px` 200 → ~200 px; Round `size` 50 → ~80 px; Mop `size` 50 → ~150 px.
+Calibrate with a test stroke rather than computing a value.
 
 Tools: `WATERCOLOR`, `OIL_AND_ACRYLIC`, `EXPRESS_OIL`, `INK_PEN`, `PENCIL`, `PASTEL`,
 `MARKER`, `AIRBRUSH`, `BLEND`, `SMUDGE`, `CLONE`, `ERASER`, `WATER`, `DRY`, `BLOW`.

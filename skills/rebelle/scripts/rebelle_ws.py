@@ -19,9 +19,10 @@ CLI use:
 
     rebelle_ws.py --ping                       # is Rebelle listening?
     rebelle_ws.py --send events.json           # a Motion IO frames/events file
+    rebelle_ws.py --send events.json --frames-out out/   # ...exporting every frame
     rebelle_ws.py --export /tmp/check.png
     rebelle_ws.py --cmd list_tools
-    rebelle_ws.py --cmd list_tool_presets --arg tool=Watercolors
+    rebelle_ws.py --cmd list_tool_presets      # presets of the tool selected in the UI
 """
 from __future__ import annotations
 
@@ -42,6 +43,20 @@ DEFAULT_PORT = int(os.environ.get("REBELLE_WS_PORT", "8265"))
 
 class WSError(RuntimeError):
     pass
+
+
+def _complete(path: str, last_size: int) -> bool:
+    size = os.path.getsize(path)
+    if not size:
+        return False
+    with open(path, "rb") as fh:
+        fh.seek(max(size - 12, 0))
+        tail = fh.read()
+    if path.lower().endswith(".png"):
+        return tail.endswith(b"IEND\xaeB`\x82")
+    if path.lower().endswith((".jpg", ".jpeg")):
+        return tail.endswith(b"\xff\xd9")
+    return size == last_size
 
 
 class Rebelle:
@@ -121,11 +136,21 @@ class Rebelle:
     def event(self, ev: dict, wait: float = 0.0):
         """Send one Motion IO JSON event (NEW_ARTWORK, SET_BRUSH, POINTER_*, ...)."""
         self.send_text(json.dumps(ev))
+        if ev.get("event_type") == "NEW_ARTWORK":
+            # While the artwork re-initialises Rebelle drops what it receives, and
+            # a stroke whose SET_BRUSH was dropped can crash a freshly launched app
+            # (bad_optional_access, 8.3.4). Block here so callers never race it.
+            if not self.ready():
+                raise WSError("NEW_ARTWORK never finished (no BOOKMARK echoed back)")
         return self.recv(timeout=wait) if wait else None
 
-    def cmd(self, name: str, wait: float = 3.0, **params):
-        """Send one live-control command ({"cmd": ...}); returns the reply text."""
-        self.send_text(json.dumps({"cmd": name, **params}))
+    def cmd(self, command: str, /, wait: float = 3.0, **params):
+        """Send one live-control command ({"cmd": ...}); returns the reply text.
+
+        `command` is positional-only so commands can take a `name` parameter
+        themselves, e.g. r.cmd("select_tool_preset", name="Watercolor/Round").
+        """
+        self.send_text(json.dumps({"cmd": command, **params}))
         return self.recv(timeout=wait)
 
     def sync(self, tag: str = "sync", timeout: float = 30.0) -> bool:
@@ -140,6 +165,25 @@ class Rebelle:
             reply = self.recv(timeout=min(2.0, deadline - time.time()))
             if reply and tag in reply:
                 return True
+        return False
+
+    def ready(self, timeout: float = 60.0) -> bool:
+        """Block until Rebelle is accepting events again, e.g. after NEW_ARTWORK.
+
+        A single BOOKMARK is not enough here: the first message after NEW_ARTWORK
+        is silently swallowed, so `sync()` would just wait out its timeout. Keep
+        sending fresh bookmarks until one comes back.
+        """
+        deadline = time.time() + timeout
+        i = 0
+        while time.time() < deadline:
+            i += 1
+            self.send_text(json.dumps({"event_type": "BOOKMARK", "id": f"ready_{i}"}))
+            reply = self.recv(timeout=1.5)
+            while reply:
+                if "ready_" in reply:
+                    return True
+                reply = self.recv(timeout=0.2)
         return False
 
     def stroke(self, points, **kw):
@@ -161,12 +205,20 @@ class Rebelle:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         before = os.path.getmtime(path) if os.path.exists(path) else 0
         self.sync("pre_export")
-        self.cmd("export_canvas", wait=0.5, filename=path)
+        # No reply on success, so don't wait for one; an error reply is skipped by sync().
+        self.send_text(json.dumps({"cmd": "export_canvas", "filename": path}))
         deadline = time.time() + timeout
+        last = -1
         while time.time() < deadline:
-            if os.path.exists(path) and os.path.getmtime(path) > before and os.path.getsize(path):
-                return path
-            time.sleep(0.3)
+            if os.path.exists(path) and os.path.getmtime(path) > before:
+                # Rebelle writes the file progressively: it exists (and is non-empty)
+                # well before it is complete, and reading it early yields a truncated
+                # image. Done = the format's end marker is there, or, for other
+                # formats, the size has stopped changing.
+                if _complete(path, last):
+                    return path
+                last = os.path.getsize(path)
+            time.sleep(0.1)
         raise WSError(f"export_canvas produced no file at {path}")
 
     def close(self):
@@ -183,14 +235,22 @@ class Rebelle:
         self.close()
 
 
-def _send_file(r: Rebelle, path: str) -> None:
-    """Replay a Motion IO events file ({"frames":[{"events":[...]}]}) live."""
-    doc = json.load(open(path))
+def _send_file(r: Rebelle, path: str, frames_out: str | None = None) -> None:
+    """Replay a Motion IO events file ({"frames":[{"events":[...]}]}) live.
+
+    With `frames_out`, every frame is exported as frame_0000.png, ... — the same
+    numbering Motion IO uses, so `Doc.first_content_frame` still applies. This is
+    how to render an animation when only Rebelle Pro is installed.
+    """
+    with open(path) as fh:
+        doc = json.load(fh)
     frames = doc["frames"] if isinstance(doc, dict) and "frames" in doc else doc
     for i, frame in enumerate(frames):
         for ev in frame.get("events", []):
             r.event(ev)
         r.sync(f"frame_{i}")
+        if frames_out:
+            r.export(os.path.join(frames_out, f"frame_{i:04d}.png"))
         print(f"frame {i + 1}/{len(frames)} done", file=sys.stderr)
 
 
@@ -199,6 +259,7 @@ def main() -> int:
     ap.add_argument("--port", type=int, default=DEFAULT_PORT)
     ap.add_argument("--ping", action="store_true", help="check the server and print its greeting")
     ap.add_argument("--send", metavar="EVENTS.json", help="replay an events file live")
+    ap.add_argument("--frames-out", metavar="DIR", help="with --send: export every frame into DIR")
     ap.add_argument("--event", metavar="JSON", action="append", default=[], help="send one raw JSON event")
     ap.add_argument("--cmd", metavar="NAME", help="send a live-control command")
     ap.add_argument("--arg", metavar="K=V", action="append", default=[], help="parameter for --cmd")
@@ -212,7 +273,7 @@ def main() -> int:
             for raw in args.event:
                 r.event(json.loads(raw))
             if args.send:
-                _send_file(r, args.send)
+                _send_file(r, args.send, args.frames_out)
             if args.cmd:
                 params = {}
                 for kv in args.arg:

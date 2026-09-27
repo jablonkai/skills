@@ -6,6 +6,10 @@ from the official [Command Line Arguments](https://www.escapemotions.com/product
 and [Import/Export data](https://www.escapemotions.com/products/rebelle/motionio_doc/reference/import_export_data)
 pages plus behaviour verified on 8.3.0 / macOS.
 
+Motion IO is a separate install. Rebelle **Pro** takes the same `-batch-json` flag and
+ignores it (8.3.4), so without Motion IO render frame sequences live instead:
+`scripts/rebelle_ws.py --send events.json --frames-out out/`.
+
 ## Command line
 
 ```bash
@@ -70,9 +74,15 @@ Exports carry transparency, so flatten before encoding if you want an opaque vid
 ```bash
 # opaque, skipping the setup frames (Doc.first_content_frame)
 ffmpeg -y -framerate 24 -start_number 2 -i out/frame_%04d.png \
-       -vf "color=white[bg];[bg][0]scale2ref[bg][fg];[bg][fg]overlay,format=yuv420p" \
+       -filter_complex "[0]split[a][b];[a]drawbox=c=white:t=fill[bg];[bg][b]overlay,format=yuv420p" \
        -c:v libx264 -crf 18 out.mp4
+```
 
+The white plate is built from each frame itself, so it ends with the input. A `color=`
+source instead never ends — the encode runs forever — and `scale2ref` is deprecated in
+current ffmpeg.
+
+```bash
 # keep alpha (for compositing in DaVinci Resolve etc.)
 ffmpeg -y -framerate 24 -start_number 2 -i out/frame_%04d.png -c:v qtrle out.mov
 ```
