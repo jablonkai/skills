@@ -69,7 +69,7 @@ Most of this workflow is fast, stateful `git`/`gh` commands that must stay with 
 **Delegate when:**
 
 - **The diff is large** (rough rule: many files, or more than a few hundred changed lines). Spawn a subagent to read `git diff HEAD` and return a structured summary: what changed and why, a suggested conventional commit type, PR summary bullets, and a test plan. Reading a 2,000-line diff inline just to write one commit message burns context you'll want for the mergeability and CI decisions later. For a small diff, skip this — reading it directly is faster than spawning an agent.
-- **CI fails and the logs are long.** Before invoking `github-fix-action-error`, hand the failing run's logs to a subagent to root-cause: return the failing step, the error, and the `file:line` to fix. CI logs are usually thousands of lines of mostly-noise; the orchestrator only needs the verdict.
+- **CI fails and the logs are long.** Before invoking `github-fix-ci-error`, hand the failing run's logs to a subagent to root-cause: return the failing step, the error, and the `file:line` to fix. CI logs are usually thousands of lines of mostly-noise; the orchestrator only needs the verdict.
 
 **Keep inline — do NOT delegate:**
 
@@ -219,7 +219,7 @@ Wait for every GitHub Actions run triggered by the push to finish, selecting run
 - If all runs **succeed** → continue to Step 10.
 - If a run **fails**, classify the failure first:
   - **GitHub billing / spending limit** — jobs with zero executed steps and a "job was not started … payments / spending limit / billing" annotation. The code never ran, so there is nothing to fix: run the workflows' checks locally (plus the repo's own pre-commit validation), and if they all pass, the PR may be merged on that basis — say in the merge confirmation and the report that CI did not run and what was validated locally instead.
-  - **Anything else** — root-cause it (delegating when the logs are long), fix via `github-fix-action-error`, push, and re-watch. Repeat until green or the user aborts.
+  - **Anything else** — root-cause it (delegating when the logs are long), fix via `github-fix-ci-error`, push, and re-watch. Repeat until green or the user aborts.
 
 ### Step 10: Merge the PR
 

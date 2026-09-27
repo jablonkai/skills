@@ -58,7 +58,7 @@ gh run view "$id" | grep -iE 'billing|spending limit|payments have failed|accoun
 A user's guess ("probably out of Actions minutes") is not evidence — check the signals. A job that
 ran steps and failed a test is a real failure even if the account is also near its limit.
 
-When it is a billing failure, don't invoke `github-fix-action-error` — there is nothing in the code
+When it is a billing failure, don't invoke `github-fix-ci-error` — there is nothing in the code
 to fix, and retrying CI will fail the same way. Run CI's checks locally instead:
 
 1. Read the workflow files that trigger on this event (`.github/workflows/*.yml`, jobs with
@@ -82,7 +82,7 @@ it (explicitly) or wait until billing is fixed and re-run CI with `gh run rerun 
 
 When the logs are long, first delegate root-causing to a read-only subagent (see "Delegating to
 subagents" in SKILL.md) and pass its conclusion — failing step, error, and `file:line` — into the
-`github-fix-action-error` skill; otherwise invoke that skill directly. After the fix is committed
+`github-fix-ci-error` skill; otherwise invoke that skill directly. After the fix is committed
 and pushed, re-watch the new runs. Repeat until the build is green or the user aborts.
 
 Never merge on an in-flight or pending status — `gh run watch --exit-status` is the gate. The only

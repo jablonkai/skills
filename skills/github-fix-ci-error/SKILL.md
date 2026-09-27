@@ -1,5 +1,5 @@
 ---
-name: github-fix-action-error
+name: github-fix-ci-error
 description: "Diagnose and fix the most recent failing GitHub Actions CI run on the current branch. Fetches the failing run's logs via the GitHub CLI, locates the root cause (failing test, compile error, lint violation, broken workflow file, etc.), applies a targeted fix in the local working tree, and — only after user confirmation — commits and pushes. Recognizes infrastructure flakes and already-fixed failures instead of patching code. Use when someone says 'fix the CI', 'fix the failing action', 'the build is red', 'why did the workflow fail', 'javítsd a CI hibát', 'piros a build', or pastes a failing Actions run URL for the current branch. Refuses to run on protected branches (main, master, develop, or the repo's default branch). Not for opening or merging PRs — use github-commit-pr for that."
 summary: "diagnose the latest failing GitHub Actions run on the current branch, apply a targeted fix locally, and — after user approval — commit and push; refuses to run on main/master/develop or the default branch"
 category: development-workflow
@@ -13,7 +13,7 @@ tags:
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write
 ---
 
-# github-fix-action-error
+# github-fix-ci-error
 
 ## Purpose
 
