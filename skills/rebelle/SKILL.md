@@ -15,15 +15,20 @@ tags:
 # Rebelle Control
 
 Rebelle simulates real paint — water flows, pigments granulate, impasto catches light —
-and both builds installed here take the **same JSON event vocabulary**:
+and both of its scriptable builds take the **same JSON event vocabulary**:
 
 | Build | How you drive it | Best for |
 |---|---|---|
-| `/Applications/Rebelle 8.app` (**Pro**) | WebSocket server, live | painting into the app the user is watching, exploring, one-off artwork |
+| `/Applications/Rebelle 8.app` (**Pro**) | WebSocket server, live | painting into the app the user is watching, exploring, one-off artwork — and animation when Motion IO is absent |
 | `/Applications/Rebelle 8 Motion IO.app` | `-batch-json` file, headless-ish | reproducible renders, animation frame sequences, data-layer in/out |
 
-Start live unless the task is an animation or needs data layers: the round-trip is
-seconds instead of a minute, and you can look at the canvas whenever you want.
+Check which are installed first (`ls -d /Applications/Rebelle*`) — often only Pro is.
+The Pro binary *accepts* `-batch-json` and then silently ignores it (blank artwork, no
+frames, verified 8.3.4), so Path B is Motion IO only.
+
+Start live unless the task needs data layers, 16-bit output or a headless render: the
+round-trip is seconds instead of a minute, you can look at the canvas whenever you want,
+and animations work live too (see Path B's last paragraph).
 
 - [references/json-events.md](references/json-events.md) — the full event vocabulary (both paths). Read before writing anything beyond simple strokes.
 - [references/websocket.md](references/websocket.md) — live protocol, the undocumented `cmd` API, what is *not* supported live.
@@ -55,9 +60,11 @@ The allowlist is matched against the socket's literal peer address, and a local 
 arrives as the IPv6-mapped `::ffff:127.0.0.1` — listing plain `127.0.0.1` alone refuses
 your own connection (`... refused` in Rebelle's output).
 
-Then drive it from Python:
+Then drive it from Python — the helpers are plain modules in this skill's `scripts/`,
+so put that directory on the path (or run from it):
 
 ```python
+import sys; sys.path.insert(0, "<this skill>/scripts")
 from rebelle_ws import Rebelle
 from rebelle_events import catmull_rom, taper
 
@@ -75,6 +82,12 @@ with Rebelle() as r:
 
 `sync()` sends a `BOOKMARK` and waits for the echo. Nothing else acknowledges anything,
 so without it you are exporting a canvas that is still mid-stroke.
+
+`NEW_ARTWORK` is the one event you must not race: while the canvas re-initialises,
+Rebelle **drops the next message** — typically your `SET_BRUSH` — and a stroke without a
+brush crashes a freshly launched app (`bad_optional_access`, 8.3.4). `Rebelle.event()`
+blocks after `NEW_ARTWORK` until a bookmark comes back (`ready()`), so go through it
+rather than raw `send_text()`; a hand-rolled client has to poll the same way.
 
 `SAVE`/`LOAD` events are rejected live — `export()` (`cmd: export_canvas`) is the only
 way out, and it writes the composited canvas exactly as the user sees it.
@@ -125,6 +138,13 @@ first frames, and these are the shapes that survive it:
 If you must skip `NEW_ARTWORK` entirely, `-input artwork.reb` opens an existing artwork
 and is the sturdiest way to fix a canvas size — but the user has to have saved one.
 
+**No Motion IO? Render the same `Doc` live.** `rebelle_ws.py --send events.json
+--frames-out out/` replays it frame by frame over the WebSocket and exports
+`frame_0000.png…` with batch numbering, so `first_content_frame` and the ffmpeg recipe
+in [batch.md](references/batch.md) apply unchanged. Live, the fluid
+simulation runs in real time rather than one step per frame, so give wet passages
+explicit `SIMULATION` repeats instead of relying on frame count.
+
 ## Painting that looks painted
 
 - **Coordinates are canvas pixels, y down from the top-left**, and may go outside the
@@ -132,6 +152,10 @@ and is the sturdiest way to fix a canvas size — but the user has to have saved
 - **A `POINTER_MOVE` draws the previous segment**, so a stroke must end with a release
   at the last move's position. `stroke()`/`stroke_events()` handle it; hand-written
   events routinely lose their final segment to this.
+- **Calibrate brush width per preset.** Neither `size` (the UI slider) nor `size_px`
+  predicts the painted width: on 8.3.4, `size_px` 200 gave ~150 px with Round, ~50 px
+  with Mop and ~200 px with Flat, and `size_px` 50 on Round only ~6 px. Paint one test
+  stroke per preset, export, measure, then scale — before committing to a composition.
 - **Sample paths densely.** Rebelle interpolates between points, so four points give a
   smooth-but-generic curve; `catmull_rom()` at ~16 points per segment lets the brush
   texture, spacing and pressure actually show.
@@ -170,14 +194,14 @@ size (`rgba_canvas`, or `SAVE` with `scaling` for a NanoPixel-scale export).
 - **Colours are 8-bit RGB objects** (`{"r":…,"g":…,"b":…}`) even though the engine mixes
   in 16-bit; 16-bit output only exists in Motion IO `.exr` exports.
 - **The docs run ahead of the build.** The 8.3 docs promise `SAVE`/`LOAD` over
-  WebSockets; the shipped 8.3.0 rejects them. Trust an export you have looked at over
-  any documented behaviour.
+  WebSockets; the shipped 8.3.x builds (checked 8.3.0 and 8.3.4) reject them. Trust an
+  export you have looked at over any documented behaviour.
 - **Animation licensing has strings attached** — see the note at the end of
   [batch.md](references/batch.md) before helping with a commercial production.
 
 ## Security
 
-Path B opens nothing — Motion IO reads a file and exits. Path A does: launching Rebelle
+Path B opens nothing — Motion IO reads a file and renders it. Path A does: launching Rebelle
 with `-websocket-server-enable` turns it into a **code-execution server** for its event
 vocabulary. Say so before asking the user to relaunch.
 

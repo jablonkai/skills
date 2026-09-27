@@ -33,7 +33,13 @@ outdir=$2
 shift 2
 
 [[ -f "$events" ]] || { echo "no such events file: $events" >&2; exit 2; }
-[[ -x "$app" ]] || { echo "Motion IO not found at: $app (set REBELLE_MOTION_IO)" >&2; exit 2; }
+[[ -x "$app" ]] || { echo "Motion IO not found at: $app (set REBELLE_MOTION_IO, or render live with rebelle_ws.py --send EVENTS --frames-out DIR)" >&2; exit 2; }
+# The Pro build accepts -batch-json and then ignores it (verified 8.3.4): it just
+# opens a blank artwork and never prints a frame. Fail fast instead of timing out.
+case "$app" in
+  *"Motion IO"*) ;;
+  *) echo "warning: $app does not look like Motion IO; Rebelle Pro silently ignores -batch-json" >&2 ;;
+esac
 
 # Motion IO resolves relative paths against its own working directory, which is
 # not necessarily this shell's — always hand it absolute paths.
@@ -53,7 +59,9 @@ deadline=$((SECONDS + timeout))
 done=0
 while (( SECONDS < deadline )); do
   # "batch frame end: i/n" — the render is complete when i reaches n.
-  if grep -Eq 'batch frame end: ([0-9]+)/\1$' "$log"; then done=1; break; fi
+  # (awk rather than a grep backreference, which POSIX ERE does not define)
+  if awk -F'batch frame end: ' 'NF > 1 { split($2, f, "/"); if (f[1] + 0 == f[2] + 0) found = 1 }
+       END { exit !found }' "$log"; then done=1; break; fi
   kill -0 "$app_pid" 2>/dev/null || { done=1; break; }
   sleep 1
 done
@@ -75,5 +83,5 @@ EOF
   exit 1
 fi
 
-frames=$(find "$outdir" -maxdepth 1 -name '*.png' -o -maxdepth 1 -name '*.exr' -o -maxdepth 1 -name '*.tif' | wc -l | tr -d ' ')
+frames=$(find "$outdir" -maxdepth 1 \( -name '*.png' -o -name '*.exr' -o -name '*.tif' \) | wc -l | tr -d ' ')
 echo "rendered $frames file(s) to $outdir"

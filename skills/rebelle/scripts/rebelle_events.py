@@ -18,6 +18,7 @@ three, so scripts can stay about the drawing.
     d.write("events.json")
 
 Then render it:  scripts/rebelle-batch.sh events.json out/
+(or, with only Rebelle Pro:  scripts/rebelle_ws.py --send events.json --frames-out out/)
 """
 from __future__ import annotations
 
@@ -97,7 +98,14 @@ def ramp(start: float = 0.2, end: float = 1.0) -> Callable[[int, int], float]:
 
 
 def rgb(color) -> dict:
-    r, g, b = color
+    """(r, g, b), {"r":…, "g":…, "b":…} or "#RRGGBB" → Rebelle's colour object."""
+    if isinstance(color, dict):
+        r, g, b = color["r"], color["g"], color["b"]
+    elif isinstance(color, str):
+        h = color.lstrip("#")
+        r, g, b = (int(h[i : i + 2], 16) for i in (0, 2, 4))
+    else:
+        r, g, b = color
     return {"r": int(r), "g": int(g), "b": int(b)}
 
 

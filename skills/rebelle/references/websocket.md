@@ -4,7 +4,7 @@ Rebelle 8 **Pro** ships a WebSocket server for live remote control (interactive
 installations, live performance, and — for us — driving the app the user has open).
 The [manual page](https://www.escapemotions.com/products/rebelle/motionio_doc/) says
 "send any JSON event mentioned in the Rebelle Motion IO reference"; everything below
-was additionally established against the installed 8.3.0 build, because a second,
+was additionally established against the installed 8.3.0 and 8.3.4 builds, because a second,
 undocumented command family lives on the same socket and it is where canvas export and
 preset discovery live.
 
@@ -50,10 +50,10 @@ an ordering guarantee. `scripts/rebelle_ws.py` exposes this as `sync()`.
 
 | Command | Parameters | Result |
 |---|---|---|
-| `list_tools` | – | JSON array of tool names in UI order; the array index is the `id` used by `select_tool` (empty strings are separators) |
+| `list_tools` | – | JSON array of UI tool names in UI order (`Watercolors`, `Pencils`, … — plural, unlike the `tool` enum and the brush folders); the array index is the `id` used by `select_tool` (empty strings are separators) |
 | `list_tool_presets` | – (a `tool` parameter is accepted but ignored) | preset paths of the **currently selected** tool, e.g. `"Watercolor/Round"` — exactly the strings `SET_BRUSH` wants |
-| `select_tool` | `id` (integer index into `list_tools`) | switches tool; the list it returns is refreshed lazily, so don't use it to enumerate another tool's presets — read the folders instead ([assets.md](assets.md)) |
-| `select_tool_preset` | `name` | replies `{"error":"Preset X was not found for the current tool."}` when it does not match |
+| `select_tool` | `id` (integer index into `list_tools`) | replies nothing and, on 8.3.4, does not change the tool the preset commands below act on. To really switch, send the `SET_TOOL` event (`{"event_type":"SET_TOOL","tool":"WATERCOLOR"}`); `list_tool_presets`/`select_tool_preset` follow it immediately |
+| `select_tool_preset` | `name` | selects a preset of the current tool in the UI; silent on success, `{"error":"Preset X was not found for the current tool."}` otherwise. Python: `r.cmd("select_tool_preset", name="Watercolor/Wash Round")` |
 | `export_canvas` | `filename` (absolute) | writes the composited canvas (paper + layers + bump shading) as PNG/JPG |
 | `set_color` | `hex` (e.g. `"#0AC80A"`) | palette colour |
 | `set_brush_paint_param` | `name`, `value` | single brush parameter |
@@ -72,6 +72,13 @@ events instead, which work fine live.
   16-bit output and `reveal_mask` are likewise Motion-IO-only.
 - **`NEW_ARTWORK` works live** — unlike in batch — and replaces whatever the user has
   open, without asking. Confirm before sending it at an artwork you did not create.
+- **The message right after `NEW_ARTWORK` is dropped** while the canvas re-initialises
+  (8.3.4; for a second or two, occasionally longer). If that was the `SET_BRUSH`, the
+  following stroke runs without a preset and a freshly launched Rebelle aborts with
+  `bad_optional_access` — reproducible every time. A single `sync()` does not help, its
+  one bookmark is the thing that gets dropped. Poll instead: send a fresh `BOOKMARK`
+  every second or so until one echoes. `Rebelle.ready()` does this, and `event()` calls
+  it automatically after `NEW_ARTWORK`.
 - Pointer events work both bare and wrapped in `pointer_event`; bare is simpler.
 - Right after the app finishes launching there is a window where events are accepted but
   the artwork is still being initialised, and painting can land on a canvas that is then

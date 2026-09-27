@@ -24,7 +24,7 @@ the tool is named separately in `SET_BRUSH`, never in the path.
 B=~/Library/Application\ Support/Escape\ Motions/Rebelle\ 8/Brushes
 ls "$B"                                   # tool folders
 ls "$B/Watercolor"                        # subfolders: Bristle, Gouache, Sumi-e, ...
-ls "$B/Watercolor/Watercolor" | sed 's/\.rebelle-brush\.png$//'   # preset names
+cd "$B/Watercolor/Watercolor" && ls *.rebelle-brush.png | sed 's/\.rebelle-brush\.png$//'   # preset names
 ```
 
 Tool folders map to the `tool` values like this:
@@ -40,7 +40,8 @@ Tool folders map to the `tool` values like this:
 | `MARKER` | `Marker` | | `BLOW` | *(no presets — Rebelle logs "Tool BLOW doesn't have presets, skipping")* |
 | `AIRBRUSH` | `Airbrush` | | | |
 
-`Favorite`, `1. Shapes` and `2. Grains` are cross-tool folders, not tools. Verified
+`Favorite`, `1. Shapes` and `2. Grains` are cross-tool folders, not tools, and every
+preset folder has a `Thumbs/` cache next to the presets — not a preset. Verified
 working examples: `WATERCOLOR` + `"Watercolor/Round"`, `PENCIL` + `"Charcoal/Charcoal"`,
 `PENCIL` + `"Graphite Pencil/HB"`, `WATERCOLOR` + `"Gouache/Gouache Filbert"`.
 
@@ -50,7 +51,8 @@ that was just written by `EDIT_BRUSH_PRESET`.
 ## Papers
 
 `"<Category>/<Name>"`, e.g. `"Handmade/HM01 Handmade"`, `"Default/RH00 Aquarelle"`
-(the default), `"Hot Pressed/HP01 Hot Pressed"`. Categories: `Canvas`, `Cold Pressed`,
+(the default), `"Hot Pressed/HP02 Hot Pressed"` (there is no HP01 — numbering does not always start
+at 01, so list the folder rather than guessing). Categories: `Canvas`, `Cold Pressed`,
 `Default`, `Exotic`, `Felt`, `Gesso`, `Handmade`, `Hot Pressed`, `Lokta`, `Machinemade`,
 `Rough`, `Stone`, `Washi`, `Wood`.
 
