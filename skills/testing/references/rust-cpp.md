@@ -88,8 +88,13 @@ cargo test --doc                      # doc-tests only
 cargo nextest run                     # faster runner, better output, if installed
 
 cargo llvm-cov --html                 # target/llvm-cov/html/index.html
-cargo llvm-cov --summary-only
+cargo llvm-cov --summary-only         # per-file line/region/branch %
+cargo llvm-cov --fail-under-lines 80  # enforce the floor
 ```
+
+`cargo llvm-cov` is a separate install (`cargo install cargo-llvm-cov`, plus
+`rustup component add llvm-tools-preview`). If it is missing, ask before installing; otherwise
+report coverage as a branch-by-branch estimate and say that it is one.
 
 `cargo test` output is compact already; still filter to `FAILED`/`failures:` on a large suite.
 

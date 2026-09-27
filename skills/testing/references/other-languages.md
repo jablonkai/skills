@@ -36,12 +36,21 @@ describe('formatPrice', () => {
 - React components: Testing Library (`render`, `screen.getByRole`, `userEvent`). Query by role and
   accessible name, never by CSS class or test-id-of-last-resort.
 
+- `node:test` (Node 18+, no dependency): `import { test, describe } from 'node:test'` and
+  `import assert from 'node:assert/strict'`; `assert.throws(() => f(-1), RangeError)`,
+  `await assert.rejects(p, /msg/)`. Timers: `mock.timers.enable({ apis: ['setTimeout', 'Date'] })`.
+
 ```bash
 npx vitest run                         # CI mode, no watch
 npx vitest run src/cart --reporter dot
 npx jest --testPathPattern cart -t 'formats zero'
 npm test -- --coverage                 # v8/istanbul; coverage/index.html
+node --test --experimental-test-coverage                 # node:test, per-file line/branch/funcs table
+node --test --experimental-test-coverage --test-coverage-include='src/**' --test-coverage-lines=80
 ```
+
+Jest/Vitest enforce a floor via `coverageThreshold` / `coverage.thresholds` in config — respect an
+existing one; do not add it unasked.
 
 ## Python
 
@@ -70,12 +79,23 @@ def test_formats(amount, expected):
 - Async: `pytest-asyncio` (`@pytest.mark.asyncio`) or `anyio`. Freeze time with `freezegun` or an
   injected clock.
 - Property-based cases: `hypothesis` (`@given(st.text())`).
+- **`unittest`** when the project has no pytest (or no dependencies at all): `class TestX(unittest.TestCase)`,
+  `self.assertRaises`, `unittest.mock.patch("pkg.module.datetime")` for a hidden clock,
+  `python3 -m unittest discover -s tests -q`. Do not install pytest just to write tests.
 
 ```bash
 python -m pytest -q
 python -m pytest tests/test_cart.py::test_rejects_negative
-python -m pytest -q --cov=cart --cov-report=term-missing     # missing lines, not just a %
+python -m pytest -q --cov=cart --cov-branch --cov-report=term-missing   # pytest-cov
+python -m coverage run --branch -m unittest discover -s tests && python -m coverage report -m --include='cart/*'
+# stdlib fallback, no install: per-module line % via --summary; '>>>>>>' marks unexecuted lines in the .cover files
+python -m trace --count --summary --missing --coverdir=/tmp/cov \
+  --ignore-dir="$(python -c 'import sys; print(sys.base_prefix)')" \
+  --module unittest discover -s tests -t .
 ```
+
+In `trace`, `-m` means `--missing`, not "module" — spell out `--module`. It measures lines only;
+say so when reporting, and read the `>>>>>>` lines to find the untaken branches.
 
 ## Go
 

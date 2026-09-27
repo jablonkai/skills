@@ -115,7 +115,8 @@ The distinction that matters is not "how many classes" but **what is real**.
 ## Reading a coverage report
 
 Coverage finds untested code. It does not measure test quality — a suite with no assertions can
-reach 100%.
+reach 100%. That is why the skill's 80% floor applies to the code under test *and* only counts
+tests that pass the "can this fail?" filter.
 
 - **Branch coverage over line coverage.** A one-line `if` with a missing else is 100% line-covered
   and untested.
@@ -123,7 +124,10 @@ reach 100%.
   defensive code that cannot occur? Say which.
 - Exclude generated code, DTOs, and framework glue from the denominator rather than writing tests
   for them.
-- A coverage *drop* on a PR is a useful signal. An absolute target is a metric to game.
+- A coverage *drop* on a PR is a useful signal. A floor is useful as long as it is met with real
+  cases; the moment tests are written *for* the number, it stops measuring anything.
+- Sanity-check the number with a quick mutation: flip one comparison in a covered line and rerun.
+  If nothing goes red, that line is executed but not tested.
 
 Report gaps as `file:line` with the reason each is untested — that is actionable in a way that a
 percentage is not.
