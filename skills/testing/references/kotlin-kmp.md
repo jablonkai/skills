@@ -165,6 +165,10 @@ HTML report with the actual failure detail: `<module>/build/reports/tests/<task>
 ./gradlew koverVerify          # if verification rules are configured
 ```
 
+If neither Kover nor JaCoCo is applied, measuring needs a build-script change — propose it rather
+than adding it unasked, and report an estimate from the branches meanwhile. Kover verification
+rules (`kover { reports { verify { rule { minBound(80) } } } }`) are how a project enforces the floor.
+
 JaCoCo remains common on Android/JVM-only projects. Report uncovered *branches* with file:line;
 exclude generated code (`*_Impl`, `*$$serializer`, `BuildConfig`, DI modules) in the report config
 rather than writing tests for it.

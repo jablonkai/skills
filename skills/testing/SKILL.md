@@ -1,7 +1,7 @@
 ---
-name: test-generation
-description: "Write tests for existing code: unit tests, integration tests, UI tests, edge cases and error paths, plus coverage analysis to find what is still untested. Detects the project's test framework from its build files and follows that project's conventions — Kotlin/KMP (kotlin.test, coroutines-test, Turbine, MockK, Kover), Compose Multiplatform, Flutter/Dart, Swift (Swift Testing, XCTest, XCUITest), Rust (cargo test, proptest, criterion), C++ (GoogleTest, Catch2), and secondarily Jest/Vitest, pytest, Go and JUnit. Use when someone says 'write tests for this', 'add unit tests', 'test this function', 'add an integration test', 'scaffold a test suite', 'what is not covered', 'improve test coverage', 'write a regression test for this bug', or the Hungarian 'írj teszteket', 'teszteld le ezt a függvényt', 'mi nincs letesztelve'. Not for auditing a whole project for bugs and missing tests in general (that is code-analyzer), nor for diagnosing a crash or a failing test's root cause (that is error-debugging)."
-summary: "write unit, integration and UI tests for existing code — framework detection from the build files, case selection for boundaries and error paths, correct source-set placement, and coverage gap analysis across Kotlin/KMP, Compose, Flutter/Dart, Swift, Rust and C++"
+name: testing
+description: "Write tests for existing code and bring it to at least 80% coverage: unit, integration and UI tests, edge cases and error paths, regression tests for fixed bugs, and measured coverage gap analysis. Detects the test framework from the build files and follows the project's conventions — Kotlin/KMP (kotlin.test, coroutines-test, Turbine, MockK, Kover), Compose Multiplatform, Flutter/Dart, Swift (Swift Testing, XCTest), Rust (cargo test, proptest), C++ (GoogleTest, Catch2), and secondarily Jest/Vitest/node:test, pytest/unittest, Go and JUnit. Use when someone says 'write tests for this', 'add unit tests', 'test this function', 'what is not covered', 'improve test coverage', 'write a regression test for this bug', or the Hungarian 'írj teszteket', 'teszteld le ezt', 'mi nincs letesztelve', 'növeld a lefedettséget'. Not for auditing a whole project (code-analyzer), nor for root-causing a crash or failing test (error-debugging)."
+summary: "write unit, integration and UI tests for existing code to at least 80% coverage — framework detection from the build files, case selection for boundaries and error paths, correct source-set placement, and measured coverage gap analysis across Kotlin/KMP, Compose, Flutter/Dart, Swift, Rust and C++"
 category: testing
 risk: low
 tags:
@@ -19,24 +19,26 @@ allowed-tools: Bash, Read, Grep, Glob, Edit, Write, Skill
 argument-hint: "[file, function, class, or module to test]"
 ---
 
-# test-generation
+# testing
 
 ## Purpose
 
 Turn existing code into tests that would actually catch it breaking. The input is a function,
 class, module, or bug report; the output is test files in the project's own framework, in the
-right source set, that run and pass — plus a short statement of what is still untested.
+right source set, that run and pass, cover at least 80% of the code under test — plus a short,
+measured statement of what is still untested.
 
 The value is in case selection, not in typing. A test that only walks the happy path documents
 the code; it does not defend it. Most real defects live at the boundaries and in the error paths,
-so that is where the cases go.
+so that is where the cases go — and that is also why well-chosen cases reach the coverage floor
+without any padding.
 
 ## When to use
 
 - "Write tests for `<file/function/class>`" — new or existing code
 - A bug was just fixed and needs a regression test that fails without the fix
 - A module has no tests and needs a suite scaffolded
-- Coverage is low and the question is *what* to test next, not *how much*
+- Coverage is low and the question is *what* to test next
 
 Not this skill:
 
@@ -46,9 +48,9 @@ Not this skill:
 
 ## Route to a more specific skill first
 
-Several stacks already have dedicated skills. When one applies, invoke it instead of
-reimplementing its guidance here; use this skill for the surrounding decisions (which cases,
-which source set, coverage) and only where no dedicated skill exists.
+Several stacks already have dedicated skills. When one applies, invoke it for the mechanics of
+writing the test; this skill still owns the surrounding decisions — which cases, which source
+set, and the coverage floor.
 
 | Situation | Skill to invoke |
 |---|---|
@@ -82,7 +84,9 @@ apply and wastes context.
 
 **2. Does a test suite already exist?** Read two or three existing test files before writing
 anything. The project's naming, assertion library, fixture style, and mocking approach are already
-decided; matching them matters more than any convention in this skill.
+decided; matching them matters more than any convention in this skill. Note any coverage
+threshold the project already enforces (Kover/JaCoCo rules, Jest `coverageThreshold`,
+`fail_under` in `.coveragerc`/`pyproject.toml`) — if it is above 80%, it is the floor instead.
 
 ```bash
 # find the existing suite and its conventions
@@ -90,7 +94,9 @@ find . -type d \( -name test -o -name tests -o -name '*Test*' -o -name commonTes
 ```
 
 If there is no suite at all, say so — the first test in a project often needs a framework
-dependency and a runner configuration, which is a larger change than the user may expect.
+dependency and a runner configuration, which is a larger change than the user may expect. Prefer
+a runner that needs no new dependency (`unittest`, `node:test`, `cargo test`, `go test`) when the
+project has not picked one.
 
 ## Workflow
 
@@ -105,10 +111,13 @@ assert on and the things that make it hard to test:
 - **State** — is the result a pure function of the inputs, or does it depend on prior calls?
 - **Concurrency** — suspending functions, async/await, threads, actors, channels
 
-Use symbol-aware tools (Serena) to read the enclosing symbol and its call sites rather than whole
-files. Call sites show how the code is really used, which is where the realistic cases come from.
+Use symbol-aware tools (Serena, LSP) where available to read the enclosing symbol and its call
+sites rather than whole files. Call sites show how the code is really used, which is where the
+realistic cases come from.
 
 If the code is untestable as written (hard-wired singleton, hidden clock, constructor doing I/O),
+first look for a seam the language already gives you — patching the module-level name in Python,
+`monkeypatch`, a default parameter, a protocol the type already conforms to. Only if there is none,
 say so and name the smallest change that would fix it. Do not silently refactor production code to
 make a test possible — propose it, and let the user decide.
 
@@ -135,7 +144,9 @@ Two rules that decide most of the case list:
   test go red, it is not testing anything — drop it.
 
 For a bug-fix regression test, invert the order: write the test that reproduces the bug first,
-confirm it fails against the unfixed code (or explain why that is not possible), then keep it.
+confirm it fails against the unfixed code (for example by stashing the fix, or checking out the
+file from the previous commit, and restoring it afterwards) — or explain why that is not possible —
+then keep it.
 
 Case-selection heuristics, naming, and fixture/mock/fake choice are in
 [test-design.md](references/test-design.md) — load it when the cases are not obvious from the
@@ -154,7 +165,7 @@ exact rules; the shape is always the same:
 
 ### Step 4: Write the tests
 
-Follow the conventions found in Step "Prerequisites 2" and the idioms in the stack reference:
+Follow the conventions found in Prerequisite 2 and the idioms in the stack reference:
 
 - **Arrange, act, assert** — visibly separated, in that order
 - **Descriptive names** — the name states the condition and the expected result, so a failure is
@@ -173,62 +184,95 @@ Write the tests the project's existing suite would recognize as its own.
 ### Step 5: Run them
 
 A generated test that was never executed is a draft. Run the suite — narrowed to the new tests
-first, then the full file — and fix what fails.
+first, then the full suite — and fix what fails.
 
 The stack reference has the exact command. Keep the output small: filter to failures rather than
 pasting the whole run.
 
-Then verify the tests are worth having: change the implementation in a way that should break a
-test (mentally, or actually and revert) and confirm the right test would catch it. Report honestly
-if a test passes against a deliberately broken implementation — that means it is asserting nothing.
+Then verify the tests are worth having: break the implementation in a way that should fail a test
+(flip a comparison, drop a branch — actually, then revert) and confirm the right test goes red.
+Report honestly if a test passes against a deliberately broken implementation — that means it is
+asserting nothing.
 
-### Step 6: Report coverage and the gaps
+### Step 6: Measure coverage and close the gap
 
-Run the project's coverage tool if it is configured (Kover, `flutter test --coverage`, `xccov`,
-`cargo llvm-cov`, `gcov`/`llvm-cov`, or the JS/Python equivalents — see the stack reference). If it
-is not configured, do not add it unasked; report the gaps by reading the branches instead.
+**The floor is 80% line coverage of the code under test — branch coverage too, where the tool
+reports it. When more is cheap, take more.** See the next section for what counts and how to
+measure. Run coverage, read the uncovered lines, and add cases for the ones that are real,
+reachable behavior until the floor is met; keep going while the remaining gaps are ordinary
+branches that one more meaningful case would take — on a small unit that usually lands at 90–100%.
+Stop when the next test would be padding, or would need a disproportionate harness.
 
-Report the gaps, not the percentage:
+Then report:
 
 ```markdown
 ## Tests added
 <file paths, and one line per behavior covered>
 
 ## Verification
-<command run, and the real result>
+<commands run, and the real result — pass/fail counts>
+
+## Coverage
+<tool used; line (and branch) % of the code under test, before → after; the floor that applied>
 
 ## Still untested
-<specific branches or paths, as `file:line` — with why, if there is a reason>
+<each uncovered line or branch as `file:line` — with why: unreachable, needs a device, untestable as written (and the smallest change that would fix it)>
 ```
 
-Coverage is a way of finding untested branches, not a target. Do not add tests whose only purpose
-is to raise the number.
+## Coverage target
+
+The 80% floor exists because on code someone just wrote tests for, anything below it almost always
+means an error path or a boundary was skipped — exactly where defects live. It is a floor, not the
+point: a suite at 100% with weak assertions defends less than one at 85% that kills every mutation.
+
+- **Scope is the code under test** — the files or units the user named, or that the new tests
+  target. A request about one module does not make the whole project's coverage your job; mention
+  the project-wide figure only if the tool prints it anyway.
+- **A stricter project threshold wins.** If the build already enforces more than 80%, meet that.
+- **Measure, do not guess.** Use the project's coverage tool if configured. If it is not, use one
+  that needs no committed configuration — `node --test --experimental-test-coverage`,
+  `flutter test --coverage`, `go test -cover`, `swift test --enable-code-coverage`,
+  `python -m coverage` if installed, else the stdlib `python -m trace --summary --module unittest …`. Do not add
+  a coverage plugin to the build or install tools globally unasked. If nothing can measure (e.g.
+  `cargo llvm-cov` is not installed), say so and give a branch-by-branch estimate, labeled as an
+  estimate — never present a guess as a measured number.
+- **Every test that raises the number must still pass the "can this fail?" filter.** Assertion-free
+  tests, getter tests, and tests that only execute a line without checking its effect do not count
+  toward the floor — they are the way coverage gets gamed.
+- **If the floor is not honestly reachable** — untestable-as-written code, defensive branches that
+  cannot occur, platform-only paths — stop there. Report the achieved number, list each uncovered
+  line with its reason, and propose the smallest production change that would unlock it. Do not
+  pad, and do not change production code to hit the number.
+- Exclude generated code (DTOs, `*.g.dart`, `BuildConfig`, serializers) from the denominator via the
+  tool's exclude option rather than testing it.
 
 ## Operations
 
 | Operation | User intent | Output |
 |---|---|---|
-| `unit` (default) | "write tests for this function/class" | Isolated tests with dependencies substituted, run and green |
+| `unit` (default) | "write tests for this function/class" | Isolated tests with dependencies substituted, run and green, ≥80% coverage of the unit |
 | `integration` | "test this end to end", "test the module together" | Tests across real collaborators — DB, HTTP, filesystem — with setup/teardown |
 | `ui` | "test this screen/widget/view" | UI tests via the stack's UI harness; routes to the dedicated skill where one exists |
-| `regression` | "write a test for the bug I just fixed" | One focused test that fails without the fix |
-| `coverage` | "what is not tested" | Coverage run plus a ranked list of untested branches; tests only if asked |
+| `regression` | "write a test for the bug I just fixed" | One focused test that fails without the fix; then the touched file checked against the floor and topped up if it is below |
+| `coverage` | "what is not tested", "raise coverage" | Coverage run, the result against the floor, and a ranked list of untested branches; tests written when the user asks for them or asks to raise coverage |
 
 ## Critical constraints
 
 - **Never assert on invented behavior.** Read the implementation; if the intended behavior is
-  genuinely ambiguous, ask rather than encoding a guess as an assertion.
+  genuinely ambiguous, ask rather than encoding a guess as an assertion. If the code looks wrong,
+  do not enshrine the bug as expected behavior — report it.
 - **Never write a test you have not run.** Report failures rather than hiding them.
-- **Do not modify production code to make a test pass** — that inverts the point. Propose the
-  change separately if the code is untestable.
+- **Do not modify production code to make a test pass or to reach the coverage floor** — that
+  inverts the point. Propose the change separately if the code is untestable.
 - **Do not rewrite or "improve" the existing test suite** while adding tests to it.
 - **Do not delete or weaken a failing test** you did not write. A red test is information.
 - **No sleeps, no wall-clock dependence, no network in unit tests.** Flaky tests are worse than
   missing ones because they train people to ignore red.
-- **Do not chase a coverage number.** Assertion-free tests and getter tests inflate coverage and
-  defend nothing.
+- **Meet the floor with meaningful tests only.** Padding coverage with assertion-free or getter
+  tests is worse than reporting an honest 70% with the reasons.
 - **Never put real credentials, tokens, or production data in fixtures.** Test data is committed
   and public.
+- **Do not commit.** Leave the new tests in the working tree for the user to review.
 
 ## References
 
@@ -237,4 +281,4 @@ is to raise the number.
 - [flutter-dart.md](references/flutter-dart.md) — routing to the dedicated Dart/Flutter skills, plus goldens and coverage
 - [swift-apple.md](references/swift-apple.md) — Swift Testing, XCTest, XCUITest, async tests, `xccov`
 - [rust-cpp.md](references/rust-cpp.md) — `cargo test`, doc-tests, `proptest`, `criterion`, `llvm-cov`; GoogleTest, Catch2, CTest
-- [other-languages.md](references/other-languages.md) — Jest/Vitest, pytest, Go `testing`, plain JUnit
+- [other-languages.md](references/other-languages.md) — Jest/Vitest/`node:test`, pytest/`unittest`, Go `testing`, plain JUnit

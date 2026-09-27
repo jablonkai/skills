@@ -168,8 +168,14 @@ xcrun xccov view --report --only-targets /tmp/result.xcresult
 xcrun xccov view --report --files-for-target MyApp /tmp/result.xcresult
 ```
 
-SwiftPM: `swift test --enable-code-coverage`, then
-`xcrun llvm-cov report .build/debug/<Module>PackageTests.xctest/Contents/MacOS/<...> -instr-profile .build/debug/codecov/default.profdata`.
+SwiftPM:
+
+```bash
+swift test --enable-code-coverage
+swift test --show-codecov-path          # JSON export; per-file lines.percent under data[0].files
+xcrun llvm-cov report "$(swift build --show-bin-path)/<Package>PackageTests.xctest/Contents/MacOS/<Package>PackageTests" \
+  -instr-profile "$(swift build --show-bin-path)/codecov/default.profdata" -ignore-filename-regex='(Tests|\.build)/'
+```
 
 Exclude generated code and UI boilerplate from judgement rather than testing it; report uncovered
 branches as `File.swift:line`.

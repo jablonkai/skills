@@ -33,8 +33,9 @@ reserve widget tests for what the widget actually renders.
 - **Async** — `await tester.pumpAndSettle()` for animations that end; a bare `pump()` advances one
   frame. `pumpAndSettle` on an infinite animation (a spinner) times out — pump a fixed duration
   instead.
-- **Time** — `fakeAsync` from `package:fake_async`, or `FakeAsync` via
-  `flutter_test`'s `tester.binding.delayed`. Never `Future.delayed` with a real duration.
+- **Time** — inside `testWidgets` the clock is already fake: `await tester.pump(duration)`
+  advances it. Outside widget tests use `fakeAsync` from `package:fake_async`
+  (`async.elapse(duration)`). Never wait on a real `Future.delayed`.
 - **HTTP** — `MockClient` from `package:http/testing.dart`, or a fake implementing your own client
   interface. Never hit the network.
 - **Plugins** — `TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

@@ -156,7 +156,7 @@ preserve.
 5. Afterwards, decide which of these tests are worth keeping as real tests and which were scaffolding.
 
 If a characterization test captures behavior that is clearly a bug, keep the test (it documents
-reality) and report the bug separately. `test-generation` covers the mechanics of writing them in
+reality) and report the bug separately. `testing` covers the mechanics of writing them in
 each stack.
 
 ## Rollback
