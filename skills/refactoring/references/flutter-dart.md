@@ -44,7 +44,7 @@ linter:
 ```
 
 Turning on a strict ruleset mid-project produces hundreds of findings at once. Land the
-`dart fix --apply` sweep as its own commit before starting any structural work.
+`dart fix --apply` sweep as its own change before starting any structural work.
 
 ## Route to a dedicated skill
 

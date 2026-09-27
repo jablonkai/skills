@@ -43,7 +43,7 @@ list, and never blanket-`allow` a lint at crate level to make it quiet — that 
 instance.
 
 `cargo clippy --fix` is the ideal level-1 step: machine-applicable, individually justified by a lint
-name, and worth landing as its own commit.
+name, and worth landing as its own change.
 
 ## Rust: idioms worth refactoring toward
 

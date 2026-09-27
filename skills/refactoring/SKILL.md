@@ -1,6 +1,6 @@
 ---
-name: refactoring-optimization
-description: "Improve the structure of working code without changing what it does: extract duplication, break up complex functions, remove dead code, replace magic numbers, fix misleading names, and modernize to the language's idioms — each step verified against the tests. Detects the stack from its build files and leans on the project's own linter (detekt/ktlint, dart analyze, SwiftLint, cargo clippy, clang-tidy). Use when someone says 'refactor this', 'clean this up', 'this function is too long', 'there's a lot of copy-paste here', 'remove the dead code', 'simplify this', 'make this more idiomatic', 'reduce the complexity', or the Hungarian 'refaktoráld ezt', 'tisztítsd meg ezt a kódot', 'túl bonyolult ez a függvény', 'sok itt a duplikáció'. This is the apply counterpart to code-analyzer's detect: that skill finds what is wrong across a project, this one changes it. Not for fixing a bug or crash (that is error-debugging), nor for writing the tests a refactoring needs (that is test-generation)."
+name: refactoring
+description: "Improve the structure of working code without changing what it does: extract duplication, break up complex functions, remove dead code, replace magic numbers, fix misleading names, and modernize to the language's idioms — each step verified against the tests. Detects the stack from its build files and leans on its own linter (detekt, dart analyze, SwiftLint, clippy, clang-tidy). Use when someone says 'refactor this', 'clean this up', 'this function is too long', 'there's a lot of copy-paste here', 'remove the dead code', 'simplify this', 'make this more idiomatic', 'reduce the complexity', 'this is slow, optimize it', or the Hungarian 'refaktoráld ezt', 'tisztítsd meg ezt a kódot', 'túl bonyolult ez a függvény', 'sok itt a duplikáció', 'töröld a halott kódot'. The apply counterpart to code-analyzer, which only finds problems. Not for fixing a bug or crash (that is error-debugging), nor for writing the tests a refactoring needs (that is test-generation)."
 summary: "behavior-preserving refactoring — duplication extraction, complexity reduction, dead-code removal, naming and idiom cleanups, driven by each stack's own linter and verified step by step against the tests"
 category: code-quality
 risk: low
@@ -19,7 +19,7 @@ allowed-tools: Bash, Read, Grep, Glob, Edit, Write, Skill
 argument-hint: "[file, function, class, or module to refactor]"
 ---
 
-# refactoring-optimization
+# refactoring
 
 ## Purpose
 
@@ -55,8 +55,9 @@ Not this skill:
 ## Route to a more specific skill first
 
 Several stacks have dedicated skills for exactly the restructuring being asked for. When one
-applies, invoke it rather than reimplementing its guidance; use this skill for the surrounding
-discipline — safety net, ordering, verification, rollback.
+applies **and appears in the available-skills list**, invoke it rather than reimplementing its
+guidance; use this skill for the surrounding discipline — safety net, ordering, verification,
+rollback. When it is not installed, carry on with the stack reference, which covers the essentials.
 
 | Situation | Skill to invoke |
 |---|---|
@@ -80,8 +81,10 @@ edit, three things need to be true:
 
 - **The tests pass now.** A green baseline is what makes "the tests went red" mean something. If
   they are already red, stop — fix or quarantine that first, or the signal is worthless.
-- **The working tree is clean and committed.** Rollback is `git checkout` only if there is
-  something to roll back to. Refactoring on top of uncommitted work destroys it.
+- **There is a known-good point to return to.** Rollback needs something to roll back to. If the
+  tree has uncommitted changes, ask whether to commit or stash them first — refactoring on top of
+  unrelated uncommitted work mixes the two and makes a clean revert impossible. Do not commit on
+  the user's behalf unless they ask; the staging area works as a checkpoint instead (Step 3).
 - **The code under change is covered.** Not the whole project — the specific behavior being
   restructured. If it is not, say so and offer to write characterization tests first
   (`test-generation`) rather than proceeding blind.
@@ -109,8 +112,9 @@ suggestions that read as wrong to everyone who works in the codebase.
 turns into a merge conflict that costs more than the cleanup saved. Check before starting:
 
 ```bash
-git log --since='2 weeks ago' --oneline -- <path>   # recent churn
-git branch -a --contains HEAD >/dev/null 2>&1        # and any open branches touching it
+git log --all --since='2 weeks ago' --oneline -- <path>   # recent churn, on any branch
+gh pr list --state open --json number,title,files \
+  --jq '.[] | select(any(.files[]; .path == "<path>")) | "#\(.number) \(.title)"'
 ```
 
 If the file is hot, prefer several small landed refactorings over one large one.
@@ -158,22 +162,28 @@ make the structural problems visible enough that the harder decisions become obv
    an abstraction. Needs a caller inventory before the first edit, and is usually worth splitting
    across several changes.
 
-Present this plan before editing anything past level 1. A refactoring plan the user rejects after
-the fact is wasted work; one they redirect early is cheap.
+The request itself authorizes level 1–2 work inside the scope the user named ("refactor this
+function" covers extracting from that function) — go ahead. Present the plan and wait before
+level 3–4, or before touching code outside that scope. A plan the user rejects after the fact is
+wasted work; one they redirect early is cheap.
 
 ### Step 3: Apply one refactoring at a time
 
 The unit of work is one refactoring, not one file and not one session. Between them the code
 compiles and the tests pass — that invariant is what makes a mistake cost minutes instead of a day.
+After each green step, `git add -A` checkpoints it without committing, so `git restore .` backs out
+exactly the step in progress (the catalog's [rollback](references/refactoring-catalog.md#rollback)
+section has the rest).
 
 - **Preserve behavior exactly**, including the behavior nobody meant: error messages, ordering,
   null/empty handling, overflow, logging that something else parses. If you believe a behavior is a
   bug, that is a separate change — report it, do not quietly correct it under cover of a refactor.
 - **Change structure or behavior, never both in one step.** Mixed diffs are unreviewable, and when
   something breaks there is no way to tell which half did it.
-- **Use reference-aware tools** for renames and moves (Serena's `rename_symbol`, `safe_delete_symbol`,
-  `find_referencing_symbols`; the IDE's refactorings). Text search misses dynamic references and hits
-  unrelated matches in comments and strings.
+- **Use reference-aware tools** for renames and moves when available (Serena's `rename_symbol`,
+  `safe_delete_symbol`, `find_referencing_symbols`; an LSP rename; `gopls rename`). Text search
+  misses dynamic references and hits unrelated matches in comments and strings — when it is all you
+  have, grep for the name as a word *and* as a string, and let the compiler or tests confirm.
 - **Do not reformat what you did not change.** A whitespace-only change to 400 unrelated lines hides
   the twelve that matter.
 - **Leave the code more consistent than you found it.** A "better" pattern used once, differing from
@@ -186,7 +196,7 @@ keep the output filtered to failures.
 
 Beyond green tests, three checks catch what tests miss:
 
-- **The compiler/linter is quiet** — new warnings after a refactor usually mean something was left
+- **The compiler/linter is no noisier than the baseline** — new warnings after a refactor usually mean something was left
   half-moved.
 - **The diff is only what you intended.** Read `git diff` before moving on. Unintended edits are
   common and cheap to catch here, expensive to catch in review.
@@ -208,7 +218,7 @@ debugging was not a refactoring.
 <command run, and the real result — after which step>
 
 ## Behavior preserved
-<how you know: tests, compiler, caller inventory>
+<how you know: tests, compiler, caller inventory — and any tests you added as a safety net>
 
 ## Left alone
 <smells found but not addressed — as `file:line` — with the reason>
@@ -228,7 +238,8 @@ everything above — is safe and reversible. Performance work is not: it trades 
 and is often wrong about where the time goes.
 
 So when the request is about speed, measure first. Profile, find the actual hot path, change that
-one thing, and measure again. An optimization without a before-and-after number is a readability
+one thing, and measure again — with the same input and the tests green on both sides, and both
+numbers in the report. An optimization without a before-and-after number is a readability
 regression with no proven benefit — and the stack references list each language's profiler for
 exactly this reason. Algorithmic complexity in a hot loop is worth fixing on sight; everything else
 waits for data.
