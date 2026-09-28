@@ -25,7 +25,7 @@ readonly END_MARKER='<!-- END GENERATED SKILLS -->'
 # category missing from it is an error rather than a silent "other" bucket — an
 # unlisted skill would otherwise vanish from README while still passing CI.
 readonly CATALOG_SECTIONS=(
-  "App automation|design-automation,3d,motion-design,cad"
+  "App automation|design-automation,3d,motion-design,video,cad"
   "GitHub workflows|git,development-workflow,project-management"
   "Development & analysis|code-quality,debugging,testing,documentation,document-conversion"
   "Ultrarunning domain|data-lookup,branding"
