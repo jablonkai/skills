@@ -28,6 +28,7 @@ readonly CATALOG_SECTIONS=(
   "App automation|design-automation,3d,motion-design,video,cad"
   "GitHub workflows|git,development-workflow,project-management"
   "Development & analysis|code-quality,debugging,testing,documentation,document-conversion"
+  "Game development|game-dev"
   "Ultrarunning domain|data-lookup,branding"
 )
 
