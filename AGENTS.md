@@ -43,6 +43,7 @@ house rules on top of that format; when the two disagree, the spec wins.
 <!-- BEGIN GENERATED SKILLS -->
 - `affinity`: remote-control Affinity (the unified Affinity by Canva app) with JavaScript via its local automation endpoint — document edits, batch operations, and reusable library scripts, with no MCP client configuration
 - `apple-photos`: query, export and organise the Apple Photos library with osxphotos and AppleScript — searches by date, place, people and keywords, yearly statistics, original or edited exports with XMP sidecars, albums from a query, and file import
+- `apple-shortcuts`: list, inspect and run Apple Shortcuts from the CLI — file and text input and output, folder batches, timeout-guarded agent steps, decoding exported .shortcut files, and generating signed shortcuts for one-click import
 - `blender`: remote-control a running Blender by Python via a local bridge — bmesh/modifier modeling, shader and geometry nodes, animation, rigging, physics, Grease Pencil and the VSE, EEVEE/Cycles stills and video, glTF/FBX/USD/OBJ/STL export
 - `cavalry`: remote-control Cavalry (Scene Group's 2D motion-design app) via a scriptable bridge — build scenes procedurally, animate with keyframes and per-letter text effects, then render PNG frames or alpha overlay videos
 - `code-analyzer`: holistic read-only project audit for bugs, security vulnerabilities, code quality issues, performance risks, missing tests, documentation gaps, and prioritized improvement ideas
