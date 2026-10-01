@@ -1,0 +1,86 @@
+#! nuke
+# Foreground over background: FG (premultiplied, optional transform) over a graded BG, written as EXR.
+# Render range and format follow the BG plate; both plates are scaled to fit the Non-commercial cap.
+version 17.1 v2
+Root {
+ inputs 0
+ first_frame @@BG_FIRST@@
+ last_frame @@BG_LAST@@
+ format "@@BG_FIT_W@@ @@BG_FIT_H@@ 0 0 @@BG_FIT_W@@ @@BG_FIT_H@@ 1 comp_format"
+}
+Read {
+ inputs 0
+ file "@@FG@@"
+ first @@FG_FIRST@@
+ last @@FG_LAST@@
+ origfirst @@FG_FIRST@@
+ origlast @@FG_LAST@@
+ origset true
+ before @@FG_BEFORE:black@@
+ after @@FG_AFTER:black@@
+ name FG
+}
+Premult {
+ disable @@FG_PREMULTIPLIED:false@@
+ name FG_Premult
+}
+Reformat {
+ type scale
+ scale {{@@BG_FIT_W@@/@@BG_W@@}}
+ name FG_Fit
+}
+Transform {
+ translate {@@FG_X:0@@ @@FG_Y:0@@}
+ scale @@FG_SCALE:1@@
+ center {{input.width/2} {input.height/2}}
+ name FG_Transform
+}
+Read {
+ inputs 0
+ file "@@BG@@"
+ first @@BG_FIRST@@
+ last @@BG_LAST@@
+ origfirst @@BG_FIRST@@
+ origlast @@BG_LAST@@
+ origset true
+ before hold
+ after hold
+ auto_alpha true
+ name BG
+}
+Reformat {
+ type scale
+ scale {{@@BG_FIT_W@@/@@BG_W@@}}
+ name BG_Fit
+}
+Grade {
+ blackpoint @@GRADE_BLACKPOINT:0@@
+ whitepoint @@GRADE_WHITEPOINT:1@@
+ black @@GRADE_LIFT:0@@
+ white @@GRADE_GAIN:1@@
+ multiply @@GRADE_MULTIPLY:1@@
+ add @@GRADE_OFFSET:0@@
+ gamma @@GRADE_GAMMA:1@@
+ name BG_Grade
+}
+Merge2 {
+ inputs 2
+ operation over
+ bbox B
+ name Comp
+}
+Crop {
+ box {0 0 @@BG_FIT_W@@ @@BG_FIT_H@@}
+ reformat true
+ crop false
+ name CropToFormat
+}
+Write {
+ file "@@OUT@@"
+ file_type exr
+ channels @@OUT_CHANNELS:rgba@@
+ datatype "16 bit half"
+ compression "Zip (1 scanline)"
+ create_directories true
+ name Write_EXR
+}
