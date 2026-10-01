@@ -1,0 +1,119 @@
+#! nuke
+# Slate + burn-ins: one slate frame at PLATE_FIRST-1 (info card and a thumbnail), then every plate frame
+# with a shot/version band on top and a project/frame band at the bottom.
+version 17.1 v2
+Root {
+ inputs 0
+ first_frame @@PLATE_SLATE@@
+ last_frame @@PLATE_LAST@@
+ format "@@PLATE_FIT_W@@ @@PLATE_FIT_H@@ 0 0 @@PLATE_FIT_W@@ @@PLATE_FIT_H@@ 1 slate_format"
+}
+Read {
+ inputs 0
+ file "@@PLATE@@"
+ first @@PLATE_FIRST@@
+ last @@PLATE_LAST@@
+ origfirst @@PLATE_FIRST@@
+ origlast @@PLATE_LAST@@
+ origset true
+ before hold
+ after hold
+ name Plate
+}
+Reformat {
+ type scale
+ scale {{@@PLATE_FIT_W@@/@@PLATE_W@@}}
+ name PlateFit
+}
+set N_plate [stack 0]
+FrameHold {
+ first_frame @@PLATE_MID@@
+ name ThumbHold
+}
+Transform {
+ scale 0.4
+ center {{input.width/2} {input.height/2}}
+ translate {{input.width*0.22} {input.height*0.05}}
+ name Thumb
+}
+Constant {
+ inputs 0
+ color {@@SLATE_BG:0.04 0.04 0.045 1@@}
+ format "@@PLATE_FIT_W@@ @@PLATE_FIT_H@@ 0 0 @@PLATE_FIT_W@@ @@PLATE_FIT_H@@ 1 slate_format"
+ name SlateBG
+}
+Merge2 {
+ inputs 2
+ operation over
+ name SlateThumb
+}
+Text {
+ message "@@PROJECT:@@\n\nSHOT      @@SHOT@@\nVERSION   @@VERSION:v001@@\nFRAMES    @@PLATE_FIRST@@-@@PLATE_LAST@@ (\[expr @@PLATE_LAST@@-@@PLATE_FIRST@@+1])\nARTIST    @@ARTIST:@@\nDATE      \[date %Y-%m-%d]\n\n@@NOTE:@@"
+ font "@@FONT:/System/Library/Fonts/Supplemental/Arial.ttf@@"
+ size {{input.height*0.04}}
+ leading 0.2
+ xjustify left
+ yjustify center
+ box {{input.width*0.05} {input.height*0.1} {input.width*0.5} {input.height*0.9}}
+ name SlateText
+}
+push $N_plate
+Rectangle {
+ area {0 {input.height*0.93} {input.width} {input.height}}
+ color {0 0 0 1}
+ opacity @@BAND_OPACITY:0.6@@
+ name TopBand
+}
+Rectangle {
+ area {0 0 {input.width} {input.height*0.07}}
+ color {0 0 0 1}
+ opacity @@BAND_OPACITY:0.6@@
+ name BottomBand
+}
+Text {
+ message "@@SHOT@@   @@VERSION:v001@@"
+ font "@@FONT:/System/Library/Fonts/Supplemental/Arial.ttf@@"
+ size {{input.height*0.035}}
+ xjustify left
+ yjustify center
+ box {{input.width*0.02} {input.height*0.93} {input.width*0.6} {input.height}}
+ name BurnTopLeft
+}
+Text {
+ message "\[date %Y-%m-%d]"
+ font "@@FONT:/System/Library/Fonts/Supplemental/Arial.ttf@@"
+ size {{input.height*0.035}}
+ xjustify right
+ yjustify center
+ box {{input.width*0.4} {input.height*0.93} {input.width*0.98} {input.height}}
+ name BurnTopRight
+}
+Text {
+ message "@@PROJECT:@@"
+ font "@@FONT:/System/Library/Fonts/Supplemental/Arial.ttf@@"
+ size {{input.height*0.035}}
+ xjustify left
+ yjustify center
+ box {{input.width*0.02} 0 {input.width*0.6} {input.height*0.07}}
+ name BurnBottomLeft
+}
+Text {
+ message "\[format %04d \[frame]]"
+ font "@@FONT:/System/Library/Fonts/Supplemental/Arial.ttf@@"
+ size {{input.height*0.035}}
+ xjustify right
+ yjustify center
+ box {{input.width*0.4} 0 {input.width*0.98} {input.height*0.07}}
+ name BurnFrame
+}
+Switch {
+ inputs 2
+ which {{frame<@@PLATE_FIRST@@}}
+ name SlateSwitch
+}
+Write {
+ file "@@OUT@@"
+ file_type @@OUT_TYPE:png@@
+ create_directories true
+ name Write_Slate
+}
