@@ -31,6 +31,7 @@ portable beyond a single tool.
 - `krita`: remote-control a running Krita by Python through a local bridge — layer stacks, brush-engine strokes and QPainter pixels, SVG vector text, filters, masks, animation frames, and PNG/JPEG/.kra export or batch conversion in the running session
 - `obs`: remote-control a running OBS Studio by Python over obs-websocket v5 — scenes, sources and filters, scene-item transforms, recording, streaming, replay buffer and virtual camera, screenshot verification, and scene collections built from a JSON spec
 - `rebelle`: remote-control Rebelle and Rebelle Motion IO with JSON events — live WebSocket painting in Rebelle Pro, batch-rendered painted animation frames, and visual verification through canvas exports
+- `sonic-pi`: live-code music in Sonic Pi 5 via a headless OSC session — run and live re-evaluate live_loops, record exact-length WAV takes, stop jobs, surface runtime and syntax errors with line numbers
 
 ### GitHub workflows
 - `github-commit-pr`: end-to-end workflow for committing changes, pushing a branch, and opening or updating a GitHub pull request
