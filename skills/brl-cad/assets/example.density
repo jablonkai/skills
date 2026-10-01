@@ -1,0 +1,17 @@
+# BRL-CAD density table: <material_id> <density g/cm3> <name>
+# A region's `material_id` attribute selects its row. Use with:
+#   python3 brl.py mass model.g region.r --density example.density
+1  7.85   Steel, mild
+2  7.82   Steel, carbon tool
+3  2.70   Aluminium 6061-T6
+4  2.81   Aluminium 7075-T6
+5  8.96   Copper
+6  8.50   Brass
+7  8.00   Stainless 304
+8  4.43   Titanium Ti-6Al-4V
+9  1.24   PLA
+10 1.04   ABS
+11 1.27   PETG
+12 1.14   Nylon PA12
+13 0.70   Wood, oak
+14 2.50   Glass
