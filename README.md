@@ -34,6 +34,7 @@ portable beyond a single tool.
 - `nuke`: build and render Nuke comps headless with Nuke Non-commercial — .nk scripts authored as text, plate-swap templates, slates and burn-ins, Roto via Python hooks, EXR/DPX/PNG or ProRes renders with frame-count checks
 - `obs`: remote-control a running OBS Studio by Python over obs-websocket v5 — scenes, sources and filters, scene-item transforms, recording, streaming, replay buffer and virtual camera, screenshot verification, and scene collections built from a JSON spec
 - `rebelle`: remote-control Rebelle and Rebelle Motion IO with JSON events — live WebSocket painting in Rebelle Pro, batch-rendered painted animation frames, and visual verification through canvas exports
+- `scribus`: lay out print documents headless with Scribus — multi-page layouts with master pages, styles, threaded text and images, CSV-driven badges and catalogues, PDF/X-4 export with bleed and marks
 - `sonic-pi`: live-code music in Sonic Pi 5 via a headless OSC session — run and live re-evaluate live_loops, record exact-length WAV takes, stop jobs, surface runtime and syntax errors with line numbers
 
 ### GitHub workflows
