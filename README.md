@@ -42,6 +42,7 @@ portable beyond a single tool.
 - `sonic-pi`: live-code music in Sonic Pi 5 via a headless OSC session — run and live re-evaluate live_loops, record exact-length WAV takes, stop jobs, surface runtime and syntax errors with line numbers
 
 ### GitHub workflows
+- `github-audit-to-issues`: audit a project and file the findings as GitHub issues in one run — scoped severities, duplicate checks, one review table, security findings kept out of public issues
 - `github-commit-pr`: end-to-end workflow for committing changes, pushing a branch, and opening or updating a GitHub pull request
 - `github-do-all-issues`: work through every open GitHub issue unattended — confirm the queue once, then implement, verify and open one PR per issue, skipping blocked ones with a reason
 - `github-do-issue`: fetch GitHub issues — the named ones, or every open one when none is named — and implement them one at a time, each reviewed, committed and shipped as its own PR
