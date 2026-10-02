@@ -59,6 +59,7 @@ house rules on top of that format; when the two disagree, the spec wins.
 - `freecad`: remote-control a running FreeCAD (parametric CAD) by Python via a local bridge — primitives and booleans, constrained Sketcher profiles, PartDesign features, metrics and viewport screenshots, STEP/IGES/STL/OBJ export
 - `gimp`: remote-control a running GIMP by Python through its built-in Script-Fu server — layer stacks, selections and masks, brush and gradient drawing, text layers, non-destructive GEGL filters, and PNG/JPEG/.xcf export or batch conversion in the live session
 - `github-commit-pr`: end-to-end workflow for committing changes, pushing a branch, and opening or updating a GitHub pull request
+- `github-do-all-issues`: work through every open GitHub issue unattended — confirm the queue once, then implement, verify and open one PR per issue, skipping blocked ones with a reason
 - `github-do-issue`: fetch GitHub issues — the named ones, or every open one when none is named — and implement them one at a time, each reviewed, committed and shipped as its own PR
 - `github-fix-ci-error`: diagnose the latest failing GitHub Actions run on the current branch, apply a targeted fix locally, and — after user approval — commit and push; refuses to run on main/master/develop or the default branch
 - `github-issues`: standardized issue creation (including batch filing from audit reports), labeling, triage, commenting, and issue management through the GitHub CLI
