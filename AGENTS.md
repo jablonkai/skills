@@ -82,7 +82,7 @@ house rules on top of that format; when the two disagree, the spec wins.
 - `refactoring`: behavior-preserving refactoring — duplication extraction, complexity reduction, dead-code removal, naming and idiom cleanups, driven by each stack's own linter and verified step by step against the tests
 - `scribus`: lay out print documents headless with Scribus — multi-page layouts with master pages, styles, threaded text and images, CSV-driven badges and catalogues, PDF/X-4 export with bleed and marks
 - `sonic-pi`: live-code music in Sonic Pi 5 via a headless OSC session — run and live re-evaluate live_loops, record exact-length WAV takes, stop jobs, surface runtime and syntax errors with line numbers
-- `testing`: write unit, integration and UI tests for existing code to at least 80% coverage — framework detection from the build files, case selection for boundaries and error paths, correct source-set placement, and measured coverage gap analysis across Kotlin/KMP, Compose, Flutter/Dart, Swift, Rust and C++
+- `test-generator`: write unit, integration and UI tests for existing code to at least 80% coverage — framework detection from the build files, case selection for boundaries and error paths, correct source-set placement, and measured coverage gap analysis across Kotlin/KMP, Compose, Flutter/Dart, Swift, Rust and C++
 <!-- END GENERATED SKILLS -->
 
 ## Conventions

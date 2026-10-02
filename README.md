@@ -58,7 +58,7 @@ portable beyond a single tool.
 - `numbers`: automate Apple Numbers via AppleScript/JXA — build spreadsheets from CSV with formulas and formats, read recalculated values back, and XLSX/CSV/PDF export or batch conversion
 - `pages`: automate Apple Pages via AppleScript/JXA — fill templates and {{placeholders}} without losing formatting, swap images, CSV mail merge, and PDF/DOCX/EPUB export or batch conversion of .pages files
 - `refactoring`: behavior-preserving refactoring — duplication extraction, complexity reduction, dead-code removal, naming and idiom cleanups, driven by each stack's own linter and verified step by step against the tests
-- `testing`: write unit, integration and UI tests for existing code to at least 80% coverage — framework detection from the build files, case selection for boundaries and error paths, correct source-set placement, and measured coverage gap analysis across Kotlin/KMP, Compose, Flutter/Dart, Swift, Rust and C++
+- `test-generator`: write unit, integration and UI tests for existing code to at least 80% coverage — framework detection from the build files, case selection for boundaries and error paths, correct source-set placement, and measured coverage gap analysis across Kotlin/KMP, Compose, Flutter/Dart, Swift, Rust and C++
 
 ### Game development
 - `godot`: build, run, test and export Godot 4 projects headless from the CLI — author scenes, GDScript and project settings as text, catch script errors from the log, test gameplay and UI signals with headless test scripts, capture Movie Maker frames, export Web and macOS builds

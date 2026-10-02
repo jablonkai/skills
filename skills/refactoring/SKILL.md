@@ -1,6 +1,6 @@
 ---
 name: refactoring
-description: "Improve the structure of working code without changing what it does: extract duplication, break up complex functions, remove dead code, replace magic numbers, fix misleading names, and modernize to the language's idioms — each step verified against the tests. Detects the stack from its build files and leans on its own linter (detekt, dart analyze, SwiftLint, clippy, clang-tidy). Use when someone says 'refactor this', 'clean this up', 'this function is too long', 'there's a lot of copy-paste here', 'remove the dead code', 'simplify this', 'make this more idiomatic', 'reduce the complexity', 'this is slow, optimize it', or the Hungarian 'refaktoráld ezt', 'tisztítsd meg ezt a kódot', 'túl bonyolult ez a függvény', 'sok itt a duplikáció', 'töröld a halott kódot'. The apply counterpart to code-analyzer, which only finds problems. Not for fixing a bug or crash (that is error-debugging), nor for writing the tests a refactoring needs (that is testing)."
+description: "Improve the structure of working code without changing what it does: extract duplication, break up complex functions, remove dead code, replace magic numbers, fix misleading names, and modernize to the language's idioms — each step verified against the tests. Detects the stack from its build files and leans on its own linter (detekt, dart analyze, SwiftLint, clippy, clang-tidy). Use when someone says 'refactor this', 'clean this up', 'this function is too long', 'there's a lot of copy-paste here', 'remove the dead code', 'simplify this', 'make this more idiomatic', 'reduce the complexity', 'this is slow, optimize it', or the Hungarian 'refaktoráld ezt', 'tisztítsd meg ezt a kódot', 'túl bonyolult ez a függvény', 'sok itt a duplikáció', 'töröld a halott kódot'. The apply counterpart to code-analyzer, which only finds problems. Not for fixing a bug or crash (that is error-debugging), nor for writing the tests a refactoring needs (that is test-generator)."
 summary: "behavior-preserving refactoring — duplication extraction, complexity reduction, dead-code removal, naming and idiom cleanups, driven by each stack's own linter and verified step by step against the tests"
 category: code-quality
 risk: low
@@ -48,7 +48,7 @@ Not this skill:
 
 - **Finding out what is wrong across a whole project** → `code-analyzer`, then come back here
 - **Fixing a bug, crash, or failing test** → `error-debugging` (that changes behavior, by design)
-- **Writing the tests this refactoring needs as a safety net** → `testing`, first
+- **Writing the tests this refactoring needs as a safety net** → `test-generator`, first
 - **Tidying code you just wrote in this session** → the built-in `simplify` skill is lighter weight
 - **Making code faster** → measure first; see [performance](#a-note-on-optimization) below
 
@@ -87,7 +87,7 @@ edit, three things need to be true:
   the user's behalf unless they ask; the staging area works as a checkpoint instead (Step 3).
 - **The code under change is covered.** Not the whole project — the specific behavior being
   restructured. If it is not, say so and offer to write characterization tests first
-  (`testing`) rather than proceeding blind.
+  (`test-generator`) rather than proceeding blind.
 
 When no tests exist and the user wants to proceed anyway, that is their call — but make the risk
 explicit, keep the steps smaller than usual, and lean harder on the compiler and the linter.
