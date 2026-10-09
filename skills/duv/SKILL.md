@@ -1,7 +1,7 @@
 ---
 name: duv
-description: "Search and retrieve data from the DUV Ultramarathon Statistics website (statistik.d-u-v.org) through its JSON API and HTML pages. Use whenever the user asks about ultramarathon results, runner profiles, race events, rankings, or records — national records, continental bests, age-group (masters) records, best performances per country, distance (50 km, 100 km, 100 mi, 6 h, 12 h, 24 h, 48 h, 6 days) and gender, personal bests, finishing times, race calendars — e.g. 'Hungarian 100 km record', 'download all national records for Poland', 'best women's 24 h in Europe', 'find runner X on DUV', 'Spartathlon 2024 results', 'top 100 km times in 2024'. Also use for Hungarian phrasings like 'országos csúcs', 'magyar rekord', 'nemzeti rekordok letöltése', 'ultrafutó eredmények'. The DUV database covers 10M+ performances, 2.4M+ runners, and 115k+ ultra events worldwide."
-summary: "search and retrieve data from the DUV Ultramarathon Statistics website (statistik.d-u-v.org) via its JSON API — runner profiles, event results, rankings, calendars, and national/continental records by distance, gender and age group"
+description: "Search, retrieve and analyse data from the DUV Ultramarathon Statistics database (statistik.d-u-v.org, 10M+ results, 2.4M+ runners, 115k+ events). Use whenever the user asks about ultramarathon results, runners, races or rankings: national, continental and age-group records and their progression, personal bests, race results and course records, race history and winners, race calendars, IAU championship medallists, head-to-head comparisons, lifetime or yearly ultra mileage, oldest finishers, women who won outright, doping cases. Examples: 'Hungarian 100 km record', 'Spartathlon 2024 results', 'top 24 h women in 2024', 'course record at Ultrabalaton', 'who ran the most km in 2025', 'compare runner A and B'. Also Hungarian: 'országos csúcs', 'magyar rekord', 'pályacsúcs', 'ultrafutó eredmények', 'ki futott a legtöbbet', 'VB-érmesek'. Not for training data from Garmin/Strava or ITRA trail scores."
+summary: "search and analyse the DUV Ultramarathon Statistics database (statistik.d-u-v.org) — runner profiles, event results and course records, rankings, calendars, national/continental records and their progression, IAU championships, head-to-head and mileage statistics"
 category: data-lookup
 risk: low
 tags:
@@ -14,7 +14,7 @@ tags:
 allowed-tools: Bash, Read, WebFetch
 argument-hint: "[runner name, event name, ranking or record query]"
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # DUV Ultramarathon Statistics
@@ -45,11 +45,25 @@ python3 scripts/duv.py calendar --year 2024 --country HUN --dist 100km
 python3 scripts/duv.py get "json/msearchrunner.php?sname=Jablonkai"   # any JSON URL, raw
 ```
 
+Derived views and HTML-only pages, also one command each:
+
+```bash
+python3 scripts/duv.py event-history --id 100580 --format md   # editions, winners, course records
+python3 scripts/duv.py multiple-finishers --id 100580           # most finishes of a race series
+python3 scripts/duv.py event-list --year 2024 --country HUN --from 80 --to 120 --sort finishers
+python3 scripts/duv.py progression --nat HUN --dist 24h --gender W   # record progression
+python3 scripts/duv.py head-to-head --runner 3510 --runner "Sipos, Istvan"
+python3 scripts/duv.py champions --dist 24hWC --cnt 3           # IAU WC/EC medallists, every edition
+python3 scripts/duv.py stats lifetime-mileage --country HUN     # also: year-km, oldest-finishers,
+#   timespan, female-winners, top-abroad, long-running-races, 100x100mi, doping
+```
+
 `python3 scripts/duv.py <subcommand> -h` lists every flag. The script handles the two things
 that trip up hand-written calls — the UTF-8 BOM some responses carry, and the fact that DUV
 answers an **unrecognised parameter value with an empty 200 body** rather than an error. If
 Python's `urllib` can't verify the site certificate (a bare python.org install on macOS) it
-silently retries through `curl`.
+silently retries through `curl`. The server drops or refuses connections in bursts; the
+script retries those with a growing pause, so don't wrap it in your own retry loop.
 An HTTP 401 means DUV has put that endpoint behind a login — switch to its HTML twin rather
 than retrying. A 404 from `meventdetail.php` is *not* an error: the body is the full payload, and
 the script uses it.
@@ -88,12 +102,21 @@ stand-alone race record), scheme differences, and how to phrase the answer.
 | Races in a year, past or future | `mcalendar.php?year=2024|futur&country=HUN&dist=…` — finished ones have `Results: "C"` |
 | Past events with finisher counts, km bounds (`from`/`to`), sort by finishers | `geteventlist.php` (HTML) |
 | Club results | `getresultclub.php` (HTML) |
-| Course record / all-time list of one event | `getresulteventalltime.php?event=<id>` (HTML) |
+| Course record, winners per edition, race history | `event-history` (from `meventdetail.php`) — `getresulteventalltime.php` now answers 404 |
+| Statistics, championships, cups, German lists | HTML pages in [references/statistics.md](references/statistics.md) |
 
 Details: [references/json-api.md](references/json-api.md) for every JSON field,
 [references/endpoints.md](references/endpoints.md) for the HTML pages and their form quirks,
 [references/parameters.md](references/parameters.md) for the shared value vocabularies. Read the
 section for the endpoint you're about to call rather than all of it.
+
+## Questions that need more than one call
+
+Course records, record progression, head-to-head, a runner's career curve, "who ran the most",
+medal tables, the biggest races of a country: [references/analysis.md](references/analysis.md)
+maps each to a recipe, with the limits to state in the answer (ranking-eligible results only,
+splits, netto vs brutto, derived vs listed figures). Read it for any question that is not a
+single lookup.
 
 ## Traps worth knowing before the first request
 
@@ -109,6 +132,8 @@ section for the endpoint you're about to call rather than all of it.
 - **Same concept, different token per page:** `label=Y` on `geteventlist.php` vs `label=IAU` on
   the rankings; `country=` on the calendar vs `nat=` on rankings and records; `sort=1|2`
   numeric on the HTML lists.
+- **Calendar quirks.** `calendar --year all` means *from today on*; loop the years for
+  history. The JSON calendar ignores `cups`, so filter championships with `--cupname "NC 24h"`.
 - **Never guess IDs.** Runner, event and club IDs are opaque — resolve them by search first.
   When a name search returns several people, `ActivRange` (years active) and `YOB` separate
   namesakes faster than opening each profile.
@@ -116,7 +141,9 @@ section for the endpoint you're about to call rather than all of it.
 
 ## Answering well
 
-Name the scope you used (country vs nationality, year vs all-time, surface, age scheme, splits
+Give DUV IDs or links so the user can check, and say when a figure is derived (course record
+from edition winners, progression replayed from the ranking) rather than listed by DUV. Name
+the scope you used (country vs nationality, year vs all-time, surface, age scheme, splits
 included or not). Keep DUV's `dd.mm.yyyy` vs ISO date difference in mind when sorting across
 endpoints. When a question is ambiguous — "best women's 24 h in Europe" — pick the more likely
 reading, say which one, and offer the other.

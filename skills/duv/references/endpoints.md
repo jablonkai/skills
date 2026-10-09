@@ -3,7 +3,7 @@
 Per-endpoint parameters and response shapes for the **HTML** pages. Most of these have a JSON
 twin under `json/m*.php` that is easier to consume — see [json-api.md](json-api.md) and prefer it.
 Come here for the pages without one (`geteventlist.php`, `getresultclub.php`, `recordsGER.php`,
-`bulk_search.php`, `getresulteventalltime.php`, `multiplefinish.php`), for `getresultevent.php`
+`bulk_search.php`, `multiplefinish.php`), for `getresultevent.php`
 (its JSON twin now needs a login), or when a user pastes an
 HTML URL and you need to understand its parameters. Value vocabularies shared across endpoints
 (country/nation, distance, surface, year, gender, age category, IAU label) live in
@@ -96,8 +96,9 @@ curl -s "https://statistik.d-u-v.org/getresultevent.php?event=100580&language=EN
 - Some events bundle several races (e.g. 50k + 100k on the same day) under separate event IDs —
   resolve each via `searchevent.php` or `geteventlist.php` rather than guessing.
 - Two sibling pages hang off the same id: `getresulteventalltime.php?event=<id>` — the all-time
-  list of every edition's results (the practical "course record" source), and
-  `multiplefinish.php?event=<id>` — runners ranked by number of finishes. Both are HTML only.
+  list of every edition's results — and `multiplefinish.php?event=<id>` — runners ranked by number
+  of finishes (`duv.py multiple-finishers`). The all-time link is still printed but the server
+  answers **404** (2026-10); derive course records with `duv.py event-history` instead.
 
 ## `eventdetail.php` — event metadata/details
 
@@ -140,6 +141,9 @@ Confirmed form field names (authoritative):
 - `sort` — `1` (Date — default) or `2` (Finishers). The form uses numeric values; passing the
   dropdown labels (`Date`, `Finishers`) silently falls back to default sort.
 - `club` — optional filter by club (string, partial match).
+
+`duv.py event-list` wraps this page (`--from/--to` km bounds, `--surface`, `--iau`,
+`--sort finishers`).
 
 Response: HTML table, one row per event, with `getresultevent.php?event=<id>` links. The list row has
 date, event name, distance, finisher count, and IAU label; it does **not** include a separate
@@ -294,12 +298,15 @@ and has no JSON twin.
 ## Overview pages
 
 `overview_intbestlist.php`, `overview_dtbestlist.php`, `overview_records.php`,
-`overview_champions.php`, `overview_cups.php` are navigation hubs — static landing pages that link
-into the filterable endpoints above. Follow the links rather than trying to parameterize them.
+`overview_champions.php`, `overview_cups.php` and `summary.php` are navigation hubs — the
+championship, cup, German-list and statistics pages they lead to are documented in
+[statistics.md](statistics.md). The hubs themselves take no filters (except `summary.php?country=`);
+follow their links rather than trying to parameterize them.
 `overview_records.php` is also where the IAU world-record PDFs and the frozen national/German
 record PDFs are linked.
 
 ## RSS feeds
 
-`latestresults_rss.php` and `xml/nextraces_rss.php` are the only structured-data endpoints on the
-whole site. Useful for "what's new" checks.
+`xml/latestresults_rss.php` and `xml/nextraces_rss.php` (plus `…GBR_rss.php` variants for the UK)
+are RSS feeds of newly added results and upcoming races — useful for "what's new" checks, as is
+`whatsnew.php`.

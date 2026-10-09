@@ -7,7 +7,8 @@ instead of capped. **Exception (2026):** `mgetresultevent.php` now answers `401 
 can't. Use the HTML `getresultevent.php` for finisher lists (`duv.py event` does). If another
 endpoint starts returning 401, treat it the same way: fall back to its HTML twin. Prefer them for everything they cover; fall back to the HTML endpoints in
 [endpoints.md](endpoints.md) only for the few pages with no JSON twin (`geteventlist.php`,
-`getresultclub.php`, `recordsGER.php`, `bulk_search.php`, `getresulteventalltime.php`) and for
+`getresultclub.php`, `recordsGER.php`, `bulk_search.php`, the statistics pages in
+[statistics.md](statistics.md)) and for
 finisher lists (`getresultevent.php`, see below).
 
 `scripts/duv.py` wraps all of these — read [../SKILL.md](../SKILL.md) for the subcommand list.
@@ -127,9 +128,14 @@ json/meventdetail.php?event=100580&language=EN
   TimeLimit, FieldLimit, Fee, IAULabel (N/B/S/G), RecordProof (Y/N), FinisherM, FinisherW,
   Results (C = complete, P = partial, N = none), Future`. `City`+`Country` is the host town — do not
   guess it from the event name.
-- `editions[]` — every edition of the same series with its own `EventID`, date, finishers and
-  `Results` flag: the cheap way to walk a race's history.
-- `winnerList[]` — `Winner_M`, `Winner_W` per edition.
+- `editions[]` — every edition of the same series with its own `EventID`, `Year`, `SDate`,
+  `Length`/`Duration`, `FinisherM`/`FinisherW` and `Results` flag: the cheap way to walk a race's
+  history. Editions with 0 finishers and `Results: "R"` are years the race did not take place
+  (seen on 2020–21).
+- `winnerList[]` — per edition with results: `Winner_M`, `Winner_W` as
+  `"<overall rank>#<Given Surname> <performance>"` (`"11#Jeanne Le Ray 05:38:07"`). The best
+  winner per course length is the course record — `duv.py event-history` computes it.
+- `valuation`, `LinkURLs` — runner ratings of the race and extra links, when present.
 - `gpsTracks[]`, `raceReports[]` — linked GPX/KML and reports when present.
 
 ## `mgetintbestlist.php` — rankings, paginated
@@ -170,5 +176,11 @@ json/mcalendar.php?year=2024&country=HUN&dist=100km&language=EN
 - `Races[]` — `EventID, ParentID, EventName, Edition, City, Country, EventType (numeric, see
   `FltEventTypes` for labels: 1 road, 2 trail, 3 road loop <5 km, 4 stage, 5 track, 6 indoor …),
   Length, Duration, RecordProof, IAULabel, Results (C/P/N), Startdate, Enddate, Cupname`.
+- `Cupname` — the cup or championship the race counts for: `"NC 24h Hungary"` (national
+  championship), `"IAU 24h WC"`, `"DUV-Cup"` …; empty for most races. **The JSON endpoint ignores
+  `cups=` and returns the same rows with or without it** (checked 2026-10), so filter on
+  `Cupname` client-side — `duv.py calendar --cupname "NC 24h"` does.
+- `year=all` here means **from today on** (same as `futur`), not every year — loop the 4-digit
+  years for history. The list is capped at 4000 races; narrow by `country`/`dist` beyond that.
 - `HitCnt` vs `len(Races)` — when they differ, the list was truncated; narrow the filters.
 - No date-range parameters: fetch the year and filter `Startdate` locally for "next 30 days".
