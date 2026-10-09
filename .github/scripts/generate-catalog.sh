@@ -24,8 +24,14 @@ readonly END_MARKER='<!-- END GENERATED SKILLS -->'
 # per-skill `category:` values. This is the only place the grouping lives, and a
 # category missing from it is an error rather than a silent "other" bucket — an
 # unlisted skill would otherwise vanish from README while still passing CI.
+# A "Theme/Subtheme" title renders as a ### theme heading with #### subsections;
+# consecutive entries sharing a theme are grouped under one ### heading.
 readonly CATALOG_SECTIONS=(
-  "App automation|design-automation,3d,motion-design,video,audio,cad,electronics,mac-automation"
+  "App automation/Graphics & design|design-automation"
+  "App automation/Documents & publishing|office,publishing"
+  "App automation/Video, motion & audio|video,motion-design,audio"
+  "App automation/3D, CAD & electronics|3d,cad,electronics"
+  "App automation/macOS|mac-automation"
   "GitHub workflows|git,development-workflow,project-management"
   "Development & analysis|code-quality,debugging,testing,documentation,document-conversion"
   "Game development|game-dev"
@@ -92,6 +98,8 @@ render_grouped_catalog() {
   local category
   local matched
   local first_section=1
+  local parent
+  local last_parent=""
 
   for entry in "${CATALOG_SECTIONS[@]}"; do
     title=${entry%%|*}
@@ -103,7 +111,17 @@ render_grouped_catalog() {
 
       if (( matched == 0 )); then
         (( first_section == 0 )) && printf '\n'
-        printf '### %s\n' "$title"
+        if [[ "$title" == */* ]]; then
+          parent=${title%%/*}
+          if [[ "$parent" != "$last_parent" ]]; then
+            printf '### %s\n\n' "$parent"
+            last_parent=$parent
+          fi
+          printf '#### %s\n' "${title#*/}"
+        else
+          printf '### %s\n' "$title"
+          last_parent=""
+        fi
         matched=1
         first_section=0
       fi

@@ -2,7 +2,7 @@
 name: pages
 description: 'Automate Apple Pages on macOS through its AppleScript/JXA dictionary (osascript) — create documents from Pages templates, replace {{placeholder}} tokens in body text, text boxes and tables without losing their formatting, swap or insert images, mail-merge a .pages template against CSV/JSON rows into one PDF/DOCX per row, and export or batch-convert .pages files to PDF, Word (DOCX), EPUB with title/author/language metadata, RTF or plain text — then verify the exports (PDF text and page count, EPUB metadata). Use whenever the user mentions Pages or a .pages file: "fill my Pages template", "export this .pages to PDF", "convert these Pages documents to Word", "make an EPUB from my Pages book", "mail merge this CSV into a Pages letter", or Hungarian "exportáld a .pages fájlt PDF-be", "töltsd ki a Pages sablont". Not for .docx files edited without Pages (use docx), generic PDF work (use pdf), converting files to Markdown (use markitdown), or Keynote and Numbers documents.'
 summary: "automate Apple Pages via AppleScript/JXA — fill templates and {{placeholders}} without losing formatting, swap images, CSV mail merge, and PDF/DOCX/EPUB export or batch conversion of .pages files"
-category: document-conversion
+category: office
 risk: low
 tags:
     - pages
