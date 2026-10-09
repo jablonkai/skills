@@ -12,6 +12,8 @@ tags:
   - workflow
 allowed-tools: Bash, Read, Grep, Glob, Agent, Write
 argument-hint: "[focus: security|quality|performance|tests|docs|ideas|all] [--severity critical,high,...] [--report <file>] [--repo owner/repo] [--dry-run]"
+metadata:
+  version: "1.0.0"
 ---
 
 # github-audit-to-issues

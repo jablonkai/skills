@@ -10,6 +10,8 @@ tags:
     - rendering
     - color-grading
     - scripting
+metadata:
+  version: "1.0.0"
 ---
 
 # DaVinci Resolve Control

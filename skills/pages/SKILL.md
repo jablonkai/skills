@@ -11,6 +11,8 @@ tags:
     - mail-merge
     - pdf
     - epub
+metadata:
+  version: "1.0.0"
 ---
 
 # Pages Automation

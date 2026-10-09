@@ -12,6 +12,8 @@ tags:
     - spreadsheet
     - xlsx
     - csv
+metadata:
+  version: "1.0.0"
 ---
 
 # Numbers Automation

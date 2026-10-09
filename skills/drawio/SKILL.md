@@ -10,6 +10,8 @@ tags:
     - flowchart
     - architecture
     - scripting
+metadata:
+  version: "1.0.0"
 ---
 
 # draw.io Control

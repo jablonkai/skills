@@ -90,3 +90,32 @@ contains() {
 
   return 1
 }
+
+# Keys nested one level under the top-level `metadata:` mapping (the Agent Skills
+# spec's free-form map), e.g. `version`. Stops at the next top-level key.
+frontmatter_metadata_keys() {
+  frontmatter_block "$1" | awk '
+    /^metadata:[[:space:]]*$/ { inside = 1; next }
+    inside && /^[^[:space:]]/ { exit }
+    inside && /^[[:space:]]+[A-Za-z][A-Za-z0-9_-]*:/ { sub(/^[[:space:]]+/, ""); sub(/:.*/, ""); print }'
+}
+
+# The value of `metadata.<key>`, with one layer of surrounding quotes removed;
+# empty when absent.
+frontmatter_metadata_value() {
+  frontmatter_block "$1" | awk -v key="$2" '
+    /^metadata:[[:space:]]*$/ { inside = 1; next }
+    inside && /^[^[:space:]]/ { exit }
+    inside {
+      line = $0
+      sub(/^[[:space:]]+/, "", line)
+      if (index(line, key ":") == 1) {
+        value = substr(line, length(key) + 2)
+        sub(/^[[:space:]]+/, "", value)
+        sub(/^["'"'"']/, "", value)
+        sub(/["'"'"']$/, "", value)
+        print value
+        exit
+      }
+    }'
+}

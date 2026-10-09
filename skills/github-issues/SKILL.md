@@ -12,6 +12,8 @@ tags:
   - triage
 allowed-tools: Bash, Read, Grep, Glob
 argument-hint: "[create <title> | from-audit [<file>] [<ids or severities>] | view <number> | close <number> [reason] | comment <number> <text> | assign <number> <user> [--remove] | label <number> <label> [--remove] | triage | list [--label <label>]]"
+metadata:
+  version: "1.0.0"
 ---
 
 # github-issues

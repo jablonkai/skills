@@ -11,6 +11,8 @@ tags:
   - ultrarunning
   - design-assets
 allowed-tools: Read, Glob
+metadata:
+  version: "1.0.0"
 ---
 
 # EMU Branding

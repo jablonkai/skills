@@ -16,6 +16,8 @@ tags:
   - rust
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write
 argument-hint: "[stack trace, crash log, or path to a log/crash file]"
+metadata:
+  version: "1.0.0"
 ---
 
 # error-debugging

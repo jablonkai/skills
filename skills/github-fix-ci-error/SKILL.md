@@ -11,6 +11,8 @@ tags:
   - debugging
   - workflow
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write
+metadata:
+  version: "1.0.0"
 ---
 
 # github-fix-ci-error

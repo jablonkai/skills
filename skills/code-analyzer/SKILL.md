@@ -13,6 +13,8 @@ tags:
   - bugs
 allowed-tools: Bash, Read, Grep, Glob, Agent, Edit, Write
 argument-hint: "[focus: security|quality|performance|tests|docs|ideas|all]"
+metadata:
+  version: "1.0.0"
 ---
 
 # code-analyzer

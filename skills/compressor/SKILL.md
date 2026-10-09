@@ -5,6 +5,8 @@ summary: "batch-transcode with Apple Compressor via its CLI — ProRes, H.264, H
 category: video
 risk: medium
 tags: [compressor, apple, prores, hevc, h264, transcode, proxy, macos, video]
+metadata:
+  version: "1.0.0"
 ---
 
 # Apple Compressor via its CLI

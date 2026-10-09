@@ -10,6 +10,8 @@ tags:
     - raster
     - layers
     - scripting
+metadata:
+  version: "1.0.0"
 ---
 
 # Krita Control

@@ -137,8 +137,9 @@ skill — it's the recommended way to scaffold a new skill, sharpen its descript
 evaluate whether it triggers reliably. It ships with Claude Code as the `skill-creator`
 skill. Then apply this repo's conventions:
 
-1. Create `skills/<kebab-name>/SKILL.md` with `name`, `description`, `summary` and
-   `category` frontmatter. The `name` must match the directory name.
+1. Create `skills/<kebab-name>/SKILL.md` with `name`, `description`, `summary`,
+   `category` and `metadata.version` (`"1.0.0"`) frontmatter. The `name` must match the
+   directory name.
 2. Write the description so it triggers reliably — say what the skill does *and* when to
    use it, with concrete trigger phrases. Keep `summary` to the one line that should
    appear in the catalog.
@@ -170,6 +171,8 @@ The validator checks:
 
 - required frontmatter fields (`name`, `description`, `summary`, `category`)
 - frontmatter `name` matches the directory name
+- `metadata.version` is `MAJOR.MINOR.PATCH`, and every skill changed since the base
+  branch has a higher version than there
 - only documented frontmatter fields are used, and `risk` is `low`, `medium` or `high`
   (see [AGENTS.md](AGENTS.md#frontmatter-fields))
 - kebab-case skill directory names

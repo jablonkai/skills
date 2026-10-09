@@ -9,6 +9,8 @@ tags:
     - motion-graphics
     - animation
     - rendering
+metadata:
+  version: "1.0.0"
 ---
 
 # Cavalry Control

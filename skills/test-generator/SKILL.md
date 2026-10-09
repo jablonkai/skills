@@ -17,6 +17,8 @@ tags:
   - cpp
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write, Skill
 argument-hint: "[file, function, class, or module to test]"
+metadata:
+  version: "1.0.0"
 ---
 
 # test-generator

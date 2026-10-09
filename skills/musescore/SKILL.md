@@ -10,6 +10,8 @@ tags:
     - sheet-music
     - notation
     - transpose
+metadata:
+  version: "1.0.0"
 ---
 
 # MuseScore headless engraving

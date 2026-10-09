@@ -14,7 +14,8 @@ house rules on top of that format; when the two disagree, the spec wins.
 ## AI agent guidance
 
 - `skills/<name>/` is the main workspace surface; changes to skills belong there.
-- Every skill directory must contain exactly one `SKILL.md` with YAML frontmatter `name:`, `description:`, `summary:` and `category:`.
+- Every skill directory must contain exactly one `SKILL.md` with YAML frontmatter `name:`, `description:`, `summary:`, `category:` and `metadata.version`.
+- Any change to a skill's files must raise its `metadata.version` (see [Versioning](#versioning)).
 - The `name:` value must match the directory name. The `description:` value must explain what the skill does and when to use it.
 - Validate every change with `bash .github/scripts/validate.sh`, and any change under
   `scripts/` with `bash .github/scripts/lint.sh` as well.
@@ -92,11 +93,12 @@ house rules on top of that format; when the two disagree, the spec wins.
 - Directory name: **kebab-case** (e.g. `github-commit-pr`)
 - Every skill dir must contain exactly one `SKILL.md`
 - The frontmatter `name:` **must** equal the directory name
-- Required YAML frontmatter fields: `name`, `description`, `summary`, `category`
+- Required YAML frontmatter fields: `name`, `description`, `summary`, `category`,
+  `metadata.version`
 - Optional fields: `risk`, `tags`, `allowed-tools`, `argument-hint`, `license`
-- No other top-level frontmatter keys — the validator rejects unknown fields so that
-  tooling-generated blocks (e.g. the `metadata:` block written by `gh skill install`)
-  don't drift into the catalog
+- No other top-level frontmatter keys, and no `metadata:` key besides `version` — the
+  validator rejects unknown fields so that tooling-generated keys (e.g. the repo URL and
+  tree SHA `gh skill install` writes into `metadata:`) don't drift into the catalog
 
 ### Frontmatter fields
 
@@ -106,6 +108,7 @@ house rules on top of that format; when the two disagree, the spec wins.
 | `description` | yes | what the skill does **and** when to use it (see below) — max 1024 characters |
 | `summary` | yes | single line, lowercase start, no trailing period — the catalog entry (see below) |
 | `category` | yes | single token grouping the skill (e.g. `testing`, `git`, `3d`), mapped to a README theme (see below) |
+| `metadata.version` | yes | the skill's own SemVer, quoted `MAJOR.MINOR.PATCH` (e.g. `"1.2.0"`) — see [Versioning](#versioning) |
 | `risk` | no | one of `low`, `medium`, `high` — see the scale below |
 | `tags` | no | YAML list of lowercase keywords |
 | `allowed-tools` | no | comma-separated tool names the skill needs |
@@ -124,6 +127,26 @@ is to go wrong:
 | `high` | Destructive or irreversible: deletes data, force-pushes, publishes, or spends money. |
 
 There is no separate `safe` level — read-only skills are `low`.
+
+### Versioning
+
+Each skill is versioned independently through the spec's `metadata` map:
+
+```yaml
+metadata:
+  version: "1.2.0"
+```
+
+Bump it in the same change that touches the skill's directory:
+
+| Bump | When |
+|------|------|
+| MAJOR | the skill's contract breaks — renamed or removed scripts, changed arguments or output format, dropped capability |
+| MINOR | new capability, scripts, references or trigger phrases |
+| PATCH | fixes, wording, docs-only changes |
+
+New skills start at `1.0.0`. The validator fails when a skill's files differ from the
+base branch (`origin/main`, or the PR target in CI) but its version did not increase.
 
 ### Writing a description
 The `description` is the only thing an agent sees when deciding whether to load the
@@ -187,7 +210,7 @@ bash .github/scripts/validate.sh
 ```
 
 Checks: frontmatter completeness, the allowed frontmatter field set and `risk`
-vocabulary, `name:` and `description:` length caps, `name:`↔directory match, skill
+vocabulary, `metadata.version` format and that every changed skill bumped it, `name:` and `description:` length caps, `name:`↔directory match, skill
 directory structure, kebab-case names, README/AGENTS catalog sync (by regenerating both
 sections and failing on any difference), and broken relative Markdown links (links
 inside fenced code blocks are examples, not targets, and are skipped). It also
@@ -226,7 +249,8 @@ scaffolding, description writing, and evaluation:
 (available as the `skill-creator` skill in Claude Code). Then apply this repo's
 conventions on top:
 
-1. Create `skills/<kebab-name>/SKILL.md` with valid frontmatter, including `summary` and `category`
+1. Create `skills/<kebab-name>/SKILL.md` with valid frontmatter, including `summary`, `category`
+   and `metadata.version: "1.0.0"`
 2. Run `.github/scripts/generate-catalog.sh` to render the **Available Skills** entry into
    [README.md](README.md) and this file
 3. Run `bash .github/scripts/validate.sh`, plus `bash .github/scripts/lint.sh` if the
