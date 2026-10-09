@@ -16,6 +16,8 @@ tags:
   - cpp
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write, Skill
 argument-hint: "[module, package, spec file, or doc type to generate]"
+metadata:
+  version: "1.0.0"
 ---
 
 # documentation-generator

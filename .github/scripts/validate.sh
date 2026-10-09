@@ -42,11 +42,13 @@ check_skill_frontmatter() {
 }
 
 # The documented field set (see AGENTS.md). Rejecting anything else keeps
-# tool-generated blocks — e.g. the `metadata:` block written by `gh skill install`,
-# which pins a repo URL and tree SHA — from drifting into the catalog.
+# tool-generated keys — e.g. the repo URL and tree SHA that `gh skill install`
+# writes into `metadata:` — from drifting into the catalog.
 readonly ALLOWED_FRONTMATTER_FIELDS=(
   name description summary category risk tags allowed-tools argument-hint license
+  metadata
 )
+readonly ALLOWED_METADATA_FIELDS=(version)
 readonly ALLOWED_RISK_VALUES=(low medium high)
 
 check_skill_frontmatter_fields() {
@@ -65,6 +67,13 @@ check_skill_frontmatter_fields() {
       fi
     done < <(frontmatter_keys "$file")
 
+    while IFS= read -r key; do
+      if ! contains "$key" "${ALLOWED_METADATA_FIELDS[@]}"; then
+        echo "Unknown metadata field '$key' in $file (allowed: ${ALLOWED_METADATA_FIELDS[*]})"
+        exit 1
+      fi
+    done < <(frontmatter_metadata_keys "$file")
+
     if frontmatter_has_key "$file" risk; then
       risk=$(frontmatter_value "$file" risk)
 
@@ -72,6 +81,65 @@ check_skill_frontmatter_fields() {
         echo "Invalid risk value '$risk' in $file (allowed: ${ALLOWED_RISK_VALUES[*]})"
         exit 1
       fi
+    fi
+  done < <(skill_dirs)
+}
+
+# Every skill carries its own SemVer in `metadata.version` (see AGENTS.md).
+readonly SEMVER_PATTERN='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
+
+check_skill_versions() {
+  local dir_name
+  local file
+  local version
+
+  while IFS= read -r dir_name; do
+    file="skills/$dir_name/SKILL.md"
+    version=$(frontmatter_metadata_value "$file" version)
+
+    if [[ -z "$version" ]]; then
+      echo "Missing metadata.version field: $file"
+      exit 1
+    fi
+
+    if [[ ! "$version" =~ $SEMVER_PATTERN ]]; then
+      echo "metadata.version '$version' is not MAJOR.MINOR.PATCH in $file"
+      exit 1
+    fi
+  done < <(skill_dirs)
+}
+
+# A hand-maintained version is only worth anything if it moves with the skill:
+# any skill whose files differ from the base branch (committed or not) must carry
+# a higher version than it has there. The base is the PR target in CI, otherwise
+# origin/main; with no base available (shallow clone, no remote) the check is
+# skipped. Skills new on this branch, or unversioned on the base, have nothing to
+# compare against.
+check_skill_version_bumps() {
+  local base_ref="origin/${GITHUB_BASE_REF:-main}"
+  local base
+  local dir_name
+  local file
+  local old
+  local new
+
+  base=$(git merge-base HEAD "$base_ref" 2>/dev/null) || {
+    echo "Skipping version bump check: $base_ref not available"
+    return 0
+  }
+
+  while IFS= read -r dir_name; do
+    file="skills/$dir_name/SKILL.md"
+    git diff --quiet "$base" -- "skills/$dir_name" && continue
+    git cat-file -e "$base:$file" 2>/dev/null || continue
+
+    old=$(frontmatter_metadata_value <(git show "$base:$file") version)
+    [[ -n "$old" ]] || continue
+    new=$(frontmatter_metadata_value "$file" version)
+
+    if [[ "$old" == "$new" ]] || [[ $(printf '%s\n%s\n' "$old" "$new" | sort -V | tail -n 1) != "$new" ]]; then
+      echo "skills/$dir_name changed since $base_ref but metadata.version did not increase ($old -> $new)"
+      exit 1
     fi
   done < <(skill_dirs)
 }
@@ -264,6 +332,8 @@ check_markdown_links() {
 check_skill_frontmatter
 check_skill_frontmatter_fields
 check_skill_frontmatter_lengths
+check_skill_versions
+check_skill_version_bumps
 check_skill_size_budget
 check_skill_structure
 check_kebab_case_skill_dirs

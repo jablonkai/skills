@@ -10,6 +10,8 @@ tags:
     - parametric-modeling
     - 3d
     - scripting
+metadata:
+  version: "1.0.0"
 ---
 
 # FreeCAD Control

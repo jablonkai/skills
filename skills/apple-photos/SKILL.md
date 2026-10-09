@@ -10,6 +10,8 @@ tags:
     - applescript
     - macos
     - export
+metadata:
+  version: "1.0.0"
 ---
 
 # Apple Photos via osxphotos and AppleScript

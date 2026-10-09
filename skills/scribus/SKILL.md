@@ -11,6 +11,8 @@ tags:
     - pdf-x
     - print
     - csv
+metadata:
+  version: "1.0.0"
 ---
 
 # Scribus via headless Python jobs

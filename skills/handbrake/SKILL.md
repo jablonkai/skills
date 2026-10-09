@@ -10,6 +10,8 @@ tags:
     - video
     - hevc
     - subtitles
+metadata:
+  version: "1.0.0"
 ---
 
 # HandBrake via HandBrakeCLI

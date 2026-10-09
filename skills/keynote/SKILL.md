@@ -11,6 +11,8 @@ tags:
     - presentation
     - pptx
     - pdf
+metadata:
+  version: "1.0.0"
 ---
 
 # Keynote Automation

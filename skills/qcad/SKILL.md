@@ -10,6 +10,8 @@ tags:
     - dxf
     - 2d-drafting
     - scripting
+metadata:
+  version: "1.0.0"
 ---
 
 # QCAD headless drafting

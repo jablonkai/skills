@@ -11,6 +11,8 @@ tags:
     - animation
     - modeling
     - scripting
+metadata:
+  version: "1.0.0"
 ---
 
 # Blender Control

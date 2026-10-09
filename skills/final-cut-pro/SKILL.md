@@ -10,6 +10,8 @@ tags:
     - video-editing
     - timecode
     - applescript
+metadata:
+  version: "1.0.0"
 ---
 
 # Final Cut Pro via FCPXML

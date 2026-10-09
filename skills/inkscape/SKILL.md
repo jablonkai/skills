@@ -10,6 +10,8 @@ tags:
     - vector
     - export
     - trace
+metadata:
+  version: "1.0.0"
 ---
 
 # Inkscape Control

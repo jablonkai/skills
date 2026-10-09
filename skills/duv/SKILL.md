@@ -13,6 +13,8 @@ tags:
   - json-api
 allowed-tools: Bash, Read, WebFetch
 argument-hint: "[runner name, event name, ranking or record query]"
+metadata:
+  version: "1.0.0"
 ---
 
 # DUV Ultramarathon Statistics

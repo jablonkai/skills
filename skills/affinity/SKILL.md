@@ -9,6 +9,8 @@ tags:
     - design
     - automation
     - scripting
+metadata:
+  version: "1.0.0"
 ---
 
 # Affinity Control

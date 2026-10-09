@@ -10,6 +10,8 @@ tags:
     - watercolor
     - animation
     - escape-motions
+metadata:
+  version: "1.0.0"
 ---
 
 # Rebelle Control

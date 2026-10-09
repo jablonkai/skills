@@ -11,6 +11,8 @@ tags:
     - exr
     - render
     - foundry
+metadata:
+  version: "1.0.0"
 ---
 
 # Nuke (Non-commercial) via headless scripts

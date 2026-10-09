@@ -10,6 +10,8 @@ tags:
     - image-editing
     - layers
     - scripting
+metadata:
+  version: "1.0.0"
 ---
 
 # GIMP Control

@@ -12,6 +12,8 @@ tags:
     - pull-request
     - commit
     - branch
+metadata:
+  version: "1.0.0"
 ---
 # github-commit-pr
 

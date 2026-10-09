@@ -11,6 +11,8 @@ tags:
     - osc
     - audio
     - wav
+metadata:
+  version: "1.0.0"
 ---
 
 # Sonic Pi via a headless OSC session

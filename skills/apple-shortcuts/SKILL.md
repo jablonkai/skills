@@ -9,6 +9,8 @@ tags:
     - macos
     - automation
     - cli
+metadata:
+  version: "1.0.0"
 ---
 
 # Apple Shortcuts from the command line

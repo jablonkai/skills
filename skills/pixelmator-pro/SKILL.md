@@ -5,6 +5,8 @@ summary: "remote-control Pixelmator Pro via AppleScript — layered compositions
 category: design-automation
 risk: medium
 tags: [pixelmator, applescript, macos, photo, background-removal, super-resolution, batch, image-editing]
+metadata:
+  version: "1.0.0"
 ---
 
 # Pixelmator Pro via AppleScript

@@ -12,6 +12,8 @@ tags:
   - text-extraction
 allowed-tools: Bash, Read, Write, Glob
 argument-hint: "[file-or-dir-or-url] [-o output.md]"
+metadata:
+  version: "1.0.0"
 ---
 
 # markitdown

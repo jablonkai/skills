@@ -12,6 +12,8 @@ tags:
   - workflow
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write
 argument-hint: "[<issue-number-or-url> ... | --label <name> | --milestone <name>]  (none = all open issues)"
+metadata:
+  version: "1.0.0"
 ---
 
 # github-do-all-issues

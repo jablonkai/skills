@@ -13,6 +13,8 @@ tags:
     - xlsx
     - odf
     - mail-merge
+metadata:
+  version: "1.0.0"
 ---
 
 # LibreOffice Automation

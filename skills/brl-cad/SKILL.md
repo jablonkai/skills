@@ -11,6 +11,8 @@ tags:
     - mged
     - raytrace
     - stl
+metadata:
+  version: "1.0.0"
 ---
 
 # BRL-CAD via headless scripts

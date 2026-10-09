@@ -19,6 +19,9 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          # The version bump check diffs each skill against the base branch.
+          fetch-depth: 0
 
       - name: Run skill validation
         run: bash .github/scripts/validate.sh
