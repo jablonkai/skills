@@ -2,7 +2,7 @@
 name: scribus
 description: 'Lay out print documents headless with Scribus 1.6 and its Python scripter: multi-page flyers, brochures and booklets with master pages, paragraph/character styles, threaded text frames and images; data-driven layouts from CSV (name badges, place cards, labels, certificates, catalogue pages); and print-ready PDF/X-4 (or X-1a/X-3) export with bleed and crop marks, including exporting an existing .sla. Every run is checked for overflowing text, missing images, substituted fonts, page size and bleed. Use for "make a 4-page A5 flyer from this text and these photos", "generate name badges from this CSV", "export this .sla as PDF/X-4 with 3 mm bleed", "print-ready PDF with crop marks for the printer", "Scribus script", ".sla". Not for a live Affinity Publisher session (affinity), Apple Pages templates (pages), Word/ODF documents or office-to-PDF conversion (libreoffice), vector illustration or posters drawn as SVG (inkscape), or slide decks (keynote).'
 summary: "lay out print documents headless with Scribus — multi-page layouts with master pages, styles, threaded text and images, CSV-driven badges and catalogues, PDF/X-4 export with bleed and marks"
-category: design-automation
+category: publishing
 risk: low
 tags:
     - scribus

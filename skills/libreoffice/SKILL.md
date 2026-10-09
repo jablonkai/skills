@@ -2,7 +2,7 @@
 name: libreoffice
 description: 'Automate documents with a real office engine: headless LibreOffice and its UNO API. Batch-convert between ODF, OOXML (docx/xlsx/pptx), legacy doc/xls/ppt, RTF and PDF including PDF/A; fill a Calc model from CSV, recalculate every formula and export xlsx/ods/PDF with the computed values, or read real recalculated values; fill Writer templates ({{placeholders}}, fields, bookmarks) into one file per record or a combined PDF; export Impress/Draw pages as PNG/SVG. Use whenever a task would run soffice or LibreOffice, or needs rendering fidelity, recalculation or ODF: "convert this folder of docx to PDF/A", "recalculate this xlsx and give me the real totals", "generate letters from this template and CSV", "export every slide as PNG", "convert legacy .doc files", or Hungarian "konvertáld PDF/A-ra a docx fájlokat". Not for editing docx/xlsx/pptx in Python without an office engine (use docx, xlsx, pptx), documents to Markdown (use markitdown), PDF merging or OCR (use pdf), or Pages, Numbers and Keynote files.'
 summary: "automate documents with headless LibreOffice and UNO — ODF/OOXML/PDF and PDF/A batch conversion, Calc recalculation with real values, Writer template fill and mail merge, Impress/Draw page export"
-category: document-conversion
+category: office
 risk: low
 tags:
     - libreoffice

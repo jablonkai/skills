@@ -157,7 +157,12 @@ skill is described in exactly one place and CI catches any drift:
 - `category` is the fine-grained grouping. README rolls categories up into themes via
   `CATALOG_SECTIONS` in the generator; a category no theme covers is a hard error, so a
   new grouping means adding it there deliberately rather than a skill quietly vanishing
-  from README.
+  from README. A theme titled `Theme/Subtheme` renders as a `###` theme heading with
+  `####` subsections (e.g. `App automation/Graphics & design`); AGENTS.md stays one
+  flat alphabetical list.
+
+Skill directories listed in `.gitignore` are local-only: `skill_dirs()` in
+`catalog-lib.sh` skips them, so they are left out of the catalog, validation and lint.
 
 Everything between the `<!-- BEGIN GENERATED SKILLS -->` and
 `<!-- END GENERATED SKILLS -->` markers is overwritten — edit the frontmatter, not the
