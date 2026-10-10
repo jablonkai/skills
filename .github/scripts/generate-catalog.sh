@@ -31,6 +31,7 @@ readonly CATALOG_SECTIONS=(
   "App automation/Documents & publishing|office,publishing"
   "App automation/Video, motion & audio|video,motion-design,audio"
   "App automation/3D, CAD & electronics|3d,cad,electronics"
+  "App automation/Maps & GIS|gis"
   "App automation/macOS|mac-automation"
   "GitHub workflows|git,development-workflow,project-management"
   "Development & analysis|code-quality,debugging,testing,documentation,document-conversion"
