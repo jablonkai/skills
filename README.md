@@ -53,6 +53,9 @@ portable beyond a single tool.
 - `kicad`: automate KiCad 10 — DRC/ERC with JSON violation summaries, JLCPCB-ready fabrication zips (Gerbers, drill, CPL, BOM, STEP), board renders, and scripted footprint placement in a running PCB editor via the IPC API
 - `qcad`: draft 2D CAD drawings headless with QCAD — ECMAScript scripts for layers, entities, blocks, dimensions and hatches, title blocks on existing DXF, batch DXF/DWG to PDF/PNG, ezdxf-verified output
 
+#### Maps & GIS
+- `qgis`: automate QGIS 4 headless with PyQGIS and qgis_process — GPX/GeoJSON/GeoPackage/raster loading, reprojection, Processing algorithms (buffer, clip, heatmap), graduated styling, and print-layout PDF/PNG map export with verified feature counts and CRS
+
 #### macOS
 - `apple-photos`: query, export and organise the Apple Photos library with osxphotos and AppleScript — searches by date, place, people and keywords, yearly statistics, original or edited exports with XMP sidecars, albums from a query, and file import
 - `apple-shortcuts`: list, inspect and run Apple Shortcuts from the CLI — file and text input and output, folder batches, timeout-guarded agent steps, decoding exported .shortcut files, and generating signed shortcuts for one-click import
