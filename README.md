@@ -76,7 +76,7 @@ portable beyond a single tool.
 - `godot`: build, run, test and export Godot 4 projects headless from the CLI — author scenes, GDScript and project settings as text, catch script errors from the log, test gameplay and UI signals with headless test scripts, capture Movie Maker frames, export Web and macOS builds
 
 ### Ultrarunning domain
-- `duv`: search and retrieve data from the DUV Ultramarathon Statistics website (statistik.d-u-v.org) via its JSON API — runner profiles, event results, rankings, calendars, and national/continental records by distance, gender and age group
+- `duv`: search and analyse the DUV Ultramarathon Statistics database (statistik.d-u-v.org) — runner profiles, event results and course records, rankings, calendars, national/continental records and their progression, IAU championships, head-to-head and mileage statistics
 - `emu-branding`: brand guidelines and visual identity for EMU (Egyesület a Magyar Ultrafutásért), including logo, color palette, and typography
 <!-- END GENERATED SKILLS -->
 

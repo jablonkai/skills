@@ -17,8 +17,9 @@ federation doesn't accept. For an official world record, go to the IAU.
 | German records (official DLV/DUV list) | `recordsGER.php?dist=D` (HTML only, both genders) |
 | World record | not on DUV — IAU records table at `https://iau-ultramarathon.org/iau-records.html` (PDFs linked from `overview_records.php`) |
 | "Best ever performance in the world" (unofficial, incl. non-ratified) | `rankings --year all --dist D --gender G` — the first row of the all-time list |
-| Record *progression* / who held it before | not exposed — fetch the all-time ranking and sort by date client-side |
-| Course record of one event | `getresulteventalltime.php?event=<id>` (HTML) — all-time list for that event |
+| Record *progression* / who held it before | `progression --nat X --dist D --gender G` — replays the all-time ranking by date (ranking-eligible results only, so splits are absent) |
+| Course record of one event | `event-history --id <id>` — best winning time per course length across editions (`getresulteventalltime.php` now 404s) |
+| Championship medallists | `champions --dist 24hWC` etc. — see [statistics.md](statistics.md) |
 
 `nat=all` on the records endpoint returns nothing: the endpoint has no world scope, by design.
 
