@@ -56,6 +56,7 @@ portable beyond a single tool.
 #### macOS
 - `apple-photos`: query, export and organise the Apple Photos library with osxphotos and AppleScript — searches by date, place, people and keywords, yearly statistics, original or edited exports with XMP sidecars, albums from a query, and file import
 - `apple-shortcuts`: list, inspect and run Apple Shortcuts from the CLI — file and text input and output, folder batches, timeout-guarded agent steps, decoding exported .shortcut files, and generating signed shortcuts for one-click import
+- `hammerspoon`: automate macOS with Hammerspoon via the hs CLI — window layouts for multi-monitor setups, hotkeys that run shell scripts, app and screen watchers, screen/app/window inventory, modular init.lua files with reload and console error checks
 
 ### GitHub workflows
 - `github-audit-to-issues`: audit a project and file the findings as GitHub issues in one run — scoped severities, duplicate checks, one review table, security findings kept out of public issues
