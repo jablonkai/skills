@@ -20,6 +20,7 @@ portable beyond a single tool.
 #### Graphics & design
 - `affinity`: remote-control Affinity (the unified Affinity by Canva app) with JavaScript via its local automation endpoint — document edits, batch operations, and reusable library scripts, with no MCP client configuration
 - `drawio`: remote-control the draw.io desktop app with JavaScript over its DevTools port — live shape building, ELK auto-layout, pages, save — or author .drawio XML directly and export PNG/SVG/PDF or convert Mermaid/CSV with the headless CLI
+- `fontforge`: build, edit and validate fonts headless with FontForge — icon fonts from SVG folders, glyph import, side bearings, kerning and name tables, subsetting, SFD/UFO/OTF/TTF/WOFF2 conversion, overlap, direction and extrema fixes
 - `gimp`: remote-control a running GIMP by Python through its built-in Script-Fu server — layer stacks, selections and masks, brush and gradient drawing, text layers, non-destructive GEGL filters, and PNG/JPEG/.xcf export or batch conversion in the live session
 - `inkscape`: drive Inkscape headless from the CLI — author SVG illustrations directly, run actions such as text to path, boolean path ops, simplify and bitmap trace, then export PNG at any DPI or @2x, PDF, EPS and plain SVG, one file or whole folders
 - `krita`: remote-control a running Krita by Python through a local bridge — layer stacks, brush-engine strokes and QPainter pixels, SVG vector text, filters, masks, animation frames, and PNG/JPEG/.kra export or batch conversion in the running session
