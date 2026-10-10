@@ -88,6 +88,7 @@ house rules on top of that format; when the two disagree, the spec wins.
 - `sonic-pi`: live-code music in Sonic Pi 5 via a headless OSC session — run and live re-evaluate live_loops, record exact-length WAV takes, stop jobs, surface runtime and syntax errors with line numbers
 - `supercollider`: make sound with SuperCollider 3 — SynthDefs and patterns rendered offline in NRT mode to WAV, or a headless live sclang/scsynth session to play, re-evaluate, record and stop, with post-window errors surfaced
 - `test-generator`: write unit, integration and UI tests for existing code to at least 80% coverage — framework detection from the build files, case selection for boundaries and error paths, correct source-set placement, and measured coverage gap analysis across Kotlin/KMP, Compose, Flutter/Dart, Swift, Rust and C++
+- `zotero`: search, export and grow a Zotero library via its local API — topic and collection searches with metadata summaries, BibTeX/BibLaTeX/CSL-JSON export for LaTeX and Typst, CSL-styled citations and bibliographies, adding papers by DOI and books by ISBN with undo
 <!-- END GENERATED SKILLS -->
 
 ## Conventions

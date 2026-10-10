@@ -74,6 +74,9 @@ portable beyond a single tool.
 - `refactoring`: behavior-preserving refactoring — duplication extraction, complexity reduction, dead-code removal, naming and idiom cleanups, driven by each stack's own linter and verified step by step against the tests
 - `test-generator`: write unit, integration and UI tests for existing code to at least 80% coverage — framework detection from the build files, case selection for boundaries and error paths, correct source-set placement, and measured coverage gap analysis across Kotlin/KMP, Compose, Flutter/Dart, Swift, Rust and C++
 
+### Research
+- `zotero`: search, export and grow a Zotero library via its local API — topic and collection searches with metadata summaries, BibTeX/BibLaTeX/CSL-JSON export for LaTeX and Typst, CSL-styled citations and bibliographies, adding papers by DOI and books by ISBN with undo
+
 ### Game development
 - `godot`: build, run, test and export Godot 4 projects headless from the CLI — author scenes, GDScript and project settings as text, catch script errors from the log, test gameplay and UI signals with headless test scripts, capture Movie Maker frames, export Web and macOS builds
 
