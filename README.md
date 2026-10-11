@@ -58,6 +58,7 @@ portable beyond a single tool.
 - `qgis`: automate QGIS 4 headless with PyQGIS and qgis_process — GPX/GeoJSON/GeoPackage/raster loading, reprojection, Processing algorithms (buffer, clip, heatmap), graduated styling, and print-layout PDF/PNG map export with verified feature counts and CRS
 
 #### macOS
+- `apple-calendar`: list, find, create and export Apple Calendar events via EventKit and JXA — date-range queries with recurring occurrences, free-slot search, events with alarms and recurrence, .ics/CSV export and .ics import, read-back verified
 - `apple-notes`: search, export and write Apple Notes via JXA — text, folder and date searches, folder export to Markdown with attachments, notes created or appended from Markdown with checklists and tables, read-back verified
 - `apple-photos`: query, export and organise the Apple Photos library with osxphotos and AppleScript — searches by date, place, people and keywords, yearly statistics, original or edited exports with XMP sidecars, albums from a query, and file import
 - `apple-shortcuts`: list, inspect and run Apple Shortcuts from the CLI — file and text input and output, folder batches, timeout-guarded agent steps, decoding exported .shortcut files, and generating signed shortcuts for one-click import
