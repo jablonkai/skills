@@ -43,6 +43,7 @@ house rules on top of that format; when the two disagree, the spec wins.
      Edit skills/<name>/SKILL.md, then run .github/scripts/generate-catalog.sh -->
 <!-- BEGIN GENERATED SKILLS -->
 - `affinity`: remote-control Affinity (the unified Affinity by Canva app) with JavaScript via its local automation endpoint — document edits, batch operations, and reusable library scripts, with no MCP client configuration
+- `apple-notes`: search, export and write Apple Notes via JXA — text, folder and date searches, folder export to Markdown with attachments, notes created or appended from Markdown with checklists and tables, read-back verified
 - `apple-photos`: query, export and organise the Apple Photos library with osxphotos and AppleScript — searches by date, place, people and keywords, yearly statistics, original or edited exports with XMP sidecars, albums from a query, and file import
 - `apple-shortcuts`: list, inspect and run Apple Shortcuts from the CLI — file and text input and output, folder batches, timeout-guarded agent steps, decoding exported .shortcut files, and generating signed shortcuts for one-click import
 - `blender`: remote-control a running Blender by Python via a local bridge — bmesh/modifier modeling, shader and geometry nodes, animation, rigging, physics, Grease Pencil and the VSE, EEVEE/Cycles stills and video, glTF/FBX/USD/OBJ/STL export
