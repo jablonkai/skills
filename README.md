@@ -87,6 +87,7 @@ portable beyond a single tool.
 
 ### Game development
 - `godot`: build, run, test and export Godot 4 projects headless from the CLI — author scenes, GDScript and project settings as text, catch script errors from the log, test gameplay and UI signals with headless test scripts, capture Movie Maker frames, export Web and macOS builds
+- `tiled`: author, edit and export Tiled maps headless — maps and tilesets from a JSON spec via Tiled's JS API, bulk typed object properties, TMX/TMJ/TSX validation, JSON/Lua/Godot .tscn export with a Godot import check, and custom export formats as extensions
 
 ### Ultrarunning domain
 - `duv`: search and analyse the DUV Ultramarathon Statistics database (statistik.d-u-v.org) — runner profiles, event results and course records, rankings, calendars, national/continental records and their progression, IAU championships, head-to-head and mileage statistics
