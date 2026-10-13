@@ -60,6 +60,7 @@ portable beyond a single tool.
 #### macOS
 - `apple-calendar`: list, find, create and export Apple Calendar events via EventKit and JXA — date-range queries with recurring occurrences, free-slot search, events with alarms and recurrence, .ics/CSV export and .ics import, read-back verified
 - `apple-contacts`: search, export and import Apple Contacts via the Contacts framework and JXA — group and search exports to vCard/CSV, duplicate and incomplete-card reports, contacts and groups created from CSV or vCard, read-back verified
+- `apple-mail`: search, export, draft and organise Apple Mail via JXA and the Envelope Index — sender, subject and date searches, attachment export, reply drafts with attachments left in Drafts, bulk move, flag and archive with preview, read-back verified
 - `apple-notes`: search, export and write Apple Notes via JXA — text, folder and date searches, folder export to Markdown with attachments, notes created or appended from Markdown with checklists and tables, read-back verified
 - `apple-photos`: query, export and organise the Apple Photos library with osxphotos and AppleScript — searches by date, place, people and keywords, yearly statistics, original or edited exports with XMP sidecars, albums from a query, and file import
 - `apple-reminders`: list, create, complete and move Apple Reminders via EventKit and JXA — open, overdue and completed reminders by list, bulk creation from Markdown checklists with due dates, matched completion and cleanup with preview, read-back verified
