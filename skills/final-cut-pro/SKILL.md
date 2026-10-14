@@ -11,7 +11,7 @@ tags:
     - timecode
     - applescript
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Final Cut Pro via FCPXML
@@ -82,7 +82,9 @@ and exits non-zero on failure — read the JSON, don't assume success.
   `video: false` enable only one side. `titles` default to the lowest free lane above
   them; `template` is `lower-third` (default for 2+ lines), `basic`, any installed title
   name (`Formal`) or `Category/Name` when the name repeats (`Cinema/Bug`); `size`,
-  `font`, `color` ("r g b a") are optional.
+  `font`, `color` ("r g b a") are optional. A template you installed yourself (e.g. with
+  the `apple-motion` skill) goes in as `{"name": "…", "uid": "~/Titles.localized/<Category>/<Name>/<Name>.moti"}`;
+  without `size`/`font`/`color` it keeps the template's own styling.
 - Marker `kind`: `marker`, `chapter` (chapter marker), `todo` (to-do marker).
 - `--library` adds the `library location` import option (no library chooser);
   media is referenced in place (`copy assets` 0) unless `--copy-media`.

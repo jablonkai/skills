@@ -432,6 +432,12 @@ class Builder:
             attrs["lane"] = str(lane)
         attrs.update({"offset": "0s", "start": "3600s", "duration": fmt_time(d, self.seq_fd)})
         el = ET.Element("title", attrs)
+        if isinstance(t_.get("template"), dict) and not any(k in t_ for k in ("font", "size", "color")):
+            # A custom template keeps its own font, size and colour: any text-style,
+            # even an empty one, makes FCP replace them with its defaults.
+            for line in lines:
+                ET.SubElement(el, "text").text = line
+            return el
         style = {"font": t_.get("font", "Helvetica Neue"), "fontColor": t_.get("color", "1 1 1 1")}
         sizes = t_.get("size")
         ids = []
