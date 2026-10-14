@@ -109,6 +109,13 @@ Each `<text>` fills the template's next text field in order (a lower third has t
 `text-style-def` ids are document-wide ids, so they must not collide with resource ids.
 FCP adds `fontFace="Regular"` and a few `<param>`s on export.
 
+A title with plain `<text>Kovács Anna</text>` and no `text-style-def` keeps the
+template's font, size and colour. Any `text-style`, even an empty one, makes FCP use
+its own defaults for whatever it leaves out (verified on FCP 12.4). User templates in
+`~/Movies/Motion Templates.localized` are referenced as
+`uid="~/Titles.localized/<Category>/<Name>/<Name>.moti"`. FCP imports an unknown uid
+without a warning, so a typo only shows up as a missing title in the timeline.
+
 ### Markers and keywords
 
 ```xml
