@@ -12,7 +12,7 @@ tags:
 allowed-tools: Bash, Read
 argument-hint: "[render folder or video file]"
 metadata:
-  version: "1.0.0"
+  version: "1.0.2"
 ---
 
 # Video review notes
@@ -23,6 +23,13 @@ picture (a point or a box). The app saves them next to the video. Your job is to
 each note into a concrete, located request: *which frame(s), which part of the picture,
 which clip on which Resolve timeline, and what the user wants changed*.
 
+The app is open source: <https://github.com/jablonkai/video-review> (Rust/egui desktop app
+for macOS, built on libmpv and ffmpeg; `brew install mpv ffmpeg`, then
+`cargo run --release -- <folder-or-videos...>` or install the `.dmg` from
+`tools/make-dmg.sh`). Check its README and `src/model.rs` there if the file format seems
+to have changed. The app can also export notes itself as EDL (Resolve markers), FCPXML or
+Markdown; point the user to that when they only want markers, not fixes.
+
 Notes are often terse, half-typed, or in Hungarian. A note is only as clear as the frame it
 points at, so always look at the frame before deciding what a note means.
 
@@ -30,6 +37,8 @@ points at, so always look at the frame before deciding what a note means.
 
 - `<video>.comments.json` next to each render (usually the project's render folder).
 - `<video>.scenes.json` next to it holds the scene cuts (seconds) the app detected.
+  It is only valid for the file it was made from (size and mtime); after a re-render,
+  `list` shows no scene number until the app has opened the video and detected again.
 - The app re-reads the file every 4 seconds, so a change you make shows up in the
   app without a restart.
 
