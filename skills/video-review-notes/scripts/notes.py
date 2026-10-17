@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Read review notes left with the Video Review app (desktop app writing <video>.comments.json).
+"""Read review notes left with the Video Review app (desktop app writing <video>.comments.json,
+https://github.com/jablonkai/video-review).
 
 Notes live next to each video as `<video>.comments.json`; scene cuts as `<video>.scenes.json`.
 
@@ -62,11 +63,25 @@ def load(video):
         return None
     data = json.loads(f.read_text())
     comments = sorted(data.get("comments", []), key=lambda c: c["t_in"])
-    cuts = None
+    return data.get("fps") or 24.0, comments, load_cuts(video)
+
+
+SCENE_THRESHOLD = 0.25  # the app's scene score; a cache made with another one is stale
+
+
+def load_cuts(video):
+    # Same validity rule as the app: the cache must be for this very file (size and mtime),
+    # otherwise the video was re-rendered since and the scene numbers would be wrong.
     sf = Path(f"{video}.scenes.json")
-    if sf.exists():
-        cuts = json.loads(sf.read_text()).get("cuts")
-    return data.get("fps") or 24.0, comments, cuts
+    try:
+        cache = json.loads(sf.read_text())
+        st = Path(video).stat()
+    except (OSError, ValueError):
+        return None
+    if (cache.get("threshold") != SCENE_THRESHOLD or cache.get("size") != st.st_size
+            or cache.get("mtime") is None or abs(cache["mtime"] - st.st_mtime_ns / 1e9) > 1e-6):
+        return None
+    return cache.get("cuts")
 
 
 def scene_of(frame, fps, cuts, duration_frames=None):
