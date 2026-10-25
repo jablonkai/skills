@@ -27,6 +27,7 @@ portable beyond a single tool.
 - `photocraft`: automate PhotoCraft headless with photocraft-cli — layered compositions with text, shape and adjustment layers and styles, filters, PSD template edits, layer-comp, layer and CSV data-set export, folder batches from JSON actions, .atn sets or droplets, info read-back verified
 - `pixelmator-pro`: remote-control Pixelmator Pro via AppleScript — layered compositions with image, text and shape layers, adjustments and effects, ML Super Resolution, Remove Background and Enhance, .pxd template fill, and single-file or folder-batch export to PNG, JPEG, HEIC, WebP and PSD
 - `rebelle`: remote-control Rebelle and Rebelle Motion IO with JSON events — live WebSocket painting in Rebelle Pro, batch-rendered painted animation frames, and visual verification through canvas exports
+- `vectorcraft`: automate VectorCraft headless with vectorcraft-cli — vector art on multiple artboards from a spec, text and colour edits, CSV data-set variants, per-artboard PNG, outlined SVG, multi-page PDF and AI/EPS/DXF export, folder conversion, info read-back verified
 
 #### Documents & publishing
 - `calibre`: manage e-books and calibre libraries from the CLI — EPUB/AZW3/KEPUB/PDF/DOCX/Markdown conversion with cover, TOC and metadata, EPUB builds from Markdown chapters, PDF-to-EPUB repair with a quality report, and bulk library metadata edits with dry run, backup and read-back
