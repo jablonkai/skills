@@ -1,8 +1,9 @@
 ---
 name: qgis
-description: 'Automate QGIS 4 headless on macOS with PyQGIS and qgis_process: load GPX, GeoJSON, GeoPackage, Shapefile and GeoTIFF data, reproject (WGS 84, UTM, EOV/EPSG:23700, Web Mercator), run Processing algorithms (buffer, clip, merge, dissolve, kernel-density heatmaps), style layers (e.g. elevation-coloured route segments) and export print layouts to PDF/PNG with legend, scale bar and north arrow, inspecting any GIS file (layers, feature counts, CRS, extent). Use whenever a task needs real GIS processing or a cartographic map: "render this GPX route as a PDF map coloured by elevation", "heatmap from all my GPX runs", "clip this layer to the county and save it as GeoPackage in EOV", "export the print layout from my .qgz", "which CRS and how many features are in this gpkg", "qgis_process", Hungarian "készíts térképet a GPX-ből". Not for GPX stats without a map (plain Python), DUV race data (duv), hand-drawn poster maps (inkscape), 3D terrain (blender), web maps (Leaflet) or diagrams (drawio).'
+description: 'Automate QGIS 4 headless on macOS with PyQGIS and qgis_process: load GPX, GeoJSON, GeoPackage, Shapefile and GeoTIFF data, reproject (WGS 84, UTM, EOV/EPSG:23700, Web Mercator), run Processing algorithms (buffer, clip, merge, dissolve, kernel-density heatmaps), style layers (e.g. elevation-coloured route segments) and export print layouts to PDF/PNG with legend, scale bar and north arrow, inspecting any GIS file (layers, feature counts, CRS, extent). Use whenever a task needs real GIS processing or a cartographic map: "render this GPX route as a PDF map coloured by elevation", "heatmap from all my GPX runs", "clip this layer to the county and save it as GeoPackage in EOV", "export the print layout from my .qgz", "which CRS and how many features are in this gpkg", "qgis_process". Not for GPX stats without a map (plain Python), DUV race data (duv), hand-drawn poster maps (inkscape), 3D terrain (blender), web maps (Leaflet) or diagrams (drawio).'
 summary: "automate QGIS 4 headless with PyQGIS and qgis_process — GPX/GeoJSON/GeoPackage/raster loading, reprojection, Processing algorithms (buffer, clip, heatmap), graduated styling, and print-layout PDF/PNG map export with verified feature counts and CRS"
 category: gis
+compatibility: "Built for QGIS 4.2.3 (Qt 6.11, GDAL 3.13, PROJ 9.8) on macOS 27."
 risk: low
 tags:
   - qgis
@@ -14,7 +15,7 @@ tags:
   - maps
   - heatmap
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # QGIS Automation

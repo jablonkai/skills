@@ -1,8 +1,9 @@
 ---
 name: gimp
-description: 'Remote-control a running GIMP (the open-source image editor) by Python script through its built-in Script-Fu server — build documents and layer stacks, fill, gradient and brush-stroke drawables, add text layers, attach non-destructive GEGL filters, cut out with masks and selections, retouch photos, and export PNG/JPEG/TIFF/GIF/.xcf or batch-convert whole folders in the session the user is looking at. Use whenever the user wants to create or edit a GIMP document (.xcf), composite, retouch or resize a raster image, batch-process a folder of images, script or automate GIMP, export layers separately, or says "GIMP", "xcf", "gimp script", "batch resize these photos", "open this in GIMP" — even if they do not mention scripting. Also covers Hungarian: "csinálj egy képet GIMP-ben", "vezéreld a GIMP-et", "rétegek", "exportáld PNG-be", "kötegelt átméretezés". Not for natural-media painting (use krita or rebelle), vector and layout design (use affinity), or keyframed motion graphics (use cavalry).'
+description: 'Remote-control a running GIMP (the open-source image editor) by Python script through its built-in Script-Fu server — build documents and layer stacks, fill, gradient and brush-stroke drawables, add text layers, attach non-destructive GEGL filters, cut out with masks and selections, retouch photos, and export PNG/JPEG/TIFF/GIF/.xcf or batch-convert whole folders in the session the user is looking at. Use whenever the user wants to create or edit a GIMP document (.xcf), composite, retouch or resize a raster image, batch-process a folder of images, script or automate GIMP, export layers separately, or says "GIMP", "xcf", "gimp script", "batch resize these photos", "open this in GIMP" — even if they do not mention scripting. Not for natural-media painting (use krita or rebelle), vector and layout design (use affinity), or keyframed motion graphics (use cavalry).'
 summary: "remote-control a running GIMP by Python through its built-in Script-Fu server — layer stacks, selections and masks, brush and gradient drawing, text layers, non-destructive GEGL filters, and PNG/JPEG/.xcf export or batch conversion in the live session"
 category: design-automation
+compatibility: "Built for GIMP 3.2.6 (Script-Fu server, Python 3 plug-ins)."
 risk: medium
 tags:
     - gimp
@@ -11,7 +12,7 @@ tags:
     - layers
     - scripting
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # GIMP Control

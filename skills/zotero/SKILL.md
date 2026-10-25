@@ -3,6 +3,7 @@ name: zotero
 description: 'Search, export, cite and add to a Zotero library from the command line through the running Zotero app''s local API: find items by topic, tag, author or collection and summarise their metadata, export a collection to BibTeX, BibLaTeX, CSL-JSON or RIS for LaTeX, Typst or Pandoc with validated citation keys, render bibliographies and in-text citations in any CSL style (APA, Chicago, IEEE, MLA …), and add papers by DOI or books by ISBN to a collection without duplicates, with undo. Uses Better BibTeX when installed. Use for "export my Thesis collection to refs.bib", "what do I have in Zotero on transformer pruning", "APA bibliography of my sleep papers", "add these three DOIs to my Reading collection", "cite these in IEEE style", "make a .bib from my reference manager for Typst". Not for Mendeley, EndNote or JabRef, fixing a .bib with no Zotero library involved, searching arXiv or Google Scholar for new papers, converting PDFs (markitdown), or writing the paper itself.'
 summary: "search, export and grow a Zotero library via its local API — topic and collection searches with metadata summaries, BibTeX/BibLaTeX/CSL-JSON export for LaTeX and Typst, CSL-styled citations and bibliographies, adding papers by DOI and books by ISBN with undo"
 category: research
+compatibility: "Built for Zotero 10.0.6 with Better BibTeX 9.0.71 on macOS 27."
 risk: medium
 tags:
     - zotero
@@ -12,7 +13,7 @@ tags:
     - references
     - research
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Zotero from the command line

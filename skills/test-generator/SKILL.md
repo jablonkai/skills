@@ -1,8 +1,9 @@
 ---
 name: test-generator
-description: "Write tests for existing code and bring it to at least 80% coverage: unit, integration and UI tests, edge cases and error paths, regression tests for fixed bugs, and measured coverage gap analysis. Detects the test framework from the build files and follows the project's conventions — Kotlin/KMP (kotlin.test, coroutines-test, Turbine, MockK, Kover), Compose Multiplatform, Flutter/Dart, Swift (Swift Testing, XCTest), Rust (cargo test, proptest), C++ (GoogleTest, Catch2), and secondarily Jest/Vitest/node:test, pytest/unittest, Go and JUnit. Use when someone says 'write tests for this', 'add unit tests', 'test this function', 'what is not covered', 'improve test coverage', 'write a regression test for this bug', or the Hungarian 'írj teszteket', 'teszteld le ezt', 'mi nincs letesztelve', 'növeld a lefedettséget'. Not for auditing a whole project (code-analyzer), nor for root-causing a crash or failing test (error-debugging)."
+description: "Write tests for existing code and bring it to at least 80% coverage: unit, integration and UI tests, edge cases and error paths, regression tests for fixed bugs, and measured coverage gap analysis. Detects the test framework from the build files and follows the project's conventions — Kotlin/KMP (kotlin.test, coroutines-test, Turbine, MockK, Kover), Compose Multiplatform, Flutter/Dart, Swift (Swift Testing, XCTest), Rust (cargo test, proptest), C++ (GoogleTest, Catch2), and secondarily Jest/Vitest/node:test, pytest/unittest, Go and JUnit. Use when someone says 'write tests for this', 'add unit tests', 'test this function', 'what is not covered', 'improve test coverage', 'write a regression test for this bug'. Not for auditing a whole project (code-analyzer), nor for root-causing a crash or failing test (error-debugging)."
 summary: "write unit, integration and UI tests for existing code to at least 80% coverage — framework detection from the build files, case selection for boundaries and error paths, correct source-set placement, and measured coverage gap analysis across Kotlin/KMP, Compose, Flutter/Dart, Swift, Rust and C++"
 category: testing
+compatibility: "Not tied to an application version; uses the target project's own toolchain (Gradle, Flutter, Xcode, Cargo, CMake and the like)."
 risk: low
 tags:
   - testing
@@ -18,7 +19,7 @@ tags:
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write, Skill
 argument-hint: "[file, function, class, or module to test]"
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # test-generator

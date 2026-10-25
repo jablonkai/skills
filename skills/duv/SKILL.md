@@ -1,8 +1,9 @@
 ---
 name: duv
-description: "Search, retrieve and analyse data from the DUV Ultramarathon Statistics database (statistik.d-u-v.org, 10M+ results, 2.4M+ runners, 115k+ events). Use whenever the user asks about ultramarathon results, runners, races or rankings: national, continental and age-group records and their progression, personal bests, race results and course records, race history and winners, race calendars, IAU championship medallists, head-to-head comparisons, lifetime or yearly ultra mileage, oldest finishers, women who won outright, doping cases. Examples: 'Hungarian 100 km record', 'Spartathlon 2024 results', 'top 24 h women in 2024', 'course record at Ultrabalaton', 'who ran the most km in 2025', 'compare runner A and B'. Also Hungarian: 'országos csúcs', 'magyar rekord', 'pályacsúcs', 'ultrafutó eredmények', 'ki futott a legtöbbet', 'VB-érmesek'. Not for training data from Garmin/Strava or ITRA trail scores."
+description: "Search, retrieve and analyse data from the DUV Ultramarathon Statistics database (statistik.d-u-v.org, 10M+ results, 2.4M+ runners, 115k+ events). Use whenever the user asks about ultramarathon results, runners, races or rankings: national, continental and age-group records and their progression, personal bests, race results and course records, race history and winners, race calendars, IAU championship medallists, head-to-head comparisons, lifetime or yearly ultra mileage, oldest finishers, women who won outright, doping cases. Examples: 'Hungarian 100 km record', 'Spartathlon 2024 results', 'top 24 h women in 2024', 'course record at Ultrabalaton', 'who ran the most km in 2025', 'compare runner A and B'. Not for training data from Garmin/Strava or ITRA trail scores."
 summary: "search and analyse the DUV Ultramarathon Statistics database (statistik.d-u-v.org) — runner profiles, event results and course records, rankings, calendars, national/continental records and their progression, IAU championships, head-to-head and mileage statistics"
 category: data-lookup
+compatibility: "Built against the DUV Ultramarathon Statistics site (statistik.d-u-v.org) as of 2026; needs Python 3 and network access."
 risk: low
 tags:
   - ultrarunning
@@ -14,7 +15,7 @@ tags:
 allowed-tools: Bash, Read, WebFetch
 argument-hint: "[runner name, event name, ranking or record query]"
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # DUV Ultramarathon Statistics

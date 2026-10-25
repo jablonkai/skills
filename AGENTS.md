@@ -14,9 +14,10 @@ house rules on top of that format; when the two disagree, the spec wins.
 ## AI agent guidance
 
 - `skills/<name>/` is the main workspace surface; changes to skills belong there.
-- Every skill directory must contain exactly one `SKILL.md` with YAML frontmatter `name:`, `description:`, `summary:`, `category:` and `metadata.version`.
+- Every skill directory must contain exactly one `SKILL.md` with YAML frontmatter `name:`, `description:`, `summary:`, `category:`, `compatibility:` and `metadata.version`.
 - Any change to a skill's files must raise its `metadata.version` (see [Versioning](#versioning)).
-- The `name:` value must match the directory name. The `description:` value must explain what the skill does and when to use it.
+- The `name:` value must match the directory name. The `description:` value must explain what the skill does and when to use it, in English only — no Hungarian (or other non-English) trigger phrases.
+- The `compatibility:` value must name the application versions the skill was built and verified for (see [Compatibility](#compatibility)); update it whenever the skill is re-verified against a newer release.
 - Validate every change with `bash .github/scripts/validate.sh`, and any change under
   `scripts/` with `bash .github/scripts/lint.sh` as well.
 - The **Available Skills** sections of `README.md` and `AGENTS.md` are generated — never
@@ -112,7 +113,7 @@ house rules on top of that format; when the two disagree, the spec wins.
 - Every skill dir must contain exactly one `SKILL.md`
 - The frontmatter `name:` **must** equal the directory name
 - Required YAML frontmatter fields: `name`, `description`, `summary`, `category`,
-  `metadata.version`
+  `compatibility`, `metadata.version`
 - Optional fields: `risk`, `tags`, `allowed-tools`, `argument-hint`, `license`
 - No other top-level frontmatter keys, and no `metadata:` key besides `version` — the
   validator rejects unknown fields so that tooling-generated keys (e.g. the repo URL and
@@ -126,6 +127,7 @@ house rules on top of that format; when the two disagree, the spec wins.
 | `description` | yes | what the skill does **and** when to use it (see below) — max 1024 characters |
 | `summary` | yes | single line, lowercase start, no trailing period — the catalog entry (see below) |
 | `category` | yes | single token grouping the skill (e.g. `testing`, `git`, `3d`), mapped to a README theme (see below) |
+| `compatibility` | yes | the application versions the skill was built for (see below) — max 500 characters |
 | `metadata.version` | yes | the skill's own SemVer, quoted `MAJOR.MINOR.PATCH` (e.g. `"1.2.0"`) — see [Versioning](#versioning) |
 | `risk` | no | one of `low`, `medium`, `high` — see the scale below |
 | `tags` | no | YAML list of lowercase keywords |
@@ -176,9 +178,26 @@ skill, so it carries the whole triggering burden:
   representative phrasings beats an exhaustive list of variants in the one field that
   is always in context
 - say explicitly when *not* to use it if a neighbouring skill overlaps
+- write it in English only — no Hungarian trigger phrases, even when the user often
+  asks in Hungarian; the agent matches the task's meaning, not its language. Proper
+  names (e.g. an organisation's official name) are the only exception
 
 Use an existing skill (e.g. [code-analyzer](skills/code-analyzer/SKILL.md)) as
 a template.
+
+### Compatibility
+
+`compatibility` is the Agent Skills spec field for environment requirements. Here it
+records which application versions the skill was built and verified for, so a skill
+that breaks after an app update can be traced to the version change:
+
+- name the app and its exact version, plus the OS when it matters, e.g.
+  `"Built for Blender 5.2.2 LTS (bundled Python 3.13)."` or
+  `"Built for Keynote Creator Studio 15.4 on macOS 27."`
+- add the companion tools and their versions the skill depends on (osxphotos, Node,
+  obs-websocket, Better BibTeX, …)
+- keep the body's *Verified against* line in step with it
+- a skill not tied to any application says so (e.g. the project's own toolchain)
 
 ### The generated catalog (`summary` and `category`)
 

@@ -1,12 +1,13 @@
 ---
 name: cadcraft
-description: 'Draft, edit, inspect and convert 2D CAD drawings with CADCraft, the AutoCAD-style drafting app, headless through cadcraft-cli: layers, filleted polylines, circles, text, hatches, dimensions and attributed title blocks from a JSON spec, JSON commands or .scr scripts; title-block fill, text replace, layer moves and purge on existing DXF/DWG; DXF↔DWG and PDF/SVG/PNG export with explicit framing; hash-checked folder batches; results read back with info and ezdxf. Use when the user mentions CADCraft or cadcraft-cli, or asks for an AutoCAD-like job in it: "draw a dimensioned mounting plate in CADCraft", "convert these DWGs to PDF with CADCraft", "fill the title block", "run this .scr script", "CADCraft-ban rajzolj egy méretezett lemezt", "konvertáld a DWG-ket PDF-be CADCrafttal". Not for QCAD or a DXF job that does not name CADCraft (qcad), 3D or parametric parts and STEP/STL (freecad), CSG solids (brl-cad), PCBs (kicad), vector art (vectorcraft, inkscape) or diagrams (drawio).'
+description: 'Draft, edit, inspect and convert 2D CAD drawings with CADCraft, the AutoCAD-style drafting app, headless through cadcraft-cli: layers, filleted polylines, circles, text, hatches, dimensions and attributed title blocks from a JSON spec, JSON commands or .scr scripts; title-block fill, text replace, layer moves and purge on existing DXF/DWG; DXF↔DWG and PDF/SVG/PNG export with explicit framing; hash-checked folder batches; results read back with info and ezdxf. Use when the user mentions CADCraft or cadcraft-cli, or asks for an AutoCAD-like job in it: "draw a dimensioned mounting plate in CADCraft", "convert these DWGs to PDF with CADCraft", "fill the title block", "run this .scr script". Not for QCAD or a DXF job that does not name CADCraft (qcad), 3D or parametric parts and STEP/STL (freecad), CSG solids (brl-cad), PCBs (kicad), vector art (vectorcraft, inkscape) or diagrams (drawio).'
 summary: "draft and convert 2D CAD drawings headless with cadcraft-cli — layers, filleted polylines, hatches, dimensions and attributed title blocks from a JSON spec, JSON commands or .scr scripts, DXF/DWG/PDF/SVG/PNG export with explicit framing, folder batches, info and ezdxf read-back verified"
 category: cad
+compatibility: "Built for cadcraft-cli 0.13.0 and CADCraft.app 0.13.0 on macOS; pre-1.0, so command ids may change."
 risk: medium
 tags: [cadcraft, cad, dxf, dwg, autocad, drafting, title-block, headless]
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # CADCraft via cadcraft-cli

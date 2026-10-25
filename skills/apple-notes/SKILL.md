@@ -1,8 +1,9 @@
 ---
 name: apple-notes
-description: 'Search, export and write Apple Notes on macOS through its AppleScript/JXA dictionary: find notes by text, folder or date and list their titles and folders, export a note or a whole folder to Markdown files with their images and attachments, and create a note or append to one from Markdown (headings, lists, checklists, tables, links, images), with read-back verification. Read-only by default; never deletes notes; skips locked notes. Use for "export my Recipes folder in Notes to Markdown", "find every note that mentions the invoice number", "turn this Markdown file into an Apple Note", "append today''s log to my Journal note", "back up my notes as Markdown files", "which notes did I edit last week", Hungarian "exportáld a jegyzeteimet Markdownba", "keresd meg a jegyzeteimben". Not for Obsidian vaults or plain Markdown files on disk (obsidian-*), converting PDFs or Office files to Markdown (markitdown), Pages documents (pages), Reminders or Calendar items, or Evernote/OneNote.'
+description: 'Search, export and write Apple Notes on macOS through its AppleScript/JXA dictionary: find notes by text, folder or date and list their titles and folders, export a note or a whole folder to Markdown files with their images and attachments, and create a note or append to one from Markdown (headings, lists, checklists, tables, links, images), with read-back verification. Read-only by default; never deletes notes; skips locked notes. Use for "export my Recipes folder in Notes to Markdown", "find every note that mentions the invoice number", "turn this Markdown file into an Apple Note", "append today''s log to my Journal note", "back up my notes as Markdown files", "which notes did I edit last week". Not for Obsidian vaults or plain Markdown files on disk (obsidian-*), converting PDFs or Office files to Markdown (markitdown), Pages documents (pages), Reminders or Calendar items, or Evernote/OneNote.'
 summary: "search, export and write Apple Notes via JXA — text, folder and date searches, folder export to Markdown with attachments, notes created or appended from Markdown with checklists and tables, read-back verified"
 category: mac-automation
+compatibility: "Built for Notes 4.13 on macOS 27.0.1 (JXA)."
 risk: medium
 tags:
     - notes
@@ -12,7 +13,7 @@ tags:
     - macos
     - markdown
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Apple Notes via JXA

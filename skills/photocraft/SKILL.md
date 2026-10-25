@@ -1,12 +1,13 @@
 ---
 name: photocraft
-description: 'Automate PhotoCraft, the Photoshop-style layered image editor, headless with photocraft-cli: build layered compositions (image, text, shape, fill and adjustment layers, layer styles) from a spec, apply filters and adjustments, edit PSD/.pcraft templates (text, visibility, smart-object images), export layer comps, layers or CSV data-set variants, batch-process folders with JSON actions, Photoshop .atn sets or .pcdroplet droplets, and convert formats, all verified by an info read-back and a rendered preview. Use when the user mentions PhotoCraft, photocraft-cli, a .pcraft file or a .pcdroplet droplet, or wants a PSD edited, a layered image built or an action run over a folder with PhotoCraft: "make a 1080x1080 post in PhotoCraft", "run Vintage.atn over this folder", "export every layer comp", "PhotoCraftban méretezd át a képeket". Not for GIMP (gimp), Krita (krita), Pixelmator Pro (pixelmator-pro), Affinity (affinity), SVG (inkscape), or plain resizing with no PhotoCraft (sips/ImageMagick).'
+description: 'Automate PhotoCraft, the Photoshop-style layered image editor, headless with photocraft-cli: build layered compositions (image, text, shape, fill and adjustment layers, layer styles) from a spec, apply filters and adjustments, edit PSD/.pcraft templates (text, visibility, smart-object images), export layer comps, layers or CSV data-set variants, batch-process folders with JSON actions, Photoshop .atn sets or .pcdroplet droplets, and convert formats, all verified by an info read-back and a rendered preview. Use when the user mentions PhotoCraft, photocraft-cli, a .pcraft file or a .pcdroplet droplet, or wants a PSD edited, a layered image built or an action run over a folder with PhotoCraft: "make a 1080x1080 post in PhotoCraft", "run Vintage.atn over this folder", "export every layer comp". Not for GIMP (gimp), Krita (krita), Pixelmator Pro (pixelmator-pro), Affinity (affinity), SVG (inkscape), or plain resizing with no PhotoCraft (sips/ImageMagick).'
 summary: "automate PhotoCraft headless with photocraft-cli — layered compositions with text, shape and adjustment layers and styles, filters, PSD template edits, layer-comp, layer and CSV data-set export, folder batches from JSON actions, .atn sets or droplets, info read-back verified"
 category: design-automation
+compatibility: "Built for photocraft-cli 0.16.0 and PhotoCraft.app 0.16.0 on macOS; pre-1.0, so command ids may change."
 risk: medium
 tags: [photocraft, psd, image-editing, layers, batch, photoshop-actions, droplet, headless]
 metadata:
-  version: "1.2.0"
+  version: "1.2.1"
 ---
 
 # PhotoCraft via photocraft-cli

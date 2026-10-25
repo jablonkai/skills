@@ -3,6 +3,7 @@ name: sonic-pi
 description: 'Live-code music with Sonic Pi 5 from the command line: boot a headless Sonic Pi session (no GUI needed), write and run Sonic Pi Ruby-DSL code (live_loop, synths, samples, FX, chords and scales), re-evaluate a running live_loop to change it without stopping the music, record exact-length takes to WAV, stop jobs, and report runtime and syntax errors with line numbers; can also send code to an already open Sonic Pi window. Use for "make a lo-fi beat in Sonic Pi and save it as a WAV", "live code a techno loop", "change the bass line in the running loop", "turn this CSV into sound", "sonify this data", "why does my Sonic Pi code throw an error". Not for transcoding or compressing existing audio/video files (use handbrake), editing or mixing audio in a video timeline (use davinci-resolve or final-cut-pro), screen or stream recording (use obs), generic Ruby scripts, or DAW projects (GarageBand, Logic, Ableton).'
 summary: "live-code music in Sonic Pi 5 via a headless OSC session — run and live re-evaluate live_loops, record exact-length WAV takes, stop jobs, surface runtime and syntax errors with line numbers"
 category: audio
+compatibility: "Built for Sonic Pi 5.0.0 on macOS 27 (arm64)."
 risk: medium
 tags:
     - sonic-pi
@@ -12,7 +13,7 @@ tags:
     - audio
     - wav
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Sonic Pi via a headless OSC session

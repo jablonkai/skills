@@ -1,8 +1,9 @@
 ---
 name: apple-reminders
-description: 'List, create, complete, move and clean up Apple Reminders on macOS through EventKit (AppleScript as a slow fallback): open, overdue, due-today, upcoming and completed reminders grouped by list as a table, JSON or CSV; bulk creation from a Markdown or text checklist with due dates, priorities and alerts; matched completion, moves between lists and cleanup of old completed items with a preview first; all read back to verify. Read-only by default. Use for "what reminders are overdue", "show my open to-dos by list", "turn this checklist into a Reminders list with due dates", "remind me to call Anna on Friday at 9", "mark all the invoice reminders done", "move everything from Inbox to Work", "clear out completed reminders older than a year", Hungarian "mik a lejárt emlékeztetőim", "csinálj emlékeztető listát ebből a teendőlistából". Not for calendar events (apple-calendar), Apple Notes, Microsoft To Do, Todoist, Things or OmniFocus, TODO comments in code, or scheduling agents or cron jobs.'
+description: 'List, create, complete, move and clean up Apple Reminders on macOS through EventKit (AppleScript as a slow fallback): open, overdue, due-today, upcoming and completed reminders grouped by list as a table, JSON or CSV; bulk creation from a Markdown or text checklist with due dates, priorities and alerts; matched completion, moves between lists and cleanup of old completed items with a preview first; all read back to verify. Read-only by default. Use for "what reminders are overdue", "show my open to-dos by list", "turn this checklist into a Reminders list with due dates", "remind me to call Anna on Friday at 9", "mark all the invoice reminders done", "move everything from Inbox to Work", "clear out completed reminders older than a year". Not for calendar events (apple-calendar), Apple Notes, Microsoft To Do, Todoist, Things or OmniFocus, TODO comments in code, or scheduling agents or cron jobs.'
 summary: "list, create, complete and move Apple Reminders via EventKit and JXA — open, overdue and completed reminders by list, bulk creation from Markdown checklists with due dates, matched completion and cleanup with preview, read-back verified"
 category: mac-automation
+compatibility: "Built for Reminders 7.0 on macOS 27.0.1 (EventKit and JXA)."
 risk: medium
 tags:
     - reminders
@@ -12,7 +13,7 @@ tags:
     - macos
     - todo
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Apple Reminders via EventKit

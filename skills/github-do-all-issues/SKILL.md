@@ -1,8 +1,9 @@
 ---
 name: github-do-all-issues
-description: "Work through a repo's open GitHub issues autonomously: confirm the queue once, then for each issue implement, verify, self-review, and ship it as its own branch, commit and pull request (Closes #N) without stopping between issues — PRs are opened, never merged. Issues that are ambiguous, too large or can't be made green are skipped with a reason instead of blocking the run, and everything ends in one report. Use when someone wants the backlog done unattended: 'do all the issues and open PRs', 'work through every open issue on your own', 'clear the backlog overnight', 'ship a PR for each open bug', 'csináld meg az összes issue-t és nyiss mindegyikhez PR-t', 'menj végig a backlogon megállás nélkül', 'oldd meg az összes nyitott issue-t önállóan'. Not when the user wants to review each implementation before it is committed — that is github-do-issue (it stops after every issue); not for filing or triaging issues (github-issues)."
+description: "Work through a repo's open GitHub issues autonomously: confirm the queue once, then for each issue implement, verify, self-review, and ship it as its own branch, commit and pull request (Closes #N) without stopping between issues — PRs are opened, never merged. Issues that are ambiguous, too large or can't be made green are skipped with a reason instead of blocking the run, and everything ends in one report. Use when someone wants the backlog done unattended: 'do all the issues and open PRs', 'work through every open issue on your own', 'clear the backlog overnight', 'ship a PR for each open bug'. Not when the user wants to review each implementation before it is committed — that is github-do-issue (it stops after every issue); not for filing or triaging issues (github-issues)."
 summary: "work through every open GitHub issue unattended — confirm the queue once, then implement, verify and open one PR per issue, skipping blocked ones with a reason"
 category: development-workflow
+compatibility: "Requires an authenticated GitHub CLI (gh) 2.x and git; verified with gh 2.103.2."
 risk: medium
 tags:
   - github
@@ -13,7 +14,7 @@ tags:
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write
 argument-hint: "[<issue-number-or-url> ... | --label <name> | --milestone <name>]  (none = all open issues)"
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # github-do-all-issues

@@ -1,12 +1,13 @@
 ---
 name: pixelmator-pro
-description: 'Drive Pixelmator Pro on macOS through its AppleScript dictionary (osascript): remove backgrounds and export transparent PNG cut-outs, ML Super Resolution upscaling, ML Enhance, denoise and auto-adjust, resize and convert whole folders to JPEG/PNG/HEIC/WebP/PSD at a set quality, compose layered graphics (image, text, shape layers) like social posts and banners at exact sizes, fill .pxd templates, colour adjustments and effects. Use when the user mentions Pixelmator, or wants Apple-native ML photo edits or a layered image built by script on a Mac: "remove the background from these product photos", "upscale this folder 3x", "make a 1080x1350 Instagram post with this photo and a headline", "batch-export to WebP at 80%", Hungarian "vágd ki a hátteret", "nagyítsd fel a képeket". Not for GIMP (gimp), painting or brush strokes (krita, rebelle), Affinity files (affinity), SVG/vector art (inkscape), the Photos library (apple-photos), or plain format conversion with no edits (sips).'
+description: 'Drive Pixelmator Pro on macOS through its AppleScript dictionary (osascript): remove backgrounds and export transparent PNG cut-outs, ML Super Resolution upscaling, ML Enhance, denoise and auto-adjust, resize and convert whole folders to JPEG/PNG/HEIC/WebP/PSD at a set quality, compose layered graphics (image, text, shape layers) like social posts and banners at exact sizes, fill .pxd templates, colour adjustments and effects. Use when the user mentions Pixelmator, or wants Apple-native ML photo edits or a layered image built by script on a Mac: "remove the background from these product photos", "upscale this folder 3x", "make a 1080x1350 Instagram post with this photo and a headline", "batch-export to WebP at 80%". Not for GIMP (gimp), painting or brush strokes (krita, rebelle), Affinity files (affinity), SVG/vector art (inkscape), the Photos library (apple-photos), or plain format conversion with no edits (sips).'
 summary: "remote-control Pixelmator Pro via AppleScript — layered compositions with image, text and shape layers, adjustments and effects, ML Super Resolution, Remove Background and Enhance, .pxd template fill, and single-file or folder-batch export to PNG, JPEG, HEIC, WebP and PSD"
 category: design-automation
+compatibility: "Built for Pixelmator Pro 3.8 (Mac App Store) on macOS 27."
 risk: medium
 tags: [pixelmator, applescript, macos, photo, background-removal, super-resolution, batch, image-editing]
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Pixelmator Pro via AppleScript

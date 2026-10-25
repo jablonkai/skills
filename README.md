@@ -160,10 +160,10 @@ evaluate whether it triggers reliably. It ships with Claude Code as the `skill-c
 skill. Then apply this repo's conventions:
 
 1. Create `skills/<kebab-name>/SKILL.md` with `name`, `description`, `summary`,
-   `category` and `metadata.version` (`"1.0.0"`) frontmatter. The `name` must match the
-   directory name.
+   `category`, `compatibility` (the app versions the skill is built for) and
+   `metadata.version` (`"1.0.0"`) frontmatter. The `name` must match the directory name.
 2. Write the description so it triggers reliably — say what the skill does *and* when to
-   use it, with concrete trigger phrases. Keep `summary` to the one line that should
+   use it, with concrete trigger phrases, in English only. Keep `summary` to the one line that should
    appear in the catalog.
 3. Keep `SKILL.md` short; push long reference material into `references/` and
    deterministic work into `scripts/`.
@@ -191,7 +191,7 @@ bash .github/scripts/validate.sh
 
 The validator checks:
 
-- required frontmatter fields (`name`, `description`, `summary`, `category`)
+- required frontmatter fields (`name`, `description`, `summary`, `category`, `compatibility`)
 - frontmatter `name` matches the directory name
 - `metadata.version` is `MAJOR.MINOR.PATCH`, and every skill changed since the base
   branch has a higher version than there

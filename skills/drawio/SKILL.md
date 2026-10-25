@@ -1,8 +1,9 @@
 ---
 name: drawio
-description: 'Create and edit draw.io (diagrams.net) diagrams — either by remote-controlling the running draw.io desktop app with JavaScript over its DevTools port (shapes appear live in the window the user is looking at, then get laid out, saved and exported), or, when live control is not possible, by writing .drawio XML files directly and rendering them headless with the draw.io CLI. Covers flowcharts, architecture and network diagrams, swimlanes, sequence, UML and ER diagrams, multi-page files, ELK auto-layout, Mermaid/CSV to draw.io conversion, and PNG/SVG/PDF export. Use whenever the user mentions draw.io, diagrams.net, .drawio files, or asks to draw, sketch or diagram an architecture, process, flow, org chart or data model as an editable diagram — even if they do not name the tool. Also covers Hungarian: "rajzold meg draw.io-ban", "csinálj egy diagramot", "folyamatábra", "architektúra ábra", "vezéreld a draw.io-t", "exportáld PNG-be". Not for charts of numeric data (use a plotting library) or Obsidian .canvas files.'
+description: 'Create and edit draw.io (diagrams.net) diagrams — either by remote-controlling the running draw.io desktop app with JavaScript over its DevTools port (shapes appear live in the window the user is looking at, then get laid out, saved and exported), or, when live control is not possible, by writing .drawio XML files directly and rendering them headless with the draw.io CLI. Covers flowcharts, architecture and network diagrams, swimlanes, sequence, UML and ER diagrams, multi-page files, ELK auto-layout, Mermaid/CSV to draw.io conversion, and PNG/SVG/PDF export. Use whenever the user mentions draw.io, diagrams.net, .drawio files, or asks to draw, sketch or diagram an architecture, process, flow, org chart or data model as an editable diagram — even if they do not name the tool. Not for charts of numeric data (use a plotting library) or Obsidian .canvas files.'
 summary: "remote-control the draw.io desktop app with JavaScript over its DevTools port — live shape building, ELK auto-layout, pages, save — or author .drawio XML directly and export PNG/SVG/PDF or convert Mermaid/CSV with the headless CLI"
 category: design-automation
+compatibility: "Built for draw.io desktop 31.5.2; needs Node 22+."
 risk: medium
 tags:
     - drawio
@@ -11,7 +12,7 @@ tags:
     - architecture
     - scripting
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # draw.io Control

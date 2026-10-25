@@ -1,8 +1,9 @@
 ---
 name: error-debugging
-description: "Analyze a stack trace, crash report, panic, or error log; find the failing frame and the root cause; then propose a fix and a way to verify it. Covers Kotlin/JVM/Android (coroutines, ANRs, R8-obfuscated traces), KMP/Compose Multiplatform, Flutter/Dart (FlutterError, RenderFlex overflow), Swift on iOS/macOS (.ips reports, EXC_BAD_ACCESS), Rust panics, C++ segfaults and sanitizer output, plus Python, JS/TS, Go and Java. Use when someone pastes a stack trace, crash log or panic — even with no question attached — or says 'why does this crash', 'what does this error mean', 'debug this exception', 'root-cause this trace', 'symbolicate this crash', 'deobfuscate this trace', or the Hungarian 'miért crashel', 'mit jelent ez a hiba', 'elemezd ezt a stack trace-t', 'nézd meg ezt a crash logot'. Not for auditing a whole project for latent bugs (that is code-analyzer), nor for a red CI run whose log has not been fetched yet (that is github-fix-ci-error)."
+description: "Analyze a stack trace, crash report, panic, or error log; find the failing frame and the root cause; then propose a fix and a way to verify it. Covers Kotlin/JVM/Android (coroutines, ANRs, R8-obfuscated traces), KMP/Compose Multiplatform, Flutter/Dart (FlutterError, RenderFlex overflow), Swift on iOS/macOS (.ips reports, EXC_BAD_ACCESS), Rust panics, C++ segfaults and sanitizer output, plus Python, JS/TS, Go and Java. Use when someone pastes a stack trace, crash log or panic — even with no question attached — or says 'why does this crash', 'what does this error mean', 'debug this exception', 'root-cause this trace', 'symbolicate this crash', 'deobfuscate this trace'. Not for auditing a whole project for latent bugs (that is code-analyzer), nor for a red CI run whose log has not been fetched yet (that is github-fix-ci-error)."
 summary: "analyze a stack trace, crash report, panic or error log down to its root cause, then propose a fix and a way to verify it — Kotlin/Android, KMP/Compose, Flutter/Dart, Swift, Rust and C++, including deobfuscation and symbolication of release traces"
 category: debugging
+compatibility: "Not tied to an application version; uses the target project's own toolchain (Gradle, Flutter, Xcode, Cargo, CMake and the like)."
 risk: low
 tags:
   - debugging
@@ -17,7 +18,7 @@ tags:
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write
 argument-hint: "[stack trace, crash log, or path to a log/crash file]"
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # error-debugging

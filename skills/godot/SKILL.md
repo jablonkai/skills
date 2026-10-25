@@ -1,8 +1,9 @@
 ---
 name: godot
-description: 'Build, run, test and export Godot 4 projects headless from the CLI — scaffold a project, author .tscn scenes, .gd scripts and project.godot as text, import, parse-check and run with errors read from the log, test gameplay and UI signals with headless test scripts, capture frames with Movie Maker, and export Web or macOS builds from export presets. Use whenever the user wants a small 2D or 3D game or prototype made in Godot, a Godot project run or debugged ("why does my scene error", "Node not found"), a Godot UI or signals wired up, a headless test, a screenshot of a scene, or an export to Web/HTML5 or macOS, or mentions Godot, GDScript, .tscn or project.godot. Hungarian: "csinálj egy Godot játékot", "futtasd headless", "exportáld webre". Not for Unity, Unreal or GameMaker; 3D modeling or rendering (use blender); 2D motion graphics (use cavalry); plain JavaScript/canvas or Phaser web games; Godot C#/.NET projects; sprite painting (use krita or gimp).'
+description: 'Build, run, test and export Godot 4 projects headless from the CLI — scaffold a project, author .tscn scenes, .gd scripts and project.godot as text, import, parse-check and run with errors read from the log, test gameplay and UI signals with headless test scripts, capture frames with Movie Maker, and export Web or macOS builds from export presets. Use whenever the user wants a small 2D or 3D game or prototype made in Godot, a Godot project run or debugged ("why does my scene error", "Node not found"), a Godot UI or signals wired up, a headless test, a screenshot of a scene, or an export to Web/HTML5 or macOS, or mentions Godot, GDScript, .tscn or project.godot. Not for Unity, Unreal or GameMaker; 3D modeling or rendering (use blender); 2D motion graphics (use cavalry); plain JavaScript/canvas or Phaser web games; Godot C#/.NET projects; sprite painting (use krita or gimp).'
 summary: "build, run, test and export Godot 4 projects headless from the CLI — author scenes, GDScript and project settings as text, catch script errors from the log, test gameplay and UI signals with headless test scripts, capture Movie Maker frames, export Web and macOS builds"
 category: game-dev
+compatibility: "Built for Godot 4.7.2 (GDScript, not C#/.NET) on macOS."
 risk: low
 tags:
     - godot
@@ -11,7 +12,7 @@ tags:
     - headless
     - export
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Godot Control

@@ -1,8 +1,9 @@
 ---
 name: krita
-description: 'Remote-control a running Krita (the open-source digital painting app) by Python script through a small local bridge — build documents, paint real brush strokes with the current preset or push QPainter pixels, stack and blend layers, add vector/SVG text, run filters and masks, animate frames, and export PNG/JPEG/TIFF/.kra or batch-convert whole folders. Use whenever the user wants to create or edit a Krita document (.kra), composite or retouch a raster image, batch-export layers or files, script or automate Krita, render an animation frame sequence, or says "Krita", "paint layer", "krita script", "batch export from Krita", "open this .kra" — even if they don''t mention scripting. Also covers Hungarian: "csinálj egy képet Kritában", "vezéreld a Kritát", "rétegek", "exportáld PNG-be", "kötegelt export". Not for natural-media painting simulation (use rebelle), vector/layout design (use affinity), or keyframed motion graphics (use cavalry).'
+description: 'Remote-control a running Krita (the open-source digital painting app) by Python script through a small local bridge — build documents, paint real brush strokes with the current preset or push QPainter pixels, stack and blend layers, add vector/SVG text, run filters and masks, animate frames, and export PNG/JPEG/TIFF/.kra or batch-convert whole folders. Use whenever the user wants to create or edit a Krita document (.kra), composite or retouch a raster image, batch-export layers or files, script or automate Krita, render an animation frame sequence, or says "Krita", "paint layer", "krita script", "batch export from Krita", "open this .kra" — even if they don''t mention scripting. Not for natural-media painting simulation (use rebelle), vector/layout design (use affinity), or keyframed motion graphics (use cavalry).'
 summary: "remote-control a running Krita by Python through a local bridge — layer stacks, brush-engine strokes and QPainter pixels, SVG vector text, filters, masks, animation frames, and PNG/JPEG/.kra export or batch conversion in the running session"
 category: design-automation
+compatibility: "Built for Krita 5.3.4 (Python 3.13, PyQt5 5.15.11)."
 risk: medium
 tags:
     - krita
@@ -11,7 +12,7 @@ tags:
     - layers
     - scripting
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Krita Control

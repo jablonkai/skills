@@ -1,8 +1,9 @@
 ---
 name: emu-branding
-description: "Brand guidelines and visual identity for EMU (Egyesület a Magyar Ultrafutásért). Use when creating any EMU-related visual content: social media posts, race posters, event presentations, documents, charts, data visualizations, or marketing materials. Covers logo usage, the EMU Blue (#00ADEF) color palette, Nebula Sans typography, and photography style. Also use when someone mentions the EMU 6-Day Race, ultrarunning branding, or needs on-brand design assets — even if they don't explicitly say 'brand guidelines'. Hungarian triggers: 'EMU-s poszt', 'EMU arculat', 'plakát a 6 napos versenyre', 'EMU színekkel'."
+description: "Brand guidelines and visual identity for EMU (Egyesület a Magyar Ultrafutásért). Use when creating any EMU-related visual content: social media posts, race posters, event presentations, documents, charts, data visualizations, or marketing materials. Covers logo usage, the EMU Blue (#00ADEF) color palette, Nebula Sans typography, and photography style. Also use when someone mentions the EMU 6-Day Race, ultrarunning branding, or needs on-brand design assets — even if they don't explicitly say 'brand guidelines'."
 summary: "brand guidelines and visual identity for EMU (Egyesület a Magyar Ultrafutásért), including logo, color palette, and typography"
 category: branding
+compatibility: "No application dependency; the font helper script needs Python 3."
 risk: low
 tags:
   - branding
@@ -12,7 +13,7 @@ tags:
   - design-assets
 allowed-tools: Read, Glob
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # EMU Branding

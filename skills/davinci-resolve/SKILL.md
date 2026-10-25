@@ -1,8 +1,9 @@
 ---
 name: davinci-resolve
-description: 'Remote-control a running DaVinci Resolve (Studio) with Python through its built-in scripting API — import media into bins, assemble timelines from clips, place B-roll on upper tracks, add markers, titles and lower thirds, import SRT or auto-generate subtitles, apply LUTs/CDL/DRX grades, normalize audio, queue and render deliverables (YouTube, TikTok/vertical, ProRes masters), and export EDL/FCPXML/OTIO/AAF. Use whenever the user wants something done in DaVinci Resolve or with a Resolve project, timeline, bin or render queue — e.g. "cut these clips together in Resolve", "build a rough cut from this folder", "render this timeline for YouTube and TikTok", "add markers from this list", "put a lower third on", "export an EDL", "batch render all timelines", "vágd össze Resolve-ban", "renderelj ki a DaVinciből" — even if they just say "Resolve" or "DaVinci". Not for ffmpeg-only edits with no Resolve involved, and not for Fusion Studio standalone.'
+description: 'Remote-control a running DaVinci Resolve (Studio) with Python through its built-in scripting API — import media into bins, assemble timelines from clips, place B-roll on upper tracks, add markers, titles and lower thirds, import SRT or auto-generate subtitles, apply LUTs/CDL/DRX grades, normalize audio, queue and render deliverables (YouTube, TikTok/vertical, ProRes masters), and export EDL/FCPXML/OTIO/AAF. Use whenever the user wants something done in DaVinci Resolve or with a Resolve project, timeline, bin or render queue — e.g. "cut these clips together in Resolve", "build a rough cut from this folder", "render this timeline for YouTube and TikTok", "add markers from this list", "put a lower third on", "export an EDL", "batch render all timelines" — even if they just say "Resolve" or "DaVinci". Not for ffmpeg-only edits with no Resolve involved, and not for Fusion Studio standalone.'
 summary: "remote-control a running DaVinci Resolve by Python via its scripting API — media import and bins, timeline assembly, markers, titles and lower thirds, subtitles, LUT/CDL grades, render queue deliverables, EDL/FCPXML/OTIO export"
 category: video
+compatibility: "Built for DaVinci Resolve Studio 21.1.0 on macOS (scripting API needs the Studio edition)."
 risk: medium
 tags:
     - davinci-resolve
@@ -11,7 +12,7 @@ tags:
     - color-grading
     - scripting
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # DaVinci Resolve Control

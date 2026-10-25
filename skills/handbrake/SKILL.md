@@ -1,8 +1,9 @@
 ---
 name: handbrake
-description: 'Transcode and compress video with HandBrakeCLI (free, open-source HandBrake): scan files, DVD/Blu-ray folders or ISOs for titles, audio and subtitle tracks; encode one file or whole folders with built-in presets or presets exported from the HandBrake GUI; H.265/H.264/AV1 with a quality (RF) target and max resolution; keep chosen audio tracks by number or language, burn in or keep subtitles; resumable, stoppable batches checked with ffprobe. Use for "convert this folder to H.265 1080p", "shrink these videos with HandBrake", "rip the main feature from this VIDEO_TS", "burn in the Hungarian subtitles and keep English and Hungarian audio", "use my HandBrake preset on all of these", or Hungarian "tömörítsd HandBrake-kel ezeket a videókat". Not for Apple Compressor or ProRes/Apple pipeline deliverables (use compressor), rendering an editor timeline (use davinci-resolve or final-cut-pro), plain ffmpeg trims, cuts, concatenation or frame grabs, screen recording (use obs), or copy-protected discs.'
+description: 'Transcode and compress video with HandBrakeCLI (free, open-source HandBrake): scan files, DVD/Blu-ray folders or ISOs for titles, audio and subtitle tracks; encode one file or whole folders with built-in presets or presets exported from the HandBrake GUI; H.265/H.264/AV1 with a quality (RF) target and max resolution; keep chosen audio tracks by number or language, burn in or keep subtitles; resumable, stoppable batches checked with ffprobe. Use for "convert this folder to H.265 1080p", "shrink these videos with HandBrake", "rip the main feature from this VIDEO_TS", "burn in the Hungarian subtitles and keep English and Hungarian audio", "use my HandBrake preset on all of these". Not for Apple Compressor or ProRes/Apple pipeline deliverables (use compressor), rendering an editor timeline (use davinci-resolve or final-cut-pro), plain ffmpeg trims, cuts, concatenation or frame grabs, screen recording (use obs), or copy-protected discs.'
 summary: "transcode and compress video with HandBrakeCLI — file and folder batches, DVD/Blu-ray title selection, built-in and GUI-exported presets, H.265/AV1 quality targets, audio and subtitle track picking with burn-in, ffprobe-verified outputs"
 category: video
+compatibility: "Built for HandBrakeCLI 1.11.2 (Homebrew, arm64) on macOS 27."
 risk: low
 tags:
     - handbrake
@@ -11,7 +12,7 @@ tags:
     - hevc
     - subtitles
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # HandBrake via HandBrakeCLI

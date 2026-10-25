@@ -1,8 +1,9 @@
 ---
 name: rebelle
-description: 'Remote-control Rebelle (Escape Motions'' natural-media painting app) and Rebelle Motion IO with JSON events: paint real watercolour, oil, ink and pencil strokes programmatically, drive a live Rebelle Pro session over its WebSocket server, or batch-render painted animation frames and turn them into video. Use whenever the user wants to paint, sketch or generate artwork in Rebelle, script or automate Rebelle, produce a watercolour/ink/oil rendering of something, animate a painting frame by frame, render a .reb artwork, or says "Rebelle", "Motion IO", "paint this in watercolour", "make a painted animation" — even if they don''t mention scripting. Also covers Hungarian phrasings like "fesd meg Rebelle-ben", "akvarell kép", "festett animáció", "vezéreld a Rebelle-t". Not for photo editing or vector work (use Affinity) or for keyframed motion graphics (use Cavalry).'
+description: 'Remote-control Rebelle (Escape Motions'' natural-media painting app) and Rebelle Motion IO with JSON events: paint real watercolour, oil, ink and pencil strokes programmatically, drive a live Rebelle Pro session over its WebSocket server, or batch-render painted animation frames and turn them into video. Use whenever the user wants to paint, sketch or generate artwork in Rebelle, script or automate Rebelle, produce a watercolour/ink/oil rendering of something, animate a painting frame by frame, render a .reb artwork, or says "Rebelle", "Motion IO", "paint this in watercolour", "make a painted animation" — even if they don''t mention scripting. Not for photo editing or vector work (use Affinity) or for keyframed motion graphics (use Cavalry).'
 summary: "remote-control Rebelle and Rebelle Motion IO with JSON events — live WebSocket painting in Rebelle Pro, batch-rendered painted animation frames, and visual verification through canvas exports"
 category: design-automation
+compatibility: "Built for Rebelle 8.3.4 Pro (live WebSocket) and Rebelle 8 Motion IO (batch) on macOS."
 risk: medium
 tags:
     - rebelle
@@ -11,7 +12,7 @@ tags:
     - animation
     - escape-motions
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Rebelle Control

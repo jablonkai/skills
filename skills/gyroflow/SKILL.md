@@ -1,8 +1,9 @@
 ---
 name: gyroflow
-description: 'Stabilize video with Gyroflow''s CLI using gyroscope data: GoPro, Sony, DJI, Insta360 and other cameras with embedded motion data, or footage plus an external gyro log (.gcsv, Betaflight blackbox for FPV). Single clips or parallel folder batches with progress; smoothing, FOV, horizon lock and lens profile settings; ProRes/H.264/H.265/DNxHR output; reusable JSON presets; .gyroflow projects for the Resolve/FCP/Premiere plugins and STMap EXRs for Nuke or Fusion. Use for "stabilize my GoPro clips", "gyro-stabilize this FPV footage with the blackbox log", "batch stabilize this folder to ProRes", "make a Gyroflow preset with horizon lock", "export an STMap for Nuke", "Gyroflow project for the Resolve plugin", or Hungarian "stabilizáld a GoPro felvételeket". Not for footage without gyro data or stabilizing in a Resolve timeline (davinci-resolve), plain transcoding or compression (handbrake, compressor), Nuke comps beyond the STMap handoff (nuke), or FCP timelines (final-cut-pro).'
+description: 'Stabilize video with Gyroflow''s CLI using gyroscope data: GoPro, Sony, DJI, Insta360 and other cameras with embedded motion data, or footage plus an external gyro log (.gcsv, Betaflight blackbox for FPV). Single clips or parallel folder batches with progress; smoothing, FOV, horizon lock and lens profile settings; ProRes/H.264/H.265/DNxHR output; reusable JSON presets; .gyroflow projects for the Resolve/FCP/Premiere plugins and STMap EXRs for Nuke or Fusion. Use for "stabilize my GoPro clips", "gyro-stabilize this FPV footage with the blackbox log", "batch stabilize this folder to ProRes", "make a Gyroflow preset with horizon lock", "export an STMap for Nuke", "Gyroflow project for the Resolve plugin". Not for footage without gyro data or stabilizing in a Resolve timeline (davinci-resolve), plain transcoding or compression (handbrake, compressor), Nuke comps beyond the STMap handoff (nuke), or FCP timelines (final-cut-pro).'
 summary: "stabilize video with the Gyroflow CLI from embedded or external gyro data — single clips and parallel folder batches with progress, reusable JSON presets, .gyroflow project and STMap export for Resolve and Nuke, ffprobe-verified outputs"
 category: video
+compatibility: "Built for Gyroflow 1.6.3 (Mac App Store build) on macOS 27."
 risk: low
 tags:
     - gyroflow
@@ -12,7 +13,7 @@ tags:
     - fpv
     - stmap
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Gyroflow via its CLI
