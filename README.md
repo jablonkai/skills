@@ -53,6 +53,7 @@ portable beyond a single tool.
 #### 3D, CAD & electronics
 - `blender`: remote-control a running Blender by Python via a local bridge — bmesh/modifier modeling, shader and geometry nodes, animation, rigging, physics, Grease Pencil and the VSE, EEVEE/Cycles stills and video, glTF/FBX/USD/OBJ/STL export
 - `brl-cad`: model CSG solids headless with BRL-CAD — mged command scripts for primitives, boolean regions and materials, rt raytraced views, gqa overlap, volume and mass checks, STL/OBJ/STEP export
+- `cadcraft`: draft and convert 2D CAD drawings headless with cadcraft-cli — layers, filleted polylines, hatches, dimensions and attributed title blocks from a JSON spec, JSON commands or .scr scripts, DXF/DWG/PDF/SVG/PNG export with explicit framing, folder batches, info and ezdxf read-back verified
 - `freecad`: remote-control a running FreeCAD (parametric CAD) by Python via a local bridge — primitives and booleans, constrained Sketcher profiles, PartDesign features, metrics and viewport screenshots, STEP/IGES/STL/OBJ export
 - `kicad`: automate KiCad 10 — DRC/ERC with JSON violation summaries, JLCPCB-ready fabrication zips (Gerbers, drill, CPL, BOM, STEP), board renders, and scripted footprint placement in a running PCB editor via the IPC API
 - `qcad`: draft 2D CAD drawings headless with QCAD — ECMAScript scripts for layers, entities, blocks, dimensions and hatches, title blocks on existing DXF, batch DXF/DWG to PDF/PNG, ezdxf-verified output
