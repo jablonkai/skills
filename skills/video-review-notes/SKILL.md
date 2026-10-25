@@ -1,8 +1,9 @@
 ---
 name: video-review-notes
-description: "Read and act on the review notes the user leaves on rendered cuts with their Video Review app (the desktop app that writes `VIDEO.comments.json` next to each render). Use this whenever the user says they watched a cut and left notes or comments, asks what their notes say, wants notes fixed in DaVinci Resolve, mentions a `.comments.json` file, or refers to notes, comments or marks they put on a video, in any language (the user often writes in Hungarian), even if they don't name the app or the file. Also use it before editing a reel that has a comments file next to its render, so open notes are not missed. Hungarian: 'megnéztem a vágást, hagytam megjegyzéseket', 'mit írtam a videóra', 'javítsd a megjegyzéseimet Resolve-ban'. Not for adding Resolve markers or general editing with no review notes (davinci-resolve)."
+description: "Read and act on the review notes the user leaves on rendered cuts with their Video Review app (the desktop app that writes `VIDEO.comments.json` next to each render). Use this whenever the user says they watched a cut and left notes or comments, asks what their notes say, wants notes fixed in DaVinci Resolve, mentions a `.comments.json` file, or refers to notes, comments or marks they put on a video, in any language (the user often writes in Hungarian), even if they don't name the app or the file. Also use it before editing a reel that has a comments file next to its render, so open notes are not missed. Not for adding Resolve markers or general editing with no review notes (davinci-resolve)."
 summary: "read and act on timecoded, scene and on-frame review notes left in the Video Review app — list open notes, extract the marked frames with the box or point drawn on, map them to Resolve timeline timecode, and mark them done atomically"
 category: video
+compatibility: "Built for the Video Review app 0.1.0 (github.com/jablonkai/video-review) with mpv and ffmpeg; Resolve steps use DaVinci Resolve Studio 21.1.0."
 risk: low
 tags:
   - video-review
@@ -12,7 +13,7 @@ tags:
 allowed-tools: Bash, Read
 argument-hint: "[render folder or video file]"
 metadata:
-  version: "1.0.2"
+  version: "1.0.3"
 ---
 
 # Video review notes

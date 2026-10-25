@@ -1,8 +1,9 @@
 ---
 name: numbers
-description: 'Automate Apple Numbers on macOS via its scripting dictionary (osascript, JXA) — build a .numbers spreadsheet from CSV/JSON with typed values, header and footer rows, formulas such as a SUM totals row, and cell formats; read sheets, tables, recalculated values and formulas back and report totals per table; export or batch-convert .numbers files to XLSX, CSV or PDF. Use whenever the user mentions Numbers or a .numbers file: "import this CSV into Numbers and add a totals row", "what are the totals in budget.numbers", "convert these Numbers files to Excel", "export my .numbers to PDF", or Hungarian "konvertáld a Numbers táblázatot Excelbe". Not for .xlsx work without Numbers (use xlsx), CSV or pandas analysis that never touches Numbers, spreadsheets to Markdown (use markitdown), or Pages and Keynote documents.'
+description: 'Automate Apple Numbers on macOS via its scripting dictionary (osascript, JXA) — build a .numbers spreadsheet from CSV/JSON with typed values, header and footer rows, formulas such as a SUM totals row, and cell formats; read sheets, tables, recalculated values and formulas back and report totals per table; export or batch-convert .numbers files to XLSX, CSV or PDF. Use whenever the user mentions Numbers or a .numbers file: "import this CSV into Numbers and add a totals row", "what are the totals in budget.numbers", "convert these Numbers files to Excel", "export my .numbers to PDF". Not for .xlsx work without Numbers (use xlsx), CSV or pandas analysis that never touches Numbers, spreadsheets to Markdown (use markitdown), or Pages and Keynote documents.'
 summary: "automate Apple Numbers via AppleScript/JXA — build spreadsheets from CSV with formulas and formats, read recalculated values back, and XLSX/CSV/PDF export or batch conversion"
 category: office
+compatibility: "Built for Numbers Creator Studio 15.4 on macOS 27."
 risk: low
 tags:
     - numbers
@@ -13,7 +14,7 @@ tags:
     - xlsx
     - csv
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Numbers Automation

@@ -1,8 +1,9 @@
 ---
 name: apple-photos
-description: 'Query, export and organise the Apple Photos library on macOS: osxphotos for read-only searches by date, year, place, GPS area, people, keywords and albums, per-year statistics, and exports of originals or edited versions with XMP/JSON sidecars as resumable --update runs; Photos'' AppleScript for creating albums from a query and importing files. Read-only and local by default. Use for "export all photos from our Lisbon trip in May 2023 with XMP sidecars", "make an album of everything tagged hiking", "how many photos did I take each year", "which people appear most in my library", "import this folder into Photos into an album", "back up my Photos originals by year", or Hungarian "exportáld a nyaralás képeit a Fotókból". Not for editing pixels or retouching (use gimp or krita), Lightroom or other catalogs, converting or resizing image files outside Photos, video transcoding (use handbrake), iCloud web or shared albums, or bulk metadata rewrites unless the user explicitly asks.'
+description: 'Query, export and organise the Apple Photos library on macOS: osxphotos for read-only searches by date, year, place, GPS area, people, keywords and albums, per-year statistics, and exports of originals or edited versions with XMP/JSON sidecars as resumable --update runs; Photos'' AppleScript for creating albums from a query and importing files. Read-only and local by default. Use for "export all photos from our Lisbon trip in May 2023 with XMP sidecars", "make an album of everything tagged hiking", "how many photos did I take each year", "which people appear most in my library", "import this folder into Photos into an album", "back up my Photos originals by year". Not for editing pixels or retouching (use gimp or krita), Lightroom or other catalogs, converting or resizing image files outside Photos, video transcoding (use handbrake), iCloud web or shared albums, or bulk metadata rewrites unless the user explicitly asks.'
 summary: "query, export and organise the Apple Photos library with osxphotos and AppleScript — searches by date, place, people and keywords, yearly statistics, original or edited exports with XMP sidecars, albums from a query, and file import"
 category: mac-automation
+compatibility: "Built for Photos 12.0 on macOS 27.0.1 with osxphotos 0.77.2."
 risk: medium
 tags:
     - photos
@@ -11,7 +12,7 @@ tags:
     - macos
     - export
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Apple Photos via osxphotos and AppleScript

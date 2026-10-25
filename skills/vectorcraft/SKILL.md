@@ -1,12 +1,13 @@
 ---
 name: vectorcraft
-description: 'Automate VectorCraft, the Illustrator-style vector editor, headless with vectorcraft-cli: build vector artwork (shapes, paths, text, layers, swatches, symbols) on one or more artboards from a spec, edit text and recolour existing .vectorcraft/SVG/AI/PDF files, fill templates from CSV with variables and data sets, export per-artboard PNG at @1x/@2x, SVG with outlined text, multi-page PDF and AI/EPS/DXF, inspect files and lossy imports, and batch-convert folders, all verified by an info read-back and a rendered preview. Use when the user mentions VectorCraft, vectorcraft-cli, a .vectorcraft or .vctemplate file, or wants a logo sheet, icon set, badge set or vector conversion made with VectorCraft: "make a logo sheet in VectorCraft", "convert these .ai files to SVG with VectorCraft", "export every artboard as PNG", "VectorCraftban cseréld le a szöveget". Not for Inkscape or hand-written SVG (inkscape), Affinity (affinity), diagrams (drawio), raster/PSD layer editing (photocraft), or fonts (fontforge).'
+description: 'Automate VectorCraft, the Illustrator-style vector editor, headless with vectorcraft-cli: build vector artwork (shapes, paths, text, layers, swatches, symbols) on one or more artboards from a spec, edit text and recolour existing .vectorcraft/SVG/AI/PDF files, fill templates from CSV with variables and data sets, export per-artboard PNG at @1x/@2x, SVG with outlined text, multi-page PDF and AI/EPS/DXF, inspect files and lossy imports, and batch-convert folders, all verified by an info read-back and a rendered preview. Use when the user mentions VectorCraft, vectorcraft-cli, a .vectorcraft or .vctemplate file, or wants a logo sheet, icon set, badge set or vector conversion made with VectorCraft: "make a logo sheet in VectorCraft", "convert these .ai files to SVG with VectorCraft", "export every artboard as PNG". Not for Inkscape or hand-written SVG (inkscape), Affinity (affinity), diagrams (drawio), raster/PSD layer editing (photocraft), or fonts (fontforge).'
 summary: "automate VectorCraft headless with vectorcraft-cli — vector art on multiple artboards from a spec, text and colour edits, CSV data-set variants, per-artboard PNG, outlined SVG, multi-page PDF and AI/EPS/DXF export, folder conversion, info read-back verified"
 category: design-automation
+compatibility: "Built for vectorcraft-cli 0.17.0 and VectorCraft.app 0.17.0 on macOS; pre-1.0, so command ids may change."
 risk: medium
 tags: [vectorcraft, vector, svg, illustrator, artboards, batch, data-sets, headless]
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # VectorCraft via vectorcraft-cli

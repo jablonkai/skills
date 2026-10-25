@@ -1,8 +1,9 @@
 ---
 name: obs
-description: 'Remote-control a running OBS Studio through its built-in obs-websocket v5 server with a dependency-free Python client — create and switch scenes, add and configure sources (color, text, image, media, browser, capture), position scene items, add filters, control recording (chapters, split), streaming, replay buffer and virtual camera, set audio volume/mute, screenshot any scene to verify, and build whole scene collections from a JSON spec. Use whenever the user wants something done in OBS or with an OBS scene, source, overlay, recording or stream — e.g. "set up my stream scenes in OBS", "add a lower third in OBS", "switch to the BRB scene", "start recording in OBS", "make a Starting Soon / Main / BRB layout", "mute the mic in OBS", "állítsd be az OBS jeleneteket", "indítsd el a felvételt OBS-ben" — even if they just say "OBS". Not for editing recorded footage (use davinci-resolve), ffmpeg-only conversion, or keyframed motion graphics (use cavalry).'
+description: 'Remote-control a running OBS Studio through its built-in obs-websocket v5 server with a dependency-free Python client — create and switch scenes, add and configure sources (color, text, image, media, browser, capture), position scene items, add filters, control recording (chapters, split), streaming, replay buffer and virtual camera, set audio volume/mute, screenshot any scene to verify, and build whole scene collections from a JSON spec. Use whenever the user wants something done in OBS or with an OBS scene, source, overlay, recording or stream — e.g. "set up my stream scenes in OBS", "add a lower third in OBS", "switch to the BRB scene", "start recording in OBS", "make a Starting Soon / Main / BRB layout", "mute the mic in OBS" — even if they just say "OBS". Not for editing recorded footage (use davinci-resolve), ffmpeg-only conversion, or keyframed motion graphics (use cavalry).'
 summary: "remote-control a running OBS Studio by Python over obs-websocket v5 — scenes, sources and filters, scene-item transforms, recording, streaming, replay buffer and virtual camera, screenshot verification, and scene collections built from a JSON spec"
 category: video
+compatibility: "Built for OBS Studio 32.2.2 with obs-websocket 5.7.4 on macOS."
 risk: high
 tags:
     - obs
@@ -11,7 +12,7 @@ tags:
     - websocket
     - scripting
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # OBS Studio Control

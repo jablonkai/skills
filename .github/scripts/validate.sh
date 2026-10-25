@@ -12,8 +12,9 @@ echo "Validating skill catalog..."
 
 # `summary` and `category` are required because the Available Skills sections of
 # README.md and AGENTS.md are rendered from them — a skill missing either cannot
-# be listed at all.
-readonly REQUIRED_FRONTMATTER_FIELDS=(name description summary category)
+# be listed at all. `compatibility` records the application versions the skill
+# was built for, so a later app update has something to be checked against.
+readonly REQUIRED_FRONTMATTER_FIELDS=(name description summary category compatibility)
 
 check_skill_frontmatter() {
   local file
@@ -45,8 +46,8 @@ check_skill_frontmatter() {
 # tool-generated keys — e.g. the repo URL and tree SHA that `gh skill install`
 # writes into `metadata:` — from drifting into the catalog.
 readonly ALLOWED_FRONTMATTER_FIELDS=(
-  name description summary category risk tags allowed-tools argument-hint license
-  metadata
+  name description summary category compatibility risk tags allowed-tools argument-hint
+  license metadata
 )
 readonly ALLOWED_METADATA_FIELDS=(version)
 readonly ALLOWED_RISK_VALUES=(low medium high)
@@ -149,6 +150,7 @@ check_skill_version_bumps() {
 # truncated — silently costing the skill the tail of its trigger phrases.
 readonly MAX_DESCRIPTION_LENGTH=1024
 readonly MAX_NAME_LENGTH=64
+readonly MAX_COMPATIBILITY_LENGTH=500
 
 check_skill_frontmatter_lengths() {
   local dir_name
@@ -167,6 +169,12 @@ check_skill_frontmatter_lengths() {
     value=$(frontmatter_value "$file" description)
     if (( ${#value} > MAX_DESCRIPTION_LENGTH )); then
       echo "Frontmatter description is ${#value} characters in $file (max $MAX_DESCRIPTION_LENGTH)"
+      exit 1
+    fi
+
+    value=$(frontmatter_value "$file" compatibility)
+    if (( ${#value} > MAX_COMPATIBILITY_LENGTH )); then
+      echo "Frontmatter compatibility is ${#value} characters in $file (max $MAX_COMPATIBILITY_LENGTH)"
       exit 1
     fi
   done < <(skill_dirs)

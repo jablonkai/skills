@@ -3,6 +3,7 @@ name: hammerspoon
 description: 'Automate macOS with Hammerspoon from the command line: run one-off Lua in the live app through the hs CLI (hs.ipc) to list screens, apps and windows or move and resize windows now, and write modular config files for persistent behaviour — window layouts for one or several monitors, global hotkeys that run shell scripts or launch apps, app, screen, Wi-Fi, USB and sleep watchers — then reload and read the console for errors. Use for "set up a two-monitor window layout with Hammerspoon", "bind ctrl+alt+B to run my backup script", "which windows are open on which screen", "when Zoom launches, mute the mic", "re-tile my windows when I plug in the external display", "write me a Hammerspoon config", "why does my init.lua error". Not for Apple Shortcuts (apple-shortcuts), scripting one app''s documents (keynote, numbers, pages), OBS scenes (obs), Karabiner-Elements key remapping, Raycast, Alfred, Rectangle or BetterTouchTool setups, or plain AppleScript with no Hammerspoon.'
 summary: "automate macOS with Hammerspoon via the hs CLI — window layouts for multi-monitor setups, hotkeys that run shell scripts, app and screen watchers, screen/app/window inventory, modular init.lua files with reload and console error checks"
 category: mac-automation
+compatibility: "Built for Hammerspoon 1.1.1 on macOS 27 (arm64)."
 risk: medium
 tags:
     - hammerspoon
@@ -12,7 +13,7 @@ tags:
     - hotkeys
     - automation
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Hammerspoon from the command line

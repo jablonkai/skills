@@ -1,8 +1,9 @@
 ---
 name: tiled
-description: 'Author, edit, validate and export Tiled maps headless from the CLI — build .tmx/.tmj maps and .tsx tilesets from a JSON spec through Tiled''s own JS API (ASCII tile rows, objects, typed and object-reference properties), bulk-set properties on objects by class or name, validate and debug maps (gid out of range, missing tilesets), and export to JSON, Lua, CSV, GameMaker or Godot 4 .tscn with a headless Godot import check, plus custom export formats as Tiled extensions. Use whenever the user wants a tilemap or level made, changed or converted in Tiled, says Tiled, .tmx, .tmj, .tsx, tilemap or level editor, wants a level exported for Godot, LÖVE, Phaser or the web, needs properties added across many map objects, or wants a Tiled extension or custom map format. Hungarian: "csinálj egy pályát Tiledben". Not for Godot work without a Tiled map (use godot); painting the tile art itself (krita, gimp); geographic maps (qgis); diagrams or floor plans (drawio); 3D levels (blender); LDtk, Unity or other level editors.'
+description: 'Author, edit, validate and export Tiled maps headless from the CLI — build .tmx/.tmj maps and .tsx tilesets from a JSON spec through Tiled''s own JS API (ASCII tile rows, objects, typed and object-reference properties), bulk-set properties on objects by class or name, validate and debug maps (gid out of range, missing tilesets), and export to JSON, Lua, CSV, GameMaker or Godot 4 .tscn with a headless Godot import check, plus custom export formats as Tiled extensions. Use whenever the user wants a tilemap or level made, changed or converted in Tiled, says Tiled, .tmx, .tmj, .tsx, tilemap or level editor, wants a level exported for Godot, LÖVE, Phaser or the web, needs properties added across many map objects, or wants a Tiled extension or custom map format. Not for Godot work without a Tiled map (use godot); painting the tile art itself (krita, gimp); geographic maps (qgis); diagrams or floor plans (drawio); 3D levels (blender); LDtk, Unity or other level editors.'
 summary: "author, edit and export Tiled maps headless — maps and tilesets from a JSON spec via Tiled's JS API, bulk typed object properties, TMX/TMJ/TSX validation, JSON/Lua/Godot .tscn export with a Godot import check, and custom export formats as extensions"
 category: game-dev
+compatibility: "Built for Tiled 1.12.2, with Godot 4.7.2 for the import check, on macOS."
 risk: low
 tags:
     - tiled
@@ -12,7 +13,7 @@ tags:
     - godot
     - gamedev
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Tiled Control

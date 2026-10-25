@@ -3,6 +3,7 @@ name: brl-cad
 description: 'Model CSG solids and analyse them with BRL-CAD from the CLI: write mged command scripts for primitives (rpp, rcc, sph, tor, trc, arb8 …), boolean regions and combinations, materials and colours; raytrace PNG views with rt; check overlaps, volume and mass with gqa; export STL/OBJ/STEP for printing or other CAD. Use for "model this part in BRL-CAD", "build a CSG model in a .g file", "write an mged script", "raytrace / render this .g from three views", "check this BRL-CAD model for overlaps" or "fix the gqa overlaps", "volume / mass of this region in aluminium", "export the .g to STL for 3D printing", "convert .g to OBJ or STEP". Not for sketch-and-pad parametric CAD or FreeCAD files (freecad), mesh/polygon modelling, sculpting or Blender renders (blender), OpenSCAD code, slicing STL for a printer, or 2D diagrams (drawio).'
 summary: "model CSG solids headless with BRL-CAD — mged command scripts for primitives, boolean regions and materials, rt raytraced views, gqa overlap, volume and mass checks, STL/OBJ/STEP export"
 category: cad
+compatibility: "Built for BRL-CAD 7.44.0 (official arm64 DMG) on macOS 27."
 risk: low
 tags:
     - brl-cad
@@ -12,7 +13,7 @@ tags:
     - raytrace
     - stl
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # BRL-CAD via headless scripts

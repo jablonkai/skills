@@ -1,8 +1,9 @@
 ---
 name: markitdown
-description: "Convert files and documents to Markdown for LLM consumption using Microsoft's markitdown tool. Use whenever the user wants to turn a PDF, Word/Excel/PowerPoint file (.docx/.xlsx/.pptx), HTML page, CSV/JSON/XML, Jupyter notebook, EPUB, Outlook .msg, ZIP archive, audio file, or YouTube URL into Markdown or plain text — e.g. 'convert this PDF to markdown', 'extract the text from report.docx', 'turn this spreadsheet into markdown', 'markdownify this folder of documents', 'pull the transcript from this audio', 'alakítsd át markdownná'. Also use when batch-converting a directory of documents, feeding office/PDF content into a prompt or RAG pipeline, or building a doc-to-markdown step in a Python script. Trigger even if the user names a file type without saying 'markitdown'. Not for plain .txt/.md/source files, which can be read directly."
+description: "Convert files and documents to Markdown for LLM consumption using Microsoft's markitdown tool. Use whenever the user wants to turn a PDF, Word/Excel/PowerPoint file (.docx/.xlsx/.pptx), HTML page, CSV/JSON/XML, Jupyter notebook, EPUB, Outlook .msg, ZIP archive, audio file, or YouTube URL into Markdown or plain text — e.g. 'convert this PDF to markdown', 'extract the text from report.docx', 'turn this spreadsheet into markdown', 'markdownify this folder of documents', 'pull the transcript from this audio'. Also use when batch-converting a directory of documents, feeding office/PDF content into a prompt or RAG pipeline, or building a doc-to-markdown step in a Python script. Trigger even if the user names a file type without saying 'markitdown'. Not for plain .txt/.md/source files, which can be read directly."
 summary: "convert PDF, Office, HTML, data, notebook, e-book, audio, and ZIP files (or YouTube URLs) to clean Markdown using Microsoft's markitdown tool, via CLI, batch script or Python API"
 category: document-conversion
+compatibility: "Built for markitdown 0.1.x or later on Python 3.10+."
 risk: low
 tags:
   - markdown
@@ -13,7 +14,7 @@ tags:
 allowed-tools: Bash, Read, Write, Glob
 argument-hint: "[file-or-dir-or-url] [-o output.md]"
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # markitdown

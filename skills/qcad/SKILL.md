@@ -1,8 +1,9 @@
 ---
 name: qcad
-description: 'Draft, edit and convert 2D CAD drawings (DXF, and DWG with QCAD Pro) by running QCAD headless with its ECMAScript API — floor plans, site plans, part outlines, panel and laser-cut layouts with layers, lines, arcs, polylines, text, blocks, linear/aligned dimensions and hatches; add title blocks to existing drawings; batch-convert folders of DXF/DWG to PDF or PNG; read and modify existing DXF files, verified with ezdxf. Use whenever the user wants a 2D technical drawing, a DXF file, a dimensioned plan, a drawing exported to PDF, a title block added, or says "QCAD", "DXF", "2D CAD", "floor plan drawing", "convert DXF to PDF", "dimension this drawing" — even without mentioning QCAD. Hungarian: "készíts 2D rajzot", "alaprajz DXF-ben", "DXF-ből PDF", "tegyél rá szövegmezőt/fejlécet", "méretezd be a rajzot". Not for 3D/parametric parts or STEP/STL (use freecad), CSG solids (brl-cad), PCB layouts (kicad), vector illustration or SVG art (inkscape), or flowcharts and diagrams (drawio).'
+description: 'Draft, edit and convert 2D CAD drawings (DXF, and DWG with QCAD Pro) by running QCAD headless with its ECMAScript API — floor plans, site plans, part outlines, panel and laser-cut layouts with layers, lines, arcs, polylines, text, blocks, linear/aligned dimensions and hatches; add title blocks to existing drawings; batch-convert folders of DXF/DWG to PDF or PNG; read and modify existing DXF files, verified with ezdxf. Use whenever the user wants a 2D technical drawing, a DXF file, a dimensioned plan, a drawing exported to PDF, a title block added, or says "QCAD", "DXF", "2D CAD", "floor plan drawing", "convert DXF to PDF", "dimension this drawing" — even without mentioning QCAD. Not for 3D/parametric parts or STEP/STL (use freecad), CSG solids (brl-cad), PCB layouts (kicad), vector illustration or SVG art (inkscape), or flowcharts and diagrams (drawio).'
 summary: "draft 2D CAD drawings headless with QCAD — ECMAScript scripts for layers, entities, blocks, dimensions and hatches, title blocks on existing DXF, batch DXF/DWG to PDF/PNG, ezdxf-verified output"
 category: cad
+compatibility: "Built for QCAD 3.33.1 on macOS (DWG needs QCAD Pro or its trial)."
 risk: low
 tags:
     - qcad
@@ -11,7 +12,7 @@ tags:
     - 2d-drafting
     - scripting
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # QCAD headless drafting

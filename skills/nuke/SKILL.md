@@ -3,6 +3,7 @@ name: nuke
 description: 'Build and render Nuke compositing scripts headless with Nuke Non-commercial (Foundry): author .nk comps as text (Read, Merge over, Grade, Transform, Roto, Text burn-ins, Write), fill plate-swap templates, set frame ranges, and render EXR/DPX/PNG/JPEG sequences or ProRes MOVs from the CLI, with each output checked frame by frame on disk. Knows the Non-commercial limits: 1920x1080 output cap, encrypted .nknc saves, the 10-node Python limit, and disabled h264. Use for "comp the foreground over this background plate in Nuke and render EXRs", "render this .nk", "batch render a folder of Nuke scripts", "make a Nuke slate / burn-in template", "swap the plate in this Nuke script", "why does my Nuke Write fail". Not for NLE timeline editing or grading (davinci-resolve, final-cut-pro), transcoding finished video (handbrake), motion-graphics animation (cavalry), 3D scenes and renders (blender), or plain image edits (gimp, krita, or ffmpeg).'
 summary: "build and render Nuke comps headless with Nuke Non-commercial — .nk scripts authored as text, plate-swap templates, slates and burn-ins, Roto via Python hooks, EXR/DPX/PNG or ProRes renders with frame-count checks"
 category: video
+compatibility: "Built for Nuke 17.1v2 Non-commercial (arm64, Python 3.11) on macOS 27."
 risk: low
 tags:
     - nuke
@@ -12,7 +13,7 @@ tags:
     - render
     - foundry
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Nuke (Non-commercial) via headless scripts

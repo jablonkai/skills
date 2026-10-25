@@ -3,6 +3,7 @@ name: supercollider
 description: 'Make sound with SuperCollider 3 from the command line: write SynthDefs and patterns (Pbind, Pdef, Pseq, Pwhite), render them offline in non-real-time (NRT) mode to WAV faster than realtime with no audio device, or boot a headless live session (sclang + scsynth) to play, live re-evaluate, record exact-length takes and stop; reports sclang post-window errors (parse errors with line and char) and checks every WAV for duration, loudness and clipping. Use for "design a SynthDef for a warm pad and render a few test notes", "render a 30 second generative ambient piece with SuperCollider", "run a drum pattern on scsynth and record 8 seconds", "turn this Pbind into a wav", "why does my .scd throw Message not understood", "write an NRT Score". Not for Sonic Pi code or live_loop (use sonic-pi), transcoding or compressing existing audio/video (handbrake), editing audio on a video timeline (davinci-resolve, final-cut-pro), notation or sheet music (musescore), or DAW projects (Logic, GarageBand, Ableton).'
 summary: "make sound with SuperCollider 3 — SynthDefs and patterns rendered offline in NRT mode to WAV, or a headless live sclang/scsynth session to play, re-evaluate, record and stop, with post-window errors surfaced"
 category: audio
+compatibility: "Built for SuperCollider 3.14.1 on macOS 27 (arm64)."
 risk: medium
 tags:
     - supercollider
@@ -14,7 +15,7 @@ tags:
     - audio
     - wav
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # SuperCollider from the command line

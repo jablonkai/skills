@@ -1,8 +1,9 @@
 ---
 name: github-audit-to-issues
-description: "Audit a project and turn the findings straight into GitHub issues in one run: run the code-analyzer audit (or reuse a fresh report), keep the findings worth tracking, check each against existing issues, show one review table, then file the confirmed ones — with security findings in public repos routed to a private advisory instead of a public issue. Use when someone wants the audit to end up in the backlog, not just in a report: 'audit the repo and open issues for what you find', 'find the bugs and file them', 'turn a security review into tickets', 'fill the backlog from a code review', 'auditáld a projektet és nyiss issue-kat a hibákra', 'nézd át a kódot és csinálj belőle issue-kat', 'keress hibákat és vedd fel őket issue-nak'. Supports a dry run that drafts the issues without touching GitHub. Not for a report-only audit (code-analyzer), filing issues from a report that already exists (github-issues from-audit), or fixing the findings (github-do-issue / github-do-all-issues)."
+description: "Audit a project and turn the findings straight into GitHub issues in one run: run the code-analyzer audit (or reuse a fresh report), keep the findings worth tracking, check each against existing issues, show one review table, then file the confirmed ones — with security findings in public repos routed to a private advisory instead of a public issue. Use when someone wants the audit to end up in the backlog, not just in a report: 'audit the repo and open issues for what you find', 'find the bugs and file them', 'turn a security review into tickets', 'fill the backlog from a code review'. Supports a dry run that drafts the issues without touching GitHub. Not for a report-only audit (code-analyzer), filing issues from a report that already exists (github-issues from-audit), or fixing the findings (github-do-issue / github-do-all-issues)."
 summary: "audit a project and file the findings as GitHub issues in one run — scoped severities, duplicate checks, one review table, security findings kept out of public issues"
 category: project-management
+compatibility: "Requires an authenticated GitHub CLI (gh) 2.x and git; verified with gh 2.103.2."
 risk: medium
 tags:
   - github
@@ -13,7 +14,7 @@ tags:
 allowed-tools: Bash, Read, Grep, Glob, Agent, Write
 argument-hint: "[focus: security|quality|performance|tests|docs|ideas|all] [--severity critical,high,...] [--report <file>] [--repo owner/repo] [--dry-run]"
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # github-audit-to-issues

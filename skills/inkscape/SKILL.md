@@ -1,8 +1,9 @@
 ---
 name: inkscape
-description: 'Automate Inkscape (open-source vector editor) headless via its CLI — author SVG illustrations directly (shapes, text, gradients, layers, pages), transform them with Inkscape actions (text to path, boolean path ops, simplify, bitmap trace), and export PNG at any DPI or @2x, PDF, EPS and plain SVG, one file or a folder. Use whenever the user wants a vector logo, badge, icon or illustration built from a description, SVGs converted or batch-converted to PNG/PDF/EPS, a raster image traced (vectorized) to SVG, text outlined for print, objects or layers exported by ID, or mentions Inkscape, .svg files, "vectorize this", "SVG to PNG at 300 DPI". Also covers Hungarian: "csinálj egy logót SVG-ben", "vektorizáld ezt a képet", "exportáld PNG-be 300 DPI-vel", "alakítsd görbévé a szöveget". Not for diagrams, flowcharts or architecture drawings (use drawio), raster photo editing or painting (use gimp or krita), Affinity documents (use affinity), charts of numeric data (use a plotting library), or CAD parts (use freecad).'
+description: 'Automate Inkscape (open-source vector editor) headless via its CLI — author SVG illustrations directly (shapes, text, gradients, layers, pages), transform them with Inkscape actions (text to path, boolean path ops, simplify, bitmap trace), and export PNG at any DPI or @2x, PDF, EPS and plain SVG, one file or a folder. Use whenever the user wants a vector logo, badge, icon or illustration built from a description, SVGs converted or batch-converted to PNG/PDF/EPS, a raster image traced (vectorized) to SVG, text outlined for print, objects or layers exported by ID, or mentions Inkscape, .svg files, "vectorize this", "SVG to PNG at 300 DPI". Not for diagrams, flowcharts or architecture drawings (use drawio), raster photo editing or painting (use gimp or krita), Affinity documents (use affinity), charts of numeric data (use a plotting library), or CAD parts (use freecad).'
 summary: "drive Inkscape headless from the CLI — author SVG illustrations directly, run actions such as text to path, boolean path ops, simplify and bitmap trace, then export PNG at any DPI or @2x, PDF, EPS and plain SVG, one file or whole folders"
 category: design-automation
+compatibility: "Built for Inkscape 1.4.4 on macOS; action names differ before 1.4."
 risk: low
 tags:
     - inkscape
@@ -11,7 +12,7 @@ tags:
     - export
     - trace
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Inkscape Control

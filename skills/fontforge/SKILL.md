@@ -1,8 +1,9 @@
 ---
 name: fontforge
-description: 'Build, edit, convert, debug and validate fonts headless with FontForge''s Python API — assemble an icon font from a folder of SVGs with a codepoint map (OTF/TTF/WOFF2 + CSS), import SVG letters as glyphs, set side bearings, kerning and name-table entries, subset a web font to the characters a page uses, convert between SFD, UFO, OTF, TTF and WOFF2, find why glyphs render as blank boxes or lose accents, and fix validation problems (overlaps, direction, extrema, open contours), verified by read-back and a rendered specimen. Use for "make an icon font from these SVGs", "subset this font to a woff2 for our site", "my font fails validation", "á shows as an empty box in my font", "add kerning for AV and To", "rename the family and bump the version", "turn my .sfd into OTF", or Hungarian "csinálj ikonfontot ezekből az SVG-kből". Not for drawing the SVG artwork (inkscape), installing system fonts, laying out documents (scribus, libreoffice), or raster text effects (gimp, krita, pixelmator-pro).'
+description: 'Build, edit, convert, debug and validate fonts headless with FontForge''s Python API — assemble an icon font from a folder of SVGs with a codepoint map (OTF/TTF/WOFF2 + CSS), import SVG letters as glyphs, set side bearings, kerning and name-table entries, subset a web font to the characters a page uses, convert between SFD, UFO, OTF, TTF and WOFF2, find why glyphs render as blank boxes or lose accents, and fix validation problems (overlaps, direction, extrema, open contours), verified by read-back and a rendered specimen. Use for "make an icon font from these SVGs", "subset this font to a woff2 for our site", "my font fails validation", "á shows as an empty box in my font", "add kerning for AV and To", "rename the family and bump the version", "turn my .sfd into OTF". Not for drawing the SVG artwork (inkscape), installing system fonts, laying out documents (scribus, libreoffice), or raster text effects (gimp, krita, pixelmator-pro).'
 summary: "build, edit and validate fonts headless with FontForge — icon fonts from SVG folders, glyph import, side bearings, kerning and name tables, subsetting, SFD/UFO/OTF/TTF/WOFF2 conversion, overlap, direction and extrema fixes"
 category: design-automation
+compatibility: "Built for FontForge 20251009 (its bundled Python) on macOS."
 risk: low
 tags:
     - fontforge
@@ -14,7 +15,7 @@ tags:
     - icon-font
     - typography
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # FontForge Control

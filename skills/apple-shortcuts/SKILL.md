@@ -3,6 +3,7 @@ name: apple-shortcuts
 description: 'Run, inspect and build Apple Shortcuts on macOS from the command line: list shortcuts and folders with whether each accepts input, run a shortcut on files or text and capture its output, batch it over a folder, wrap it as a reusable agent or script step with a timeout, exit codes and output checks, decode an exported .shortcut file to read its actions, and generate simple shortcuts as signed files the user adds with one click. Use for "run my Resize shortcut on every image in this folder", "what shortcuts do I have and what do they do", "turn this shortcut into a script step with error handling", "chain these two shortcuts", "what does this .shortcut file do", "make me a shortcut that counts words", "shortcuts run". Not for editing Photos libraries (apple-photos), Keynote/Numbers/Pages documents (keynote, numbers, pages), video transcoding (handbrake), or image edits GIMP, Inkscape or sips can do directly — unless the user wants them done through a shortcut.'
 summary: "list, inspect and run Apple Shortcuts from the CLI — file and text input and output, folder batches, timeout-guarded agent steps, decoding exported .shortcut files, and generating signed shortcuts for one-click import"
 category: mac-automation
+compatibility: "Built for Shortcuts 10.0 on macOS 27.0.1."
 risk: medium
 tags:
     - shortcuts
@@ -10,7 +11,7 @@ tags:
     - automation
     - cli
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Apple Shortcuts from the command line

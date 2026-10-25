@@ -1,8 +1,9 @@
 ---
 name: documentation-generator
-description: "Generate and update documentation from what the code already knows: API reference from doc comments (KDoc/Dokka, dartdoc, DocC, rustdoc, Doxygen), REST docs from an OpenAPI spec, README scaffolding from package metadata, changelogs from conventional commits, and architecture diagrams from module structure. Also fills in missing doc comments and finds docs that drifted from the implementation. Use when someone says 'generate the docs', 'document this API', 'add KDoc/dartdoc/DocC/rustdoc comments', 'write docstrings/TSDoc/Doxygen comments', 'set up Dokka', 'write the README', 'generate a changelog', 'the docs are out of date', or the Hungarian 'generáld a dokumentációt', 'dokumentáld ezt az API-t', 'írd meg a README-t', 'frissítsd a changelogot'. Not for prose docs written from scratch with the user (that is doc-coauthoring), not for looking up someone else's library docs (that is find-docs)."
+description: "Generate and update documentation from what the code already knows: API reference from doc comments (KDoc/Dokka, dartdoc, DocC, rustdoc, Doxygen), REST docs from an OpenAPI spec, README scaffolding from package metadata, changelogs from conventional commits, and architecture diagrams from module structure. Also fills in missing doc comments and finds docs that drifted from the implementation. Use when someone says 'generate the docs', 'document this API', 'add KDoc/dartdoc/DocC/rustdoc comments', 'write docstrings/TSDoc/Doxygen comments', 'set up Dokka', 'write the README', 'generate a changelog', 'the docs are out of date'. Not for prose docs written from scratch with the user (that is doc-coauthoring), not for looking up someone else's library docs (that is find-docs)."
 summary: "generate and refresh documentation from code — doc comments and API reference via Dokka, dartdoc, DocC, rustdoc and Doxygen, OpenAPI-driven REST docs, README scaffolding, conventional-commit changelogs, and architecture diagrams"
 category: documentation
+compatibility: "Not tied to an application version; uses the target project's own toolchain (Gradle, Flutter, Xcode, Cargo, CMake and the like)."
 risk: low
 tags:
   - documentation
@@ -17,7 +18,7 @@ tags:
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write, Skill
 argument-hint: "[module, package, spec file, or doc type to generate]"
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # documentation-generator

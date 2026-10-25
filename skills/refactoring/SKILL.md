@@ -1,8 +1,9 @@
 ---
 name: refactoring
-description: "Improve the structure of working code without changing what it does: extract duplication, break up complex functions, remove dead code, replace magic numbers, fix misleading names, and modernize to the language's idioms — each step verified against the tests. Detects the stack from its build files and leans on its own linter (detekt, dart analyze, SwiftLint, clippy, clang-tidy). Use when someone says 'refactor this', 'clean this up', 'this function is too long', 'there's a lot of copy-paste here', 'remove the dead code', 'simplify this', 'make this more idiomatic', 'reduce the complexity', 'this is slow, optimize it', or the Hungarian 'refaktoráld ezt', 'tisztítsd meg ezt a kódot', 'túl bonyolult ez a függvény', 'sok itt a duplikáció', 'töröld a halott kódot'. The apply counterpart to code-analyzer, which only finds problems. Not for fixing a bug or crash (that is error-debugging), nor for writing the tests a refactoring needs (that is test-generator)."
+description: "Improve the structure of working code without changing what it does: extract duplication, break up complex functions, remove dead code, replace magic numbers, fix misleading names, and modernize to the language's idioms — each step verified against the tests. Detects the stack from its build files and leans on its own linter (detekt, dart analyze, SwiftLint, clippy, clang-tidy). Use when someone says 'refactor this', 'clean this up', 'this function is too long', 'there's a lot of copy-paste here', 'remove the dead code', 'simplify this', 'make this more idiomatic', 'reduce the complexity', 'this is slow, optimize it'. The apply counterpart to code-analyzer, which only finds problems. Not for fixing a bug or crash (that is error-debugging), nor for writing the tests a refactoring needs (that is test-generator)."
 summary: "behavior-preserving refactoring — duplication extraction, complexity reduction, dead-code removal, naming and idiom cleanups, driven by each stack's own linter and verified step by step against the tests"
 category: code-quality
+compatibility: "Not tied to an application version; uses the target project's own toolchain (Gradle, Flutter, Xcode, Cargo, CMake and the like)."
 risk: low
 tags:
   - refactoring
@@ -18,7 +19,7 @@ tags:
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write, Skill
 argument-hint: "[file, function, class, or module to refactor]"
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # refactoring
