@@ -50,6 +50,7 @@ portable beyond a single tool.
 - `nuke`: build and render Nuke comps headless with Nuke Non-commercial — .nk scripts authored as text, plate-swap templates, slates and burn-ins, Roto via Python hooks, EXR/DPX/PNG or ProRes renders with frame-count checks
 - `obs`: remote-control a running OBS Studio by Python over obs-websocket v5 — scenes, sources and filters, scene-item transforms, recording, streaming, replay buffer and virtual camera, screenshot verification, and scene collections built from a JSON spec
 - `sonic-pi`: live-code music in Sonic Pi 5 via a headless OSC session — run and live re-evaluate live_loops, record exact-length WAV takes, stop jobs, surface runtime and syntax errors with line numbers
+- `soundcraft`: automate SoundCraft headless with soundcraft-cli — multitrack sessions from a spec with clips, fades, clip gain, pan, volume automation and ducking, built-in EQ, dynamics and reverb inserts, range or full bounces, batch conversion with normalize and dither, inspect read-back verified
 - `supercollider`: make sound with SuperCollider 3 — SynthDefs and patterns rendered offline in NRT mode to WAV, or a headless live sclang/scsynth session to play, re-evaluate, record and stop, with post-window errors surfaced
 - `video-review-notes`: read and act on timecoded, scene and on-frame review notes left in the Video Review app — list open notes, extract the marked frames with the box or point drawn on, map them to Resolve timeline timecode, and mark them done atomically
 
