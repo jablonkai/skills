@@ -35,6 +35,7 @@ portable beyond a single tool.
 - `libreoffice`: automate documents with headless LibreOffice and UNO — ODF/OOXML/PDF and PDF/A batch conversion, Calc recalculation with real values, Writer template fill and mail merge, Impress/Draw page export
 - `numbers`: automate Apple Numbers via AppleScript/JXA — build spreadsheets from CSV with formulas and formats, read recalculated values back, and XLSX/CSV/PDF export or batch conversion
 - `pages`: automate Apple Pages via AppleScript/JXA — fill templates and {{placeholders}} without losing formatting, swap images, CSV mail merge, and PDF/DOCX/EPUB export or batch conversion of .pages files
+- `pdfcraft`: automate PdfCraft headless with pdfcraft-cli — merge, split, extract, rotate and reorder pages, metadata, batch OCR and optimize, redaction proven by audit, form fill, comments and watermarks, JSON tool scripts, info, text and render read-back verified
 - `scribus`: lay out print documents headless with Scribus — multi-page layouts with master pages, styles, threaded text and images, CSV-driven badges and catalogues, PDF/X-4 export with bleed and marks
 - `wordcraft`: automate WordCraft with wordcraft-cli — docx template fill with formatting kept (headers and footers too), documents from Markdown with heading styles, tables and an updated TOC, tracked changes and comments by a named author, markup PDFs, docx/odt/rtf/html/md/pdf conversion and folder batches, inspect read-back verified
 
