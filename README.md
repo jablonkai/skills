@@ -33,6 +33,7 @@ portable beyond a single tool.
 
 #### Documents & publishing
 - `calibre`: manage e-books and calibre libraries from the CLI — EPUB/AZW3/KEPUB/PDF/DOCX/Markdown conversion with cover, TOC and metadata, EPUB builds from Markdown chapters, PDF-to-EPUB repair with a quality report, and bulk library metadata edits with dry run, backup and read-back
+- `designcraft`: automate DesignCraft headless with designcraft-cli — multi-page layouts with parent pages, auto page numbers, styles, threaded text and placed images from a spec, CSV data merge for badges and catalogues, style and image edits, PDF/X-4 with bleed and marks checked by validate-pdf, per-page PNG, inspect read-back verified
 - `gridcraft`: automate GridCraft headless with gridcraft-cli — workbooks from CSV with formulas, number formats, tables and charts, input edits with recalculated read-back, formula eval, xlsx/csv/pdf conversion and folder batches, cached-value and round-trip checks
 - `keynote`: automate Apple Keynote via AppleScript/JXA — build decks from an outline with themes, layouts and presenter notes, edit .key text without losing formatting, skip or reorder slides, and PDF/PPTX/image export or batch conversion
 - `libreoffice`: automate documents with headless LibreOffice and UNO — ODF/OOXML/PDF and PDF/A batch conversion, Calc recalculation with real values, Writer template fill and mail merge, Impress/Draw page export
