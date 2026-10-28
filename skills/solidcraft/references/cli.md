@@ -1,4 +1,4 @@
-# solidcraft-cli 0.25.0
+# solidcraft-cli 0.25.1
 
 Use the CLI inside the app (`/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli`).
 A separately installed copy (`~/.local/bin/solidcraft-cli`, from the artcraft-cli
@@ -8,7 +8,7 @@ PATH is older.
 
 ```sh
 SC=/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli
-$SC --version          # solidcraft-cli 0.25.0
+$SC --version          # solidcraft-cli 0.25.1
 $SC --help             # the full usage text below
 ```
 
