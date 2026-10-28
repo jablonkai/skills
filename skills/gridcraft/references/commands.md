@@ -1,4 +1,4 @@
-# Command ids (pinned to GridCraft 0.12.1)
+# Command ids (pinned to GridCraft 0.13.0)
 
 The ids below cover the common jobs. For anything else, or if one of these fails with
 `unknown command`, look it up. Never guess a param name: an unknown param fails the run.
@@ -42,6 +42,7 @@ selection, so always pass them explicitly in scripts.
 | `home.deleteRows` / `home.deleteColumns` | `{rows}` / `{cols}` |
 | `edit.clearContents` | `{range}` |
 | `formulas.defineName` | `{name, refersTo: "=Sheet1!$B$2", scope?}` |
+| `insert.checkbox` / `cell.toggleCheckbox` | `{range?}` / `{cell?}`: new in 0.13.0. Turns TRUE/FALSE/empty cells into checkboxes (empty becomes FALSE, `num_fmt` `checkbox`); the toggle flips the stored boolean. `check` round-trips clean |
 | `formulas.calculateNow` | `{}`: recalculation is automatic. This is only for manual-calc workbooks |
 
 ## Number formats and styling

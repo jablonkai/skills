@@ -3,20 +3,20 @@ name: gridcraft
 description: 'Automate GridCraft, the Excel-style spreadsheet app, headless with gridcraft-cli: build workbooks from CSV with formulas, number formats, tables and charts, edit inputs in an existing .xlsx and read the recalculated values back, evaluate formulas and search the function list, convert between xlsx/csv/tsv/json/html/pdf one file or a whole folder, and check workbooks for cached-value differences and round-trip fidelity, all verified by read-back and check exit status. Use when the user mentions GridCraft or gridcraft-cli, or wants a spreadsheet built, recalculated, checked or converted with GridCraft: "build a budget workbook from this CSV in GridCraft with a chart", "change B3 and tell me the new totals using gridcraft-cli", "run gridcraft check over this folder". Not for Apple Numbers (numbers), LibreOffice Calc or UNO (libreoffice), openpyxl/pandas work with no GridCraft (xlsx), Word documents (wordcraft) or PDF page edits (pdfcraft).'
 summary: "automate GridCraft headless with gridcraft-cli — workbooks from CSV with formulas, number formats, tables and charts, input edits with recalculated read-back, formula eval, xlsx/csv/pdf conversion and folder batches, cached-value and round-trip checks"
 category: office
-compatibility: "Built for gridcraft-cli 0.12.1 and GridCraft.app 0.12.1 on macOS; pre-1.0, so command ids may change."
+compatibility: "Built for gridcraft-cli 0.13.0 and GridCraft.app 0.13.0 on macOS; pre-1.0, so command ids may change."
 risk: low
 tags: [gridcraft, spreadsheet, excel, xlsx, csv, formulas, charts, headless]
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # GridCraft via gridcraft-cli
 
 GridCraft is an Excel-style spreadsheet app. Every menu item is a command in one engine
-registry (353 in 0.12.1), and `gridcraft-cli` runs those commands headless against a
+registry (355 in 0.13.0), and `gridcraft-cli` runs those commands headless against a
 workbook, with its own calculation engine, and saves the result. This skill drives that
 route and checks every result by reading the saved file back. Verified against
-**gridcraft-cli 0.12.1** and **GridCraft.app 0.12.1** on macOS. The software is pre-1.0,
+**gridcraft-cli 0.13.0** and **GridCraft.app 0.13.0** on macOS. The software is pre-1.0,
 so when a pinned command id fails, look it up rather than guessing.
 
 ```sh
@@ -37,7 +37,7 @@ gridcraft-cli version
 | Do cached values match a recalculation? (one file or folders) | `scripts/gc_batch.py check PATH…` |
 
 The live app channel (`GridCraft --control PORT`, `GRIDCRAFT_CONTROL_PORT`,
-`gridcraft-cli mcp --connect` / `send`) has **no authentication** in 0.12.1. This skill
+`gridcraft-cli mcp --connect` / `send`) has **no authentication** in 0.13.0. This skill
 doesn't start it or connect to it ([gotchas](references/gotchas.md#live-app-channel)).
 Edit files headless; if the workbook is open in the app, ask the user to close it or save
 to a new file.
