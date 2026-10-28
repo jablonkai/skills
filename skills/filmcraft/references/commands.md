@@ -1,4 +1,4 @@
-# Command ids (pinned to FilmCraft 0.13.0)
+# Command ids (pinned to FilmCraft 0.14.0)
 
 The ids below cover the common jobs. For anything else, or when one of these fails with
 `unknown command` or `invalid parameters`, look it up. The param string `describe` prints
@@ -25,7 +25,7 @@ placed clip with sound is two clips (video + audio, linked).
 | `file.newProject` | `{name}` |
 | `file.open` | `{path}`: or start the session with `--project` |
 | `file.import` | `{paths:[abs path], bin?, imageSequence?, replace?}` → `{items:[itemId], errors:[]}`. Check `errors` |
-| `file.newSequence` | `{name, width=1920, height=1080, fps=23.976, sampleRate, video=3, audio=3, fromItem?, fromItems?}` → `{sequence: itemId}`. **Becomes the active sequence.** Pass `fps` explicitly. `fromItem: id` matches that clip's size and rate and places it on V1 |
+| `file.newSequence` | `{name, width=1920, height=1080, fps=23.976, sampleRate, video=3, audio=3, mix?: Stereo\|Mono\|5.1\|Adaptive, fromItem?, fromItems?}` → `{sequence: itemId}`. **Becomes the active sequence.** Pass `fps` explicitly. `fromItem: id` matches that clip's size and rate and places it on V1 |
 | `sequence.open` | `{item}`: make a sequence active (export and inspect use the active one) |
 | `sequence.settings` | `{width?, height?, fps?, name?, …}` |
 | `sequence.addTracks` | `{video=1, audio=0, videoAfter?: "first"\|"V2"\|n}` |
@@ -87,6 +87,8 @@ Blue, Teal, Magenta, Tan, Green (default), Brown, Yellow.
 `file.exportMedia` `{path, preset? | format?, sequence?: itemId, range?:
 "entire"|"inOut"|"workArea"|"custom", startSeconds?, endSeconds?, scale=1, width?, height?,
 fps?, bitrateKbps?, crf?, proresProfile?, dnxProfile?, audio=true, captionSidecar?,
-loudnessLufs?, wait=false}`. In `filmcraft-cli run` it waits for the file before the next
+loudnessLufs?, wait=false}`. Also takes `format` values `hevc|mjpeg|apv|mxf-op1a|mxf-opatom|aiff|aac|flac|tga|dpx|exr`,
+`audioCodec`, `bitrateMode`, `hardwareEncoding`, `alpha`, `burnCaptions`, `apvProfile`, `mxfVideoCodec`,
+`exrCompression`; `describe file.exportMedia` prints the full list. In `filmcraft-cli run` it waits for the file before the next
 line. Through `fc_run.py` (MCP) the file is only written with `"wait": true`, which `fc_run.py` adds. Prefer `fc_export.py`, which checks
 the outputs.
