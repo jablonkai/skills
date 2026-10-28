@@ -1,4 +1,4 @@
-# designcraft-cli reference (0.13.0)
+# designcraft-cli reference (0.14.0)
 
 `designcraft-cli` (`~/.local/bin/designcraft-cli`) runs the DesignCraft engine headless.
 Vendor docs: `docs/agents.md`, `docs/mcp.md`, `docs/control-protocol.md` in
@@ -72,7 +72,7 @@ Command equivalents: `file.exportPdf`, `file.exportIdml`, `file.exportEpub`,
 | Key | Values |
 |---|---|
 | `path` | output (command only; without it the result is base64) |
-| `standard` | `"none"` (default), `"x4"` (PDF/X-4), `"a2b"` (PDF/A-2b) |
+| `standard` | `"none"` (default), `"x4"` (PDF/X-4), `"a2b"` (PDF/A-2b), `"x1a"` (PDF/X-1a:2003, new in 0.14.0: the X-4 file flattened to CMYK/gray/spot, no transparency; `validate-pdf` reports `PDF/X-1a:2003`) |
 | `bleed` | `true`: include the document bleed (set by `file.new {bleed}` / `layout.documentSetup`) |
 | `marks` | `true` or `{crop, bleed, pageInfo, weight, offset}` |
 | `pages` | `"1-3,5"` or `[1, 3]` — **1-based** |
