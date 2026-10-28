@@ -5,7 +5,7 @@
     vc_commands.py --prefix text.   every id under a namespace
     vc_commands.py --id text.setText   one command in full
 
-The catalogue holds ~811 commands; never print all of it into context.
+The catalogue holds ~822 commands; never print all of it into context.
 """
 import argparse
 import json

@@ -1,4 +1,4 @@
-# Gotchas (VectorCraft 0.17.0)
+# Gotchas (VectorCraft 0.18.0)
 
 ## Paint and geometry
 
