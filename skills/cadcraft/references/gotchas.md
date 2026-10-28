@@ -1,4 +1,4 @@
-# Gotchas (CADCraft 0.13.0, each reproduced)
+# Gotchas (CADCraft 0.14.0, each reproduced)
 
 ## Silent or surprising
 
@@ -22,8 +22,10 @@
   devices or URLs are not opened (`Unresolved`) unless a file of that name sits beside
   the host. Run `cadcraft-cli run IN --cmd 'xref {}'` on inputs that have xrefs before
   converting. Paths you pass to `xattach` are used as given.
-- **`convert IN IN` overwrites the input** and exits 0. So does `save` to the opened
-  path. The scripts refuse both.
+- **Overwriting an input needs `--in-place` since 0.14.0.** `convert IN IN` and `run IN
+  --save IN` now exit 2 ("is an input file ... pass --in-place") instead of overwriting.
+  A `save` to the opened path inside an MCP session may still overwrite silently
+  (not re-tested). The scripts refuse both; never pass `--in-place`.
 - **Script `TEXT` swallows the following lines** as more text lines until a blank line; one-line `-LAYER`
   chains derail the rest of the script ([scr-syntax.md](scr-syntax.md)).
 - **`-attedit {"find": "*"}` changes nothing** (`changed: 0`); `find` is literal text.
@@ -41,7 +43,7 @@
 | `invalid parameters for \`block\`: no objects selected` | no selection | `select {handles}` first |
 | `object is not a circle or arc` (dimradius/dimdiameter) | a polyline fillet (bulge) | `{center, point}` |
 | `\`handle\`: "XX" is not an object handle` | guessed handle | `query` / `qselect` / an `as` ref |
-| `unknown command \`foo\`` | typo or alias not in 0.13.0 | `cc_commands.py foo` |
+| `unknown command \`foo\`` | typo or alias not in 0.14.0 | `cc_commands.py foo` |
 | `` `keep` must be "convert", "retain" or "delete" `` | other `block` keep value (0.8.0 silently deleted) | one of the three |
 | `` `{last}` needs an earlier --cmd in this run to have returned a handle `` | `{last}` before any `--cmd` returned one | reorder, or use `cc_session.py` |
 | `--window/--view need an image output` | framing with no `--export` | add `--export` or drop framing |

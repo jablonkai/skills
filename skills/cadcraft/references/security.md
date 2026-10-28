@@ -12,7 +12,7 @@ Everything is local and headless:
   server's instructions say "headless backend" and refuses otherwise.
 - **No app process.** `/Applications/CADCraft.app` is never launched.
 
-CADCraft 0.13.0 has no file-root confinement of its own (unlike VectorCraft's automation
+CADCraft 0.14.0 has no file-root confinement of its own (unlike VectorCraft's automation
 roots), so the scripts confine themselves. (It only limits xref and data-link paths
 *stored in a drawing* to this computer or the drawing's share — see
 [gotchas.md](gotchas.md); paths passed to commands are used as given.)
