@@ -1,6 +1,6 @@
-# photocraft-cli reference (0.16.0)
+# photocraft-cli reference (0.17.0)
 
-Verified against `photocraft-cli 0.16.0 (b1794c6e0, 2026-10-25)`. Every subcommand prints
+Verified against `photocraft-cli 0.17.0 (b8c3f3aa8, 2026-10-28)`. Every subcommand prints
 its own help with `photocraft-cli <sub> --help`; a flag the subcommand doesn't take is
 an error. The CLI is the trusted local route: unlike `serve`, MCP and the desktop
 control port, it may use ordinary filesystem paths.
@@ -113,7 +113,7 @@ to it. Droplet `quality` is **0..12** (Photoshop's JPEG scale), not 1..100.
 photocraft-cli commands [--json] [--filter <text>]
 ```
 
-The engine registry: 940 commands in 0.16.0. `--filter` matches the id and label. Only
+The engine registry: 945 commands in 0.17.0. `--filter` matches the id and label. Only
 `--json` includes each command's `params` signature (ranges, defaults, enum values), so
 use `scripts/pc_inspect.py commands <words…>` to see it. That's the source of truth
 whenever this reference and the binary disagree.
