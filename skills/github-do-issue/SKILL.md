@@ -12,8 +12,9 @@ tags:
   - workflow
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write
 argument-hint: "[<issue-number-or-url> ...]  (none = all open issues)"
+license: GPL-3.0-only
 metadata:
-  version: "1.0.2"
+  version: "1.0.3"
   author: "Tamás Jablonkai"
 ---
 

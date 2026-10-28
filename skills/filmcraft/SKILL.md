@@ -6,8 +6,9 @@ category: video
 compatibility: "Built for FilmCraft 0.14.0 and filmcraft-cli 0.14.0 on macOS; ffprobe (FFmpeg) for export checks. Pre-1.0, so command ids may change."
 risk: medium
 tags: [filmcraft, video-editing, nle, premiere, timeline, export, prores, headless]
+license: GPL-3.0-only
 metadata:
-  version: "1.1.1"
+  version: "1.1.2"
   author: "Tamás Jablonkai"
 ---
 

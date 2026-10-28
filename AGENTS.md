@@ -14,7 +14,7 @@ house rules on top of that format; when the two disagree, the spec wins.
 ## AI agent guidance
 
 - `skills/<name>/` is the main workspace surface; changes to skills belong there.
-- Every skill directory must contain exactly one `SKILL.md` with YAML frontmatter `name:`, `description:`, `summary:`, `category:`, `compatibility:`, `metadata.version` and `metadata.author`.
+- Every skill directory must contain exactly one `SKILL.md` with YAML frontmatter `name:`, `description:`, `summary:`, `category:`, `compatibility:`, `license:`, `metadata.version` and `metadata.author`.
 - Any change to a skill's files must raise its `metadata.version` (see [Versioning](#versioning)).
 - The `name:` value must match the directory name. The `description:` value must explain what the skill does and when to use it, in English only — no Hungarian (or other non-English) trigger phrases.
 - The `compatibility:` value must name the application versions the skill was built and verified for (see [Compatibility](#compatibility)); update it whenever the skill is re-verified against a newer release.
@@ -126,8 +126,8 @@ house rules on top of that format; when the two disagree, the spec wins.
 - Every skill dir must contain exactly one `SKILL.md`
 - The frontmatter `name:` **must** equal the directory name
 - Required YAML frontmatter fields: `name`, `description`, `summary`, `category`,
-  `compatibility`, `metadata.version`, `metadata.author`
-- Optional fields: `risk`, `tags`, `allowed-tools`, `argument-hint`, `license`
+  `compatibility`, `license`, `metadata.version`, `metadata.author`
+- Optional fields: `risk`, `tags`, `allowed-tools`, `argument-hint`
 - No other top-level frontmatter keys, and no `metadata:` keys besides `version` and `author` — the
   validator rejects unknown fields so that tooling-generated keys (e.g. the repo URL and
   tree SHA `gh skill install` writes into `metadata:`) don't drift into the catalog
@@ -141,13 +141,13 @@ house rules on top of that format; when the two disagree, the spec wins.
 | `summary` | yes | single line, lowercase start, no trailing period — the catalog entry (see below) |
 | `category` | yes | single token grouping the skill (e.g. `testing`, `git`, `3d`), mapped to a README theme (see below) |
 | `compatibility` | yes | the application versions the skill was built for (see below) — max 500 characters |
+| `license` | yes | SPDX identifier — `GPL-3.0-only`, the repo's [LICENSE](LICENSE); bundled third-party assets keep their own |
 | `metadata.version` | yes | the skill's own SemVer, quoted `MAJOR.MINOR.PATCH` (e.g. `"1.2.0"`) — see [Versioning](#versioning) |
 | `metadata.author` | yes | the skill's author, quoted — `"Tamás Jablonkai"` |
 | `risk` | no | one of `low`, `medium`, `high` — see the scale below |
 | `tags` | no | YAML list of lowercase keywords |
 | `allowed-tools` | no | comma-separated tool names the skill needs |
 | `argument-hint` | no | usage string shown for `/`-invocation |
-| `license` | no | SPDX identifier, if the skill ships under its own terms |
 
 ### Risk scale
 
@@ -302,7 +302,7 @@ scaffolding, description writing, and evaluation:
 conventions on top:
 
 1. Create `skills/<kebab-name>/SKILL.md` with valid frontmatter, including `summary`, `category`,
-   `metadata.version: "1.0.0"` and `metadata.author`
+   `license: GPL-3.0-only`, `metadata.version: "1.0.0"` and `metadata.author`
 2. Run `.github/scripts/generate-catalog.sh` to render the **Available Skills** entry into
    [README.md](README.md) and this file
 3. Run `bash .github/scripts/validate.sh`, plus `bash .github/scripts/lint.sh` if the

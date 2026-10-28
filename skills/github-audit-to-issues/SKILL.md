@@ -13,8 +13,9 @@ tags:
   - workflow
 allowed-tools: Bash, Read, Grep, Glob, Agent, Write
 argument-hint: "[focus: security|quality|performance|tests|docs|ideas|all] [--severity critical,high,...] [--report <file>] [--repo owner/repo] [--dry-run]"
+license: GPL-3.0-only
 metadata:
-  version: "1.0.2"
+  version: "1.0.3"
   author: "Tamás Jablonkai"
 ---
 

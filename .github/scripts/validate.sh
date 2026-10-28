@@ -14,7 +14,7 @@ echo "Validating skill catalog..."
 # README.md and AGENTS.md are rendered from them — a skill missing either cannot
 # be listed at all. `compatibility` records the application versions the skill
 # was built for, so a later app update has something to be checked against.
-readonly REQUIRED_FRONTMATTER_FIELDS=(name description summary category compatibility)
+readonly REQUIRED_FRONTMATTER_FIELDS=(name description summary category compatibility license)
 
 check_skill_frontmatter() {
   local file

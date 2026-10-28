@@ -12,8 +12,9 @@ tags:
   - ffmpeg
 allowed-tools: Bash, Read
 argument-hint: "[render folder or video file]"
+license: GPL-3.0-only
 metadata:
-  version: "1.0.4"
+  version: "1.0.5"
   author: "Tamás Jablonkai"
 ---
 

@@ -6,8 +6,9 @@ category: audio
 compatibility: "Built for SoundCraft 0.14.0 and soundcraft-cli 0.14.0 on macOS 27 (arm64); pre-1.0, so command ids may change. Scripts need Python 3.9+ (standard library only)."
 risk: medium
 tags: [soundcraft, daw, audio-editing, mixing, bounce, podcast, voice-over, headless]
+license: GPL-3.0-only
 metadata:
-  version: "1.1.1"
+  version: "1.1.2"
   author: "Tamás Jablonkai"
 ---
 

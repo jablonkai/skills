@@ -6,8 +6,9 @@ category: office
 compatibility: "Built for gridcraft-cli 0.13.0 and GridCraft.app 0.13.0 on macOS; pre-1.0, so command ids may change."
 risk: low
 tags: [gridcraft, spreadsheet, excel, xlsx, csv, formulas, charts, headless]
+license: GPL-3.0-only
 metadata:
-  version: "1.1.1"
+  version: "1.1.2"
   author: "Tamás Jablonkai"
 ---
 

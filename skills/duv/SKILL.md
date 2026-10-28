@@ -14,8 +14,9 @@ tags:
   - json-api
 allowed-tools: Bash, Read, WebFetch
 argument-hint: "[runner name, event name, ranking or record query]"
+license: GPL-3.0-only
 metadata:
-  version: "1.1.2"
+  version: "1.1.3"
   author: "Tamás Jablonkai"
 ---
 

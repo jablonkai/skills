@@ -6,8 +6,9 @@ category: office
 compatibility: "Built for DeckCraft 0.12.0 and deckcraft-cli 0.12.0 on macOS, Python 3.9+; poppler (pdfinfo, pdftotext) and ImageMagick for export checks; pre-1.0, so command ids may change."
 risk: medium
 tags: [deckcraft, presentations, slides, pptx, keynote-style, powerpoint-style, headless]
+license: GPL-3.0-only
 metadata:
-  version: "1.0.2"
+  version: "1.0.3"
   author: "Tamás Jablonkai"
 ---
 

@@ -6,8 +6,9 @@ category: design-automation
 compatibility: "Built for lightcraft-cli 0.15.0 and LightCraft.app 0.15.0 on macOS; pre-1.0, so command ids may change."
 risk: medium
 tags: [lightcraft, lightroom, raw, photo-library, develop, keywords, export, headless]
+license: GPL-3.0-only
 metadata:
-  version: "1.0.2"
+  version: "1.0.3"
   author: "Tamás Jablonkai"
 ---
 

@@ -6,8 +6,9 @@ category: cad
 compatibility: "Built for SolidCraft 0.25.1 and its bundled solidcraft-cli 0.25.1 on macOS, Python 3.9+; pre-1.0, so command ids may change."
 risk: medium
 tags: [solidcraft, cad, parametric, solid-modeling, step, stl, 3mf, headless]
+license: GPL-3.0-only
 metadata:
-  version: "1.0.2"
+  version: "1.0.3"
   author: "Tamás Jablonkai"
 ---
 
