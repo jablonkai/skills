@@ -1,4 +1,4 @@
-# Gotchas (DeckCraft 0.11.1)
+# Gotchas (DeckCraft 0.12.0)
 
 Each of these was hit while building and verifying the skill.
 
@@ -64,7 +64,7 @@ Each of these was hit while building and verifying the skill.
 - Notes pages and handouts default to US Letter portrait; pass `paper`.
 - `convert X.md` writes the outline with tab-indented lines, not Markdown bullets.
 - `.pptx` round trips keep titles, layouts, notes, pictures, tables and charts in
-  0.11.1; check anything exotic (SmartArt, media, animations) with `info` and a render.
+  0.12.0; check anything exotic (SmartArt, media, animations) with `info` and a render.
 
 ## Running it
 

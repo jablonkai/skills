@@ -1,4 +1,4 @@
-# deckcraft-cli 0.11.1
+# deckcraft-cli 0.12.0
 
 `deckcraft-cli help SUBCOMMAND` explains any subcommand; this page is what the help
 leaves implicit. Slides are 960 × 540 pt by default (16:9); positions are points, x right,
@@ -9,7 +9,7 @@ y down, a rect is `[x, y, w, h]`.
 | Subcommand | What it does |
 |---|---|
 | `info FILE` | JSON: `slides` (index, id, title, layout, shapes count, notes, hidden, transition, animations), `layouts`, `theme`, `fonts`, `sections`, `media`, `slideSize`. The read-back oracle. |
-| `render FILE [--slide N \| --all] [--scale S] [--edit] [--transparent] OUT` | PNG of slide N (0-based, default 0), or `--all` into folder OUT as `slide-01.png …`. `--scale` is px per point (2 → 1920×1080). `--edit` also draws placeholder prompts. |
+| `render (FILE \| --sample) [--slide N \| --all] [--scale S] [--edit] [--transparent] OUT` | PNG of slide N (0-based, default 0), or `--all` into folder OUT as `slide-01.png …`. `--scale` is px per point (2 → 1920×1080). `--edit` also draws placeholder prompts. |
 | `render-transition FILE --slide N --t 0.25,0.5 [--width PX] OUT.png` | Frames of the transition *into* slide N; several times write `OUT-t0.250.png` … |
 | `convert IN OUT` | By OUT's extension: `.deckcraft`, `.pptx`, `.pdf`, `.md`/`.txt` (outline), `.png`/`.jpg` (first slide), `.gif` (one frame per slide). Anything else is refused. |
 | `run [--in FILE \| --sample] --cmd ID=JSON … [--save OUT] [--export OUT [--export-params JSON]] [--print]` | Commands in order on one presentation, then save and/or export. |
