@@ -7,7 +7,8 @@ compatibility: "Built for DesignCraft 0.14.0 and designcraft-cli 0.14.0 on macOS
 risk: medium
 tags: [designcraft, indesign, page-layout, dtp, data-merge, pdf-x, idml, headless]
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
+  author: "Tamás Jablonkai"
 ---
 
 # DesignCraft via designcraft-cli

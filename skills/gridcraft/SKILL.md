@@ -7,7 +7,8 @@ compatibility: "Built for gridcraft-cli 0.13.0 and GridCraft.app 0.13.0 on macOS
 risk: low
 tags: [gridcraft, spreadsheet, excel, xlsx, csv, formulas, charts, headless]
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
+  author: "Tamás Jablonkai"
 ---
 
 # GridCraft via gridcraft-cli

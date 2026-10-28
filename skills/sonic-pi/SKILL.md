@@ -13,7 +13,8 @@ tags:
     - audio
     - wav
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
+  author: "Tamás Jablonkai"
 ---
 
 # Sonic Pi via a headless OSC session

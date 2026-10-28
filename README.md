@@ -174,7 +174,7 @@ skill. Then apply this repo's conventions:
 
 1. Create `skills/<kebab-name>/SKILL.md` with `name`, `description`, `summary`,
    `category`, `compatibility` (the app versions the skill is built for) and
-   `metadata.version` (`"1.0.0"`) frontmatter. The `name` must match the directory name.
+   `metadata.version` (`"1.0.0"`) plus `metadata.author` frontmatter. The `name` must match the directory name.
 2. Write the description so it triggers reliably — say what the skill does *and* when to
    use it, with concrete trigger phrases, in English only. Keep `summary` to the one line that should
    appear in the catalog.
@@ -206,6 +206,7 @@ The validator checks:
 
 - required frontmatter fields (`name`, `description`, `summary`, `category`, `compatibility`)
 - frontmatter `name` matches the directory name
+- `metadata.author` is set
 - `metadata.version` is `MAJOR.MINOR.PATCH`, and every skill changed since the base
   branch has a higher version than there
 - only documented frontmatter fields are used, and `risk` is `low`, `medium` or `high`

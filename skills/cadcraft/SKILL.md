@@ -7,7 +7,8 @@ compatibility: "Built for cadcraft-cli 0.14.0 and CADCraft.app 0.14.0 on macOS; 
 risk: medium
 tags: [cadcraft, cad, dxf, dwg, autocad, drafting, title-block, headless]
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
+  author: "Tamás Jablonkai"
 ---
 
 # CADCraft via cadcraft-cli

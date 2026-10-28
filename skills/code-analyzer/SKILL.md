@@ -15,7 +15,8 @@ tags:
 allowed-tools: Bash, Read, Grep, Glob, Agent, Edit, Write
 argument-hint: "[focus: security|quality|performance|tests|docs|ideas|all]"
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
+  author: "Tamás Jablonkai"
 ---
 
 # code-analyzer

@@ -7,7 +7,8 @@ compatibility: "Built for WordCraft 0.12.0 and wordcraft-cli 0.12.0 on macOS 27;
 risk: medium
 tags: [wordcraft, word, docx, templates, tracked-changes, comments, toc, markdown, conversion, headless]
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
+  author: "Tamás Jablonkai"
 ---
 
 # WordCraft via wordcraft-cli

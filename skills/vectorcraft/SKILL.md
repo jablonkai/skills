@@ -7,7 +7,8 @@ compatibility: "Built for vectorcraft-cli 0.18.0 and VectorCraft.app 0.18.0 on m
 risk: medium
 tags: [vectorcraft, vector, svg, illustrator, artboards, batch, data-sets, headless]
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
+  author: "Tamás Jablonkai"
 ---
 
 # VectorCraft via vectorcraft-cli

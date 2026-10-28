@@ -7,7 +7,8 @@ compatibility: "Built for PdfCraft 0.15.0 and pdfcraft-cli 0.15.0 on macOS 27; P
 risk: medium
 tags: [pdfcraft, pdf, ocr, redaction, forms, merge, split, headless]
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
+  author: "Tamás Jablonkai"
 ---
 
 # PdfCraft via pdfcraft-cli

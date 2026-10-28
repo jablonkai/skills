@@ -7,7 +7,8 @@ compatibility: "Built for photocraft-cli 0.17.0 and PhotoCraft.app 0.17.0 on mac
 risk: medium
 tags: [photocraft, psd, image-editing, layers, batch, photoshop-actions, droplet, headless]
 metadata:
-  version: "1.2.2"
+  version: "1.2.3"
+  author: "Tamás Jablonkai"
 ---
 
 # PhotoCraft via photocraft-cli

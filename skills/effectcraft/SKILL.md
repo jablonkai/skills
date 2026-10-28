@@ -7,7 +7,8 @@ compatibility: "Built for EffectCraft 0.18.0 and effectcraft-cli 0.18.0 on macOS
 risk: medium
 tags: [effectcraft, after-effects, motion-graphics, compositing, lower-third, essential-graphics, prores, headless]
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
+  author: "Tamás Jablonkai"
 ---
 
 # EffectCraft via effectcraft-cli

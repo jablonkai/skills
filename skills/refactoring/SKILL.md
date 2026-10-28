@@ -19,7 +19,8 @@ tags:
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write, Skill
 argument-hint: "[file, function, class, or module to refactor]"
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
+  author: "Tamás Jablonkai"
 ---
 
 # refactoring

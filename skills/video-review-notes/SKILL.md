@@ -13,7 +13,8 @@ tags:
 allowed-tools: Bash, Read
 argument-hint: "[render folder or video file]"
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
+  author: "Tamás Jablonkai"
 ---
 
 # Video review notes

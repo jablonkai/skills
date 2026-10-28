@@ -15,7 +15,8 @@ tags:
     - odf
     - mail-merge
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
+  author: "Tamás Jablonkai"
 ---
 
 # LibreOffice Automation

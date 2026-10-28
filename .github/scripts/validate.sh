@@ -49,7 +49,7 @@ readonly ALLOWED_FRONTMATTER_FIELDS=(
   name description summary category compatibility risk tags allowed-tools argument-hint
   license metadata
 )
-readonly ALLOWED_METADATA_FIELDS=(version)
+readonly ALLOWED_METADATA_FIELDS=(version author)
 readonly ALLOWED_RISK_VALUES=(low medium high)
 
 check_skill_frontmatter_fields() {
@@ -105,6 +105,11 @@ check_skill_versions() {
 
     if [[ ! "$version" =~ $SEMVER_PATTERN ]]; then
       echo "metadata.version '$version' is not MAJOR.MINOR.PATCH in $file"
+      exit 1
+    fi
+
+    if [[ -z "$(frontmatter_metadata_value "$file" author)" ]]; then
+      echo "Missing metadata.author field: $file"
       exit 1
     fi
   done < <(skill_dirs)
