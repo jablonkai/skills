@@ -1,6 +1,6 @@
-# Pinned command ids (lightcraft-cli 0.14.0)
+# Pinned command ids (lightcraft-cli 0.15.0)
 
-The registry has 752 commands in 0.14.0. This page pins the ones the common jobs need.
+The registry has 376 commands in 0.15.0. This page pins the ones the common jobs need.
 For anything else, or when a pinned id fails after an upgrade, look it up instead of
 guessing. Unknown params are often ignored silently.
 
@@ -95,7 +95,7 @@ when named).
 
 | Id | Params |
 |---|---|
-| `presets.list` | `{}` → 41 built-ins in 0.14.0 (`lc.warm-glow`, `lc.teal-orange`, `lc.bw-high-contrast`, `lc.crisp-landscape`, …) plus user presets |
+| `presets.list` | `{}` → 41 built-ins in 0.15.0 (`lc.warm-glow`, `lc.teal-orange`, `lc.bw-high-contrast`, `lc.crisp-landscape`, …) plus user presets |
 | `preset.apply` | `{id, amount?: 0..200, ids?}` |
 | `preset.create` | `{name, group?, groups?}`: from the active photo |
 | `preset.import` | `{paths, group?, dryRun?}`: .lcpreset, XMP, .lrtemplate, DNG presets, .zip |
