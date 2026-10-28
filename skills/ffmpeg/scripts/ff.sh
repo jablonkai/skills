@@ -36,7 +36,11 @@ while IFS= read -r bin; do
   version=$("$bin" -hide_banner -version | head -n 1 | awk '{print $3}')
   filters=$("$bin" -hide_banner -filters 2>/dev/null | awk '{print $2}')
   encoders=$("$bin" -hide_banner -encoders 2>/dev/null | awk '{print $2}')
-  have() { printf '%s\n' "$2" | grep -qx "$1" && printf '%s ' "$1" || true; }
+  have() {
+    if printf '%s\n' "$2" | grep -qx "$1"; then
+      printf '%s ' "$1"
+    fi
+  }
   echo "ffmpeg: $bin  (version $version)"
   printf '  encoders: '
   for e in libx264 libx265 libsvtav1 libvpx-vp9 h264_videotoolbox hevc_videotoolbox prores_videotoolbox prores_ks libopus libmp3lame aac_at; do
