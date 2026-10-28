@@ -12,7 +12,7 @@ import subprocess
 import sys
 import zipfile
 
-PINNED_VERSION = "0.11.0"
+PINNED_VERSION = "0.12.0"
 PLACEHOLDER = re.compile(r"\{\{\s*([^{}]+?)\s*\}\}")
 
 

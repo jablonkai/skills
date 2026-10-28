@@ -1,6 +1,6 @@
-# wordcraft-cli reference (0.11.0)
+# wordcraft-cli reference (0.12.0)
 
-All behaviour below was verified against wordcraft-cli 0.11.0 on macOS. `-h` on any
+All behaviour below was verified against wordcraft-cli 0.12.0 on macOS. `-h` on any
 subcommand prints this same global help; there is no per-command help and no `describe`.
 
 ## Subcommands
@@ -13,7 +13,7 @@ subcommand prints this same global help; there is no per-command help and no `de
 | `inspect FILE` | Structure JSON (below) |
 | `render FILE OUT.png [--page N] [--scale S]` | One page to PNG. Pages are 1-based; scale is px per pt (default 2) |
 | `run [--file F \| --template T] [--script FILE\|-] --cmd 'id={json}' … [--save OUT] [--print] [--author NAME]` | Runs commands headless, then saves. `--print` prints each command's result |
-| `commands [--json]` | The registry (643 ids). Filter it with `scripts/wc_commands.py` |
+| `commands [--json]` | The registry (648 ids). Filter it with `scripts/wc_commands.py` |
 | `parity [--markdown]` | Feature-catalogue coverage |
 | `mcp [--connect HOST:PORT \| --author NAME] [--automation-read-root DIR] [--automation-write-root DIR]` | MCP server on stdio, headless or bridged to the app |
 | `zotero <command> FILE …` | Zotero citation commands (needs Zotero running) |
@@ -42,6 +42,7 @@ Password-protected files take `--password-file PATH` or `WORDCRAFT_PASSWORD`. A
 
 - Relative paths in the script resolve against the script file's folder. With `--script -` (stdin), use absolute paths.
 - `--author NAME` sets the author of new tracked changes and comments. Without it they are "WordCraft User". The `file.setAuthor` command does the same.
+- `file.new` and `file.open` open another document and make it the active one; later commands and the `save` list act on the active document. `view.switchWindows` lists the open documents and, with `{"id": N}`, activates one.
 - An unknown id stops the run: `unknown command `font.bold``. The error names the id.
 
 ## `inspect` JSON
