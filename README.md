@@ -46,6 +46,7 @@ portable beyond a single tool.
 
 #### Video, motion & audio
 - `apple-motion`: author and install Apple Motion templates for Final Cut Pro as ozml XML — lower-third titles, generators and effects with published parameters, branded variant sets, headless renders through Compressor and use in FCPXML timelines
+- `aubio`: analyse audio with the aubio CLI — corrected BPM and beat grids, onsets, pitch and note extraction to CSV or MIDI, silence detection, exported as Resolve marker JSON/EDL or FCPXML marker CSV
 - `cavalry`: remote-control Cavalry (Scene Group's 2D motion-design app) via a scriptable bridge — build scenes procedurally, animate with keyframes and per-letter text effects, then render PNG frames or alpha overlay videos
 - `compressor`: batch-transcode with Apple Compressor via its CLI — ProRes, H.264, HEVC and image-sequence deliverables from files or folders, built-in and custom settings lookup, derived custom settings, monitored, stoppable and resumable batches, ffprobe-verified outputs
 - `davinci-resolve`: remote-control a running DaVinci Resolve by Python via its scripting API — media import and bins, timeline assembly, markers, titles and lower thirds, subtitles, LUT/CDL grades, render queue deliverables, EDL/FCPXML/OTIO export
