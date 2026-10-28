@@ -1,4 +1,4 @@
-# effectcraft-cli 0.17.0
+# effectcraft-cli 0.18.0
 
 Each invocation runs a headless engine, does its work and exits. `--help` lists everything;
 running the app binary would open a window, so don't.
@@ -46,13 +46,15 @@ render --project F --comp C --out FILE --format h264|hevc|av1|prores|webm|png|jp
        [--quality best|draft] [--channels rgb|rgba] [--prores proxy|lt|standard|hq|4444|4444xq]
        [--bitrate KBPS] [--audio auto|on|off] [--jpeg-quality N]
        [--profile main|main10] [--rate-control bitrate|quality] [--video-quality N] [--keyint N]
-       [--webm-codec vp9|av1] [--progress]
+       [--webm-codec vp9|av1] [--level auto|4.1] [--audio-bitrate KBPS] [--opus-app audio|voice]
+       [--progress]      # or: render --queue (render the project's queue)
 ```
 
 - Alpha: `--format prores --prores 4444 --channels rgba` → ffprobe `prores / 4444 / yuva444p12le`.
   WebM VP9 also carries alpha (`--format webm --channels rgba`). H.264 never does.
 - Image sequences: `--out 'dir/f_[#####].png'` writes `f_00000.png…`; the folder must exist.
 - `--end` is exclusive: `--start 0 --end 0.2` at 25 fps is 5 frames.
+- `--profile`, `--level`, `--rate-control`, `--video-quality`, `--keyint` apply to HEVC / AV1; `--audio-bitrate` and `--opus-app` to WebM Opus audio. Listed in 0.18.0 help; only `--webm-codec vp9` alpha was smoke-tested.
 - A relative `--out` is relative to the working directory, not the project.
 - `--progress` prints `progress <done> <total> <elapsed> <left>` on stderr.
 - Verified: H.264 MP4 5.000 s, ProRes 4444 alpha, PNG sequence.
