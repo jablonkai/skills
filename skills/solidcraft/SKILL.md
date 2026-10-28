@@ -7,7 +7,8 @@ compatibility: "Built for SolidCraft 0.25.1 and its bundled solidcraft-cli 0.25.
 risk: medium
 tags: [solidcraft, cad, parametric, solid-modeling, step, stl, 3mf, headless]
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
+  author: "Tamás Jablonkai"
 ---
 
 # SolidCraft via solidcraft-cli

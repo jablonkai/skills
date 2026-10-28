@@ -7,7 +7,8 @@ compatibility: "Built for Compressor 5.4 on macOS 27 (arm64)."
 risk: medium
 tags: [compressor, apple, prores, hevc, h264, transcode, proxy, macos, video]
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
+  author: "Tamás Jablonkai"
 ---
 
 # Apple Compressor via its CLI

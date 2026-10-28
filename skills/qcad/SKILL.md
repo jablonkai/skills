@@ -12,7 +12,8 @@ tags:
     - 2d-drafting
     - scripting
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
+  author: "Tamás Jablonkai"
 ---
 
 # QCAD headless drafting

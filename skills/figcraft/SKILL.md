@@ -7,7 +7,8 @@ compatibility: "Built for figcraft-cli 0.12.1 and FigCraft.app 0.12.1 on macOS, 
 risk: medium
 tags: [figcraft, figma, ui-design, fig, auto-layout, components, export, headless]
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
+  author: "Tamás Jablonkai"
 ---
 
 # FigCraft via figcraft-cli

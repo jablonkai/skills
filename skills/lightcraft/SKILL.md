@@ -7,7 +7,8 @@ compatibility: "Built for lightcraft-cli 0.15.0 and LightCraft.app 0.15.0 on mac
 risk: medium
 tags: [lightcraft, lightroom, raw, photo-library, develop, keywords, export, headless]
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
+  author: "Tamás Jablonkai"
 ---
 
 # LightCraft via lightcraft-cli

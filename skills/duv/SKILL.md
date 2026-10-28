@@ -15,7 +15,8 @@ tags:
 allowed-tools: Bash, Read, WebFetch
 argument-hint: "[runner name, event name, ranking or record query]"
 metadata:
-  version: "1.1.1"
+  version: "1.1.2"
+  author: "Tamás Jablonkai"
 ---
 
 # DUV Ultramarathon Statistics

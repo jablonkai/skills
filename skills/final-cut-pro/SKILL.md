@@ -12,7 +12,8 @@ tags:
     - timecode
     - applescript
 metadata:
-  version: "1.1.1"
+  version: "1.1.2"
+  author: "Tamás Jablonkai"
 ---
 
 # Final Cut Pro via FCPXML

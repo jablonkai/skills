@@ -7,7 +7,8 @@ compatibility: "Built for FilmCraft 0.14.0 and filmcraft-cli 0.14.0 on macOS; ff
 risk: medium
 tags: [filmcraft, video-editing, nle, premiere, timeline, export, prores, headless]
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
+  author: "Tamás Jablonkai"
 ---
 
 # FilmCraft via filmcraft-cli

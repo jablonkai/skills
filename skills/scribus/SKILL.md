@@ -13,7 +13,8 @@ tags:
     - print
     - csv
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
+  author: "Tamás Jablonkai"
 ---
 
 # Scribus via headless Python jobs

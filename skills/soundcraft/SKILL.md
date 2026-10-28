@@ -7,7 +7,8 @@ compatibility: "Built for SoundCraft 0.14.0 and soundcraft-cli 0.14.0 on macOS 2
 risk: medium
 tags: [soundcraft, daw, audio-editing, mixing, bounce, podcast, voice-over, headless]
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
+  author: "Tamás Jablonkai"
 ---
 
 # SoundCraft via soundcraft-cli

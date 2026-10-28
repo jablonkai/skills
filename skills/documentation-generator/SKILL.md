@@ -18,7 +18,8 @@ tags:
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write, Skill
 argument-hint: "[module, package, spec file, or doc type to generate]"
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
+  author: "Tamás Jablonkai"
 ---
 
 # documentation-generator

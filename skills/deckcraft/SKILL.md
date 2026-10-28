@@ -7,7 +7,8 @@ compatibility: "Built for DeckCraft 0.12.0 and deckcraft-cli 0.12.0 on macOS, Py
 risk: medium
 tags: [deckcraft, presentations, slides, pptx, keynote-style, powerpoint-style, headless]
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
+  author: "Tamás Jablonkai"
 ---
 
 # DeckCraft via deckcraft-cli

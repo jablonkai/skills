@@ -13,7 +13,8 @@ tags:
     - raytrace
     - stl
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
+  author: "Tamás Jablonkai"
 ---
 
 # BRL-CAD via headless scripts
