@@ -1,4 +1,4 @@
-# SoundCraft recipes (0.13.1)
+# SoundCraft recipes (0.14.0)
 
 `S=<skill>/scripts`. Use absolute paths in hand-written command JSON; `sc_session.py`
 resolves spec paths against the current directory.
@@ -40,7 +40,7 @@ ends it. Without `--save`, the mute experiment doesn't touch the saved session. 
 the voice before the bed, place the bed so it outlasts the voice, or trim it with
 `edit.trim_clip`.
 
-If the user asked for **sidechain** ducking: there is no key input in 0.13.1. Use
+If the user asked for **sidechain** ducking: there is no key input in 0.14.0. Use
 `duck` and say it's done with volume automation.
 
 ## Plugins on one track of an existing session, then a range bounce

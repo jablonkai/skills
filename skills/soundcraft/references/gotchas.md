@@ -1,6 +1,6 @@
-# SoundCraft gotchas (0.13.1)
+# SoundCraft gotchas (0.14.0)
 
-Each item was reproduced against soundcraft-cli 0.13.1.
+Each item was reproduced against soundcraft-cli 0.14.0.
 
 ## Time and units
 
@@ -15,7 +15,8 @@ Each item was reproduced against soundcraft-cli 0.13.1.
 
 - `session.new` has no `path`: a `path` key is silently ignored and the session lives in
   memory until `--save`.
-- `--save` replaces an existing file, including the `--in` session, with no prompt. It
+- `--save` replaces an existing file with no prompt, but saving over the `--in` session needs
+  `--in-place` (without it: "which it would replace: choose another file, or pass --in-place"). It
   keeps the previous version as `Backups/<name> backup N.scraft` beside the session, so
   a mistaken overwrite can be undone from there.
 - `convert IN IN` overwrites the source in place. `sc_convert.sh` refuses OUT == IN.
