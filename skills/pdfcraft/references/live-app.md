@@ -20,10 +20,10 @@ rm -f "$C"
 ```
 
 - **Save before `quit`.** With unsaved changes it answers
-  `{"needs_confirmation": true, "quitting": false}`. In 0.14.0 testing, the app
+  `{"needs_confirmation": true, "quitting": false}`. In 0.15.0 testing, the app
   still exited about 3 s later and the changes were lost.
 
-- Methods (0.14.0): `state`, `inspect`, `click`, `focus`, `resize`, `move`,
+- Methods (0.15.0): `state`, `inspect`, `click`, `focus`, `resize`, `move`,
   `drag`, `type`, `key`, `command`, `commands`, `set`, `open`, `screenshot`,
   `quit`. An unknown method lists them.
 - `open` returns `pending: true`. Poll `state` until `active` is non-null
