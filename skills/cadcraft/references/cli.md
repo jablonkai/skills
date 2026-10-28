@@ -1,20 +1,25 @@
-# cadcraft-cli 0.13.0 reference
+# cadcraft-cli 0.14.0 reference
 
 Universal binary at `~/.local/bin/cadcraft-cli`. `cadcraft-cli --version` prints
-`cadcraft-cli 0.13.0`. `--help`/`-h`/`help` print the usage to stdout and exit 0; bad
-usage prints it and exits 1. There is no per-subcommand help.
+`cadcraft-cli 0.14.0`. `--help`/`-h`/`help` print the usage to stdout and exit 0; bad
+usage prints it and exits 1. Since 0.14.0 every subcommand has
+its own `--help` (`cadcraft-cli run --help` lists the flags and the `{last}` chaining).
 
 ## Subcommands
 
 | Command | Does |
 |---|---|
-| `info FILE.dxf|dwg` | JSON summary: `counts` by type, `entityCount`, `extents` `[[x0,y0],[x1,y1]]`, `layers` (name, color, linetype, on/frozen/locked), `blocks`, `layouts`, `dimStyles`, `textStyles`, `linetypes`, `view`, `skipped` (sections not read). No units field — use ezdxf `$INSUNITS`. |
-| `convert IN OUT [FRAMING]` | IN: DXF/DWG. OUT by extension: dxf, dwg, svg, png, pdf. Writes over OUT (and over IN if OUT == IN) without asking. An image output warns on stderr about entities it can't draw — report those. |
-| `run [FILE | --sample | --metric] [--script TEXT] [--script-file F.scr] [--cmd 'id {json}']… [--save OUT] [--export OUT.(png|svg|pdf)] [FRAMING]` | Opens FILE (or a new drawing: MEASUREINIT units, imperial out of the box; `--metric` for mm, `--sample` for a demo), runs scripts and commands **in command-line order**, then saves/exports. A `--cmd` param value of exactly `"{last}"` (at any depth, e.g. `"handles":["{last}"]`) becomes the last handle an earlier `--cmd` returned; with none the run fails. |
+| `info [--compact] FILE.dxf|dwg|svg|svgz` | JSON summary: `counts` by type, `entityCount`, `extents` `[[x0,y0],[x1,y1]]`, `layers` (name, color, linetype, on/frozen/locked), `blocks`, `layouts`, `dimStyles`, `textStyles`, `linetypes`, `view`, `skipped` (sections not read). No units field — use ezdxf `$INSUNITS`. |
+| `convert IN OUT [FRAMING]` | IN: DXF/DWG/SVG/SVGZ (an SVG imports as polylines). OUT by extension: dxf, dwg, dwt, svg, png, pdf. Writes over OUT without asking; OUT == IN exits 2 unless `--in-place`. An image output warns on stderr about entities it can't draw — report those. |
+| `run [FILE | --sample | --metric] [--script TEXT] [--script-file F.scr] [--cmd 'id {json}']… [--in-place] [--save OUT] [--export OUT.(png|svg|pdf)] [FRAMING]` | Opens FILE (or a new drawing: MEASUREINIT units, imperial out of the box; `--metric` for mm, `--sample` for a demo), runs scripts and commands **in command-line order**, then saves/exports. A `--cmd` param value of exactly `"{last}"` (at any depth, e.g. `"handles":["{last}"]`) becomes the last handle an earlier `--cmd` returned; with none the run fails. |
 | `commands [FILTER]` | JSON list: `id`, `aliases`, `label`, `menu`, `params` (signature text), `interactive`, `enabled`, `shortcut`. Use `scripts/cc_commands.py`. |
 | `sample (bracket|floorplan) OUT.(dxf|dwg|svg|png)` | Demo drawings. `bracket`: 46 entities, hatches, dims, notes MText, no blocks. `floorplan`: 16 entities on A-WALL/A-DOOR/A-GLAZ/A-ANNO…, 2 texts (LIVING ROOM, BEDROOM), no blocks. |
 | `mcp [--connect HOST:PORT [--lazy] [--launch]]` | MCP server on stdio. Without `--connect`: headless backend in-process (what the scripts use). With it: bridge to the app's token-authenticated control port — not used by this skill ([security.md](security.md)). |
 | `perf [N | FILE]` | Performance diagnostics only. |
+
+Settings flags on `info`/`convert`/`run`/`mcp`: `--config-dir DIR` (env
+`CADCRAFT_CONFIG_DIR`; plotter configs live in `plotters/`), `--fontalt FONT`,
+`--fontfallback A,B` (envs `CADCRAFT_FONTALT`, `CADCRAFT_FONTFALLBACK`).
 
 ## Framing (png, svg, pdf; always model space)
 

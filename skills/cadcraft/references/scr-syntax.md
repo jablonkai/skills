@@ -1,4 +1,4 @@
-# .scr scripts in CADCraft 0.13.0
+# .scr scripts in CADCraft 0.14.0
 
 `--script TEXT`, `--script-file F.scr`, the `script` session step and `cc_build.py`'s
 `{"script": …}` item all feed text to the command line as typed input. Prefer JSON
@@ -32,7 +32,7 @@ ZOOM E
   script` followed directly by `CIRCLE 0,0 3` produced Text "Hello script", Text "CIRCLE
   0,0 3" and no circle. Spaces inside the text are literal. Fix: a blank line right
   after every TEXT line — or use the `text`/`mtext` JSON commands.
-- **`-LAYER` chains** broke the rest of the script in 0.8.0; in 0.13.0 `-LAYER M GEOM C 3
+- **`-LAYER` chains** broke the rest of the script in 0.8.0; in 0.14.0 `-LAYER M GEOM C 3
   GEOM` + a blank line makes GEOM green and current, and later lines run. Still check
   the layer table with `info` after a script that sets layers — and prefer
   `layer.new {"name": "GEOM", "color": "Green", "current": true}`.
