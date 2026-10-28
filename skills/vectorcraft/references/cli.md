@@ -1,4 +1,4 @@
-# vectorcraft-cli 0.17.0 reference
+# vectorcraft-cli 0.18.0 reference
 
 `vectorcraft-cli` is a universal binary in `~/.local/bin`. It renders headless, with no
 window and no GPU. The app (`/Applications/VectorCraft.app`, bundle id
@@ -39,7 +39,7 @@ vectorcraft-cli run [--in FILE] [--cmd ID [--params JSON] | --commands FILE|-]..
 
 ```sh
 vectorcraft-cli convert IN OUT [--scale N] [--artboard I | --range R] [--outline-text]
-    [--decimals N] [--replace-lossy] [--editing-data] [--ai-version 7|pdf]
+    [--decimals N] [--replace-lossy] [--editing-data] [--preserve-editing] [--ai-version 7|pdf]
     [--hidden-objects layer|omit|visible] [--transparent-images flatten|omit]
 ```
 
@@ -52,6 +52,7 @@ vectorcraft-cli convert IN OUT [--scale N] [--artboard I | --range R] [--outline
 | `--decimals N` | SVG coordinate precision 1–7 (default 3) |
 | `--replace-lossy` | allow OUT == IN even though reading IN dropped things — only with the user's consent |
 | `--editing-data` | open a `.ai` from its editing copy even when it draws differently from its PDF part |
+| `--preserve-editing` | PDF: embed the native VectorCraft document as an attachment (default: omitted; the app's Save As PDF keeps it). The warnings say when it was written; it is left out for `--artboard`/`--range` without every artboard |
 | `--ai-version 7` | legacy AI v7 output (one file per artboard: `OUT-<n>.ai`) |
 | `--hidden-objects layer\|omit\|visible` | AI v7 only: hidden objects go on a hidden layer above their layer (default), are dropped, or are written visible |
 | `--transparent-images flatten\|omit` | AI v7 only: flatten transparent images with the art under them (default) or drop them |
