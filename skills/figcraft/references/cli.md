@@ -1,7 +1,7 @@
-# figcraft-cli 0.11.2 reference
+# figcraft-cli 0.12.1 reference
 
-Verified on macOS with `figcraft-cli 0.11.2` (`~/.local/bin/figcraft-cli`) and
-`FigCraft.app 0.11.2` (`ai.storyteller.figcraft`). `figcraft-cli --help` is the vendor
+Verified on macOS with `figcraft-cli 0.12.1` (`~/.local/bin/figcraft-cli`) and
+`FigCraft.app 0.12.1` (`ai.storyteller.figcraft`). `figcraft-cli --help` is the vendor
 reference; the `docs/cli.md` / `docs/mcp.md` it mentions are not shipped in the bundle.
 
 ## Contents
@@ -16,7 +16,7 @@ reference; the `docs/cli.md` / `docs/mcp.md` it mentions are not shipped in the 
 | Command | What it does |
 |---|---|
 | `info FILE [--json]` | pages, top-level frames (id, name, type, size), node/style/variable/image counts, `notes` (import losses), `missingFonts` |
-| `export FILE -o OUT [--format F] [--scale N] [--page NAME] [--node ID\|NAME] [--bleed L] [--crop-marks] [--bleed-marks] [--cmyk]` | images, SVG, PDF or a `.fig` copy |
+| `export FILE -o OUT [--format F] [--scale N] [--page NAME] [--node ID\|NAME] [--bleed L] [--crop-marks] [--bleed-marks] [--cmyk] [--vd-compat bestEffort\|exact\|ignore]` | images, SVG, PDF, Android vector drawable XML or a `.fig` copy |
 | `convert IN OUT` | any readable format to `.figcraft`, FigCraft `.json`, `.fig`, `.svg`, images (format from OUT's extension) |
 | `render FILE -o OUT.png [--scale N] [--page NAME]` | the whole page with its background, for a look |
 | `run SCRIPT.json\|.jsonl [--in FILE] [--out FILE]` | engine commands in a headless session; one JSON line per step |
@@ -30,7 +30,7 @@ command's params.
 ## File formats
 
 - **Read:** `.figcraft` (native), `.json` (FigCraft JSON or Figma REST-API file JSON,
-  `GET /v1/files/:key`), `.fig` (best effort), `.svg` (becomes vectors), raster images
+  `GET /v1/files/:key`), `.fig` and `.sketch` (Sketch 48+) (both best effort; `info` lists what wasn't imported), `.svg` (becomes vectors), raster images
   (an image layer).
 - **REST JSON:** variables come from `<name>.variables.json` or `variables.json` next to the
   file (the session's `open_file` also takes `variables`). Unsupported node types are
@@ -57,6 +57,9 @@ command's params.
   `--bleed-marks` enlarge the MediaBox for the marks; `--cmyk` writes CMYK colour.
 - SVG: text is outlined by default; the session's `export` takes `svgOutlineText: false`
   to keep `<text>`, and `svgIdAttribute: true` for layer names as ids.
+- `--format xml` (or `-o x.xml`) writes an Android vector drawable (`<vector>`, `android:pathData`). Use
+  `--node ID` for one layer; without it the whole page is composited. `--vd-compat bestEffort`
+  (default) | `exact` | `ignore` sets how features a vector drawable can't express are handled.
 - Existing outputs are **overwritten without warning**.
 
 ## run in detail
