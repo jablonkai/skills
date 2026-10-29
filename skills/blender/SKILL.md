@@ -3,7 +3,7 @@ name: blender
 description: 'Remote-control a running Blender by Python script through a small local bridge — build and edit 3D scenes live: mesh and curve modeling with bmesh and modifiers, materials and shader node graphs, geometry nodes, lighting and cameras, keyframe animation, rigging, physics simulation, Grease Pencil, the video sequencer, and EEVEE/Cycles rendering, then measure the result, grab viewport screenshots, and export glTF / FBX / USD / Alembic / OBJ / STL. Use whenever the user wants to create or edit a 3D scene, model, animation, product shot, or .blend file, render an image or video, convert or export a 3D asset, or says "Blender", "3D model", "render this", "make a 3D animation", "Blender scene", "export to glTF" — even if they don''t mention scripting.'
 summary: "remote-control a running Blender by Python via a local bridge — bmesh/modifier modeling, shader and geometry nodes, animation, rigging, physics, Grease Pencil and the VSE, EEVEE/Cycles stills and video, glTF/FBX/USD/OBJ/STL export"
 category: 3d
-compatibility: "Built for Blender 5.2.2 LTS (bundled Python 3.13)."
+compatibility: "Built for Blender 5.2.3 LTS (bundled Python 3.13)."
 risk: medium
 tags:
     - blender
@@ -14,7 +14,7 @@ tags:
     - scripting
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -25,7 +25,7 @@ Blender (`/Applications/Blender.app`) is scriptable in **Python** against `bpy`,
 Blender GUI that executes whatever build script is POSTed to `127.0.0.1:8736`. Because it
 runs in the live session on the main thread, `bpy.data` writes are legal, the viewport
 updates as you build, and viewport screenshots work. Everything documented here was executed
-and verified on **Blender 5.2.2 LTS** (bundled Python 3.13) — the current stable release;
+and verified on **Blender 5.2.3 LTS** (bundled Python 3.13) — the current stable release;
 5.2 is the LTS line, so this holds for every 5.2.x. Check `version` in the ping reply: on
 a newer release, trust the live session over these notes and probe before assuming.
 
@@ -54,7 +54,7 @@ or deprecated.
    - install it as an add-on via Preferences ▸ Add-ons ▸ Install.
 
    A successful ping returns
-   `{"ok": true, "bridge": "blender", "bridge_version": "1.2.0", "version": "5.2.2 LTS", ...}`.
+   `{"ok": true, "bridge": "blender", "bridge_version": "1.2.0", "version": "5.2.3 LTS", ...}`.
    An older `bridge_version` means the user's installed copy is stale — ask them to
    re-copy the file (older copies crash `metrics()` on cameras and empties).
 2. **Look before you build**: `bash scripts/blender-send.sh --state` returns objects and

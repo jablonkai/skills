@@ -1,6 +1,6 @@
 # Grease Pencil v3 — 2D drawing in 3D space
 
-Verified on Blender 5.2.2 LTS. Grease Pencil was rewritten for 4.3; everything from the
+Verified on Blender 5.2.3 LTS. Grease Pencil was rewritten for 4.3; everything from the
 legacy API is gone:
 
 | Legacy (≤4.2) | Blender 5.2 |

@@ -1,4 +1,4 @@
-# Blender scripting gotchas — verified on Blender 5.2.2 LTS (Python 3.13)
+# Blender scripting gotchas — verified on Blender 5.2.3 LTS (Python 3.13)
 
 Everything here was reproduced through the bridge on this machine. Most of it contradicts
 what older tutorials, forum answers, and pre-5.x training data will tell you — Blender's

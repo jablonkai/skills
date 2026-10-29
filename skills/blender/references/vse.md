@@ -1,6 +1,6 @@
 # Video Sequence Editor — strips, effects, transitions
 
-Verified on Blender 5.2.2 LTS. `sequence_editor.sequences` was renamed to `.strips`, and
+Verified on Blender 5.2.3 LTS. `sequence_editor.sequences` was renamed to `.strips`, and
 `new_effect()` changed signature — the old keyword names raise `TypeError`.
 
 ## Setup

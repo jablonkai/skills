@@ -1,6 +1,6 @@
 # Import / export
 
-Verified on Blender 5.2.2 LTS — every export below was run and produced a non-empty file.
+Verified on Blender 5.2.3 LTS — every export below was run and produced a non-empty file.
 
 ## Where each operator lives
 
