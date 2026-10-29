@@ -3,7 +3,7 @@ name: obs
 description: 'Remote-control a running OBS Studio through its built-in obs-websocket v5 server with a dependency-free Python client — create and switch scenes, add and configure sources (color, text, image, media, browser, capture), position scene items, add filters, control recording (chapters, split), streaming, replay buffer and virtual camera, set audio volume/mute, screenshot any scene to verify, and build whole scene collections from a JSON spec. Use whenever the user wants something done in OBS or with an OBS scene, source, overlay, recording or stream — e.g. "set up my stream scenes in OBS", "add a lower third in OBS", "switch to the BRB scene", "start recording in OBS", "make a Starting Soon / Main / BRB layout", "mute the mic in OBS" — even if they just say "OBS". Not for editing recorded footage (use davinci-resolve), ffmpeg-only conversion, or keyframed motion graphics (use cavalry).'
 summary: "remote-control a running OBS Studio by Python over obs-websocket v5 — scenes, sources and filters, scene-item transforms, recording, streaming, replay buffer and virtual camera, screenshot verification, and scene collections built from a JSON spec"
 category: video
-compatibility: "Built for OBS Studio 32.2.2 with obs-websocket 5.7.4 on macOS."
+compatibility: "Built for OBS Studio 33.0.0 with obs-websocket 5.7.6 on macOS."
 risk: high
 tags:
     - obs
@@ -13,7 +13,7 @@ tags:
     - scripting
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -24,8 +24,8 @@ password-protected) that exposes almost everything the UI can do — scenes, inp
 items, filters, transitions, outputs, media and UI state — as JSON requests. A job script
 runs in a local Python process and talks to the **running** OBS through
 [scripts/obs_client.py](scripts/obs_client.py), a standard-library-only v5 client: nothing
-to `pip install`, nothing to load inside OBS. Everything here was run against **OBS 32.2.2
-with obs-websocket 5.7.4** (macOS). Check `obsWebSocketVersion` in the ping reply; on
+to `pip install`, nothing to load inside OBS. Everything here was run against **OBS 33.0.0
+with obs-websocket 5.7.6** (macOS). Check `obsWebSocketVersion` in the ping reply; on
 another version, `GetVersion` → `availableRequests` is the source of truth.
 
 - [scripts/obs-run.sh](scripts/obs-run.sh) — run a `.py` (or `-c 'inline'`); `--ping`
@@ -40,7 +40,7 @@ another version, `GetVersion` → `availableRequests` is the source of truth.
 ## The control loop
 
 1. **Ping**: `bash scripts/obs-run.sh --ping` →
-   `{"ok": true, "obsVersion": "32.2.2", "obsWebSocketVersion": "5.7.4", …}`. On
+   `{"ok": true, "obsVersion": "33.0.0", "obsWebSocketVersion": "5.7.6", …}`. On
    `{"ok": false, …}` the error says which case you are in:
    - OBS not running → `bash scripts/obs-start.sh`.
    - Connection refused while OBS runs → the server is off. Only the user can switch it on:
