@@ -3,7 +3,7 @@ name: github-do-issue
 description: "Fetch GitHub issues, understand their requirements, plan and implement the solution, then run verification — without committing, pushing, or creating a PR. Works one issue at a time: when several issues are named, or when no issue number is given at all (then it takes every open issue of the current repo as the queue), implement them sequentially so each one lands as its own commit and its own pull request, never bundled together. Use when someone says 'work on issue #N', 'do #N', 'implement #N', 'fix issue #N', 'work through the open issues', 'do all the issues' or pastes GitHub issue URLs to implement. Not for an unattended run shipping a PR per issue (github-do-all-issues), or for creating, labeling or triaging issues (github-issues) or for committing and opening the PR (github-commit-pr, which runs once per issue afterwards). The user always reviews each issue's result and decides when to commit."
 summary: "fetch GitHub issues — the named ones, or every open one when none is named — and implement them one at a time, each reviewed, committed and shipped as its own PR"
 category: development-workflow
-compatibility: "Requires an authenticated GitHub CLI (gh) 2.x and git; verified with gh 2.103.2."
+compatibility: "Requires an authenticated GitHub CLI (gh) 2.x and git; verified with gh 2.103.3."
 risk: low
 tags:
   - github
@@ -14,7 +14,7 @@ allowed-tools: Bash, Read, Grep, Glob, Edit, Write
 argument-hint: "[<issue-number-or-url> ...]  (none = all open issues)"
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
