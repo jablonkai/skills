@@ -1,15 +1,15 @@
-# Vendored: @scenery/cavalry-types 1.0.0
+# Vendored: @scenery/cavalry-types 1.1.0
 
 Complete TypeScript definitions for Cavalry's scripting API, vendored from
-[`@scenery/cavalry-types`](https://www.npmjs.com/package/@scenery/cavalry-types) 1.0.0
-(github.com/scenery-io/cavalry-types, MIT — see [LICENSE](LICENSE); last published 2026-05-06).
+[`@scenery/cavalry-types`](https://www.npmjs.com/package/@scenery/cavalry-types) 1.1.0
+(github.com/scenery-io/cavalry-types, MIT — see [LICENSE](LICENSE); last published 2026-10-02; covers the 2.8 additions).
 
 This is the authoritative, machine-readable API surface — grep it when a function isn't in
 [../api-reference.md](../api-reference.md):
 
 | File | Contents |
 |---|---|
-| `namespaces/api.d.ts` | the full `api` module (~2900 lines, JSDoc'd with examples) |
+| `namespaces/api.d.ts` | the full `api` module (~3250 lines, JSDoc'd with examples) |
 | `namespaces/cavalry.d.ts` | `cavalry` utilities: Path, Line, math/noise, color, fonts |
 | `namespaces/ui.d.ts` | script windows: layouts, all widgets, callbacks |
 | `namespaces/ctx.d.ts` | `ctx` — JavaScript *expression* context (Duplicator/Connect Shape indices: `ctx.index`, `ctx.count`, `ctx.positionX/Y`) |
