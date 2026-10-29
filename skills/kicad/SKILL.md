@@ -3,7 +3,7 @@ name: kicad
 description: 'Automate KiCad 10 PCB and schematic work: run DRC/ERC with kicad-cli and summarise the violations, build a manufacturer-ready fabrication package (Gerbers, Excellon drill, pick-and-place/CPL, BOM, STEP, zipped, with a JLCPCB preset), render the board to PNG, and script footprint placement and board edits in a running PCB editor through the KiCad IPC API (kicad-python / kipy). Use for "run DRC on this board", "why does ERC fail", "summarise the DRC errors", "export Gerbers for JLCPCB / PCBWay", "make the fab zip", "generate the BOM and CPL / centroid file", "place these LEDs in a circle", "move or rotate footprints by script", "set the title block", or anything mentioning .kicad_pcb, .kicad_sch, kicad-cli or pcbnew scripting. Not for mechanical CAD, enclosures, STEP modelling or turning existing Gerbers into printable 3D parts (freecad, brl-cad), photoreal renders of a board in a 3D scene (blender), block or wiring diagrams (drawio), circuit simulation (SPICE), or flashing firmware to a board.'
 summary: "automate KiCad 10 — DRC/ERC with JSON violation summaries, JLCPCB-ready fabrication zips (Gerbers, drill, CPL, BOM, STEP), board renders, and scripted footprint placement in a running PCB editor via the IPC API"
 category: electronics
-compatibility: "Built for KiCad 10.0.6 (kicad-cli and the IPC API) on macOS."
+compatibility: "Built for KiCad 10.0.7 (kicad-cli; IPC API last checked on 10.0.6) on macOS."
 risk: medium
 tags:
     - kicad
@@ -14,7 +14,7 @@ tags:
     - jlcpcb
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -35,7 +35,7 @@ hand-edit it for placement. In the file, pad and field offsets are relative to t
 footprint, but their **angles are absolute**, so changing a footprint's rotation in
 `(at X Y ROT)` leaves every pad at the old angle.
 
-Verified against **KiCad 10.0.6** on macOS. `kicad-cli` lives in
+Verified against **KiCad 10.0.7** on macOS (the IPC API section on 10.0.6). `kicad-cli` lives in
 `/Applications/KiCad/KiCad.app/Contents/MacOS/` and is not on `PATH`. The helpers
 find it (or use `$KICAD_APP`).
 
@@ -49,8 +49,8 @@ Raw `kicad-cli` has measured traps (details in [references/gotchas.md](reference
   stable. The user's settings are never touched.
 - **Exit codes disagree:** `pcb drc --exit-code-violations` gives 5, `sch erc` gives 0
   with 50 violations. `kicad.py` reads the JSON and exits 2 when errors exist.
-- **ERC JSON positions are 1/100 of the stated unit** in 10.0.6. `kicad.py erc`
-  detects and corrects this.
+- **ERC JSON positions are 1/100 of the stated unit** up to 10.0.6 (fixed in 10.0.7).
+  `kicad.py erc` detects and corrects this on older releases.
 - **`pcb export gerbers` without `-l` plots every layer** (User.*, Fab, Margin…), and an
   invalid layer name is only a warning (exit 0). `fab` passes an explicit layer list
   derived from the board's copper count.

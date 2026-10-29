@@ -320,8 +320,8 @@ def cmd_erc(args):
 
 
 def erc_pos_scale(sch, violations, timeout):
-    """KiCad 10.0.6 writes ERC JSON positions at 1/100 of the stated unit while the text
-    report is right. Compare the first item against a text report to get the factor."""
+    """KiCad up to 10.0.6 writes ERC JSON positions at 1/100 of the stated unit while the
+    text report is right (fixed in 10.0.7). Compare the first item against a text report to get the factor."""
     first = next((i["pos"] for v in violations for i in v.get("items", []) if "pos" in i), None)
     if not first or not first.get("y"):
         return 1
@@ -358,10 +358,20 @@ def board_copper_layers(board):
     return ["F.Cu"] + inner + ["B.Cu"]
 
 
-def layer_file(files, layer):
-    stem = "-" + layer.replace(".", "_") + "."
-    hits = [f for f in files if stem in os.path.basename(f)]
-    return hits[0] if hits else None
+def board_layer_aliases(board):
+    """Canonical layer -> user name for layers renamed in Board Setup; Gerber files use it."""
+    with open(board, encoding="utf-8") as f:
+        head = f.read(200000)
+    return dict(re.findall(r'\(\d+ "([^"]+)" \w+ "([^"]+)"\)', head))
+
+
+def layer_file(files, layer, alias=None):
+    for name in filter(None, (layer, alias)):
+        stem = "-" + re.sub(r"[^\w-]", "_", name) + "."
+        hits = [f for f in files if stem in os.path.basename(f)]
+        if hits:
+            return hits[0]
+    return None
 
 
 def gerber_has_draws(path):
@@ -410,8 +420,9 @@ def cmd_fab(args):
         for f in glob.glob(os.path.join(gdir, "*.gbrjob")):
             os.remove(f)
     files = sorted(glob.glob(os.path.join(gdir, "*")))
+    aliases = board_layer_aliases(board)
     for l in layers:
-        f = layer_file(files, l)
+        f = layer_file(files, l, aliases.get(l))
         if not f and l in REQUIRED_LAYERS + copper:
             problems.append(f"missing Gerber for {l}")
         made[l] = f
@@ -485,7 +496,12 @@ def cmd_fab(args):
         step_path = os.path.join(out, f"{name}.step")
         rc, log, _ = cli(["pcb", "export", "step", "-f", "-o", step_path, "--subst-models", board],
                          args.timeout, "step")
-        if rc != 0 or not os.path.isfile(step_path) or os.path.getsize(step_path) < 1000:
+        ok = os.path.isfile(step_path) and os.path.getsize(step_path) >= 1000
+        if rc == 2 and ok and "Cannot use VRML models" in log:
+            # A footprint whose only model is VRML (no STEP/IGS twin for --subst-models)
+            # makes kicad-cli exit 2, yet the STEP is written without that model.
+            warnings.append("STEP written without VRML-only 3D models (no STEP/IGS twin found)")
+        elif rc != 0 or not ok:
             raise ToolFailure(f"STEP export failed (exit {rc}):\n{log}")
 
     # Zip: Gerbers + drill only, as fab houses expect.

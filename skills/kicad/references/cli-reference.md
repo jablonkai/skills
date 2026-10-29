@@ -1,7 +1,7 @@
 # kicad-cli 10 reference (subset used by this skill)
 
 Binary: `/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli`. Run any subcommand
-with `--help` for the full list. All flags below were checked with `--help` on 10.0.6.
+with `--help` for the full list. All flags below were checked with `--help` on 10.0.7.
 
 Top level: `fp`, `jobset`, `pcb`, `sch`, `sym`, `version`.
 
