@@ -2,7 +2,7 @@
 
 The binary is at `/Applications/MuseScore 4.app/Contents/MacOS/mscore` (`mscore-run.sh --which`).
 Run `mscore --help` for the authoritative list on the installed version. Everything
-below was exercised on 4.7.5 unless marked *untested*.
+below was exercised on 4.7.5 and rechecked on 4.7.6 unless marked *untested*.
 
 ## Contents
 - [Export](#export-o)
@@ -25,7 +25,7 @@ below was exercised on 4.7.5 unless marked *untested*.
 | `.musicxml` `.xml` | uncompressed MusicXML 4.0 |
 | `.mxl` | compressed MusicXML |
 | `.mscz` `.mscx` | native; `.mscz` is a zip (`score.mscx`, `score_style.mss`, thumbnail…) |
-| `.brf` | Braille. Wrote nothing on 4.7.5 (rc 30) |
+| `.brf` | Braille. Wrote nothing on 4.7.5–4.7.6 (rc 30) |
 
 Inputs are anything MuseScore imports: `.mscz .mscx .musicxml .mxl .xml .mid .midi .kar
 .gp .gp3–5 .gpx .gtp .ptb .cap .capx .mei .md .bww .ove .scw` and a few others.
@@ -41,7 +41,7 @@ Modifiers for `-o`:
 | `--unroll-repeats` | expand repeats (useful for audio/MIDI) |
 | `-M ops.xml` | MIDI import operations: quantisation, voices (*untested*; see the handbook) |
 | `-f` | ignore "corrupted / newer version" warnings |
-| `-P` | score + parts in one PDF. **Wrote nothing on 4.7.5**: use `--score-parts-pdf` |
+| `-P` | score + parts in one PDF. **Wrote nothing on 4.7.5–4.7.6**: use `--score-parts-pdf` |
 
 ## Job files (`-j`)
 
