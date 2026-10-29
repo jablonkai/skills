@@ -3,7 +3,7 @@ name: musescore
 description: 'Write, engrave, convert and render sheet music with MuseScore Studio 4 headless (the mscore CLI) and MusicXML — lead sheets with chord symbols and lyrics, piano and ensemble arrangements with correct transposing parts; export PDF, PNG, SVG, MP3/WAV, MIDI, MusicXML and .mscz; batch-convert whole folders (MIDI to PDF scores, .mscz to MusicXML, scores to audio); transpose to a new key or interval and extract individual part PDFs; read score metadata. Use whenever the user wants sheet music, a score, notation, a lead sheet or jazz/Real Book-style chart, parts for players, or says "MuseScore", "MusicXML", "engrave", "convert these MIDI files to PDF scores", "transpose this score to Bb", "export the parts", "render the score to MP3" — even without naming MuseScore. Not for live-coded, generative or synthesized audio (use sonic-pi), audio or video transcoding (handbrake, compressor), DAW mixing, or plain-text tabs and chord charts.'
 summary: "write, engrave and convert sheet music headless with MuseScore Studio 4 — MusicXML lead sheets and arrangements from a compact spec, PDF/PNG/SVG/MP3/MIDI export, folder batch conversion, transposition and part extraction, score-meta verified output"
 category: audio
-compatibility: "Built for MuseScore Studio 4.7 (mscore CLI, checked on 4.7.5) on macOS."
+compatibility: "Built for MuseScore Studio 4.7 (mscore CLI, checked on 4.7.6) on macOS."
 risk: low
 tags:
     - musescore
@@ -13,7 +13,7 @@ tags:
     - transpose
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 

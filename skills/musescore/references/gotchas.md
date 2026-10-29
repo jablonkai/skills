@@ -1,4 +1,4 @@
-# Gotchas (MuseScore Studio 4.7.5, macOS)
+# Gotchas (MuseScore Studio 4.7.5–4.7.6, macOS)
 
 ## The process
 
