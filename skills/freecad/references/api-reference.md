@@ -1,6 +1,6 @@
 # FreeCAD Python API reference (condensed)
 
-Verified against **FreeCAD 1.1.3** on macOS. Units are **millimetres** and **degrees**
+Verified against **FreeCAD 1.1.4** on macOS. Units are **millimetres** and **degrees**
 by default. Scripts run inside a live FreeCAD GUI session via the bridge, so both the
 modelling API and the `FreeCADGui` view/screenshot calls work. For anything beyond this digest, the authoritative
 source is the FreeCAD Python wiki — <https://wiki.freecad.org/Python_scripting_tutorial>

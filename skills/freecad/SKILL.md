@@ -3,7 +3,7 @@ name: freecad
 description: 'Remote-control a running FreeCAD (the open-source parametric CAD app) by Python script through a small local bridge — build and edit 3D models live: box/cylinder primitives and booleans, filleted/chamfered solids, constrained Sketcher profiles, parametric PartDesign features (pad, pocket, revolution, patterns), 2D Draft geometry, meshes, and TechDraw drawings, then measure them, grab viewport screenshots, and export STEP / IGES / BREP / STL / OBJ. Use whenever the user wants to create or edit a CAD model, 3D part, mechanical component, enclosure, bracket, or .FCStd file, convert or export a model to STEP/STL/IGES/OBJ, or says "FreeCAD", "CAD model", "parametric part", "make a 3D part", "export to STEP", "STL for printing" — even if they don''t mention scripting.'
 summary: "remote-control a running FreeCAD (parametric CAD) by Python via a local bridge — primitives and booleans, constrained Sketcher profiles, PartDesign features, metrics and viewport screenshots, STEP/IGES/STL/OBJ export"
 category: cad
-compatibility: "Built for FreeCAD 1.1.3."
+compatibility: "Built for FreeCAD 1.1.4."
 risk: medium
 tags:
     - freecad
@@ -13,7 +13,7 @@ tags:
     - scripting
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -24,7 +24,7 @@ FreeCAD (`/Applications/FreeCAD.app`) is scriptable in **Python** against the `F
 Drive it through the **FreeCAD Bridge** — a small script running inside a *running* FreeCAD
 GUI that executes whatever build script is POSTed to `127.0.0.1:8735`. Because the script
 runs in the live session on the GUI thread, the viewport updates as you build and
-`Gui.*` / `saveImage` work directly. Everything below was proven on FreeCAD 1.1.3.
+`Gui.*` / `saveImage` work directly. Everything below was proven on FreeCAD 1.1.4.
 
 - [scripts/freecad-bridge.py](scripts/freecad-bridge.py) — the bridge to run inside FreeCAD.
 - [scripts/freecad-send.sh](scripts/freecad-send.sh) — send a `.py` file (or `-c 'inline code'`)
@@ -39,7 +39,7 @@ runs in the live session on the GUI thread, the viewport updates as you build an
 ## The control loop
 
 1. **Make sure the bridge is up**: `bash scripts/freecad-send.sh --ping`. A live bridge
-   answers `{"ok": true, "bridge": "freecad", "version": "1.1.3"}`. If it doesn't, the bridge
+   answers `{"ok": true, "bridge": "freecad", "version": "1.1.4"}`. If it doesn't, the bridge
    has to be started — it is a local code-execution server (see [Security](#security)), so
    say that before starting it:
    - **FreeCAD not running** (`pgrep -xi freecad` finds nothing): launch it with the bridge
