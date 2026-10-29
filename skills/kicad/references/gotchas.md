@@ -1,4 +1,4 @@
-# KiCad 10 gotchas (measured on 10.0.6, macOS)
+# KiCad 10 gotchas (measured on 10.0.6 and 10.0.7, macOS)
 
 ## kicad-cli
 
@@ -8,13 +8,15 @@
 | Partial config | A temp `KICAD_CONFIG_HOME` holding only `kicad_common.json` adds 17 `lib_footprint_issues` (no `fp-lib-table`). | Copy the whole `~/Library/Preferences/kicad/10.0/` directory (≈ 120 KB), then change the language. |
 | DRC exit codes | `--exit-code-violations` → 5 when violations exist; missing file → 3; success → 0. | `kicad.py drc` maps to 0/2/3. |
 | ERC exit code | `sch erc` exits **0** even with 51 violations. | Read the JSON. |
-| ERC JSON coordinates | `pos` values are **1/100** of `coordinate_units` (J1 at 24.92, 100 mm reported as 0.2492, 1.0; the same in `in` and `mils`). The `--format report` text is right. DRC JSON is right. | `kicad.py erc` compares against a text report and rescales (`pos_scale_applied: 100` in the JSON). |
+| ERC JSON coordinates | Up to 10.0.6, `pos` values are **1/100** of `coordinate_units` (J1 at 24.92, 100 mm reported as 0.2492, 1.0; the same in `in` and `mils`). The `--format report` text is right. DRC JSON is right. Fixed in 10.0.7. | `kicad.py erc` compares against a text report and rescales (`pos_scale_applied: 100` in the JSON). |
 | DRC JSON layout | `violations`, `unconnected_items`, `schematic_parity` are separate arrays. | Report unconnected items separately; they are often the most important errors. |
 | Side files | `pcb drc` on a bare `.kicad_pcb` creates `.kicad_pro`/`.kicad_prl` next to it. The board file is not changed. | Expected; don't treat as a modification. |
 | Gerbers without `-l` | Plots all ~20 layers including User.*, Fab, Courtyard, Margin. | Always pass an explicit list. |
 | Bad layer name | `-l F.Cu,nonsense` prints "Invalid layer name" and **exits 0**, silently dropping it. | `kicad.py` treats that line as a failure. |
 | BOM ranges | `sch export bom` writes `D1-D8` by default. | `--ref-range-delimiter ''` gives `D1,D2,…`. |
 | Position file Y | `pos` CSV Y is negated (math Y-up: board Y=108 → `-108`). | Fine for fab houses (JLCPCB expects KiCad's sign). Don't "fix" it. |
+| STEP with VRML-only models | `pcb export step --subst-models` exits **2** ("Cannot use VRML models…") when a footprint has a `.wrl` model with no STEP/IGS twin, but still writes the STEP without it. Missing model files only warn (exit 0). | `kicad.py fab --step` reports a `WARNING:` and keeps going. |
+| Renamed copper layers | A board whose layers have user names (`(0 "F.Cu" signal "top_layer")`) gets Gerbers named after them: `board-top_layer.gtl`, not `board-F_Cu.gtl`. | `kicad.py fab` matches either name. |
 | HPGL | `pcb export hpgl` is gone in 10.0. | Use PDF/SVG. |
 | Fontconfig noise | Every call prints a Fontconfig cache warning on stderr. | Filtered by `kicad.py`. |
 
