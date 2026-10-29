@@ -42,7 +42,16 @@
 - **Units are nanometres.** `Vector2.from_xy_mm()` / `.x / 1e6`. Angles are `Angle.from_degrees()`.
 - **Setting `fp.position` moves children client-side.** kipy's setter shifts pads,
   fields and graphics by the delta before `update_items()`. Editing the proto directly
-  leaves them behind.
+  leaves them behind: KiCad keeps every child exactly where the message puts it (measured
+  on 10.0.7).
+- **kipy 0.8.0's `fp.orientation` setter deletes the 3D model.** It rebuilds the child
+  list from pads, fields, text, zones and shapes only, and KiCad drops what is missing on
+  `update_items()`. `kicad_ipc.py`'s `set_pose()` re-attaches it.
+- **KiCad 10.0.7 sends `ReferencePoint` children kipy 0.8.0 can't unpack.**
+  `board.get_footprints()` raises `NotImplementedError: Missing type mapping for
+  …ReferencePoint` on any board that has one (7 of 63 footprints on the pic_programmer
+  demo). Importing `kicad_ipc.py` registers a minimal type for it, and `set_pose()` moves
+  and rotates the point with its footprint; its other fields pass through untouched.
 - **Edits aren't saved** until `board.save()`. Unsaved edits are lost if KiCad closes.
 - **External clients send an empty token.** `KICAD_API_TOKEN` is only set for plugins
   KiCad launches itself, so an outside script is not authenticated by a token.

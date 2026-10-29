@@ -63,7 +63,12 @@ is already there.
 
 - Coordinates: nanometres, **Y down**. A point at angle θ (CCW, math convention) around
   `(cx, cy)` is `(cx + r cos θ, cy - r sin θ)`.
-- Modify `fp.position` via the kipy setter. Copying protos by hand doesn't move children.
+- Move and rotate with `set_pose(fp, pos, rot)` from `scripts/kicad_ipc.py`
+  (`sys.path.insert(0, <skill>/scripts); from kicad_ipc import set_pose`). It wraps kipy's
+  setters, which shift pads, fields, text and shapes but drop the 3D model on rotation and
+  leave 10.0.7 reference points behind. Copying protos by hand moves no children at all.
+- Importing `kicad_ipc` also teaches kipy 0.8.0 the `ReferencePoint` child type that
+  KiCad 10.0.7 sends; without it `get_footprints()` fails on boards that have one.
 - `update_items` outside a commit makes one undo step per call.
 - KiCad answers `AS_BUSY` ("busy performing an operation") while it is mid-operation,
   e.g. an interactive move or a running tool. Ask the user to finish it (Esc), then retry once.
