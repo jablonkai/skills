@@ -1,6 +1,6 @@
-# QCAD scripting reference (QCAD 3.33)
+# QCAD scripting reference (QCAD 27)
 
-Everything here was exercised headless (`-no-gui`) on QCAD 3.33.1. Upstream
+Everything here was exercised headless (`-no-gui`) on QCAD 3.33.1 and rechecked on 27.0.2. Upstream
 class reference: <https://www.qcad.org/doc/qcad/latest/developer/> (the C++
 classes map 1:1 to the script names).
 
@@ -218,8 +218,8 @@ fonts (`Standard`, `Courier`, `Cursive`, …) or a system TTF name such as
 
 - `di.importFile(path)` → `RDocumentInterface.IoErrorNoError` (0) on success.
 - `di.exportFile(path, "DXF 2013")` → bool. Formats: `DXF 2013`, `DXF 2010`,
-  `DXF 2007`, `DXF 2004`, `DXF 2000`, `DXF R12` (**drops all text** — QCAD
-  writes text as MTEXT, which R12 lacks); `DWG 2013` etc. with Pro and a
+  `DXF 2007`, `DXF 2004`, `DXF 2000`, `DXF R12` (MTEXT becomes single-line
+  `TEXT` on 27.0.2; 3.33 dropped all text); `DWG 2013` etc. with Pro and a
   `.dwg` path.
 - PDF: `include("scripts/File/Print/Print.js")`, set `PageSettings/PaperWidth`,
   `PageSettings/PaperHeight` (mm, with `UnitSettings/PaperUnit` = mm),

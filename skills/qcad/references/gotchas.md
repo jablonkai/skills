@@ -1,6 +1,8 @@
 # QCAD gotchas
 
-Observed on QCAD 3.33.1 (Qt 6, macOS), Pro add-on in trial mode.
+Observed on QCAD 3.33.1 and 27.0.2 (Qt 6, macOS), Pro add-on in trial mode. QCAD 27 is
+the 3.33 line under calendar versioning (`RSettings.getMajorVersion()` returns 27);
+the scripting API, `-no-gui` runs, the trial delay and DWG-needs-Pro are unchanged.
 
 ## Editions, trial and what needs Pro
 
@@ -87,9 +89,10 @@ Observed on QCAD 3.33.1 (Qt 6, macOS), Pro add-on in trial mode.
   10 × 8 m" check one layer (`dxf-inspect.py --layer WALLS`).
 - Hatch pattern scale is in drawing units: a 1:100 plan in mm needs scale
   20–100 or the pattern is a solid grey blur; check the PNG.
-- Text: QCAD saves its text as MTEXT. `DXF R12` has no MTEXT and the text is
-  silently dropped — use 2000 or later unless the recipient insists on R12
-  (then use ezdxf to write TEXT entities).
+- Text: QCAD saves its text as MTEXT, which `DXF R12` lacks. QCAD 27 writes it as
+  single-line `TEXT` (formatting and line breaks lost); 3.33 silently dropped it.
+  Use 2000 or later unless the recipient insists on R12, and re-check texts with
+  `dxf-inspect.py --texts`.
 - Layer colour "white" is ACI 7 — displayed black on white paper by most
   viewers and by our monochrome PDF.
 - `saveDrawing` overwrites without asking. Write to a new name (the scripts

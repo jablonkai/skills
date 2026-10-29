@@ -3,7 +3,7 @@ name: qcad
 description: 'Draft, edit and convert 2D CAD drawings (DXF, and DWG with QCAD Pro) by running QCAD headless with its ECMAScript API — floor plans, site plans, part outlines, panel and laser-cut layouts with layers, lines, arcs, polylines, text, blocks, linear/aligned dimensions and hatches; add title blocks to existing drawings; batch-convert folders of DXF/DWG to PDF or PNG; read and modify existing DXF files, verified with ezdxf. Use whenever the user wants a 2D technical drawing, a DXF file, a dimensioned plan, a drawing exported to PDF, a title block added, or says "QCAD", "DXF", "2D CAD", "floor plan drawing", "convert DXF to PDF", "dimension this drawing" — even without mentioning QCAD. Not for 3D/parametric parts or STEP/STL (use freecad), CSG solids (brl-cad), PCB layouts (kicad), vector illustration or SVG art (inkscape), or flowcharts and diagrams (drawio).'
 summary: "draft 2D CAD drawings headless with QCAD — ECMAScript scripts for layers, entities, blocks, dimensions and hatches, title blocks on existing DXF, batch DXF/DWG to PDF/PNG, ezdxf-verified output"
 category: cad
-compatibility: "Built for QCAD 3.33.1 on macOS (DWG needs QCAD Pro or its trial)."
+compatibility: "Built for QCAD 27.0.2 on macOS (DWG needs QCAD Pro or its trial)."
 risk: low
 tags:
     - qcad
@@ -13,7 +13,7 @@ tags:
     - scripting
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -129,7 +129,8 @@ A script that ran is not a drawing that is right. After each run:
    missing dimension text and mis-scaled title blocks only show up here.
 
 Note: QCAD writes text as `MTEXT` and saves DXF 2013 (`AC1027`) by default —
-count `TEXT`+`MTEXT` together; `"DXF R12"` drops text entirely. Dimensions
+count `TEXT`+`MTEXT` together; `"DXF R12"` turns it into single-line `TEXT`
+(QCAD 3.33 dropped it entirely). Dimensions
 are saved without geometry blocks, so ezdxf-based renderers show none —
 check dimensions in the QCAD-exported PNG/PDF, not an ezdxf render.
 
