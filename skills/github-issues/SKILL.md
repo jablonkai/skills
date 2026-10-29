@@ -3,7 +3,7 @@ name: github-issues
 description: "Create, view, close, comment on, label, triage, and list GitHub issues with standardized structure — including batch-filing issues from a code audit or review report (e.g. a CODE_AUDIT_*.md from code-analyzer). Use when someone says 'create an issue', 'file a bug', 'open an issue for this', 'turn the audit findings into issues', 'open issues for the high/critical items', 'triage issues', 'label issue #N', 'close #N as duplicate', 'list open issues', or wants to manage GitHub issues in any way. Checks for duplicates first, enforces templates with required sections (Summary, Proposed Solution), and validates labels exist before use. Not for running a fresh audit and filing its findings in one go (github-audit-to-issues), implementing an issue (github-do-issue) or opening pull requests (github-commit-pr)."
 summary: "standardized issue creation (including batch filing from audit reports), labeling, triage, commenting, and issue management through the GitHub CLI"
 category: project-management
-compatibility: "Requires an authenticated GitHub CLI (gh) 2.x and git; verified with gh 2.103.2."
+compatibility: "Requires an authenticated GitHub CLI (gh) 2.x and git; verified with gh 2.103.3."
 risk: low
 tags:
   - github
@@ -15,7 +15,7 @@ allowed-tools: Bash, Read, Grep, Glob
 argument-hint: "[create <title> | from-audit [<file>] [<ids or severities>] | view <number> | close <number> [reason] | comment <number> <text> | assign <number> <user> [--remove] | label <number> <label> [--remove] | triage | list [--label <label>]]"
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
