@@ -1,6 +1,7 @@
 # DaVinci Resolve scripting — gotchas
 
-Everything here was reproduced against **DaVinci Resolve Studio 21.1.0** through
+Everything here was reproduced against **DaVinci Resolve Studio 21.1.0** (sections 4, 7 and 11
+rechecked on 21.1.2) through
 `scripts/resolve-run.sh`. Most of what a model remembers about this API comes from the
 18–20 era README and blog posts, and several of those habits now fail silently.
 
@@ -79,7 +80,7 @@ equivalent and is not deprecated.
 ## 4. Import
 
 - **`MediaPool.ImportMedia([{"FilePath": p}])` — the README's canonical form — returns
-  `None` for ordinary files in 21.1.0.** It is meant for image sequences (`%04d` +
+  `None` for ordinary files in 21.1.0–21.1.2.** It is meant for image sequences (`%04d` +
   `StartIndex`/`EndIndex`). For files, `MediaStorage.AddItemListToMediaPool([{"media": p}])`
   works; `ImportMedia([p1, p2])` (path list) is the fallback. `import_media()` does this.
 - Import lands in the Media Pool's **current folder** — `SetCurrentFolder(bin)` first.
@@ -125,7 +126,7 @@ Media Pool folder.
 
 ## 7. Fusion compositions
 
-- **`TimelineItem.AddFusionComp()` returns a composition that is never rendered** (21.1.0):
+- **`TimelineItem.AddFusionComp()` returns a composition that is never rendered** (21.1.0–21.1.2):
   tools built on it look right, `ExportFusionComp` shows them wired, but the Edit page and
   renders ignore them. `ImportFusionComp(path)` works — `overlay_text()` imports
   [assets/text-overlay.comp](../assets/text-overlay.comp), whose `MediaIn1` rebinds to the host
@@ -207,6 +208,13 @@ rest yourself when it matters (remember `project.GetCurrentTimeline()` and
   set `RESOLVE_JOB_TIMEOUT` so a stuck job ends instead of waiting forever; after a
   timeout, `--ping` — if that also times out, ask the user to check Resolve. `copy_timeline()`
   (DRT export + import) avoids `DuplicateTimeline()` if you want to rule it out.
+- **AI and analysis calls return before the work is done** (21.1.1+):
+  `CreateSubtitlesFromAudio`, `TranscribeAudio`, `DetectSceneCuts`, `SmartReframe`,
+  `AnalyzeForSlate` and `RenderWithQuickExport` return `True` at once with the job
+  `Initializing`. Poll the matching `project.Get<Call>Status()` (e.g.
+  `GetCreateSubtitlesFromAudioStatus()`) until `JobStatus` is `Complete` or `Failed`
+  (`RenderWithQuickExport`: `GetRenderWithQuickExportStatus()`) before reading the result.
+  Auto-captions on a 6 s clip took ~2 minutes; size `RESOLVE_JOB_TIMEOUT` accordingly.
 - Calls are serialised — two scripts driving the same Resolve interleave on shared current
   state. Run jobs one at a time.
 - ResolvePython (21.1+) has no `pip`; for extra packages use your own Python with the SDK

@@ -3,7 +3,7 @@ name: davinci-resolve
 description: 'Remote-control a running DaVinci Resolve (Studio) with Python through its built-in scripting API — import media into bins, assemble timelines from clips, place B-roll on upper tracks, add markers, titles and lower thirds, import SRT or auto-generate subtitles, apply LUTs/CDL/DRX grades, normalize audio, queue and render deliverables (YouTube, TikTok/vertical, ProRes masters), and export EDL/FCPXML/OTIO/AAF. Use whenever the user wants something done in DaVinci Resolve or with a Resolve project, timeline, bin or render queue — e.g. "cut these clips together in Resolve", "build a rough cut from this folder", "render this timeline for YouTube and TikTok", "add markers from this list", "put a lower third on", "export an EDL", "batch render all timelines" — even if they just say "Resolve" or "DaVinci". Not for ffmpeg-only edits with no Resolve involved, and not for Fusion Studio standalone.'
 summary: "remote-control a running DaVinci Resolve by Python via its scripting API — media import and bins, timeline assembly, markers, titles and lower thirds, subtitles, LUT/CDL grades, render queue deliverables, EDL/FCPXML/OTIO export"
 category: video
-compatibility: "Built for DaVinci Resolve Studio 21.1.0 on macOS (scripting API needs the Studio edition)."
+compatibility: "Built for DaVinci Resolve Studio 21.1.2 on macOS (scripting API needs the Studio edition)."
 risk: medium
 tags:
     - davinci-resolve
@@ -13,7 +13,7 @@ tags:
     - scripting
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.1.0"
   author: "Tamás Jablonkai"
 ---
 
@@ -24,7 +24,8 @@ a job script runs in a local Python process and talks to the **running** Resolve
 `fusionscript`. [scripts/resolve-run.sh](scripts/resolve-run.sh) finds the interpreter
 (Resolve 21.1+ ships `ResolvePython`, which needs no environment setup; otherwise `python3` with
 the SDK variables), connects, injects the live objects and helpers, and runs your script.
-Everything here was executed and verified on **DaVinci Resolve Studio 21.1.0** (macOS). Check
+Everything here was executed and verified on **DaVinci Resolve Studio 21.1.0**, and rechecked on
+**21.1.2** (macOS). Check
 `version` in the ping reply — on another release, the installed stub
 (`bash scripts/resolve-api.sh <Name>`) is the source of truth.
 
@@ -43,7 +44,7 @@ cut — quietly do the wrong thing on 21.1.
 ## The control loop
 
 1. **Ping**: `bash scripts/resolve-run.sh --ping` →
-   `{"ok": true, "product": "DaVinci Resolve Studio", "version": "21.1.0.17", "studio": true, …}`.
+   `{"ok": true, "product": "DaVinci Resolve Studio", "version": "21.1.2.10", "studio": true, …}`.
    If it fails, the user has to fix it — you can't from here:
    - Resolve not running, or no project open → ask them to open one.
    - "refused the connection" → Studio: Preferences ▸ System ▸ General ▸ *External scripting
