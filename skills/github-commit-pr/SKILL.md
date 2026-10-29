@@ -2,7 +2,7 @@
 allowed-tools: Bash, Read, Grep, Glob, Task
 argument-hint: '[<base-branch>] [--issue <number>] [--no-merge]'
 category: git
-compatibility: "Requires an authenticated GitHub CLI (gh) 2.x and git; verified with gh 2.103.2."
+compatibility: "Requires an authenticated GitHub CLI (gh) 2.x and git; verified with gh 2.103.3."
 description: 'Commit changes, create a feature branch, open a GitHub pull request, wait for CI, and merge the PR once GitHub Actions go green — or push new commits to an existing PR and merge after CI succeeds. Ships one issue per commit and per PR: when the working tree holds work for several issues it stages them one at a time instead of bundling them into a single review. Use whenever someone says ''commit and push'', ''create a PR'', ''open a pull request'', ''send for review'', ''push my changes'', ''commit issue #12'', ''merge when CI passes'', or is done with their work and ready to ship it. Also triggers on any variation of wanting to get changes into a pull request and landed. Handles conventional commit messages, issue linking with auto-close keywords (Closes #N), sensitive file detection, PR template integration, auto-merge with branch cleanup, and local validation in place of CI when GitHub billing stops the Actions run.'
 name: github-commit-pr
 risk: medium
@@ -15,7 +15,7 @@ tags:
     - branch
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 # github-commit-pr
