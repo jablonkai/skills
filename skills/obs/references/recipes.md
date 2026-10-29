@@ -67,10 +67,15 @@ call("PressInputPropertiesButton", inputName="Alerts", propertyName="refreshnoca
 screenshot(scene, f"{OUT}/overlay.png", width=960, settle=2.0)   # pages need time to load
 ```
 
-If the source stays empty in the screenshot **and** in the OBS preview, the browser plugin
-(CEF) itself is not rendering on that machine — seen with OBS 32.2.2 on macOS 27, for URLs and
-local files alike. That cannot be fixed over the websocket: tell the user, and suggest
-toggling Settings ▸ Advanced ▸ *Browser Source Hardware Acceleration* and restarting OBS.
+If the source stays fully transparent in the screenshot **and** in the OBS preview — URLs and
+local files alike — CEF is not starting its page renderer: `ps -axww -o args | grep "OBS Helper"`
+shows a `--type=gpu-process` but no `OBS Helper (Renderer) --type=renderer`. Seen on macOS 27
+with OBS 32.2.2 and 33.0.0 (CEF 150); the cause was a stale CEF profile carried over from older
+OBS versions, not hardware acceleration (toggling that did not help). The fix needs OBS closed,
+so ask the user first: quit OBS, move
+`~/Library/Application Support/obs-studio/plugin_config/obs-browser` aside (rename, don't
+delete — it holds browser-dock logins and cookies, which are lost with it), relaunch with
+`obs-start.sh`. OBS builds a fresh profile and the renderer processes appear.
 
 ## Record a take with chapters
 

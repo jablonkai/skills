@@ -1,6 +1,6 @@
 # obs-websocket v5 — condensed API reference
 
-Checked against **OBS 32.2.2 / obs-websocket 5.7.4** (151 requests). The authoritative spec,
+Checked against **OBS 33.0.0 / obs-websocket 5.7.6** (151 requests). The authoritative spec,
 with every field and event, is
 [protocol.md](https://github.com/obsproject/obs-websocket/blob/master/docs/generated/protocol.md).
 On any other version, `call("GetVersion")["availableRequests"]` lists what exists.
@@ -78,7 +78,11 @@ filterKind, filterSettings?}`, `RemoveSourceFilter`, `SetSourceFilterName`, `Get
 `Get/SetSceneItemBlendMode` (`OBS_BLEND_NORMAL|ADDITIVE|SUBTRACT|SCREEN|MULTIPLY|LIGHTEN|DARKEN`),
 `Get/SetSceneItemPrivateSettings`.
 
-**Outputs** — `GetVirtualCamStatus`, `Start/Stop/ToggleVirtualCam`, `GetReplayBufferStatus`
+**Outputs** — `GetVirtualCamStatus`, `Start/Stop/ToggleVirtualCam` (on macOS `StartVirtualCam`
+returns success but `outputActive` stays false and no `VirtualcamStateChanged` arrives while the
+camera system extension awaits approval — `systemextensionsctl list` shows *activated waiting for
+user*, typically right after an OBS upgrade; only the user can approve it in System Settings ▸
+General ▸ Login Items & Extensions), `GetReplayBufferStatus`
 (fails with 604 when the replay buffer is disabled in Settings ▸ Output),
 `Start/Stop/ToggleReplayBuffer`, `SaveReplayBuffer`, `GetLastReplayBufferReplay` → `savedReplayPath`,
 `GetOutputList`, `GetOutputStatus`, `Start/Stop/ToggleOutput`, `Get/SetOutputSettings {outputName}`.
