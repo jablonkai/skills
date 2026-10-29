@@ -1,6 +1,6 @@
 # Affinity SDK map — curated digest of `sdk-docs/`
 
-Distilled from the vendored SDK source (Affinity 3.3.0). Use this file to find the right
+Distilled from the vendored SDK source (Affinity 3.3.0; unchanged in 3.3.1). Use this file to find the right
 module and API shape *before* grepping `sdk-docs/`; grep only for exact signatures/params.
 All modules load as `require('/name.js')` or `require('/name')` (vendored file `name.js`
 mirrors the module).

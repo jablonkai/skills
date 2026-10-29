@@ -3,7 +3,7 @@ name: affinity
 description: 'Remote-control Affinity (the unified Affinity by Canva app: vector, pixel, and layout studios) with JavaScript through its local automation endpoint — no MCP client configuration needed. Automate document edits, batch operations, text/layer manipulation, and reusable library scripts, with rendered-JPEG visual verification. Use whenever the user wants to script or automate Affinity, programmatically edit .af / .afdesign / .afphoto / .afpub documents, batch-process designs, or says "Affinity", "Affinity script", "automate Affinity", "batch edit in Affinity", "control Affinity" — even if they don''t mention scripting.'
 summary: "remote-control Affinity (the unified Affinity by Canva app) with JavaScript via its local automation endpoint — document edits, batch operations, and reusable library scripts, with no MCP client configuration"
 category: design-automation
-compatibility: "Built for Affinity (by Canva) 3.3.0, build 4850, on macOS, with its local automation endpoint enabled; the CLI needs Node."
+compatibility: "Built for Affinity (by Canva) 3.3.1, build 4940, on macOS, with its local automation endpoint enabled; the CLI needs Node."
 risk: medium
 tags:
     - affinity
@@ -12,7 +12,7 @@ tags:
     - scripting
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -23,7 +23,7 @@ dictionary, CLI, or URL scheme, and its file formats are proprietary. Its only a
 surface is the **AI connector**: when enabled, the app serves its JavaScript scripting SDK
 on `http://localhost:6767/sse`. The endpoint speaks the MCP protocol, but this skill drives
 it directly over HTTP/SSE with a zero-dependency Node CLI — no MCP client configuration,
-no tool schemas loaded into context. Verified end-to-end against Affinity 3.3.0 (build 4850).
+no tool schemas loaded into context. Verified end-to-end against Affinity 3.3.1 (build 4940).
 
 - [scripts/affinity-cli.mjs](scripts/affinity-cli.mjs) — the CLI (Node ≥ 18, no npm install needed).
 - [references/api-reference.md](references/api-reference.md) — verified endpoint tool contracts + SDK preamble digest. **Read it before writing scripts.**

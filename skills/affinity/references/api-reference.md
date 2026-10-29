@@ -1,6 +1,7 @@
 # Affinity automation endpoint — API reference
 
-Verified live against **Affinity 3.3.0.4850 (macOS)**, protocol `2025-11-25`, 2026-09-24.
+Verified live against **Affinity 3.3.1.4940 (macOS)**, protocol `2025-11-25`, 2026-10-29
+(3.3.1: tool set and all 142 SDK doc topics byte-identical to 3.3.0.4850).
 The tool set is unchanged from 3.2.3; the SDK itself grew substantially (see sdk-map.md).
 
 ## Endpoint
@@ -17,7 +18,7 @@ The tool set is unchanged from 3.2.3; the SDK itself grew substantially (see sdk
 - Long-running sessions can die server-side (POST starts returning HTTP 404) — rerun the
   command; `docs-dump` resumes, skipping already-saved files.
 
-## Tools (verified 3.3.0)
+## Tools (verified 3.3.0, re-verified 3.3.1)
 
 | Tool | Arguments | Notes |
 |---|---|---|
