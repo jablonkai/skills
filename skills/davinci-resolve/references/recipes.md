@@ -3,7 +3,7 @@
 Job scripts for `bash scripts/resolve-run.sh job.py`. The names they use without defining —
 `resolve`, `project`, `mp`, `OUT`, `ARGS`, `need`, `import_media`, `place`, `render`, … — are
 injected by the runner (see the table in [SKILL.md](../SKILL.md#injected-namespace)).
-Recipes marked *verified* were run against Resolve Studio 21.1.0; the rest follow the 21.1
+Recipes marked *verified* were run against Resolve Studio 21.1.0 and rechecked on 21.1.2; the rest follow the 21.1
 stub and are unverified — check return values.
 
 ## Contents
@@ -83,8 +83,9 @@ for off, m in sorted(tl.GetMarkers().items()):
 ```
 
 Use `customData` to tag markers your script owns, then `DeleteMarkerByCustomData` removes
-only those. From a Studio transcription (`clip.TranscribeAudio()` first, then
-`clip.GetTranscription()`), each segment has `start`/`end` timecodes, `text` and `speaker`
+only those. From a Studio transcription (`clip.TranscribeAudio()` first, wait until
+`project.GetTranscribeAudioStatus()["JobStatus"]` is `Complete` — the call returns at once
+since 21.1.1 — then `clip.GetTranscription()`), each segment has `start`/`end` timecodes, `text` and `speaker`
 — convert with `tc_to_frame` relative to the clip's own start timecode.
 
 ## Multi-format delivery
@@ -128,10 +129,14 @@ ensure_tracks("subtitle", 1)
 place(srt, at=current_timeline().GetStartFrame())          # one timeline item per caption
 
 # Auto-captions (Studio, AI)
+import time
 tl = current_timeline()
 need(tl.CreateSubtitlesFromAudio({"language": resolve.AUTO_CAPTION_ENGLISH,
                                   "charsPerLine": 42, "lineBreak": resolve.AUTO_CAPTION_LINE_SINGLE}),
      "CreateSubtitlesFromAudio")
+while project.GetCreateSubtitlesFromAudioStatus().get("JobStatus") not in ("Complete", "Failed", "Cancelled"):
+    time.sleep(2)                                          # returns at once since 21.1.1
+need(project.GetCreateSubtitlesFromAudioStatus()["JobStatus"] == "Complete", "auto-captions")
 for it in tl.GetItemListInTrack("subtitle", 1):
     print(frame_to_tc(it.GetStart()), it.GetName())      # GetName() is the caption text
 ```

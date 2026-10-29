@@ -194,7 +194,7 @@ class Helpers:
                 existing[os.path.abspath(fp)] = clip
         todo = [p for p in paths if p not in existing]
         if todo:
-            # 21.1.0: MediaPool.ImportMedia([{"FilePath": p}]) — the README's canonical form —
+            # 21.1.0–21.1.2: MediaPool.ImportMedia([{"FilePath": p}]) — the README's canonical form —
             # returns None for plain files; MediaStorage's dict form works, and the
             # "deprecated" path-list form is the fallback.
             new = (self.resolve.GetMediaStorage().AddItemListToMediaPool([{"media": p} for p in todo])
@@ -297,7 +297,7 @@ class Helpers:
         """Burn Text+ over a video TimelineItem through its own Fusion composition.
 
         Uses ImportFusionComp with assets/text-overlay.comp: TimelineItem.AddFusionComp()
-        returns a composition that is not the one Resolve renders (21.1.0), so tools built
+        returns a composition that is not the one Resolve renders (21.1.0–21.1.2), so tools built
         on it never reach the output. Returns the TextPlus tool for further styling.
         """
         path = comp_path or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
