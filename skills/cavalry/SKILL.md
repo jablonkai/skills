@@ -3,7 +3,7 @@ name: cavalry
 description: 'Remote-control Cavalry (Scene Group''s 2D motion-design app) by script: build scenes procedurally, animate with keyframes and magic easing, do per-letter text animation, load image/JSON assets, and render PNG frames or full videos. Use whenever the user wants to create or edit a Cavalry scene (.cv file), a motion-graphics sting, logo animation, animated title, countdown, lower third, or particle-style burst in Cavalry — or says ''Cavalry'', ''logo sting'', ''make an animation in Cavalry'', ''intro animation'', ''render from Cavalry'' — even if they don''t mention scripting. Also use when a video project needs an animated overlay that DaVinci Resolve or ffmpeg alone can''t produce.'
 summary: "remote-control Cavalry (Scene Group's 2D motion-design app) via a scriptable bridge — build scenes procedurally, animate with keyframes and per-letter text effects, then render PNG frames or alpha overlay videos"
 category: motion-design
-compatibility: "Built for Cavalry 2.7.2 (V8 JavaScript API) on macOS."
+compatibility: "Built for Cavalry 2.8.0 (V8 JavaScript API) on macOS."
 risk: medium
 tags:
     - cavalry
@@ -12,7 +12,7 @@ tags:
     - rendering
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.1.0"
   author: "Tamás Jablonkai"
 ---
 
@@ -22,12 +22,12 @@ Cavalry (`/Applications/Cavalry.app`) is scriptable in JavaScript (V8 12.4 since
 ES2024 — `let`/`const`, arrow functions, `Set` methods all work; `api.*` / `ui.*` / `cavalry.*`
 modules). Drive it through the **Cavalry Bridge** — a small script UI running inside Cavalry
 that executes whatever is POSTed to `127.0.0.1:8731`. Everything below was proven against
-**Cavalry 2.7.2** (May 2026, the current release) on real projects; the reference file covers
+**Cavalry 2.8.0** (September 2026, the current release) on real projects; the reference file covers
 the rest of the API surface.
 
 Since 2.7 Cavalry belongs to Canva: sign-in uses a Canva account and the former *Professional*
 features are free for everyone — so don't plan around licence tiers. The one casualty is the
-**CLI, which is not shipped in 2.7.x** (see Rendering).
+**CLI, which is not shipped in 2.7.x or 2.8.0** (see Rendering).
 
 - [references/api-reference.md](references/api-reference.md) — condensed module reference (api, cavalry, ui, WebClient/WebServer, render scripts, CLI). Read it when you need something outside the cheatsheet below.
 - [references/cavalry-types/](references/cavalry-types/README.md) — the **complete** API as vendored TypeScript definitions with JSDoc examples; grep it for any function the reference doesn't cover.
@@ -260,10 +260,10 @@ or `api.renderAll()`. Useful for native mp4/ProRes/GIF output and for batching s
 scenes (`api.openScene(path, true)` per file). Render Queue Items can carry Setup/Pre/Post
 **render scripts** (e.g. swap assets or text per render) — see the reference.
 
-**Cavalry CLI — not available in 2.7.x.** Scene Group's release notes for 2.7.0–2.7.2 say the
+**Cavalry CLI — not available in 2.7.x or 2.8.0.** Scene Group's release notes for 2.7.0–2.8.0 say the
 CLI is missing ("please remain on your current version… working towards reinstating this"),
 and before 2.7 its `render`/`list` commands needed an Enterprise licence. A `CavalryCLI.app`
-still sits inside the 2.7.2 bundle, but its `Contents/MacOS/` is empty — there is no binary
+still sits inside the 2.8.0 bundle, but its `Contents/MacOS/` is empty — there is no binary
 to call. For headless-style batch renders, drive
 the running app through the bridge instead (open each scene, render, ffmpeg); see the
 reference for the pre-2.7 CLI flags if the user is pinned to an older version.
@@ -276,7 +276,7 @@ reference for the pre-2.7 CLI flags if the user is pinned to an older version.
   nothing persists between sends. Persist state in the scene or on disk.
 - **Silent `api.set`/`api.keyframe`**: unknown names are ignored without an error, and
   `keyframe` also drops arrays and bare numbers on vectors — use `setAttrs`/`keyAttrs`.
-  The names in this file are the ones 2.7.2 uses (`fps`, `endFrame`, `text`,
+  The names in this file are the ones 2.7.2–2.8.0 use (`fps`, `endFrame`, `text`,
   `backgroundColor`); earlier notes about `frameRate`/`string`/`frameRangeEnd` are wrong for
   2.7. Branch on `api.getCavalryVersion()` if a script must also run on older releases.
 - **Colour**: 2.6 removed *Linear Gamma* (comp settings) and the *Color Filter* shader — use

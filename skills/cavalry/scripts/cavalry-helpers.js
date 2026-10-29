@@ -3,7 +3,7 @@
 // Load at the top of a script sent through cavalry-send.sh:
 //   api.load("/abs/path/to/cavalry-helpers.js");
 // Every send runs in a fresh scope, so load it in each script that needs it.
-// Checked against Cavalry 2.7.2.
+// Checked against Cavalry 2.8.0.
 
 // api.set silently ignores attribute names the layer doesn't have — a typo or
 // a name from another Cavalry version just does nothing. setAttrs refuses

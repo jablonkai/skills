@@ -2,7 +2,7 @@
 
 Condensed from the official docs (https://cavalry.studio/docs/tech-info/scripting/ — the old
 docs.cavalry.scenegroup.co URLs redirect there) plus production experience, checked against
-Cavalry 2.7.2. Cavalry scripts are JavaScript (V8 12.4 / ES2024 since 2.6); modules: `api` (scene + filesystem + web), `cavalry` (math/geometry/color/text
+Cavalry 2.8.0. Cavalry scripts are JavaScript (V8 12.4 / ES2024 since 2.6); modules: `api` (scene + filesystem + web), `cavalry` (math/geometry/color/text
 utilities), `ui` (script windows), `render` (inside render scripts only), `console`.
 
 User scripts live in `~/Library/Application Support/Cavalry/Scripts/` (**Help ▸ Show Scripts
@@ -36,7 +36,7 @@ Folder**) and appear in the Scripts menu. The JavaScript Editor window runs ad-h
 | `setFrame(f)` / `getFrame()` | move playhead (needed before `renderPNGFrame`) |
 | `play()` / `stop()` | stop playback before frame-loop renders |
 
-Comp attributes (2.7.2, layer type `compNode`): `resolution` `[w,h]`, `fps`, `startFrame`,
+Comp attributes (2.7.2–2.8.0, layer type `compNode`): `resolution` `[w,h]`, `fps`, `startFrame`,
 `endFrame` (inclusive), `playbackStart`/`playbackEnd`, `backgroundColor` (hex, or `"#00000000"`
 / `backgroundColor.a: 0` for transparent — default is opaque), `motionBlur`, `shutterAngle`.
 There is no `frameRate`/`frameRangeEnd` — and `api.set` would ignore them without an error.
@@ -77,6 +77,7 @@ characters), `indexMode`. Stagger: `minimum`, `maximum`, `offset`, `graph`, `str
 | `getKeyframeTimes(id, attr)` / `isAnimatedAttribute(id, attr)` | verify keys landed |
 | `deleteKeyframe(id, attr, frame)` / `modifyKeyframe(id, data)` | |
 | `magicEasing(id, attr, frame, presetName)` | applies at that keyframe |
+| `getMagicEasing(id, attr, frame)` → `{easingName, expression}` | 2.8+: read back the easing to verify it landed |
 
 Presets: `SlowIn`, `SlowOut`, `SlowInSlowOut`, `VerySlowIn`, `VerySlowOut`,
 `VerySlowInVerySlowOut`, `SpringIn`, `SpringOut`, `SpringInSpringOut`, `SmallSpringIn`,
@@ -129,7 +130,7 @@ Transparent output: leave the comp background empty (no BG rect) — PNG frames 
 | Function | Notes |
 |---|---|
 | `filePathExists(path)` / `isFile(path)` / `isDirectory(path)` | |
-| `listDirectoryPaths(path, includeDirectories)` → `[path]` | the documented one; `listDirectory(path)` also works in 2.7.2 but isn't in the typings |
+| `listDirectoryPaths(path, includeDirectories)` → `[path]` | the documented one; `listDirectory(path)` also works in 2.7.2–2.8.0 but isn't in the typings |
 | `writeToFile(path, content, overwrite)` / `readFromFile(path)` | the feedback channel back to the caller |
 | `makeFolder(path)` / `deleteFilePath(path)` | |
 | `exec(scriptId, source)` | run JS from a string (scriptId = reverse-domain name) |
@@ -137,7 +138,7 @@ Transparent output: leave the comp background empty (no BG rect) — PNG frames 
 | `runProcess(cmd, [args]) → {output, error}` | blocking system command; from a UI script (the bridge is one) it first raises a "trust this script" dialog — prefer running tools from the shell |
 | `runDetachedProcess(cmd, [args])` | non-blocking; same trust prompt |
 | `getPreferencesPath()` / `getTempFolder()` | where the bridge keeps its status and result files / scratch space |
-| `getCavalryVersion()` → `"2.7.2"` | branch on version when attribute names differ |
+| `getCavalryVersion()` → `"2.8.0"` | branch on version when attribute names differ |
 
 ## api — WebClient / WebServer
 
@@ -197,8 +198,8 @@ For image sequences the hooks run before/after the whole sequence, not per frame
 
 ## Cavalry CLI
 
-**Not available in Cavalry 2.7.0–2.7.2** — the release notes tell CLI users to stay on 2.6.x
-until it is reinstated. On 2.7.x render through the app (bridge + `renderPNGFrame`, or the
+**Not available in Cavalry 2.7.0–2.8.0** — the release notes tell CLI users to stay on 2.6.x
+until it is reinstated. On 2.7.x/2.8.x render through the app (bridge + `renderPNGFrame`, or the
 Render Queue). The rest of this section applies to **2.6.x and earlier** only.
 
 Binary: `/Applications/Cavalry.app/Contents/Applications/CavalryCLI.app/Contents/MacOS/cavalry-cli`.
