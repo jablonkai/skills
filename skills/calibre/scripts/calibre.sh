@@ -98,7 +98,7 @@ case "$cmd" in
     lib=${1:-${CALIBRE_LIBRARY:-$(default_library)}}
     state=$(lock_state "$lib")
     echo "$state"
-    [[ "$state" == locked ]] && server_urls
+    if [[ "$state" == locked ]]; then server_urls; fi
     ;;
   py)
     [[ $# -ge 1 ]] || { echo "usage: calibre.sh py SCRIPT [ARGS...]" >&2; exit 2; }
