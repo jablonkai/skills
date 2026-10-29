@@ -3,7 +3,7 @@ name: kicad
 description: 'Automate KiCad 10 PCB and schematic work: run DRC/ERC with kicad-cli and summarise the violations, build a manufacturer-ready fabrication package (Gerbers, Excellon drill, pick-and-place/CPL, BOM, STEP, zipped, with a JLCPCB preset), render the board to PNG, and script footprint placement and board edits in a running PCB editor through the KiCad IPC API (kicad-python / kipy). Use for "run DRC on this board", "why does ERC fail", "summarise the DRC errors", "export Gerbers for JLCPCB / PCBWay", "make the fab zip", "generate the BOM and CPL / centroid file", "place these LEDs in a circle", "move or rotate footprints by script", "set the title block", or anything mentioning .kicad_pcb, .kicad_sch, kicad-cli or pcbnew scripting. Not for mechanical CAD, enclosures, STEP modelling or turning existing Gerbers into printable 3D parts (freecad, brl-cad), photoreal renders of a board in a 3D scene (blender), block or wiring diagrams (drawio), circuit simulation (SPICE), or flashing firmware to a board.'
 summary: "automate KiCad 10 — DRC/ERC with JSON violation summaries, JLCPCB-ready fabrication zips (Gerbers, drill, CPL, BOM, STEP), board renders, and scripted footprint placement in a running PCB editor via the IPC API"
 category: electronics
-compatibility: "Built for KiCad 10.0.7 (kicad-cli; IPC API last checked on 10.0.6) on macOS."
+compatibility: "Built for KiCad 10.0.7 (kicad-cli and the IPC API, kicad-python 0.8.0) on macOS."
 risk: medium
 tags:
     - kicad
@@ -14,7 +14,7 @@ tags:
     - jlcpcb
 license: GPL-3.0-only
 metadata:
-  version: "1.0.4"
+  version: "1.0.5"
   author: "Tamás Jablonkai"
 ---
 
@@ -35,7 +35,7 @@ hand-edit it for placement. In the file, pad and field offsets are relative to t
 footprint, but their **angles are absolute**, so changing a footprint's rotation in
 `(at X Y ROT)` leaves every pad at the old angle.
 
-Verified against **KiCad 10.0.7** on macOS (the IPC API section on 10.0.6). `kicad-cli` lives in
+Verified against **KiCad 10.0.7** on macOS. `kicad-cli` lives in
 `/Applications/KiCad/KiCad.app/Contents/MacOS/` and is not on `PATH`. The helpers
 find it (or use `$KICAD_APP`).
 
@@ -149,7 +149,10 @@ $PY $K/kicad_ipc.py set-title --title "LED ring" --revision B --save
   in the open editor.
 - For anything the helper doesn't cover, write a short kipy script following
   [references/ipc-api.md](references/ipc-api.md): positions are `Vector2` in **nm**,
-  wrap edits in `begin_commit()`/`push_commit()`, then `update_items()`.
+  wrap edits in `begin_commit()`/`push_commit()`, then `update_items()`. **Move and rotate
+  footprints with `set_pose()` from `kicad_ipc.py`, not kipy's setters**: kipy 0.8.0's
+  rotation drops the 3D model, and on 10.0.7 it can't even read boards whose footprints have
+  reference points (details in the reference).
 
 ## Verify
 

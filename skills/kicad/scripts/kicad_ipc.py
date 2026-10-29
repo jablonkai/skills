@@ -52,6 +52,81 @@ class SetupError(Exception):
     pass
 
 
+# --------------------------------------------------------------------------- kipy 0.8.0 gaps
+
+REFPOINT_URL = "type.googleapis.com/kiapi.board.types.ReferencePoint"
+
+
+def _register_reference_point():
+    """KiCad 10.0.7 sends footprint reference points (kiapi.board.types.ReferencePoint),
+    which kipy 0.8.0 cannot unpack: get_footprints() raises NotImplementedError on any
+    board that has one. Teach kipy a minimal message - only `position` (field 3, absolute
+    Vector2) is declared; every other field survives the round trip as an unknown field."""
+    from kipy import board_types
+    from kipy.util import proto as kproto
+    if REFPOINT_URL in kproto._any_urls:
+        return None
+    from google.protobuf import descriptor_pb2, descriptor_pool, message_factory
+    from kipy.proto.common.types import base_types_pb2
+    fdp = descriptor_pb2.FileDescriptorProto(
+        name="kicad_ipc_reference_point.proto", package="kiapi.board.types", syntax="proto3",
+        dependency=[base_types_pb2.DESCRIPTOR.name])
+    msg = fdp.message_type.add(name="ReferencePoint")
+    msg.field.add(name="position", number=3, type=descriptor_pb2.FieldDescriptorProto.TYPE_MESSAGE,
+                  label=descriptor_pb2.FieldDescriptorProto.LABEL_OPTIONAL,
+                  type_name=".kiapi.common.types.Vector2")
+    pool = descriptor_pool.Default()
+    pool.Add(fdp)
+    cls = message_factory.GetMessageClass(pool.FindMessageTypeByName("kiapi.board.types.ReferencePoint"))
+
+    class ReferencePoint:
+        def __init__(self, proto=None):
+            self._proto = proto if proto is not None else cls()
+
+        @property
+        def proto(self):
+            return self._proto
+
+        @property
+        def position(self):
+            return Vector2(self._proto.position)
+
+        @position.setter
+        def position(self, value):
+            self._proto.position.CopyFrom(value.proto)
+
+    kproto._any_urls[REFPOINT_URL] = cls
+    board_types._proto_to_object[cls] = ReferencePoint
+    return ReferencePoint
+
+
+ReferencePoint = _register_reference_point()
+
+
+def set_pose(fp, pos=None, rot=None):
+    """Move and/or rotate a footprint, carrying along what kipy 0.8.0's setters skip.
+    Footprint children are stored with absolute positions and KiCad keeps exactly the
+    children it is sent: kipy's orientation setter drops 3D models (KiCad then deletes
+    them) and neither setter moves reference points."""
+    from kipy.board_types import Footprint3DModel
+    extra = [i for i in fp.definition.items
+             if isinstance(i, Footprint3DModel) or (ReferencePoint and isinstance(i, ReferencePoint))]
+    points = [i for i in extra if not isinstance(i, Footprint3DModel)]
+    if pos is not None:
+        delta = pos - fp.position
+        fp.position = pos
+        for p in points:
+            p.position = p.position + delta
+    if rot is not None:
+        rot.normalize180()
+        delta = rot - fp.orientation
+        fp.orientation = rot
+        for p in points:
+            p.position = p.position.rotate(delta, fp.position)
+        items = list(fp.definition.items)
+        fp.definition.items = items + [i for i in extra if not any(i is j for j in items)]
+
+
 # --------------------------------------------------------------------------- connection
 
 def connect(timeout_ms, wait_s=20):
@@ -207,9 +282,8 @@ def cmd_move(args):
     if args.relative:
         x += fp.position.x / NM_PER_MM
         y += fp.position.y / NM_PER_MM
-    fp.position = Vector2.from_xy_mm(x, y)
-    if args.rot is not None:
-        fp.orientation = Angle.from_degrees(args.rot)
+    set_pose(fp, Vector2.from_xy_mm(x, y),
+             Angle.from_degrees(args.rot) if args.rot is not None else None)
     if args.dry_run:
         print(json.dumps(fp_row(fp)))
         return 0
@@ -234,10 +308,11 @@ def cmd_place_circle(args):
         x = cx + args.radius * math.cos(t)
         y = cy - args.radius * math.sin(t)  # board Y grows downward
         fp = fps[ref]
-        fp.position = Vector2.from_xy_mm(round(x, 6), round(y, 6))
+        rot = None
         if args.facing != "keep":
-            rot = theta + (90.0 if args.facing == "tangent" else 0.0) + args.rotation_offset
-            fp.orientation = Angle.from_degrees(rot)
+            rot = Angle.from_degrees(theta + (90.0 if args.facing == "tangent" else 0.0)
+                                     + args.rotation_offset)
+        set_pose(fp, Vector2.from_xy_mm(round(x, 6), round(y, 6)), rot)
         rows.append(fp_row(fp))
     if not args.dry_run:
         commit_edits(board, [fps[r] for r in refs], f"Place {n} footprints on a circle", args.save)
