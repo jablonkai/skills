@@ -1,6 +1,6 @@
 # Geometry Nodes — building trees from script
 
-Verified on Blender 5.2.2 LTS. The important 5.x change is how the **modifier exposes its
+Verified on Blender 5.2.3 LTS. The important 5.x change is how the **modifier exposes its
 inputs** — see "Driving the modifier" below; the 4.x idiom raises `TypeError`.
 
 ## A complete scatter tree

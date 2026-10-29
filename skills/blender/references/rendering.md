@@ -1,6 +1,6 @@
 # Rendering — engines, passes, compositor, output
 
-Verified on Blender 5.2.2 LTS.
+Verified on Blender 5.2.3 LTS.
 
 ## Engines
 
