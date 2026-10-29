@@ -3,7 +3,7 @@ name: drawio
 description: 'Create and edit draw.io (diagrams.net) diagrams — either by remote-controlling the running draw.io desktop app with JavaScript over its DevTools port (shapes appear live in the window the user is looking at, then get laid out, saved and exported), or, when live control is not possible, by writing .drawio XML files directly and rendering them headless with the draw.io CLI. Covers flowcharts, architecture and network diagrams, swimlanes, sequence, UML and ER diagrams, multi-page files, ELK auto-layout, Mermaid/CSV to draw.io conversion, and PNG/SVG/PDF export. Use whenever the user mentions draw.io, diagrams.net, .drawio files, or asks to draw, sketch or diagram an architecture, process, flow, org chart or data model as an editable diagram — even if they do not name the tool. Not for charts of numeric data (use a plotting library) or Obsidian .canvas files.'
 summary: "remote-control the draw.io desktop app with JavaScript over its DevTools port — live shape building, ELK auto-layout, pages, save — or author .drawio XML directly and export PNG/SVG/PDF or convert Mermaid/CSV with the headless CLI"
 category: design-automation
-compatibility: "Built for draw.io desktop 31.5.2; needs Node 22+."
+compatibility: "Built for draw.io desktop 32.6.1; needs Node 22+."
 risk: medium
 tags:
     - drawio
@@ -13,7 +13,7 @@ tags:
     - scripting
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -24,7 +24,7 @@ same JavaScript runtime as diagrams.net (mxGraph + `EditorUi`). Started with a
 DevTools port, it can be driven live: a script runs **inside the editor window**, the
 user watches the shapes appear, and every change lands on the normal undo stack. When
 that isn't possible, draw.io files are plain XML and the app's CLI renders them
-headless. Everything here was run against **draw.io 31.5.2**; needs Node 22+.
+headless. Everything here was run against **draw.io 31.5.2** and rechecked on **32.6.1**; needs Node 22+.
 
 - [scripts/drawio-start.sh](scripts/drawio-start.sh) — launch draw.io with the control
   port, opening or creating a `.drawio` file.

@@ -1,6 +1,6 @@
 # draw.io live API reference
 
-Everything here was run against **draw.io desktop 31.5.2** through
+Everything here was run against **draw.io desktop 31.5.2** (rechecked on 32.6.1) through
 [drawio-eval.mjs](../scripts/drawio-eval.mjs). Scripts run in the editor window's
 renderer, so the whole draw.io JavaScript runtime (mxGraph plus draw.io's `EditorUi`,
 `Graph`, `Editor`) is available — the `D` helpers are a thin layer over it.
@@ -112,7 +112,7 @@ created the cells, or it silently does nothing.
 ## Menu actions
 
 `ui.actions.get(name).funct()` runs a menu command on the current selection. Present in
-31.5.2: `fitWindow`, `fitPage`, `resetView`, `zoomIn`, `zoomOut`, `selectAll`,
+31.5.2–32.6.1: `fitWindow`, `fitPage`, `resetView`, `zoomIn`, `zoomOut`, `selectAll`,
 `selectVertices`, `selectEdges`, `autosize`, `toFront`, `toBack`, `group`, `ungroup`,
 `duplicate`, `delete`, `deleteAll`, `lockUnlock`, `alignCellsLeft`, `undo`, `redo`.
 Avoid actions and `ui` methods that open dialogs (`editStyle`, `editData`, `save` on Untitled, `ui.renamePage`) — a modal
