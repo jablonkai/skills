@@ -3,7 +3,7 @@ name: video-review-notes
 description: "Read and act on the review notes the user leaves on rendered cuts with their Video Review app (the desktop app that writes `VIDEO.comments.json` next to each render). Use this whenever the user says they watched a cut and left notes or comments, asks what their notes say, wants notes fixed in DaVinci Resolve, mentions a `.comments.json` file, or refers to notes, comments or marks they put on a video, in any language (the user often writes in Hungarian), even if they don't name the app or the file. Also use it before editing a reel that has a comments file next to its render, so open notes are not missed. Not for adding Resolve markers or general editing with no review notes (davinci-resolve)."
 summary: "read and act on timecoded, scene and on-frame review notes left in the Video Review app — list open notes, extract the marked frames with the box or point drawn on, map them to Resolve timeline timecode, and mark them done atomically"
 category: video
-compatibility: "Built for the Video Review app 0.1.0 (github.com/jablonkai/video-review) with mpv and ffmpeg; Resolve steps use DaVinci Resolve Studio 21.1.0."
+compatibility: "Built for the Video Review app 0.1.0 (github.com/jablonkai/video-review) with mpv and ffmpeg; Resolve steps use DaVinci Resolve Studio 21.1.2."
 risk: low
 tags:
   - video-review
@@ -14,7 +14,7 @@ allowed-tools: Bash, Read
 argument-hint: "[render folder or video file]"
 license: GPL-3.0-only
 metadata:
-  version: "1.0.5"
+  version: "1.0.6"
   author: "Tamás Jablonkai"
 ---
 
@@ -117,7 +117,7 @@ when you talk to the user ("#2"), because that is what they see in the app.
 
 Renders are usually made from a whole timeline, so render frame 0 is the timeline's first
 frame. Get the timeline's start timecode and frame rate from Resolve (the
-`davinci-resolve` MCP: timeline settings and start timecode). Then:
+`davinci-resolve` skill: `resolve-run.sh --state` prints both). Then:
 
 ```bash
 python3 $S/notes.py list "<video>" \
