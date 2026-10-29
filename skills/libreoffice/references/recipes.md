@@ -28,7 +28,7 @@ leaves a `.~lock.<name>#` file next to the user's file. Style names are the
 programmatic English ones (`Text body`, `Heading 1`, `Standard` for the default page
 style), not the names the UI shows.
 
-Every recipe below was run as written against LibreOffice 26.8.0.3, and the outputs
+Every recipe below was run as written against LibreOffice 26.8.2.2, and the outputs
 were checked with openpyxl, python-docx, python-pptx or poppler.
 
 ## Calc: number format, bold header, chart, sheet protection

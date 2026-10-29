@@ -2,7 +2,7 @@
 
 This is the subset of the LibreOffice API (https://api.libreoffice.org/) that
 `lo_ops.py` and the recipes use, with the details that matter for headless work. Every
-call was run on 26.8.0.3. Lengths are in 1/100 mm.
+call was run on 26.8.2.2. Lengths are in 1/100 mm.
 
 ## Loading and storing
 
