@@ -2,7 +2,7 @@
 
 Checked against the LibreOffice 26.8 Help pages (*PDF export command line parameters*,
 *File conversion filter names*, *CSV filter options*, *Starting LibreOffice with
-parameters*) and run live on 26.8.0.3.
+parameters*) and run live on 26.8.2.2.
 
 ## Export filter per document kind
 

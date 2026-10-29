@@ -1,6 +1,6 @@
 # Gotchas
 
-Every item was reproduced on LibreOffice 26.8.0.3 (macOS 27, system locale hu-HU)
+Every item was reproduced on LibreOffice 26.8.2.2 (macOS 27, system locale hu-HU)
 unless noted. Each one says what the scripts do about it.
 
 ## Process and profile

@@ -3,7 +3,7 @@ name: libreoffice
 description: 'Automate documents with a real office engine: headless LibreOffice and its UNO API. Batch-convert between ODF, OOXML (docx/xlsx/pptx), legacy doc/xls/ppt, RTF and PDF including PDF/A; fill a Calc model from CSV, recalculate every formula and export xlsx/ods/PDF with the computed values, or read real recalculated values; fill Writer templates ({{placeholders}}, fields, bookmarks) into one file per record or a combined PDF; export Impress/Draw pages as PNG/SVG. Use whenever a task would run soffice or LibreOffice, or needs rendering fidelity, recalculation or ODF: "convert this folder of docx to PDF/A", "recalculate this xlsx and give me the real totals", "generate letters from this template and CSV", "export every slide as PNG", "convert legacy .doc files". Not for editing docx/xlsx/pptx in Python without an office engine (use docx, xlsx, pptx), documents to Markdown (use markitdown), PDF merging or OCR (use pdf), or Pages, Numbers and Keynote files.'
 summary: "automate documents with headless LibreOffice and UNO — ODF/OOXML/PDF and PDF/A batch conversion, Calc recalculation with real values, Writer template fill and mail merge, Impress/Draw page export"
 category: office
-compatibility: "Built for LibreOffice 26.8.0.3 on macOS 27."
+compatibility: "Built for LibreOffice 26.8.2.2 on macOS 27."
 risk: low
 tags:
     - libreoffice
@@ -16,7 +16,7 @@ tags:
     - mail-merge
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -26,7 +26,7 @@ Every call is one short **headless `soffice` process on the skill's own profile*
 scripts run [scripts/lo_ops.py](scripts/lo_ops.py) *inside* LibreOffice as a Python macro
 (UNO API), pass the request as a private JSON file, and read a JSON result back. Nothing
 listens on a port or pipe, and the user's own LibreOffice window and profile are never
-touched. Verified against **LibreOffice 26.8.0.3** on macOS 27; the scripts also find
+touched. Verified against **LibreOffice 26.8.2.2** on macOS 27; the scripts also find
 `soffice` on Linux.
 
 Use the scripts rather than raw `soffice --convert-to`. They encode fixes for behaviour
