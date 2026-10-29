@@ -13,8 +13,9 @@ tags:
   - text-extraction
 allowed-tools: Bash, Read, Write, Glob
 argument-hint: "[file-or-dir-or-url] [-o output.md]"
+license: GPL-3.0-only
 metadata:
-  version: "1.0.2"
+  version: "1.0.3"
   author: "Tamás Jablonkai"
 ---
 

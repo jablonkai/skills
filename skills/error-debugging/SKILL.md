@@ -17,8 +17,9 @@ tags:
   - rust
 allowed-tools: Bash, Read, Grep, Glob, Edit, Write
 argument-hint: "[stack trace, crash log, or path to a log/crash file]"
+license: GPL-3.0-only
 metadata:
-  version: "1.0.2"
+  version: "1.0.3"
   author: "Tamás Jablonkai"
 ---
 

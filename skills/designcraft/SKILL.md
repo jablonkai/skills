@@ -6,8 +6,9 @@ category: publishing
 compatibility: "Built for DesignCraft 0.14.0 and designcraft-cli 0.14.0 on macOS, Python 3.9+, poppler (pdfinfo, pdftotext) for PDF checks; pre-1.0, so command ids may change."
 risk: medium
 tags: [designcraft, indesign, page-layout, dtp, data-merge, pdf-x, idml, headless]
+license: GPL-3.0-only
 metadata:
-  version: "1.1.1"
+  version: "1.1.2"
   author: "Tamás Jablonkai"
 ---
 

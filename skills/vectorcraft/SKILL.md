@@ -6,8 +6,9 @@ category: design-automation
 compatibility: "Built for vectorcraft-cli 0.18.0 and VectorCraft.app 0.18.0 on macOS; pre-1.0, so command ids may change."
 risk: medium
 tags: [vectorcraft, vector, svg, illustrator, artboards, batch, data-sets, headless]
+license: GPL-3.0-only
 metadata:
-  version: "1.1.1"
+  version: "1.1.2"
   author: "Tamás Jablonkai"
 ---
 

@@ -6,8 +6,9 @@ category: design-automation
 compatibility: "Built for figcraft-cli 0.12.1 and FigCraft.app 0.12.1 on macOS, Python 3.9+; pre-1.0, so command ids may change."
 risk: medium
 tags: [figcraft, figma, ui-design, fig, auto-layout, components, export, headless]
+license: GPL-3.0-only
 metadata:
-  version: "1.1.1"
+  version: "1.1.2"
   author: "Tamás Jablonkai"
 ---
 

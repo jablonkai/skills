@@ -6,8 +6,9 @@ category: office
 compatibility: "Built for WordCraft 0.12.0 and wordcraft-cli 0.12.0 on macOS 27; helper scripts need Python 3.9+. Pre-1.0, so command ids may change."
 risk: medium
 tags: [wordcraft, word, docx, templates, tracked-changes, comments, toc, markdown, conversion, headless]
+license: GPL-3.0-only
 metadata:
-  version: "1.1.1"
+  version: "1.1.2"
   author: "Tamás Jablonkai"
 ---
 

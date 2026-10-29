@@ -14,8 +14,9 @@ tags:
     - silence
     - audio-analysis
     - markers
+license: GPL-3.0-only
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
   author: "Tamás Jablonkai"
 ---
 

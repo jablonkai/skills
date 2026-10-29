@@ -6,8 +6,9 @@ category: design-automation
 compatibility: "Built for Pixelmator Pro 3.8 (Mac App Store) on macOS 27."
 risk: medium
 tags: [pixelmator, applescript, macos, photo, background-removal, super-resolution, batch, image-editing]
+license: GPL-3.0-only
 metadata:
-  version: "1.0.2"
+  version: "1.0.3"
   author: "Tamás Jablonkai"
 ---
 

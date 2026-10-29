@@ -13,8 +13,9 @@ tags:
   - triage
 allowed-tools: Bash, Read, Grep, Glob
 argument-hint: "[create <title> | from-audit [<file>] [<ids or severities>] | view <number> | close <number> [reason] | comment <number> <text> | assign <number> <user> [--remove] | label <number> <label> [--remove] | triage | list [--label <label>]]"
+license: GPL-3.0-only
 metadata:
-  version: "1.0.2"
+  version: "1.0.3"
   author: "Tamás Jablonkai"
 ---
 

@@ -11,8 +11,9 @@ tags:
     - video-editing
     - timecode
     - applescript
+license: GPL-3.0-only
 metadata:
-  version: "1.1.2"
+  version: "1.1.3"
   author: "Tamás Jablonkai"
 ---
 

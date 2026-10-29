@@ -6,8 +6,9 @@ category: design-automation
 compatibility: "Built for photocraft-cli 0.17.0 and PhotoCraft.app 0.17.0 on macOS; pre-1.0, so command ids may change."
 risk: medium
 tags: [photocraft, psd, image-editing, layers, batch, photoshop-actions, droplet, headless]
+license: GPL-3.0-only
 metadata:
-  version: "1.2.3"
+  version: "1.2.4"
   author: "Tamás Jablonkai"
 ---
 

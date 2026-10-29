@@ -6,8 +6,9 @@ category: office
 compatibility: "Built for PdfCraft 0.15.0 and pdfcraft-cli 0.15.0 on macOS 27; Python 3.9+ for the helper scripts. Pre-1.0, so tool names and arguments may change."
 risk: medium
 tags: [pdfcraft, pdf, ocr, redaction, forms, merge, split, headless]
+license: GPL-3.0-only
 metadata:
-  version: "1.0.2"
+  version: "1.0.3"
   author: "Tamás Jablonkai"
 ---
 

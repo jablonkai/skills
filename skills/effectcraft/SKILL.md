@@ -6,8 +6,9 @@ category: motion-design
 compatibility: "Built for EffectCraft 0.18.0 and effectcraft-cli 0.18.0 on macOS, Python 3.9+, ffprobe (FFmpeg) for render checks; pre-1.0, so command ids may change."
 risk: medium
 tags: [effectcraft, after-effects, motion-graphics, compositing, lower-third, essential-graphics, prores, headless]
+license: GPL-3.0-only
 metadata:
-  version: "1.1.1"
+  version: "1.1.2"
   author: "Tamás Jablonkai"
 ---
 
