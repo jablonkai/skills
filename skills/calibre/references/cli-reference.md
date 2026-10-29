@@ -1,4 +1,4 @@
-# calibre CLI reference (checked against 9.16)
+# calibre CLI reference (checked against 9.17.0)
 
 Run every tool as `bash scripts/calibre.sh <tool> …`. Full option lists:
 `bash scripts/calibre.sh ebook-convert in.<ext> out.<ext> -h` (the list depends on the

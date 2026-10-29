@@ -3,7 +3,7 @@ name: calibre
 description: 'Manage e-books and calibre libraries from the CLI on macOS: convert between EPUB, AZW3, KEPUB, MOBI, PDF, DOCX, Markdown and HTML with cover, TOC and metadata; build an EPUB from a folder of Markdown or HTML chapters; turn a text PDF into a clean EPUB and report what the conversion broke; read and write e-book metadata; query, add, export and bulk-edit calibre library records (authors, series, tags) with a dry run, backup and read-back, even while the calibre GUI is open; validate EPUBs. Use for "turn these Markdown chapters into an EPUB with a cover", "convert this PDF to EPUB and tell me what is wrong with it", "fix the author spelling across this series in my calibre library", "convert my EPUBs to AZW3 for Kindle", "which books have no cover", "ebook-convert", "calibredb". Not for pulling text out of a document to read or summarise (markitdown), typeset print PDFs (scribus, libreoffice), Pages export (pages), or reference libraries and citations (zotero).'
 summary: "manage e-books and calibre libraries from the CLI — EPUB/AZW3/KEPUB/PDF/DOCX/Markdown conversion with cover, TOC and metadata, EPUB builds from Markdown chapters, PDF-to-EPUB repair with a quality report, and bulk library metadata edits with dry run, backup and read-back"
 category: publishing
-compatibility: "Built for calibre 9.16 on macOS 27."
+compatibility: "Built for calibre 9.17.0 on macOS 27."
 risk: medium
 tags:
   - calibre
@@ -16,7 +16,7 @@ tags:
   - metadata
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -26,7 +26,7 @@ Every call is **one short process** on calibre's own CLI tools (`ebook-convert`,
 `calibredb`, `ebook-meta`, `ebook-polish`). The helper scripts run on calibre's
 bundled Python, so they need nothing else installed. The skill never starts a server
 and never edits `metadata.db` directly; library writes go through `calibredb`.
-Verified against **calibre 9.16** on macOS 27.
+Verified against **calibre 9.17.0** on macOS 27.
 
 Always go through `scripts/calibre.sh`. It finds the app, applies a timeout
 (`CALIBRE_TIMEOUT`, default 600 s) and forces English output. calibre localizes its
