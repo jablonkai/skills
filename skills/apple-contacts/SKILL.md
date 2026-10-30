@@ -3,7 +3,7 @@ name: apple-contacts
 description: 'Search, export, audit and write Apple Contacts on macOS through the Contacts framework, with JXA where the framework falls short: find people by name, email, phone or company across every account (iCloud, Exchange, Google, On My Mac); export a group or a search to vCard or CSV; report likely duplicates (same name, email or phone) and incomplete cards; create or update contacts and groups from CSV, vCard or flags; every write read back. Read-only by default; never merges or deletes unless asked. Use for "export my Running Club group to vCard and CSV", "find duplicate contacts", "which contacts have no phone number", "import these 5 people from people.csv into a new group", "add a contact for Anna Nagy with her mobile", "back up my address book". Not for Calendar events (apple-calendar), Notes (apple-notes), Mail, Google/Outlook contacts through a web API or connector, or reshaping a CSV/vCard file that never touches the address book.'
 summary: "search, export and import Apple Contacts via the Contacts framework and JXA — group and search exports to vCard/CSV, duplicate and incomplete-card reports, contacts and groups created from CSV or vCard, read-back verified"
 category: mac-automation
-compatibility: "Built for Contacts 14.0 on macOS 27.0.1 (Contacts framework and JXA)."
+compatibility: "Built for Contacts 14.0 on macOS 27.2 (Contacts framework and JXA)."
 risk: medium
 tags:
     - contacts
@@ -14,7 +14,7 @@ tags:
     - macos
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -29,7 +29,7 @@ account. It fills two gaps: notes (the framework hides them without an Apple
 entitlement) and saving contacts that have a note (see [gotchas](references/gotchas.md)).
 Contacts doesn't need to be open, but AppleScript steps launch it.
 
-Verified against **Contacts 14.0 on macOS 27.0.1**.
+Verified against **Contacts 14.0 on macOS 27.2**.
 
 ## Privacy and safety rules (read first)
 
