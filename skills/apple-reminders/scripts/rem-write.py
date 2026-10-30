@@ -276,7 +276,7 @@ def bulk(a):
     saved = L.ek("save", spec=specs, timeout=300)
     finish(a, list(zip(specs, saved)), {"complete": "Completed", "uncomplete": "Reopened",
                                         "move": f"Moved to {L.label(dest) if dest else ''}"}[a.cmd],
-           skipped=skip)
+           skipped=skip, before={r["id"]: r for r in rems})
 
 
 def find_list(name, all_lists):
@@ -308,17 +308,25 @@ def preview(a, rems, skip, dest):
 
 # ---- read-back ------------------------------------------------------------------------
 
-def finish(a, pairs, verb, skipped=()):
-    mismatches = []
+def finish(a, pairs, verb, skipped=(), before=None):
+    mismatches, advanced = [], []
     for spec, back in pairs:
         diff = compare(spec, back)
+        if diff and advanced_to_next(spec, back, (before or {}).get(back.get("id"))):
+            advanced.append(_brief(back))
+            continue
         if diff:
             mismatches.append({"id": back.get("id"), "title": back.get("title"), "diff": diff})
     backs = [b for _, b in pairs]
     out = {"action": a.cmd, "count": len(backs), "items": backs,
            "unchanged": [_brief(r) for r in skipped],
            "readback": {"ok": not mismatches, "mismatches": mismatches}}
+    if advanced:
+        out["advanced"] = advanced
     _print(a, out, f"{verb}: {len(backs)} reminder(s)", backs)
+    if advanced and a.format != "json":
+        print(f"Repeating: {len(advanced)} moved on to the next due date (same id); the done "
+              "occurrence is kept as a separate completed reminder.")
     if skipped:
         print(f"Left alone (already in that state): {len(skipped)}")
     if mismatches:
@@ -347,6 +355,14 @@ def compare(spec, back):
     if "repeat" in spec and bool(spec["repeat"]) != bool(back.get("repeat")):
         diff["repeat"] = [spec["repeat"], back.get("repeat")]
     return diff
+
+
+def advanced_to_next(spec, back, orig):
+    """Completing a repeating reminder keeps its id open with the next due date, and
+    Reminders stores the done occurrence as a new completed reminder."""
+    return bool(spec.get("completed") and orig and orig.get("repeat") and back.get("repeat")
+                and not back.get("completed") and orig.get("due") and back.get("due")
+                and not L.same_due(orig, back))
 
 
 def _brief(r):

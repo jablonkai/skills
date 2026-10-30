@@ -42,6 +42,12 @@
   it to the new account and removes the original). `rem-write.py move` reports the new
   ids; don't reuse the old ones. Moves within one account keep the id.
 - Ids are stable otherwise, including across edits and completion.
+- **Completing a repeating reminder doesn't complete that id.** Like the Reminders app,
+  EventKit keeps the id open with the next due date and stores the done occurrence as
+  a new completed reminder with a new id (verified on macOS 27.2). `rem-write.py
+  complete` reports these under `advanced` and still exits 0, but
+  `rem-verify.py ids --completed yes` on that id fails. Only the last occurrence of a
+  `--count`/`--until` series completes for real.
 
 ## Dates
 
