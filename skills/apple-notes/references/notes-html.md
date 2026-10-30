@@ -27,8 +27,9 @@ always puts a `<div><br></div>` between blocks.
 
 - Each top-level `<div>` is one line. `<div><br></div>` is a blank line.
 - A line that is all bold in `.AppleSystemUIFontBold` is a heading: ≥ 22px gives `#`,
-  ≥ 17px gives `##`, anything else `###`. Lines that are bold in the regular font stay
-  `**bold**` text.
+  ≥ 17px gives `##`, anything else `###`. So is an all-bold line with a size of ≥ 17px
+  but no face, which is what a body rewrite leaves of a heading. Lines that are bold in
+  the regular font at the normal size stay `**bold**` text.
 - A line that is all Courier or `<tt>` is code, and consecutive code lines become one
   fenced block.
 - Tables: the first row becomes the header row (Notes has no header concept).

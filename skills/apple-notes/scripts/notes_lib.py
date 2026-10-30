@@ -65,8 +65,10 @@ def folders(account=None):
     return jxa("folders", {"account": account})
 
 
-def resolve_folder(path, all_folders=None):
-    """Find one folder by 'Account/Folder/Sub', 'Folder/Sub' or bare 'Folder' (case-insensitive)."""
+def resolve_folder(path, all_folders=None, missing_ok=False):
+    """Find one folder by 'Account/Folder/Sub', 'Folder/Sub' or bare 'Folder' (case-insensitive).
+
+    missing_ok returns None for a folder that doesn't exist instead of exiting."""
     fs = all_folders if all_folders is not None else folders()
     want = path.strip("/").lower()
     hits = [f for f in fs if f["path"].lower() == want]
@@ -75,6 +77,8 @@ def resolve_folder(path, all_folders=None):
     if not hits:
         hits = [f for f in fs if f["name"].lower() == want.rsplit("/", 1)[-1]
                 and f["path"].lower().endswith(want)]
+    if not hits and missing_ok:
+        return None
     if not hits:
         die(f"folder not found: {path!r}. Known: " + ", ".join(f["path"] for f in fs), 2)
     if len(hits) > 1:

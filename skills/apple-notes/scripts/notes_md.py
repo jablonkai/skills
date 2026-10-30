@@ -188,6 +188,22 @@ def md_to_html(text, base_dir=None, title=None, images=None):
     return "".join(out)
 
 
+# A heading line as Notes returns it. Writing it back through `body` keeps the bold and the
+# size but drops the .AppleSystemUIFontBold face, so it would stop reading as a heading.
+_HEADING_LINE = re.compile(
+    r'<div><b>(?:<font face="\.AppleSystemUIFontBold">)?<span style="font-size: (\d+)px">'
+    r'((?:(?!</?div)[^<]|<(?!/?(?:div|span|font|b)\b)[^>]*>)*)</span>(?:</font>)?</b>(?:<br>)?</div>')
+
+
+def restore_headings(body):
+    """Turn the h1/h2 lines of an existing `body` back into <h1>/<h2> before a rewrite."""
+    def sub(m):
+        size = int(m.group(1))
+        level = 1 if size >= 22 else 2 if size >= 17 else 0
+        return f"<div><h{level}>{m.group(2)}</h{level}></div>" if level else m.group(0)
+    return _HEADING_LINE.sub(sub, body)
+
+
 # ---------------------------------------------------------------- HTML -> Markdown
 
 class _Node:
@@ -297,9 +313,11 @@ class _Renderer:
         infos = [_attr_chain(p, div) for _, p in leaves]
         if all("tt" in tg or any(f.lower().startswith("courier") for f in fc) for tg, _, fc in infos):
             return "code", 0
+        size = max((max(sz) for _, sz, _ in infos if sz), default=0)
+        # a body rewrite strips the face but keeps the size, so bold at >= 17px is a heading too
         if all("b" in tg for tg, _, _ in infos) and \
-                all(any("Bold" in f for f in fc) for _, _, fc in infos):
-            size = max((max(sz) for _, sz, _ in infos if sz), default=0)
+                (all(any("Bold" in f for f in fc) for _, _, fc in infos)
+                 or all(sz and max(sz) >= 17 for _, sz, _ in infos)):
             return "heading", 1 if size >= 22 else 2 if size >= 17 else 3
         return "text", 0
 
