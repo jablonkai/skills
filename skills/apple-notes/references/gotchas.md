@@ -8,6 +8,11 @@
   `nt-write.py append/replace` refuses notes with file attachments unless `--reattach`
   (save, rewrite without them, re-add at the end), and always refuses notes with
   attachments it can't save. Don't bypass that with raw JXA.
+- **A body rewrite flattens headings.** Writing back the HTML that `body` returned keeps
+  a heading's `<b>` and font size but drops `face=".AppleSystemUIFontBold"`, so the note's
+  existing `#`/`##` lines turn into big bold text (verified on macOS 27.2). `nt-write.py
+  append` turns them back into `<h1>`/`<h2>` before the rewrite, and the reader also
+  treats bold text of ≥ 17px as a heading, which covers notes rewritten earlier.
 - **No real checklists.** Notes' tappable checkboxes are invisible to scripting. Reading
   them gives plain bullets without their state, and writing `class="checklist"` or
   `<input type=checkbox>` gives plain bullets. The helpers use ☐/☑ glyph bullets. For

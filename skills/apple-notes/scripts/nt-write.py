@@ -30,11 +30,9 @@ verify = importlib.import_module("nt-verify")
 
 
 def target_folder(path, make, all_folders):
-    try:
-        return L.resolve_folder(path, all_folders)
-    except SystemExit:
-        if not make:
-            raise
+    found = L.resolve_folder(path, all_folders, missing_ok=make)
+    if found:
+        return found
     parts = path.strip("/").split("/")
     accounts = sorted({f["account"] for f in all_folders})
     if parts[0] not in accounts:
@@ -86,7 +84,8 @@ def main():
         if not a.folder:
             L.die("create needs --folder", 2)
         if a.dry_run:
-            folder = {"path": a.folder + (" (would be created)" if a.make_folder else "")}
+            folder = L.resolve_folder(a.folder, fs, missing_ok=a.make_folder) \
+                or {"path": a.folder + " (would be created)"}
         else:
             folder = target_folder(a.folder, a.make_folder, fs)
         report["folder"] = folder["path"]
@@ -113,7 +112,7 @@ def main():
                   f"({', '.join(r['name'] for r in saved)}). Rewriting the body would delete or degrade "
                   "them. Options: --reattach (they are re-added as real attachments, moved to the end "
                   "of the note), or create a new note instead.", 3)
-        body = note["body"]
+        body = M.restore_headings(note["body"])
         if saved:
             # drop the inline copies of the files we re-add; legacy data-URI images stay put
             hashes = {hashlib.sha256(Path(r["path"]).read_bytes()).hexdigest() for r in saved}
