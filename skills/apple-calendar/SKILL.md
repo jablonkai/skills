@@ -3,7 +3,7 @@ name: apple-calendar
 description: 'List, find, create and export Apple Calendar events on macOS through EventKit (AppleScript as a slow fallback): events in a date range across all calendars with recurring occurrences expanded, as a table, JSON or CSV; free-slot search; creating, moving and deleting events with alarms, recurrence and time zones, one occurrence or a whole series; .ics export and import; all read back to verify. Read-only by default; never writes to subscribed, holiday or birthday calendars. Use for "what''s on my calendar next week", "am I free Thursday afternoon", "add a weekly team sync every Monday at 10 with a 15-minute alert", "move my dentist appointment to Friday", "export November to an .ics file", "dump this month''s events to CSV", "import this .ics invite". Not for the Google Calendar web API or connector, Reminders or to-dos, scheduling cron jobs or agents, or .ics files unrelated to the Mac''s calendars.'
 summary: "list, find, create and export Apple Calendar events via EventKit and JXA — date-range queries with recurring occurrences, free-slot search, events with alarms and recurrence, .ics/CSV export and .ics import, read-back verified"
 category: mac-automation
-compatibility: "Built for Calendar 27.0 on macOS 27.0.1 (EventKit and JXA)."
+compatibility: "Built for Calendar 27.0 on macOS 27.2 (EventKit and JXA)."
 risk: medium
 tags:
     - calendar
@@ -14,7 +14,7 @@ tags:
     - ics
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -27,7 +27,7 @@ calendar in well under a second and expands recurring events into their occurren
 Calendar's AppleScript can do neither: one week took 32 s there, and its `whose` matches
 only the first event of a series. Calendar doesn't need to be open.
 
-Verified against **Calendar 27.0 on macOS 27.0.1**.
+Verified against **Calendar 27.0 on macOS 27.2**.
 
 ## Privacy and safety rules (read first)
 
