@@ -3,7 +3,7 @@ name: apple-shortcuts
 description: 'Run, inspect and build Apple Shortcuts on macOS from the command line: list shortcuts and folders with whether each accepts input, run a shortcut on files or text and capture its output, batch it over a folder, wrap it as a reusable agent or script step with a timeout, exit codes and output checks, decode an exported .shortcut file to read its actions, and generate simple shortcuts as signed files the user adds with one click. Use for "run my Resize shortcut on every image in this folder", "what shortcuts do I have and what do they do", "turn this shortcut into a script step with error handling", "chain these two shortcuts", "what does this .shortcut file do", "make me a shortcut that counts words", "shortcuts run". Not for editing Photos libraries (apple-photos), Keynote/Numbers/Pages documents (keynote, numbers, pages), video transcoding (handbrake), or image edits GIMP, Inkscape or sips can do directly — unless the user wants them done through a shortcut.'
 summary: "list, inspect and run Apple Shortcuts from the CLI — file and text input and output, folder batches, timeout-guarded agent steps, decoding exported .shortcut files, and generating signed shortcuts for one-click import"
 category: mac-automation
-compatibility: "Built for Shortcuts 10.0 on macOS 27.0.1."
+compatibility: "Built for Shortcuts 10.0 on macOS 27.2."
 risk: medium
 tags:
     - shortcuts
@@ -12,7 +12,7 @@ tags:
     - cli
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -26,7 +26,7 @@ Three surfaces, all local:
 - **`.shortcut` files.** They are plists of `WFWorkflowActions`, signed as an Apple Encrypted
   Archive. `sc-decode.py` reads them and `sc-build.py` writes and signs simple ones.
 
-Verified on **Shortcuts 10.0 / macOS 27.0.1**. Nothing listens on a port.
+Verified on **Shortcuts 10.0 / macOS 27.2**. Nothing listens on a port.
 
 ## Rules
 
@@ -91,7 +91,9 @@ python3 $S/sc-run.py "Resize" --batch in/ --out out/ --glob '*.png' --glob '*.jp
   exist (`--overwrite` redoes them). `--fail-fast` stops at the first failure. An
   output rejected by `--expect` is deleted, so a re-run retries it instead of skipping it.
 - **Filter batches with `--glob`** to the types the shortcut accepts (see
-  `accepts_input` / decode). Use `--timeout` (default 60 s) for long jobs.
+  `accepts_input` / decode). `--expect` alone isn't enough: on macOS 27.2 a text file
+  given to an image shortcut comes back as a real image of the rendered text. Use
+  `--timeout` (default 60 s) for long jobs.
 
 ## Wrap as an agent step / chain
 

@@ -1,6 +1,6 @@
 # The `shortcuts` CLI and the scripting dictionary
 
-Checked with `--help` on Shortcuts 10.0 / macOS 27.0.1. The CLI exists since macOS 12.
+Checked with `--help` on Shortcuts 10.0 / macOS 27.2. The CLI exists since macOS 12.
 
 ## Subcommands
 
@@ -25,8 +25,9 @@ There is no `create`, `delete`, `rename`, `export` or `import` subcommand.
 - **Several results** (several `-i`, or a list result): `-o PATH` is created as a
   **folder**, and items keep their input file names. `-o dir/` into an existing folder
   does the same.
-- **Wrong input type** (a `.txt` given to an image-only shortcut): exit 0, and the
-  output is a UUID string or an empty file. Filter inputs first and check output types.
+- **Wrong input type** (a `.txt` given to an image-only shortcut): exit 0. On 27.0.1 the
+  output was a UUID string or an empty file. On 27.2 the text is rendered as a page
+  image, so the output is a real image. Filter inputs first, and check output types too.
 - **Errors**: exit 1, `Error: <message>` on stderr, **in the system UI language** (for
   example Hungarian). Don't match on the wording.
 - **Needs interaction** (an Ask/Choose action, an unset required parameter, a

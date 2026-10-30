@@ -13,8 +13,11 @@ All of these were reproduced on Shortcuts 10.0 / macOS 27.0.1.
 - **Exit 0 with no output.** Text output to an `-o` path with an unknown extension
   (`.out`) writes nothing. Use `.txt` or `--output-type public.plain-text`.
 - **Exit 0 with junk output.** Input of a type the shortcut doesn't accept (a text file
-  given to an image shortcut) doesn't fail. The output is a UUID string or an empty file, written under
-  whatever name `-o` gave it. Filter batches with `--glob` and use `--expect`.
+  given to an image shortcut) doesn't fail. On 27.0.1 the output was a UUID string or an
+  empty file, written under whatever name `-o` gave it. **On 27.2 Shortcuts converts the
+  text into an image of a rendered page**, and that page goes through the shortcut. The
+  result is a real image, so `--expect image` can't catch it. Filtering the inputs with
+  `--glob` is the only guard. Keep `--expect` for the empty and UUID cases.
 - **Error messages are localized.** On a Hungarian system: `Error: A megadott index
   kívül esik…`. Branch on exit codes, never on message text.
 - **Several outputs make `-o` a folder.** Two `-i` files with `-o result.png` create a
