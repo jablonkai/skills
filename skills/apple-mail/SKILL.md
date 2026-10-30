@@ -3,7 +3,7 @@ name: apple-mail
 description: 'Search, export, draft and organise Apple Mail on macOS via its JXA dictionary, plus Mail''s Envelope Index for fast search when Full Disk Access allows: find messages by sender, recipient, subject, date, mailbox, attachment or newsletter status; export messages as .eml/Markdown and save attachments to a folder; draft new messages or replies with attachments, left in Drafts (never sends); bulk move, archive, flag and mark read with a preview first, read back to verify. Use for "find every email from Anna this month", "save all the PDF invoices from my mail to a folder", "draft a reply to the landlord with the contract attached", "archive newsletters older than 90 days", "flag everything from my boss this week". Not for sending mail or SMTP scripts, Gmail via web or API (Gmail connector), Outlook, contacts (apple-contacts), calendar invites (apple-calendar), or converting .eml/.msg files (markitdown).'
 summary: "search, export, draft and organise Apple Mail via JXA and the Envelope Index — sender, subject and date searches, attachment export, reply drafts with attachments left in Drafts, bulk move, flag and archive with preview, read-back verified"
 category: mac-automation
-compatibility: "Built for Mail 16.0 on macOS 27.0.1 (JXA and the Envelope Index)."
+compatibility: "Built for Mail 16.0 on macOS 27.2 (JXA and the Envelope Index)."
 risk: medium
 tags:
     - mail
@@ -15,7 +15,7 @@ tags:
     - attachments
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -30,7 +30,7 @@ The helpers exist because the obvious approach is slow. A JXA `whose` filter tak
 20–40 s on a 15k-message inbox, and a sweep of every mailbox takes 90 s. The index
 answers the same search in under half a second.
 
-Verified against **Mail 16.0 on macOS 27.0.1**.
+Verified against **Mail 16.0 on macOS 27.2**.
 
 ## Privacy and safety rules (read first)
 
