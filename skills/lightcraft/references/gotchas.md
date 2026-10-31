@@ -1,4 +1,4 @@
-# LightCraft gotchas (verified on lightcraft-cli 0.15.0)
+# LightCraft gotchas (verified on lightcraft-cli 0.16.0)
 
 Everything here was reproduced against the real CLI. Most of these fail **silently**:
 the command replies `"ok": true` and exits 0, and the result is still wrong. That is
@@ -135,7 +135,7 @@ and most `crop.*`, `mask.*` and `spot.*` commands.
 ## Live app port
 
 - `LightCraft --control PORT` (and `lightcraft-cli run --connect`) is a JSON-lines
-  channel on 127.0.0.1 **with no authentication** in 0.15.0. Any local process can
+  channel on 127.0.0.1 **with no authentication** in 0.16.0. Any local process can
   drive the app and read the library through it.
 - This skill does not start it or connect to it. If the user insists on watching the
   edits live, say this plainly, let them start the app with `--control` themselves, and
