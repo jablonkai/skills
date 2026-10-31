@@ -118,6 +118,7 @@ house rules on top of that format; when the two disagree, the spec wins.
 - `vectorcraft`: automate VectorCraft headless with vectorcraft-cli — vector art on multiple artboards from a spec, text and colour edits, CSV data-set variants, per-artboard PNG, outlined SVG, multi-page PDF and AI/EPS/DXF export, folder conversion, info read-back verified
 - `video-review-notes`: read and act on timecoded, scene and on-frame review notes left in the Video Review app — list open notes, extract the marked frames with the box or point drawn on, map them to Resolve timeline timecode, and mark them done atomically
 - `wordcraft`: automate WordCraft with wordcraft-cli — docx template fill with formatting kept (headers and footers too), documents from Markdown with heading styles, tables and an updated TOC, tracked changes and comments by a named author, markup PDFs, docx/odt/rtf/html/md/pdf conversion and folder batches, inspect read-back verified
+- `yt-dlp`: download video, audio and subtitles with yt-dlp — resolution and codec capped downloads, audio-only M4A/MP3, manual or auto subtitles as SRT, frame-accurate time-range clips, resumable playlist and channel batches with a download archive, metadata and format reports without downloading, ffprobe-verified outputs
 - `zotero`: search, export and grow a Zotero library via its local API — topic and collection searches with metadata summaries, BibTeX/BibLaTeX/CSL-JSON export for LaTeX and Typst, CSL-styled citations and bibliographies, adding papers by DOI and books by ISBN with undo
 <!-- END GENERATED SKILLS -->
 

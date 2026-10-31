@@ -64,6 +64,7 @@ portable beyond a single tool.
 - `soundcraft`: automate SoundCraft headless with soundcraft-cli — multitrack sessions from a spec with clips, fades, clip gain, pan, volume automation and ducking, built-in EQ, dynamics and reverb inserts, range or full bounces, batch conversion with normalize and dither, inspect read-back verified
 - `supercollider`: make sound with SuperCollider 3 — SynthDefs and patterns rendered offline in NRT mode to WAV, or a headless live sclang/scsynth session to play, re-evaluate, record and stop, with post-window errors surfaced
 - `video-review-notes`: read and act on timecoded, scene and on-frame review notes left in the Video Review app — list open notes, extract the marked frames with the box or point drawn on, map them to Resolve timeline timecode, and mark them done atomically
+- `yt-dlp`: download video, audio and subtitles with yt-dlp — resolution and codec capped downloads, audio-only M4A/MP3, manual or auto subtitles as SRT, frame-accurate time-range clips, resumable playlist and channel batches with a download archive, metadata and format reports without downloading, ffprobe-verified outputs
 
 #### 3D, CAD & electronics
 - `blender`: remote-control a running Blender by Python via a local bridge — bmesh/modifier modeling, shader and geometry nodes, animation, rigging, physics, Grease Pencil and the VSE, EEVEE/Cycles stills and video, glTF/FBX/USD/OBJ/STL export
