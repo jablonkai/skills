@@ -1,7 +1,7 @@
-# cadcraft-cli 0.14.0 reference
+# cadcraft-cli 0.15.1 reference
 
 Universal binary at `~/.local/bin/cadcraft-cli`. `cadcraft-cli --version` prints
-`cadcraft-cli 0.14.0`. `--help`/`-h`/`help` print the usage to stdout and exit 0; bad
+`cadcraft-cli 0.15.1`. `--help`/`-h`/`help` print the usage to stdout and exit 0; bad
 usage prints it and exits 1. Since 0.14.0 every subcommand has
 its own `--help` (`cadcraft-cli run --help` lists the flags and the `{last}` chaining).
 
