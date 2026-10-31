@@ -1,6 +1,6 @@
-# SoundCraft gotchas (0.14.0)
+# SoundCraft gotchas (0.15.0)
 
-Each item was reproduced against soundcraft-cli 0.14.0.
+Each item was reproduced against soundcraft-cli 0.15.0.
 
 ## Time and units
 
@@ -64,4 +64,3 @@ Each item was reproduced against soundcraft-cli 0.14.0.
   `info` on a WAV does not report levels, so `sc_verify.py` measures them from samples.
 - `engine.plugins` ignores any filter and returns every plugin (~30 KB);
   `sc_inspect.py plugin ID` prints one.
-- `soundcraft-cli` subcommands have no `--help` (`run --help` → "unknown option").
