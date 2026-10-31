@@ -1,6 +1,6 @@
-# Gotchas (gridcraft-cli 0.13.0)
+# Gotchas (gridcraft-cli 0.14.2)
 
-Everything here was reproduced on 0.13.0. Most of these fail **silently**: exit 0 and a
+Everything here was reproduced on 0.14.2. Most of these fail **silently**: exit 0 and a
 plausible file, but the wrong content.
 
 ## Saving
@@ -94,7 +94,7 @@ plausible file, but the wrong content.
 JSON-lines channel on 127.0.0.1. `gridcraft-cli mcp --connect PORT` and
 `gridcraft-cli send PORT METHOD` drive the running app through it.
 
-In 0.13.0 the channel has **no token or other authentication**: any local process,
+In 0.14.2 the channel has **no token or other authentication**: any local process,
 including a web page that can reach localhost, could run any command, among them
 `file.saveAs` to arbitrary paths. That fails this repo's bridge rules (token auth,
 cross-origin rejection, documented posture, stop path), so this skill:
