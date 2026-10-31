@@ -1,4 +1,4 @@
-# filmcraft-cli 0.14.0 reference
+# filmcraft-cli 0.15.0 reference
 
 `filmcraft-cli [OPTIONS] <SUBCOMMAND> [ARGS]`. It runs a headless FilmCraft engine by
 default, or sends commands to the running app with `--bridge`. `filmcraft-cli help` is the
@@ -44,7 +44,7 @@ authoritative list. The CLI is a symlink into `~/.local/share/artcraft-cli/filmc
 - Sequences count from frame 0 (`00:00:00:00`). Subtract a source list's `01:00:00:00`
   start (`fc_markers.py --sequence-start`).
 
-## Export presets (built in, 0.14.0)
+## Export presets (built in, 0.15.0)
 
 - **Match Source**: Adaptive High, Medium and Low Bitrate (H.264 at the sequence size).
 - **Web & Social**: High Quality 1080p HD and 2160p 4K, YouTube 1080p Full HD and 2160p 4K
