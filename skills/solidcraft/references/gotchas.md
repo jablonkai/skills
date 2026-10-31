@@ -1,4 +1,4 @@
-# Gotchas (SolidCraft 0.25.1)
+# Gotchas (SolidCraft 0.28.0)
 
 ## Silent failures
 
@@ -56,7 +56,7 @@
 - **The ground grid lies on Z 0.** A part below Z 0 is cut by it in snapshots; use
   `--no-grid`.
 - **`exec` ignores `--connect`.** It always runs on an empty headless design.
-- **The CLI on PATH may be older than the app** (0.22.1 against 0.25.0 once; both were
-  0.25.1 at the last check). Commands it lacks, such as `solid.cone`, fail as unknown, and it refuses
+- **The CLI on PATH may be older than the app** (0.22.1 against 0.25.0 once; on the last
+  check only the standalone 0.28.0 install was present). Commands it lacks, such as `solid.cone`, fail as unknown, and it refuses
   designs saved by the newer app (`format 41; reads up to 36`). Use the app's copy,
   which `sclib.cli()` picks.
