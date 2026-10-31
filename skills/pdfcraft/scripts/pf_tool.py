@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Look up PdfCraft automation tools and registry commands without dumping all of
-`pdfcraft-cli tools` (179 tools, one large JSON document).
+`pdfcraft-cli tools` (182 tools, one large JSON document).
 
   pf_tool.py NAME...            description and arguments of each tool
   pf_tool.py --search WORD...   tools whose name or description matches every word

@@ -1,4 +1,4 @@
-# pdfcraft-cli 0.15.0 reference
+# pdfcraft-cli 0.16.1 reference
 
 Run every subcommand through `scripts/pf.sh` (same arguments) so OCR finds its
 models. `pdfcraft-cli help <sub>` prints the same usage text as `--help`.
