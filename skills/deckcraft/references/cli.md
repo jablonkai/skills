@@ -1,4 +1,4 @@
-# deckcraft-cli 0.12.0
+# deckcraft-cli 0.13.1
 
 `deckcraft-cli help SUBCOMMAND` explains any subcommand; this page is what the help
 leaves implicit. Slides are 960 × 540 pt by default (16:9); positions are points, x right,
