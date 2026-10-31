@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import sys
 
-PINNED_VERSION = "0.12.1"
+PINNED_VERSION = "0.13.1"
 
 
 def cli():
