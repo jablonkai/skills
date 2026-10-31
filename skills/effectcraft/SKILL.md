@@ -3,12 +3,12 @@ name: effectcraft
 description: 'Automate EffectCraft, the After Effects-style motion-graphics compositor, headless with effectcraft-cli: build comps with text, shape and footage layers, eased keyframes, expressions and effects from a spec; change text, values and keyframes in .ecproj projects; make and fill .ectemplate templates from JSON or CSV (lower thirds, name titles); render PNG stills and H.264, ProRes 4444 alpha, WebM or GIF, verified by read-back and ffprobe. Use when the user mentions EffectCraft, effectcraft-cli, an .ecproj or .ectemplate file, or wants an After Effects-style comp or .jsx script made or rendered with EffectCraft: "make a lower third in EffectCraft and render ProRes 4444 with alpha", "fill this .ectemplate with these names and render MP4s", "change the title text in this .ecproj and render frame 2 s". Not for Cavalry scenes (cavalry), Apple Motion/Final Cut titles (apple-motion), Nuke comps (nuke), editing timelines (filmcraft, davinci-resolve), or plain transcodes (handbrake, compressor).'
 summary: "automate EffectCraft headless with effectcraft-cli — comps with text, shape and footage layers, keyframes, expressions and effects from a spec, .ecproj edits, Essential Graphics templates filled from JSON or CSV, PNG stills and H.264/ProRes 4444 alpha renders, info, get and ffprobe read-back verified"
 category: motion-design
-compatibility: "Built for EffectCraft 0.18.0 and effectcraft-cli 0.18.0 on macOS, Python 3.9+, ffprobe (FFmpeg) for render checks; pre-1.0, so command ids may change."
+compatibility: "Built for EffectCraft 0.19.0 and effectcraft-cli 0.19.0 on macOS, Python 3.9+, ffprobe (FFmpeg) for render checks; pre-1.0, so command ids may change."
 risk: medium
 tags: [effectcraft, after-effects, motion-graphics, compositing, lower-third, essential-graphics, prores, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.1.2"
+  version: "1.1.3"
   author: "Tamás Jablonkai"
 ---
 
@@ -17,11 +17,11 @@ metadata:
 EffectCraft is an After Effects-style compositor: projects (`.ecproj`) hold compositions,
 compositions hold layers, layers hold a property tree you can keyframe, drive with
 expressions and stack effects on. Every menu item and panel action is a command in one
-engine registry (735 in 0.18.0, plus 307 effects). The same commands run from
+engine registry (742 in 0.19.0, plus 308 effects). The same commands run from
 `effectcraft-cli`, from a headless MCP session (`effectcraft-cli mcp`) and in the app. This
 skill drives them **headless**, so no window opens, and checks every result by reading the
-project or the render back. It is verified against **EffectCraft 0.18.0** and
-**effectcraft-cli 0.18.0** on macOS. The software is pre-1.0, so if a pinned id fails, look
+project or the render back. It is verified against **EffectCraft 0.19.0** and
+**effectcraft-cli 0.19.0** on macOS. The software is pre-1.0, so if a pinned id fails, look
 it up rather than guessing.
 
 ```sh
@@ -110,7 +110,7 @@ only, each with a full `--help`.
 ## References
 
 - [references/cli.md](references/cli.md): subcommands, global options, render formats and flags, `script`, `mcp`.
-- [references/commands.md](references/commands.md): pinned 0.18.0 ids by task, with key params.
+- [references/commands.md](references/commands.md): pinned 0.19.0 ids by task, with key params.
 - [references/recipes.md](references/recipes.md): lower third spec, template batch, open-edit-render, effects + still, image sequences.
 - [references/gotchas.md](references/gotchas.md): silent failures and surprises.
 - [references/security.md](references/security.md): file roots, scripts, and why there is no live-app bridge.

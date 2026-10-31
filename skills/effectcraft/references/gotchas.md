@@ -1,4 +1,4 @@
-# Gotchas (effectcraft-cli 0.18.0)
+# Gotchas (effectcraft-cli 0.19.0)
 
 ## Silent
 

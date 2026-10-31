@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Filtered lookup in EffectCraft's command registry (about 730 commands in 0.18.0).
+"""Filtered lookup in EffectCraft's command registry (about 740 commands in 0.19.0).
 
   ec_commands.py WORD…            commands whose id or label contains every word
   ec_commands.py --prefix keys.   every command under a prefix

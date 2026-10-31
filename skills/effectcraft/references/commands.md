@@ -1,4 +1,4 @@
-# Command ids pinned to 0.18.0
+# Command ids pinned to 0.19.0
 
 Look any of these up with `ec_commands.py --id ID` before relying on a parameter; the
 registry rejects unknown keys and lists the accepted ones. Layer refs are id, `#n` or name;
