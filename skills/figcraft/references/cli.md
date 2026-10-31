@@ -1,7 +1,7 @@
-# figcraft-cli 0.12.1 reference
+# figcraft-cli 0.13.1 reference
 
-Verified on macOS with `figcraft-cli 0.12.1` (`~/.local/bin/figcraft-cli`) and
-`FigCraft.app 0.12.1` (`ai.storyteller.figcraft`). `figcraft-cli --help` is the vendor
+Verified on macOS with `figcraft-cli 0.13.1` (`~/.local/bin/figcraft-cli`) and
+`FigCraft.app 0.13.1` (`ai.storyteller.figcraft`). `figcraft-cli --help` is the vendor
 reference; the `docs/cli.md` / `docs/mcp.md` it mentions are not shipped in the bundle.
 
 ## Contents
@@ -22,14 +22,14 @@ reference; the `docs/cli.md` / `docs/mcp.md` it mentions are not shipped in the 
 | `run SCRIPT.json\|.jsonl [--in FILE] [--out FILE]` | engine commands in a headless session; one JSON line per step |
 | `commands [--json] [--filter TEXT]` | the command registry (use `scripts/fc_commands.py`) |
 | `mcp [--attach PORT] [--automation-read-root DIR]… [--automation-write-root DIR]…` | MCP server over stdio (use `scripts/fc_session.py`) |
-| `plugin publish`, `perf` | plugin upload to a figcraft-server, benchmarks — out of scope |
+| `plugin publish`, `connect publish`, `perf` | plugin upload, code-connect publishing, benchmarks — out of scope |
 
 There is **no `describe` subcommand**: `commands --filter` / `fc_commands.py --id` show a
 command's params.
 
 ## File formats
 
-- **Read:** `.figcraft` (native), `.json` (FigCraft JSON or Figma REST-API file JSON,
+- **Read:** `.figcraft` (native), `.penpot` (Penpot 2.x; also a `convert` target), `.json` (FigCraft JSON or Figma REST-API file JSON,
   `GET /v1/files/:key`), `.fig` and `.sketch` (Sketch 48+) (both best effort; `info` lists what wasn't imported), `.svg` (becomes vectors), raster images
   (an image layer).
 - **REST JSON:** variables come from `<name>.variables.json` or `variables.json` next to the

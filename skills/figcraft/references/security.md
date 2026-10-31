@@ -21,7 +21,7 @@ folder with the inputs and the output folder, not `$HOME`.
 ## No live-app bridge
 
 The desktop app can be started with `figcraft --control PORT` and attached to with
-`figcraft-cli mcp --attach PORT`. In 0.12.1 that control port still shows **no token or key** option in `--help`:
+`figcraft-cli mcp --attach PORT`. In 0.13.1 that control port still shows **no token or key** option in `--help`:
 any local process that can reach the port can drive the app and, within the app's roots,
 read and write files. That does not meet this repository's bridge rules (token auth,
 cross-origin rejection, a documented stop path), so the skill ships no launcher or

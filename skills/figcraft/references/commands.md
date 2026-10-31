@@ -1,8 +1,8 @@
-# Pinned command ids (FigCraft 0.12.1)
+# Pinned command ids (FigCraft 0.13.1)
 
 The registry is the authority: `python3 scripts/fc_commands.py --id <id>` prints the full
 params. `*` there marks commands that change the document. Ids below were checked against
-0.12.1; if one is rejected, search by word (`fc_commands.py instance`).
+0.13.1; if one is rejected, search by word (`fc_commands.py instance`).
 
 ## Layers
 
