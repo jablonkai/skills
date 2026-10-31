@@ -1,4 +1,4 @@
-# Gotchas (DesignCraft 0.14.0)
+# Gotchas (DesignCraft 0.15.2)
 
 Each was hit while building or testing the skill.
 

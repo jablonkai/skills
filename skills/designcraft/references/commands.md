@@ -1,6 +1,6 @@
-# Command ids by task (pinned to DesignCraft 0.14.0)
+# Command ids by task (pinned to DesignCraft 0.15.2)
 
-The registry has 542 commands. These are the ones layout work needs; check the full
+The registry has 545 commands. These are the ones layout work needs; check the full
 signature with `scripts/dc_commands.py --id ID` before a first use, since pre-1.0
 releases can rename params. Coordinates are points in spread space; page numbers in
 `file.exportPdf` and `layout.pageSize` are 1-based, `layout.pages.applyParent` indices 0-based; text offsets are UTF-8 bytes.

@@ -11,7 +11,7 @@ import subprocess
 import sys
 import zipfile
 
-PINNED_VERSION = "0.14.0"
+PINNED_VERSION = "0.15.2"
 PAGE_MARKER = "\ue000"  # Current Page Number marker inside story text
 
 
