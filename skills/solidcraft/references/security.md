@@ -24,7 +24,7 @@ The scripts never overwrite their input. They refuse existing outputs unless giv
 SolidCraft's own control channel serves a running app to `solidcraft-cli mcp --connect`
 and `--connect` on other subcommands. It starts when the app is launched with
 `--control PORT`, or with *Settings › Assistant › Let AI agents connect*. These checks
-were made against 0.25.0:
+were made against 0.28.0:
 
 - **Loopback only:** it listens on 127.0.0.1 (27878 by default, or the next free port).
 - **Token auth:** every request must carry a token made fresh at every start, in
@@ -33,10 +33,13 @@ were made against 0.25.0:
   itself when it runs as the same user. Never print, log or pass the token to anyone; it
   stays out of reports and out of prompts to delegate tools. (#32)
 - **Browser requests are rejected.** The channel speaks JSON lines, not HTTP. An HTTP
-  request, such as a web page's cross-origin `fetch`, gets the connection closed with no
-  response, and it could not carry the token anyway. (#17)
+  request, such as a web page's cross-origin `fetch`, gets one JSON `unauthorized` line
+  back, not an HTTP response, so a page cannot read it (0.25.0 closed the connection with
+  no reply). It could not carry the token anyway. (#17)
 - **Stop path:** quitting the app closes the port. A control channel the skill opened
-  for a task (`SolidCraft --control PORT`) is quit when the task ends. (#35)
+  for a task (`SolidCraft --control PORT`) is quit when the task ends. (#35) The
+  `PORT.token` file can stay behind after a normal quit. It keeps mode `0600`, opens
+  nothing once the port is closed, and the next start writes a fresh token.
 
 The skill ships **no bridge of its own** and prefers headless work. It uses the live
 route only when the user wants changes made in their open design, and asks before any
