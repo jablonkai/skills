@@ -1,6 +1,6 @@
 # Recipes
 
-Recipes are verified end to end on 0.9.0, and again on 0.17.0 (composition, template
+Recipes are verified end to end on 0.9.0, and again on 0.18.0 (composition, template
 and comps, data sets, session measuring, smart-object swap, droplet, live app), except
 the `.atn` playback and the `pixelReplacement` variable, which follow the registry docs. `S` is this skill's `scripts/` folder, so
 call scripts as `python3 $S/pc_….py` (zsh doesn't word-split a `$VAR` that holds a
