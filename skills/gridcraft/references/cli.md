@@ -1,8 +1,8 @@
-# gridcraft-cli 0.13.0 reference
+# gridcraft-cli 0.14.2 reference
 
 `gridcraft-cli` is the headless front end of GridCraft's engine: same command registry,
 same calculation engine, same file readers and writers as the app, with no window.
-Binary: `~/.local/bin/gridcraft-cli`. `gridcraft-cli version` prints `0.13.0`.
+Binary: `~/.local/bin/gridcraft-cli`. `gridcraft-cli version` prints `0.14.2`.
 
 ## run: commands, then save
 
