@@ -1,7 +1,7 @@
 # Recipes
 
 `S=<skill>/scripts`. Every recipe writes to new paths and ends with a read-back.
-Each one was run against pdfcraft-cli 0.15.0.
+Each one was run against pdfcraft-cli 0.16.1.
 
 ## Contents
 

@@ -23,7 +23,7 @@ rm -f "$C"
   `{"needs_confirmation": true, "quitting": false}`. In 0.15.0 testing, the app
   still exited about 3 s later and the changes were lost.
 
-- Methods (0.15.0): `state`, `inspect`, `click`, `focus`, `resize`, `move`,
+- Methods (0.16.1): `state`, `inspect`, `click`, `focus`, `resize`, `move`,
   `drag`, `type`, `key`, `command`, `commands`, `set`, `open`, `screenshot`,
   `quit`. An unknown method lists them.
 - `open` returns `pending: true`. Poll `state` until `active` is non-null
@@ -45,7 +45,7 @@ bash $S/pf.sh mcp --compact \
      --automation-read-root "$PWD/in" --automation-write-root "$PWD/out"
 ```
 
-- stdio MCP server with the same 179 tools. `--compact` lists a core set plus
+- stdio MCP server with the same 182 tools. `--compact` lists a core set plus
   `tool_search` and `tool_call`.
 - `--automation-read-root` / `--automation-write-root` confine what the tools
   may open and write (links followed). **A root left out grants no access of
