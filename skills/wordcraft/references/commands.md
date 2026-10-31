@@ -1,6 +1,6 @@
-# Command ids by task (pinned to WordCraft 0.12.0)
+# Command ids by task (pinned to WordCraft 0.13.2)
 
-These are the ids this skill uses, checked against the 0.12.0 registry. Look anything
+These are the ids this skill uses, checked against the 0.13.2 registry. Look anything
 else up rather than guessing. Names follow the ribbon, but not always the obvious way:
 it is `format.bold`, not `font.bold`.
 
@@ -10,7 +10,7 @@ python3 $S/wc_commands.py --prefix references.
 python3 $S/wc_commands.py --id edit.replaceAll   # full params
 ```
 
-In a session, `list_commands {"query": "…"}` does the same. In 0.12.0 the largest
+In a session, `list_commands {"query": "…"}` does the same. In 0.13.2 the largest
 namespaces are `para`, `table`, `insert`, `format`, `view`, `review`, `edit`, `file`,
 `outline`, `references`, `text` and `mailings`.
 
