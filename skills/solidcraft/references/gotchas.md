@@ -1,4 +1,4 @@
-# Gotchas (SolidCraft 0.28.0)
+# Gotchas (SolidCraft 0.29.0)
 
 ## Silent failures
 
@@ -57,6 +57,6 @@
   `--no-grid`.
 - **`exec` ignores `--connect`.** It always runs on an empty headless design.
 - **The CLI on PATH may be older than the app** (0.22.1 against 0.25.0 once; both were
-  0.28.0 at the last check). Commands it lacks, such as `solid.cone`, fail as unknown, and it refuses
+  0.29.0 at the last check). Commands it lacks, such as `solid.cone`, fail as unknown, and it refuses
   designs saved by the newer app (`format 41; reads up to 36`). Use the app's copy,
   which `sclib.cli()` picks.

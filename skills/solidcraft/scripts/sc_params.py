@@ -36,7 +36,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("design")
     ap.add_argument("--all", action="store_true", help="list sketch and feature parameters too")
-    ap.add_argument("--set", nargs="+", default=[], metavar="NAME=EXPR")
+    ap.add_argument("--set", nargs="+", action="extend", default=[], metavar="NAME=EXPR")
     ap.add_argument("--save", help="the changed copy (.solidcraft); required with --set")
     ap.add_argument("--out", action="append", default=[], help="export the changed design (repeat)")
     ap.add_argument("--overwrite", action="store_true")

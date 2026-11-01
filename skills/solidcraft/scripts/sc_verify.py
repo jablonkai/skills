@@ -39,7 +39,7 @@ def main():
     p.add_argument("--size", type=float, nargs=3)
     p.add_argument("--size-tol", type=float, default=0.01)
     p.add_argument("--param", action="append", default=[])
-    p.add_argument("--params-exact", nargs="*")
+    p.add_argument("--params-exact", nargs="*", action="extend")
     p.add_argument("--no-errors", action="store_true")
     p.add_argument("--closed", action="store_true", help="every body is a closed solid")
     p.add_argument("--face-type", action="append", default=[], help="TYPE=N total over all bodies")

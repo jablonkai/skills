@@ -24,7 +24,7 @@ The scripts never overwrite their input. They refuse existing outputs unless giv
 SolidCraft's own control channel serves a running app to `solidcraft-cli mcp --connect`
 and `--connect` on other subcommands. It starts when the app is launched with
 `--control PORT`, or with *Settings › Assistant › Let AI agents connect*. These checks
-were made against 0.28.0:
+were made against 0.29.0:
 
 - **Loopback only:** it listens on 127.0.0.1 (27878 by default, or the next free port).
 - **Token auth:** every request must carry a token made fresh at every start, in
