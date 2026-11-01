@@ -1,6 +1,6 @@
 # LightCraft recipes
 
-Worked jobs for lightcraft-cli 0.16.0. `S` is this skill's `scripts/` folder. Every path
+Worked jobs for lightcraft-cli 0.17.0. `S` is this skill's `scripts/` folder. Every path
 in JSON params is absolute. `LIB`, `IN` and `OUT` stand for absolute paths.
 
 ## Contents

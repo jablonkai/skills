@@ -12,7 +12,7 @@ import subprocess
 import sys
 import tempfile
 
-# Filter keys catalog.query / library.filter understand in 0.16.0 (library.state's
+# Filter keys catalog.query / library.filter understand in 0.17.0 (library.state's
 # `filter` object). Unknown keys are ignored silently by LightCraft, which turns a
 # typo into "every photo", so the scripts refuse them instead.
 FILTER_KEYS = {
