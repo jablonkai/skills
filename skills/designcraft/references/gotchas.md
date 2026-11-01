@@ -1,4 +1,4 @@
-# Gotchas (DesignCraft 0.15.2)
+# Gotchas (DesignCraft 0.16.0)
 
 Each was hit while building or testing the skill.
 
@@ -14,7 +14,9 @@ Each was hit while building or testing the skill.
   past the end it fails with `no such page`. The `wrote … (N glyphs)` line is a cheap
   hint: 0 glyphs on a text page means the wrong page.
 - **PNG renders include the bleed.** At `--scale 2` an A4 page with 3 mm bleed is
-  1225 × 1718 px, not 1191 × 1684. Pages without bleed render at exactly page × scale.
+  1225 × 1718 px, not 1191 × 1684. Pages without bleed render at exactly page × scale. The MCP `export_png` (what `dc_build.py`
+  `png` uses) renders the trim size only (595 × 842 at scale 1; checked in 0.16.0), so size-check
+  those PNGs against the page, not the bleed.
 
 ## Units and geometry
 
@@ -62,7 +64,7 @@ Each was hit while building or testing the skill.
 
 ## CLI behaviour
 
-- `run` without `--in`/`--sample` works on an empty Letter document — easy to miss when a
+- `run` with `--cmd` but no `--in`/`--sample` works on an empty Letter document (a bare `--export` fails: `no active document`) — easy to miss when a
   path variable is empty.
 - `--cmd 'file.save={}'` writes back to the `--in` file: copy first.
 - The `wrote …` lines and command results may print out of order.

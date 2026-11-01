@@ -1,4 +1,4 @@
-# Command ids by task (pinned to DesignCraft 0.15.2)
+# Command ids by task (pinned to DesignCraft 0.16.0)
 
 The registry has 545 commands. These are the ones layout work needs; check the full
 signature with `scripts/dc_commands.py --id ID` before a first use, since pre-1.0
