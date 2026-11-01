@@ -3,22 +3,22 @@ name: vectorcraft
 description: 'Automate VectorCraft, the Illustrator-style vector editor, headless with vectorcraft-cli: build vector artwork (shapes, paths, text, layers, swatches, symbols) on one or more artboards from a spec, edit text and recolour existing .vectorcraft/SVG/AI/PDF files, fill templates from CSV with variables and data sets, export per-artboard PNG at @1x/@2x, SVG with outlined text, multi-page PDF and AI/EPS/DXF, inspect files and lossy imports, and batch-convert folders, all verified by an info read-back and a rendered preview. Use when the user mentions VectorCraft, vectorcraft-cli, a .vectorcraft or .vctemplate file, or wants a logo sheet, icon set, badge set or vector conversion made with VectorCraft: "make a logo sheet in VectorCraft", "convert these .ai files to SVG with VectorCraft", "export every artboard as PNG". Not for Inkscape or hand-written SVG (inkscape), Affinity (affinity), diagrams (drawio), raster/PSD layer editing (photocraft), or fonts (fontforge).'
 summary: "automate VectorCraft headless with vectorcraft-cli — vector art on multiple artboards from a spec, text and colour edits, CSV data-set variants, per-artboard PNG, outlined SVG, multi-page PDF and AI/EPS/DXF export, folder conversion, info read-back verified"
 category: design-automation
-compatibility: "Built for vectorcraft-cli 0.19.0 and VectorCraft.app 0.19.0 on macOS; pre-1.0, so command ids may change."
+compatibility: "Built for vectorcraft-cli 0.20.0 and VectorCraft.app 0.20.0 on macOS; pre-1.0, so command ids may change."
 risk: medium
 tags: [vectorcraft, vector, svg, illustrator, artboards, batch, data-sets, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.1.3"
+  version: "1.1.4"
   author: "Tamás Jablonkai"
 ---
 
 # VectorCraft via vectorcraft-cli
 
 VectorCraft is an Illustrator-style vector editor. Every menu item, tool and dialog is a
-command in one engine registry: 885 of them in 0.19.0. The same commands run from the CLI,
+command in one engine registry: 906 of them in 0.20.0. The same commands run from the CLI,
 from a headless session and in the desktop app. This skill drives them **headless**, so
 no window opens, and checks every result by reading the document back. It is verified
-against **vectorcraft-cli 0.19.0** and **VectorCraft.app 0.19.0** on macOS. The software
+against **vectorcraft-cli 0.20.0** and **VectorCraft.app 0.20.0** on macOS. The software
 is pre-1.0, so command ids may change. When a pinned id fails, look it up.
 
 ```sh
@@ -49,7 +49,7 @@ full `--help`.
 
 - **`vc_commands.py WORD…`** (`--prefix text.`, `--id text.setText`): filtered catalogue
   lookup with each command's params signature. Never dump `vectorcraft-cli commands`:
-  it is ~885 entries.
+  it is ~906 entries.
 - **`vc_build.py SPEC.json`**: builds from a spec:
   - artboards laid out in a row;
   - swatches and layers;
@@ -152,7 +152,7 @@ full `--help`.
 
 - [references/cli.md](references/cli.md): every subcommand and flag, the formats, and
   verified behaviour.
-- [references/commands.md](references/commands.md): pinned 0.19.0 command ids by task,
+- [references/commands.md](references/commands.md): pinned 0.20.0 command ids by task,
   with key params.
 - [references/recipes.md](references/recipes.md): worked specs and step files for each
   job above.

@@ -1,6 +1,6 @@
 # Recipes
 
-`S=<skill>/scripts`. All of them were verified on vectorcraft-cli 0.19.0.
+`S=<skill>/scripts`. All of them were verified on vectorcraft-cli 0.20.0.
 
 ## Logo sheet
 
