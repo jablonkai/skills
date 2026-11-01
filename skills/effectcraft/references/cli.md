@@ -1,4 +1,4 @@
-# effectcraft-cli 0.19.0
+# effectcraft-cli 0.20.0
 
 Each invocation runs a headless engine, does its work and exits. `--help` lists everything;
 running the app binary would open a window, so don't.
@@ -27,7 +27,7 @@ a name; `<value>` is JSON (`50`, `[960,540]`, `"#ff0000"`) or a bare string.
 | `info` | project summary: version, active comp with its layers, project items, renderer |
 | `commands [--filter T] [--enabled]` | the registry as text (≈730 lines — filter it, or use `ec_commands.py`) |
 | `exec ID [--params JSON]` / `exec --list [--schemas] --json` | one command / the registry as JSON |
-| `run ID JSON [ID JSON …]` / `run --args-file F` | several commands in order, one process; no `$N` result references |
+| `run ID JSON [ID JSON …]` / `run --args-file F` / `run --commands FILE\|-` | several commands in order, one process; no `$N` references. `--commands`: JSON array or JSON Lines of `{"command":ID,"params":{}}`, `-` = stdin (new in 0.20.0, smoke-tested) |
 | `props COMP LAYER [--flat] [--time S]` | a layer's property tree with paths (`--json` nests groups and names effects) |
 | `get COMP LAYER PATH [--time S]` | value at comp time S, `keys[]` (time, compTime, value, in/out interpolation), `expression` |
 | `set COMP LAYER PATH VALUE [--time S] [--expression E]` | static value, a keyframe at layer time S (replaces a key already there), or an expression |
@@ -54,7 +54,7 @@ render --project F --comp C --out FILE --format h264|hevc|av1|prores|webm|png|jp
   WebM VP9 also carries alpha (`--format webm --channels rgba`). H.264 never does.
 - Image sequences: `--out 'dir/f_[#####].png'` writes `f_00000.png…`; the folder must exist.
 - `--end` is exclusive: `--start 0 --end 0.2` at 25 fps is 5 frames.
-- `--profile`, `--level`, `--rate-control`, `--video-quality`, `--keyint` apply to HEVC / AV1; `--audio-bitrate` and `--opus-app` to WebM Opus audio. Listed in 0.19.0 help; only `--webm-codec vp9` alpha was smoke-tested.
+- `--profile`, `--level`, `--rate-control`, `--video-quality`, `--keyint` apply to HEVC / AV1; `--audio-bitrate` and `--opus-app` to WebM Opus audio. Listed in 0.20.0 help; only `--webm-codec vp9` alpha was smoke-tested.
 - A relative `--out` is relative to the working directory, not the project.
 - `--progress` prints `progress <done> <total> <elapsed> <left>` on stderr.
 - Verified: H.264 MP4 5.000 s, ProRes 4444 alpha, PNG sequence.
