@@ -1,7 +1,7 @@
 # Control protocol: headless `serve` and the desktop control port
 
 Condensed from the vendor's `docs/control-protocol.md` (storytold/photocraft, v0.9.0),
-which is not shipped with the CLI, and checked against the installed 0.16.0, 0.17.0 and 0.18.0, where 0.16.0 added
+which is not shipped with the CLI, and checked against the installed 0.16.0, 0.17.0, 0.18.0 and 0.19.0, where 0.16.0 added
 `doc.replaceSmartObject`.
 
 ## Contents

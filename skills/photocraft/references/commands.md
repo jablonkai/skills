@@ -1,6 +1,6 @@
-# Engine commands most tasks need (pinned to 0.18.0)
+# Engine commands most tasks need (pinned to 0.19.0)
 
-The registry has 948 commands. This table pins the ids that were exercised for this
+The registry has 953 commands. This table pins the ids that were exercised for this
 skill. For anything else, look it up instead of guessing an id:
 
 ```sh
@@ -97,7 +97,7 @@ These act on the active pixel layer. On a Smart Object they become smart filters
 | Id | Key params |
 |---|---|
 | `layerComp.new` | `name`, `visibility`, `position`, `appearance` (records the current state) |
-| `layerComp.apply` | `comp` id\|name. **An unknown name is not an error**, so check the returned `comp` |
+| `layerComp.apply` | `comp` id\|name. an unknown name fails with `no layer comp named …` (0.10.0+) |
 | `layerComp.update` | `comp` id\|name\|"*", `what` all\|visibility\|position\|appearance |
 | `layerComp.list` | → `{comps, lastApplied}` |
 | `file.export.layerCompsToFiles` | `dir`, `format` png\|jpg\|psd\|tiff, `prefix`, `comps` [id]. Files are named `<prefix>_NNNN_<comp>.<ext>` (CLI `run` only) |
