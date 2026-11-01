@@ -1,6 +1,6 @@
-# Command ids by task (pinned to 0.13.1)
+# Command ids by task (pinned to 0.14.1)
 
-The registry has 330 commands. These are the ones the common tasks need; for anything
+The registry has 331 commands. These are the ones the common tasks need; for anything
 else, `scripts/dk_commands.py WORD…` or `deckcraft-cli describe ID`. Indices are
 0-based. Unknown parameters are **ignored, not rejected** — copy names from here or from
 `describe`.
@@ -17,7 +17,7 @@ else, `scripts/dk_commands.py WORD…` or `deckcraft-cli describe ID`. Indices a
 | `file.info` | → `{title, path, format, slides, hiddenSlides, sections, properties}` | |
 | `file.properties` | `{title?, subject?, author?, keywords?, comments?, category?, company?}` | |
 | `design.themes` | → `{themes: [{name, colors, major, minor}], colorSchemes, fontSchemes, effectSchemes}` | Themes: DeckCraft, Harbor, Ember, Meadow, Nocturne, Paper, Coral Reef, Slate. |
-| `design.theme` | `{name}` | Unknown name: silently nothing. |
+| `design.theme` | `{name}` | Unknown name: error since 0.14.1 (`file.new {theme}` still falls back silently). |
 | `design.colors` / `design.fonts` / `design.variant` | `{name}` · `{colors:{accent1…}}` / `{name}` · `{major, minor}` / `{index: 0..3}` | |
 | `design.slideSize` | `{preset: widescreen\|standard…, scale?: maximize\|ensureFit\|none}` or `{w, h}` | |
 | `design.background` | `{color? \| gradient? \| picture?: base64 \| style?: 1..12, all?, index?}` | |

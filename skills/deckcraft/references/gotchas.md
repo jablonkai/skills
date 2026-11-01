@@ -1,4 +1,4 @@
-# Gotchas (DeckCraft 0.13.1)
+# Gotchas (DeckCraft 0.14.1)
 
 Each of these was hit while building and verifying the skill.
 
@@ -33,9 +33,9 @@ Each of these was hit while building and verifying the skill.
 
 - **Unknown parameters are ignored.** `slide.new {"titel": "x"}` makes an untitled slide
   and returns success. Copy parameter names from `describe`.
-- **An unknown theme falls back to the default** — `file.new {"theme":"Harbour"}`,
-  `design.theme {"name":"Harbour"}` and MCP `new_presentation {theme}` all succeed and
-  leave DeckCraft. Check the name against `design.themes` and read `theme` back from
+- **An unknown theme falls back to the default** in `file.new {"theme":"Harbour"}` and
+  MCP `new_presentation {theme}` (success, theme stays DeckCraft); since 0.14.1
+  `design.theme {"name":"Harbour"}` fails with `no theme`. Check the name against `design.themes` and read `theme` back from
   `info`.
 - `slide.notes` returns `null` on success; `text.set` too. Read back to know.
 
@@ -64,16 +64,15 @@ Each of these was hit while building and verifying the skill.
 - Notes pages and handouts default to US Letter portrait; pass `paper`.
 - `convert X.md` writes the outline with tab-indented lines, not Markdown bullets.
 - `.pptx` round trips keep titles, layouts, notes, pictures, tables and charts in
-  0.13.1; check anything exotic (SmartArt, media, animations) with `info` and a render.
+  0.14.1; check anything exotic (SmartArt, media, animations) with `info` and a render.
 
 ## Running it
 
 - **One failing `--cmd` stops `run`; nothing is saved.** Fix the command and rerun the
   batch — partial output never appears.
-- **`deckcraft-cli mcp` takes one `--automation-read-root` and one
-  `--automation-write-root`**; a second one is an error (`--automation-read-root given
-  twice`) and the server exits before answering. `dklib.Session` uses the common parent
-  of the folders and refuses a parent as wide as `/` or `/Users`.
+- **`deckcraft-cli mcp` accepts repeated `--automation-read-root` / `--automation-write-root`**
+  since 0.14.1 (0.14.1 rejected a second one). `dklib.Session` still uses the common parent
+  of the folders (and refuses one as wide as `/` or `/Users`), which also works on both.
 - Paths in commands should be absolute; `run` resolves relative ones against the
   current directory, MCP roots compare resolved paths (`/tmp` → `/private/tmp` on macOS).
 - Do not run the app binary (`/Applications/DeckCraft.app/Contents/MacOS/DeckCraft`)

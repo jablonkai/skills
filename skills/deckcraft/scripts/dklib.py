@@ -13,7 +13,7 @@ import subprocess
 import sys
 import tempfile
 
-PINNED_VERSION = "0.13.1"
+PINNED_VERSION = "0.14.1"
 SLIDE_W, SLIDE_H = 960.0, 540.0  # default 16:9 slide, in points
 
 

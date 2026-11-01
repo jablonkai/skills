@@ -8,8 +8,8 @@ network port, and no window opens.
 
 ## File roots
 
-`deckcraft-cli mcp` takes one `--automation-read-root DIR` and one
-`--automation-write-root DIR`. With them, every file a command reads (open, pictures,
+`deckcraft-cli mcp` takes `--automation-read-root DIR` and
+`--automation-write-root DIR` (repeatable since 0.14.1; 0.13.1 allowed one each). With them, every file a command reads (open, pictures,
 audio, video) must lie inside the read root and every file it writes (save, export)
 inside the write root, links followed; anything else is refused (`automation path
 rejected: outside the write root …`). A kind left out grants none of its access.
