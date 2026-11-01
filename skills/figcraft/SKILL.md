@@ -3,12 +3,12 @@ name: figcraft
 description: 'Automate FigCraft, the Figma-style UI/interface design app, headless with figcraft-cli: build app and web screens from a spec (frames with auto layout, components and instances, text and colour styles), open and inspect .fig, Figma REST-API JSON and .figcraft files and report what an import dropped, edit text and layer properties, export frames or named nodes as PNG @1x/@2x, SVG, and print PDF with bleed, crop marks and CMYK, and render pages to check, all verified by a read-back. Use when the user mentions FigCraft, figcraft-cli or a .figcraft file, or wants a UI screen, mockup or design-system file made, a .fig/REST JSON design opened, edited or exported, without the Figma app: "design a 390x844 login screen in FigCraft", "export every frame of this .fig as PNG", "print PDF of the card frame with 3 mm bleed". Not for vector illustration or logos (vectorcraft, inkscape), Affinity (affinity), diagrams (drawio), raster/PSD editing (photocraft), or the Figma web app, its REST API or Figma plugins.'
 summary: "automate FigCraft headless with figcraft-cli — UI screens from a spec with auto layout, components and text styles, .fig and REST JSON import with dropped-feature report, text and property edits, PNG @2x, SVG and print PDF with bleed and crop marks, info and inspect read-back verified"
 category: design-automation
-compatibility: "Built for figcraft-cli 0.13.1 and FigCraft.app 0.13.1 on macOS, Python 3.9+; pre-1.0, so command ids may change."
+compatibility: "Built for figcraft-cli 0.14.0 and FigCraft.app 0.14.0 on macOS, Python 3.9+; pre-1.0, so command ids may change."
 risk: medium
 tags: [figcraft, figma, ui-design, fig, auto-layout, components, export, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.2.0"
+  version: "1.2.1"
   author: "Tamás Jablonkai"
 ---
 
@@ -16,10 +16,10 @@ metadata:
 
 FigCraft is a Figma-style interface design app: pages, frames, auto layout, components
 and instances, styles and variables. Every menu item, panel action and shortcut is a
-command in one engine registry (629 of them in 0.13.1). The same commands run from
+command in one engine registry (629 of them in 0.14.0). The same commands run from
 `figcraft-cli run`, from a headless session (`figcraft-cli mcp`) and in the app. This skill
 drives them **headless**, so no window opens, and checks every result by reading the
-document back. It is verified against **figcraft-cli 0.13.1** and **FigCraft.app 0.13.1** on
+document back. It is verified against **figcraft-cli 0.14.0** and **FigCraft.app 0.14.0** on
 macOS. The software is pre-1.0, so if a pinned id fails, look it up rather than guessing.
 
 ```sh
@@ -119,7 +119,7 @@ only, each with a full `--help`.
 ## References
 
 - [references/cli.md](references/cli.md): subcommands, flags, formats, print options, verified behaviour.
-- [references/commands.md](references/commands.md): pinned 0.13.1 ids by task, with key params.
+- [references/commands.md](references/commands.md): pinned 0.14.0 ids by task, with key params.
 - [references/session.md](references/session.md): the MCP tools, refs, and the inspect JSON fields.
 - [references/recipes.md](references/recipes.md): worked specs and step files.
 - [references/gotchas.md](references/gotchas.md): silent failures and surprises.
