@@ -1,4 +1,4 @@
-# lightcraft-cli reference (0.16.0)
+# lightcraft-cli reference (0.17.0)
 
 `lightcraft-cli --help` is the authoritative usage, and it is cheap to read. This page
 records what the help leaves out, verified by running it.

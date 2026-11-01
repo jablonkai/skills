@@ -1,4 +1,4 @@
-# LightCraft gotchas (verified on lightcraft-cli 0.16.0)
+# LightCraft gotchas (verified on lightcraft-cli 0.17.0)
 
 Everything here was reproduced against the real CLI. Most of these fail **silently**:
 the command replies `"ok": true` and exits 0, and the result is still wrong. That is
@@ -72,6 +72,8 @@ and most `crop.*`, `mask.*` and `spot.*` commands.
 - **`app.export path=<folder>` treats the folder as a file stem.** With `path=/x/out`,
   LightCraft wrote `p0.png`, `p1.png`… into the **current directory**, as PNG, with
   `ok: true`. For a folder use `dir=<folder>`, and always pass `format`.
+  Re-checked on 0.17.0: with one id the file is written as a PNG named exactly the stem
+  (no extension); with several ids it still writes `p1.png`, `p2.png` into the cwd.
 - Create the `dir` first. Use absolute paths.
 - `conflict` defaults to `unique`. Exporting again into the same folder adds
   `IMG_0001-2.jpg`, `-3`… silently. That doubles the file count on a retry. Export into
@@ -135,7 +137,7 @@ and most `crop.*`, `mask.*` and `spot.*` commands.
 ## Live app port
 
 - `LightCraft --control PORT` (and `lightcraft-cli run --connect`) is a JSON-lines
-  channel on 127.0.0.1 **with no authentication** in 0.16.0. Any local process can
+  channel on 127.0.0.1 **with no authentication** in 0.16.0 (not re-checked in 0.17.0: that needs the GUI app). Any local process can
   drive the app and read the library through it.
 - This skill does not start it or connect to it. If the user insists on watching the
   edits live, say this plainly, let them start the app with `--control` themselves, and
