@@ -19,6 +19,7 @@ portable beyond a single tool.
 
 #### Graphics & design
 - `affinity`: remote-control Affinity (the unified Affinity by Canva app) with JavaScript via its local automation endpoint — document edits, batch operations, and reusable library scripts, with no MCP client configuration
+- `comfyui`: drive a local ComfyUI server over its HTTP API — parameterised workflow runs, prompt and image-folder batches with seed control, img2img and inpainting uploads, node and model inspection, editor-to-API workflow conversion, pre-queue validation, scoped cancel, outputs with params sidecars and PNG-metadata checks
 - `drawio`: remote-control the draw.io desktop app with JavaScript over its DevTools port — live shape building, ELK auto-layout, pages, save — or author .drawio XML directly and export PNG/SVG/PDF or convert Mermaid/CSV with the headless CLI
 - `figcraft`: automate FigCraft headless with figcraft-cli — UI screens from a spec with auto layout, components and text styles, .fig and REST JSON import with dropped-feature report, text and property edits, PNG @2x, SVG and print PDF with bleed and crop marks, info and inspect read-back verified
 - `fontforge`: build, edit and validate fonts headless with FontForge — icon fonts from SVG folders, glyph import, side bearings, kerning and name tables, subsetting, SFD/UFO/OTF/TTF/WOFF2 conversion, overlap, direction and extrema fixes
