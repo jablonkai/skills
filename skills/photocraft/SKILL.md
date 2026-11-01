@@ -3,23 +3,23 @@ name: photocraft
 description: 'Automate PhotoCraft, the Photoshop-style layered image editor, headless with photocraft-cli: build layered compositions (image, text, shape, fill and adjustment layers, layer styles) from a spec, apply filters and adjustments, edit PSD/.pcraft templates (text, visibility, smart-object images), export layer comps, layers or CSV data-set variants, batch-process folders with JSON actions, Photoshop .atn sets or .pcdroplet droplets, and convert formats, all verified by an info read-back and a rendered preview. Use when the user mentions PhotoCraft, photocraft-cli, a .pcraft file or a .pcdroplet droplet, or wants a PSD edited, a layered image built or an action run over a folder with PhotoCraft: "make a 1080x1080 post in PhotoCraft", "run Vintage.atn over this folder", "export every layer comp". Not for GIMP (gimp), Krita (krita), Pixelmator Pro (pixelmator-pro), Affinity (affinity), SVG (inkscape), or plain resizing with no PhotoCraft (sips/ImageMagick).'
 summary: "automate PhotoCraft headless with photocraft-cli — layered compositions with text, shape and adjustment layers and styles, filters, PSD template edits, layer-comp, layer and CSV data-set export, folder batches from JSON actions, .atn sets or droplets, info read-back verified"
 category: design-automation
-compatibility: "Built for photocraft-cli 0.18.0 and PhotoCraft.app 0.18.0 on macOS; pre-1.0, so command ids may change."
+compatibility: "Built for photocraft-cli 0.19.0 and PhotoCraft.app 0.19.0 on macOS; pre-1.0, so command ids may change. Live-app route (pc_live.py) last verified on 0.18.0."
 risk: medium
 tags: [photocraft, psd, image-editing, layers, batch, photoshop-actions, droplet, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.2.5"
+  version: "1.2.6"
   author: "Tamás Jablonkai"
 ---
 
 # PhotoCraft via photocraft-cli
 
 PhotoCraft is a Photoshop-style layered editor. All of its features are commands in one
-engine registry: every menu item, tool and dialog is a command (948 in 0.18.0). The same
+engine registry: every menu item, tool and dialog is a command (953 in 0.19.0). The same
 commands are reachable from the CLI, a headless JSON session and the desktop app. This
 skill drives them headless, so no window or GPU is needed, and checks every result by
-reading the document back. Verified against **photocraft-cli 0.18.0** and
-**PhotoCraft.app 0.18.0** on macOS. The software is pre-1.0, so the command ids pinned in
+reading the document back. Verified against **photocraft-cli 0.19.0** and
+**PhotoCraft.app 0.19.0** on macOS. The software is pre-1.0, so the command ids pinned in
 `references/` may change. When a pinned id fails, look it up.
 
 ```sh

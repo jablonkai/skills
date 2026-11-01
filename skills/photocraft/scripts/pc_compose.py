@@ -140,7 +140,7 @@ class Composer(object):
         else:
             result = self.s.execute("layer.newFillLayer.solidColor", {"color": item["fill"]})
         if rect:
-            try:  # 0.18.0 clears the selection itself; 0.17.0 kept it
+            try:  # 0.18.0+ clears the selection itself; 0.17.0 kept it
                 self.s.execute("select.deselect", {})
             except PcError:
                 pass
