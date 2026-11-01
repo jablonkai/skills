@@ -1,7 +1,7 @@
-# figcraft-cli 0.13.1 reference
+# figcraft-cli 0.14.0 reference
 
-Verified on macOS with `figcraft-cli 0.13.1` (`~/.local/bin/figcraft-cli`) and
-`FigCraft.app 0.13.1` (`ai.storyteller.figcraft`). `figcraft-cli --help` is the vendor
+Verified on macOS with `figcraft-cli 0.14.0` (`~/.local/bin/figcraft-cli`) and
+`FigCraft.app 0.14.0` (`ai.storyteller.figcraft`). `figcraft-cli --help` is the vendor
 reference; the `docs/cli.md` / `docs/mcp.md` it mentions are not shipped in the bundle.
 
 ## Contents
