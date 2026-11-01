@@ -1,4 +1,4 @@
-# vectorcraft-cli 0.19.0 reference
+# vectorcraft-cli 0.20.0 reference
 
 `vectorcraft-cli` is a universal binary in `~/.local/bin`. It renders headless, with no
 window and no GPU. The app (`/Applications/VectorCraft.app`, bundle id
