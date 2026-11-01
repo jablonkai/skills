@@ -1,4 +1,4 @@
-# Command ids (pinned to FilmCraft 0.15.0)
+# Command ids (pinned to FilmCraft 0.16.0)
 
 The ids below cover the common jobs. For anything else, or when one of these fails with
 `unknown command` or `invalid parameters`, look it up. The param string `describe` prints

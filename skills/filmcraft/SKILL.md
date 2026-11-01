@@ -3,22 +3,22 @@ name: filmcraft
 description: 'Automate FilmCraft, the Premiere-style non-linear video editor, headless with filmcraft-cli: create projects and sequences from imported media, assemble rough cuts on V1 with B-roll on upper tracks, add titles and transitions, add markers from a list of timecodes, set in/out ranges, export with built-in or user presets (H.264, ProRes, DNxHR, MXF, image sequences, audio) at full or reduced scale, and inspect a .fcproj, all verified by an inspect read-back and ffprobe. Use when the user mentions FilmCraft, filmcraft-cli or a .fcproj file, or wants an edit or export done with FilmCraft: "assemble a rough cut from these clips in FilmCraft", "add markers from this timecode list to my .fcproj", "export the sequence as ProRes and a half-res H.264 preview", "what is on the timeline of this project". Not for DaVinci Resolve (davinci-resolve), Final Cut Pro or FCPXML (final-cut-pro), plain file-to-file transcodes with no FilmCraft project (handbrake, compressor), or Apple Motion templates (apple-motion).'
 summary: "automate FilmCraft headless with filmcraft-cli — projects and sequences from imported media, rough cuts with B-roll, titles and transitions, markers from timecode lists, in/out ranges, preset or format exports (H.264, ProRes, DNxHR, image sequences) at full or reduced scale, inspect and ffprobe read-back verified"
 category: video
-compatibility: "Built for FilmCraft 0.15.0 and filmcraft-cli 0.15.0 on macOS; ffprobe (FFmpeg) for export checks. Pre-1.0, so command ids may change."
+compatibility: "Built for FilmCraft 0.16.0 and filmcraft-cli 0.16.0 on macOS; ffprobe (FFmpeg) for export checks. Pre-1.0, so command ids may change."
 risk: medium
 tags: [filmcraft, video-editing, nle, premiere, timeline, export, prores, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.1.3"
+  version: "1.1.4"
   author: "Tamás Jablonkai"
 ---
 
 # FilmCraft via filmcraft-cli
 
 FilmCraft is a Premiere-style video editor. Every menu item, shortcut and timeline gesture
-is a command in one engine registry (711 in 0.15.0). `filmcraft-cli` runs those commands
+is a command in one engine registry (716 in 0.16.0). `filmcraft-cli` runs those commands
 headless against a `.fcproj` and exports through the same render engine as the app. This
 skill drives that route and checks every result by reading the project and the exports
-back. Verified against **FilmCraft 0.15.0 / filmcraft-cli 0.15.0** on macOS. The software
+back. Verified against **FilmCraft 0.16.0 / filmcraft-cli 0.16.0** on macOS. The software
 is pre-1.0, so when a pinned command id or param fails, look it up instead of guessing.
 
 ```sh
@@ -122,7 +122,7 @@ Python 3.9+, standard library only. Call them as `python3 $S/<script>` with
   succeeds. Its documented param is `time` in ticks (254016000000 per second).
   `fc_markers.py` converts timecodes for you.
 - **Marker colours are FilmCraft label names** (Rose, Mango, Yellow, Green, Blue, …).
-  `Red` fails the step.
+  Unknown names fail the step; since 0.16.0 `Red` and `Orange` alias Rose and Mango.
 - **`graphics.newText` takes the lowest video track free over its span**, which is V3 when
   B-roll sits on V2. Its `track` param is a **0-based index** (1 = V2). A name such as
   `"V2"`, or an index past the last track, is silently ignored. It is point text starting at the frame centre: centre it with
