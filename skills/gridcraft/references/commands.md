@@ -1,4 +1,4 @@
-# Command ids (pinned to GridCraft 0.14.2)
+# Command ids (pinned to GridCraft 0.15.0)
 
 The ids below cover the common jobs. For anything else, or if one of these fails with
 `unknown command`, look it up. Never guess a param name: an unknown param fails the run.
