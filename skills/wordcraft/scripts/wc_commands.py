@@ -5,7 +5,7 @@
     wc_commands.py --prefix review.   every id under a namespace
     wc_commands.py --id edit.replaceAll   one command in full
 
-The registry holds ~648 commands in 0.13.2, and there is no `describe` subcommand:
+The registry holds ~648 commands in 0.14.0, and there is no `describe` subcommand:
 this is the lookup. Never print all of it into context.
 """
 import argparse

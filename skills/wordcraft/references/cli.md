@@ -1,6 +1,6 @@
-# wordcraft-cli reference (0.13.2)
+# wordcraft-cli reference (0.14.0)
 
-All behaviour below was verified against wordcraft-cli 0.13.2 on macOS. `-h` on any
+All behaviour below was verified against wordcraft-cli 0.14.0 on macOS. `-h` on any
 subcommand prints this same global help; there is no per-command help and no `describe`.
 
 ## Subcommands

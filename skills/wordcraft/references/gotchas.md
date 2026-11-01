@@ -1,4 +1,4 @@
-# Gotchas (WordCraft 0.13.2)
+# Gotchas (WordCraft 0.14.0)
 
 Each of these was hit while building or testing this skill. Most fail **silently**: the
 command succeeds and the document is wrong.
