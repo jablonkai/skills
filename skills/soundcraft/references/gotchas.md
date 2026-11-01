@@ -1,6 +1,6 @@
-# SoundCraft gotchas (0.15.0)
+# SoundCraft gotchas (0.16.0)
 
-Each item was reproduced against soundcraft-cli 0.15.0.
+Each item was reproduced against soundcraft-cli 0.16.0.
 
 ## Time and units
 
