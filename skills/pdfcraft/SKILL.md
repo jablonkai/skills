@@ -1,24 +1,24 @@
 ---
 name: pdfcraft
-description: 'Automate PdfCraft, the Acrobat-style PDF editor, headless with pdfcraft-cli: merge, split, extract, rotate, reorder and delete pages, set title/author metadata, OCR folders of scanned PDFs into searchable text and optimize their size, redact phrases or patterns for good and prove it with an audit for faux redactions, fill and flatten forms, add comments, stamps, watermarks and headers/footers, and run any of its 182 tools from a JSON script, all verified by an info, text and render read-back. Use when the user mentions PdfCraft or pdfcraft-cli, or wants PDFs edited with it: "merge these PDFs, drop page 2 and rotate the last page", "OCR this folder of scans", "redact every mention of the client and prove it is gone", "check this PDF for fake redactions", "fill this PDF form". Not for converting PDFs to Markdown (markitdown), Office documents to PDF or PDF/A from documents (libreoffice), Python PDF scripting with pypdf/reportlab and no PdfCraft (pdf), or Word documents (wordcraft).'
+description: 'Automate PdfCraft, the Acrobat-style PDF editor, headless with pdfcraft-cli: merge, split, extract, rotate, reorder and delete pages, set title/author metadata, OCR folders of scanned PDFs into searchable text and optimize their size, redact phrases or patterns for good and prove it with an audit for faux redactions, fill and flatten forms, add comments, stamps, watermarks and headers/footers, and run any of its 183 tools from a JSON script, all verified by an info, text and render read-back. Use when the user mentions PdfCraft or pdfcraft-cli, or wants PDFs edited with it: "merge these PDFs, drop page 2 and rotate the last page", "OCR this folder of scans", "redact every mention of the client and prove it is gone", "check this PDF for fake redactions", "fill this PDF form". Not for converting PDFs to Markdown (markitdown), Office documents to PDF or PDF/A from documents (libreoffice), Python PDF scripting with pypdf/reportlab and no PdfCraft (pdf), or Word documents (wordcraft).'
 summary: "automate PdfCraft headless with pdfcraft-cli — merge, split, extract, rotate and reorder pages, metadata, batch OCR and optimize, redaction proven by audit, form fill, comments and watermarks, JSON tool scripts, info, text and render read-back verified"
 category: office
-compatibility: "Built for PdfCraft 0.16.1 and pdfcraft-cli 0.16.1 on macOS 27; Python 3.9+ for the helper scripts. Pre-1.0, so tool names and arguments may change."
+compatibility: "Built for PdfCraft 0.17.0 and pdfcraft-cli 0.17.0 on macOS 27; Python 3.9+ for the helper scripts. Pre-1.0, so tool names and arguments may change."
 risk: medium
 tags: [pdfcraft, pdf, ocr, redaction, forms, merge, split, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.0.4"
+  version: "1.0.5"
   author: "Tamás Jablonkai"
 ---
 
 # PdfCraft via pdfcraft-cli
 
-PdfCraft is an Acrobat-style PDF editor. Its features are exposed as 182 automation
+PdfCraft is an Acrobat-style PDF editor. Its features are exposed as 183 automation
 tools (open, edit pages, OCR, redact, forms, comments, standards…). `pdfcraft-cli`
 runs them headless, with no window, through quick subcommands for common page jobs
 and through JSON tool scripts for everything else. Verified against **PdfCraft
-0.16.1** and **pdfcraft-cli 0.16.1** on macOS. It is pre-1.0, so when a tool name
+0.17.0** and **pdfcraft-cli 0.17.0** on macOS. It is pre-1.0, so when a tool name
 or argument pinned in `references/` fails, look it up with `pf_tool.py` rather
 than guessing.
 
