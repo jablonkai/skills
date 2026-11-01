@@ -1,4 +1,4 @@
-# deckcraft-cli 0.13.1
+# deckcraft-cli 0.14.1
 
 `deckcraft-cli help SUBCOMMAND` explains any subcommand; this page is what the help
 leaves implicit. Slides are 960 × 540 pt by default (16:9); positions are points, x right,
@@ -24,6 +24,7 @@ y down, a rect is `[x, y, w, h]`.
 - Without `--in` or `--sample`, `run` starts from a **new presentation with one empty
   title slide** (default theme). `file.new {theme?, template?, size?, blank?}` inside the
   run replaces it with another new one — still with one starter slide.
+- `--cmd-file FILE` (0.14.1): one `ID=JSON` per line, `#` comments, no shell quoting; mixes with `--cmd` in order.
 - `--cmd ID=JSON`: quote the JSON for the shell; an id with no params is just `ID`.
   Build long JSON with `python3 -c 'import json; print(json.dumps(…))'` or use the
   scripts, so quotes and newlines (`\n` = new paragraph, `\t` at line start = bullet
@@ -62,7 +63,7 @@ blank?}`, `open_presentation {path}`, `save_presentation {path}` (format by exte
 `list_commands {filter}`. `screenshot` and `call_app` work only with `--connect`.
 
 - `--automation-read-root DIR` / `--automation-write-root DIR` confine every file read
-  (open, pictures, media) and write (save, export). **Each may be given once.** A root
+  (open, pictures, media) and write (save, export). Each may be repeated since 0.14.1 (0.13.1: once). A root
   left out grants none of that access; a path outside is refused with `automation path
   rejected: outside the write root …`. Roots conflict with `--connect`.
 - The scripts in this skill speak MCP through `dklib.Session` so one presentation stays

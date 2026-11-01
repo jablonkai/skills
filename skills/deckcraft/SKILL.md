@@ -3,12 +3,12 @@ name: deckcraft
 description: 'Automate DeckCraft, the Keynote/PowerPoint-style presentation app, headless with deckcraft-cli: build decks from a Markdown outline (theme, title slide, bullet slides, image slides, presenter notes); edit existing .deckcraft or .pptx files (titles, body text, find and replace, delete, move, duplicate or hide slides, swap pictures, change layouts or theme); export PDF (slides or notes pages), PPTX, PNG/JPG and animated GIF; batch-convert folders of decks; render slides for a visual check, with every result read back. Use when the user mentions DeckCraft, deckcraft-cli or a .deckcraft file, or wants slides made or changed with DeckCraft: "turn this outline into a DeckCraft deck", "delete slide 4 and move the last slide to 2 in this pptx with DeckCraft", "convert these decks to PDF with DeckCraft", "render slide 3 as PNG". Not for Apple Keynote (keynote), LibreOffice Impress (libreoffice), Word documents (wordcraft), page layout (designcraft), or editing PDFs (pdfcraft).'
 summary: "automate DeckCraft headless with deckcraft-cli — decks from a Markdown outline with theme, layouts, images and presenter notes, title, text, picture and slide-order edits in .deckcraft or .pptx, PDF/PPTX/PNG/GIF export and folder conversion, info read-back and rendered slides verified"
 category: office
-compatibility: "Built for DeckCraft 0.13.1 and deckcraft-cli 0.13.1 on macOS, Python 3.9+; poppler (pdfinfo, pdftotext) and ImageMagick for export checks; pre-1.0, so command ids may change."
+compatibility: "Built for DeckCraft 0.14.1 and deckcraft-cli 0.14.1 on macOS, Python 3.9+; poppler (pdfinfo, pdftotext) and ImageMagick for export checks; pre-1.0, so command ids may change."
 risk: medium
 tags: [deckcraft, presentations, slides, pptx, keynote-style, powerpoint-style, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.0.4"
+  version: "1.1.0"
   author: "Tamás Jablonkai"
 ---
 
@@ -17,11 +17,11 @@ metadata:
 DeckCraft is a Keynote/PowerPoint-style presentation app. A presentation (`.deckcraft`,
 or `.pptx` read and written natively) has slides on layouts from a slide master, a theme
 (colours and fonts), placeholders, pictures, notes, sections and transitions. Every menu
-item is a command in one registry (330 in 0.13.1); the same commands run from
+item is a command in one registry (331 in 0.14.1); the same commands run from
 `deckcraft-cli run`, from a headless MCP session (`deckcraft-cli mcp`) and in the app.
 This skill drives them **headless** — no window opens — and checks every result by
-reading the file or the export back. Verified against **DeckCraft 0.13.1** and
-**deckcraft-cli 0.13.1** on macOS; the software is pre-1.0, so if a pinned id fails,
+reading the file or the export back. Verified against **DeckCraft 0.14.1** and
+**deckcraft-cli 0.14.1** on macOS; the software is pre-1.0, so if a pinned id fails,
 look it up rather than guessing.
 
 ```sh
@@ -109,15 +109,15 @@ only, each with a full `--help`. They refuse to overwrite outputs without `--ove
   `insert.picture` never fills a placeholder — it adds a free picture. Use Title Only
   plus `insert.picture {rect}` (what `dk_build.py` does).
 - **Hidden slides are left out of PDFs** unless `includeHidden: true`.
-- **`mcp` takes one read root and one write root** (a second `--automation-read-root`
-  is an error); the scripts use the folders' common parent.
+- **`mcp` roots**: repeatable since 0.14.1 (0.14.1 allowed one each); the scripts still
+  use the folders' common parent.
 - **One failing `--cmd` aborts the whole `run`** and nothing is saved — good for safety,
   but check the message, fix the one command, and rerun the batch.
 
 ## References
 
 - [references/cli.md](references/cli.md): subcommands, `run` ordering and `--print`, export params, render, MCP tools.
-- [references/commands.md](references/commands.md): pinned 0.13.1 ids by task, with key params.
+- [references/commands.md](references/commands.md): pinned 0.14.1 ids by task, with key params.
 - [references/recipes.md](references/recipes.md): outline deck, open-edit-export, folder conversion, notes PDF, GIF, tables and charts.
 - [references/gotchas.md](references/gotchas.md): silent failures and surprises.
 - [references/security.md](references/security.md): file roots, and why there is no live-app bridge.
