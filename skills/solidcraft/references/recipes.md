@@ -1,4 +1,4 @@
-# Recipes (checked against SolidCraft 0.28.0)
+# Recipes (checked against SolidCraft 0.29.0)
 
 In the commands below, `S=<skill>/scripts`. Every recipe states its expected volume,
 worked out by hand before building. `sc_run.py --expect-volume` turns that number into

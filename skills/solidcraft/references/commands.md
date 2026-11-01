@@ -1,7 +1,7 @@
-# Command ids by task (pinned to 0.28.0)
+# Command ids by task (pinned to 0.29.0)
 
-These ids were checked against `solidcraft-cli commands` from SolidCraft 0.28.0, which
-has 553 commands. The parameter shapes are long and change between releases, so look
+These ids were checked against `solidcraft-cli commands` from SolidCraft 0.29.0, which
+has 555 commands. The parameter shapes are long and change between releases, so look
 them up instead of copying them from here:
 - `sc_commands.py WORD…` for one-line signatures;
 - `sc_commands.py --id ID` for the full text and the typed schema, where there is one;

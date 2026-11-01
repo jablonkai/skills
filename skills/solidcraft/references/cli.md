@@ -1,15 +1,15 @@
-# solidcraft-cli 0.28.0
+# solidcraft-cli 0.29.0
 
 Use the CLI inside the app (`/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli`).
 A separately installed copy (`~/.local/bin/solidcraft-cli`, a link into
 `~/.local/share/artcraft-cli/solidcraft/current/`, from the artcraft-cli installer) can be
-older: it was once 0.22.1, with 461 commands instead of 493. At 0.28.0 both copies match,
+older: it was once 0.22.1, with 461 commands instead of 493. At 0.29.0 both copies match,
 and without the app the standalone copy works on its own. `sclib.cli()` picks
 `SOLIDCRAFT_CLI`, then the app's copy, then PATH, and warns when PATH is older.
 
 ```sh
 SC=/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli
-$SC --version          # solidcraft-cli 0.28.0
+$SC --version          # solidcraft-cli 0.29.0
 $SC --help             # the full usage text below
 ```
 
@@ -31,7 +31,7 @@ format. `eval` and `run` replay it.
 
 | Command | What it does |
 |---|---|
-| `run SCRIPT [--in DESIGN] [--out F]… [--save F.solidcraft] [--quiet] [--results] [--timings] [--json-out F] [--allow-errors]` | Replays the script on a new design, or on `--in`. A failing feature exits 1 and writes nothing unless `--allow-errors` is given. `--out` exports by extension. `--results` prints every step's reply, which is very large; prefer `--quiet` followed by `eval`. |
+| `run SCRIPT [--in DESIGN] [--out F]… [--save F.solidcraft] [--quiet] [--results] [--timings] [--profile] [--json-out F] [--allow-errors] [--param-check off\|warn\|strict]` | Replays the script on a new design, or on `--in`. A failing feature exits 1 and writes nothing unless `--allow-errors` is given. `--out` exports by extension. `--results` prints every step's reply, which is very large; prefer `--quiet` followed by `eval`. |
 | `run --in F --out G…` | Converts with no script, for example STEP → STL/3MF. |
 | `eval FILE [--json-out F]` (alias `inspect`) | Measures a design, part (STEP/STL/3MF/OBJ) or script and returns JSON. This is the read-back oracle. |
 | `eval SCRIPT --in DESIGN` | Runs the script on DESIGN, measures the result and saves nothing. Use it to preview an edit. |
@@ -47,6 +47,9 @@ format. `eval` and `run` replay it.
 `--view` takes `iso front back top bottom left right` or a view saved with `view.save`.
 `--camera` takes `{target:[x,y,z], yaw, pitch, distance, fov?}` in mm and radians.
 `--section` takes `z=27` (keeps the smaller side), `z=27,flip`, `XY`, `XZ` or `YZ`.
+Two global flags work with any subcommand: `--max-file-size 2GB` reads STEP and design
+files above the 512 MB / 256 MB defaults, and `--debug` logs to stderr. `run --timings`
+(with `--profile` for the kernel's share) prints per-step milliseconds for a slow script.
 `--tool NAME` draws that body solid and everything else see-through, which is useful to
 show a cutter inside the stock.
 
@@ -62,12 +65,15 @@ show a cutter inside the stock.
  "params": [{"name": "thickness", "expression": "10 mm", "value": 10.0, "unit": "mm", "error": null}],
  "sketches": [{"name": "Outline", "profiles": 5, "dof": 14, "status": "solved"}],
  "timeline": [{"id": 2, "name": "Extrude1", "type": "ExtrudeFeature", "error": null, "warning": null,
-               "suppressed": false, "rolled_back": false}],
- "total": {"volume_mm3": 23420.14, "mass_g": 30.21, "open_bodies_skipped": 0}}
+               "suppressed": false, "rolled_back": false, "ms": 4.2}],
+ "total": {"volume_mm3": 23420.14, "mass_g": 30.21, "area_mm2": 7135.15, "faces": 14,
+           "edges": 32, "vertices": 24, "open_bodies_skipped": 0}}
 ```
 
 - Volume and mass are given only for closed bodies; `open_bodies_skipped` counts the rest.
-- Compare `faces`, not `kernel.faces`.
+- Compare `faces`, not `kernel.faces`. `total` also sums area, faces, edges and
+  vertices; each param carries `comment` and `model`, each timeline entry `ms` and
+  `boolean_diagnostics`.
 - `params` lists **user** parameters only. Sketch dimensions and feature inputs (`d1`…)
   come from `parameters.list {filter: "all"}`, which `sc_params.py --all` runs.
 - A STEP file opens as one `BaseFeature`, with no history or parameters.

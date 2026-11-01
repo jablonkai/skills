@@ -29,7 +29,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("part")
     ap.add_argument("--snap-dir")
-    ap.add_argument("--views", nargs="*", default=None,
+    ap.add_argument("--views", nargs="*", action="extend", default=None,
                     help="iso front back top bottom left right, or a saved view name (default: iso)")
     ap.add_argument("--section", action="append", default=[])
     ap.add_argument("--section-view", default="iso")
