@@ -1,4 +1,4 @@
-# Gotchas (FilmCraft 0.15.0)
+# Gotchas (FilmCraft 0.16.0)
 
 Everything here was hit while building the skill. Most of these fail **silently**: exit 0,
 a plausible result, wrong output.
@@ -65,8 +65,9 @@ a plausible result, wrong output.
   It succeeds, so a list of markers piles up at 0. Its documented time param is `time`
   (ticks).
 - **Marker colours are label names**: Violet, Iris, Caribbean, Lavender, Cerulean,
-  Forest, Rose, Mango, Purple, Blue, Teal, Magenta, Tan, Green, Brown, Yellow. `Red` and
-  `Orange` fail the step (`unknown marker color`).
+  Forest, Rose, Mango, Purple, Blue, Teal, Magenta, Tan, Green, Brown, Yellow. Since 0.16.0
+  `Red`, `Orange`, `Cyan` and `Pink` are accepted as aliases (Rose, Mango, Teal, Magenta)
+  and `#RRGGBB` is kept as given; any other name fails (`unknown marker color`).
 - `timeline.razor` with a time outside the clips, or a non-number, returns `{cuts: 0}`
   and succeeds.
 - An unknown transition or effect name fails (`unknown transition`). List them with
