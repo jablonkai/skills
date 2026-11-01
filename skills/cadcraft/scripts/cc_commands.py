@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Look up CADCraft commands without dumping the ~440-entry catalogue.
+"""Look up CADCraft commands without dumping the ~450-entry catalogue.
 
     cc_commands.py WORD...            ids, aliases, labels or menu paths containing every WORD
     cc_commands.py --id dimlinear     exactly that id (or alias)

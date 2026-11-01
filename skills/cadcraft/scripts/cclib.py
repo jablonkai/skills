@@ -11,7 +11,7 @@ import shutil
 import subprocess
 import sys
 
-PINNED_VERSION = "0.15.1"
+PINNED_VERSION = "0.16.0"
 IMAGE_EXTS = (".png", ".svg", ".pdf")
 DRAWING_EXTS = (".dxf", ".dwg")
 
@@ -52,7 +52,7 @@ def framing_args(view=None, window=None):
     if window:
         if isinstance(window, (list, tuple)):
             window = ",".join(str(v) for v in window)
-        return ["--window", window]
+        return ["--window=" + window]  # `=` form: a negative x0 is parsed as a flag otherwise
     return ["--view", view or "extents"]
 
 

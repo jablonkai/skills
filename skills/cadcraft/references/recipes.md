@@ -65,7 +65,7 @@ python3 $S/cc_titleblock.py add plan.dxf plan-tb.dxf --at 240,-90 --size 120,45 
 cadcraft-cli run plan-tb.dxf \
   --cmd 'layer.new {"name":"A-ANNO-NEW","color":"Magenta"}' \
   --cmd 'qselect {"layer":"A-ANNO"}' --cmd 'laymch {"layer":"A-ANNO-NEW"}' \
-  --save plan-final.dxf --export plan-window.png --window -10,-100,370,250
+  --save plan-final.dxf --export plan-window.png --window=-10,-100,370,250
 python3 $S/cc_verify.py doc plan-final.dxf --attr TITLE="Ground floor" DATE=2026-10-17 \
   --on-layer A-ANNO=0 A-ANNO-NEW=3 --layer A-ANNO-NEW
 ```

@@ -1,4 +1,4 @@
-# Gotchas (CADCraft 0.15.1, each reproduced)
+# Gotchas (CADCraft 0.16.0, each reproduced)
 
 ## Silent or surprising
 
@@ -43,7 +43,7 @@
 | `invalid parameters for \`block\`: no objects selected` | no selection | `select {handles}` first |
 | `object is not a circle or arc` (dimradius/dimdiameter) | a polyline fillet (bulge) | `{center, point}` |
 | `\`handle\`: "XX" is not an object handle` | guessed handle | `query` / `qselect` / an `as` ref |
-| `unknown command \`foo\`` | typo or alias not in 0.15.1 | `cc_commands.py foo` |
+| `unknown command \`foo\`` | typo or alias not in 0.16.0 | `cc_commands.py foo` |
 | `` `keep` must be "convert", "retain" or "delete" `` | other `block` keep value (0.8.0 silently deleted) | one of the three |
 | `` `{last}` needs an earlier --cmd in this run to have returned a handle `` | `{last}` before any `--cmd` returned one | reorder, or use `cc_session.py` |
 | `--window/--view need an image output` | framing with no `--export` | add `--export` or drop framing |

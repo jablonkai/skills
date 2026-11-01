@@ -12,7 +12,7 @@ Everything is local and headless:
   server's instructions say "headless backend" and refuses otherwise.
 - **No app process.** `/Applications/CADCraft.app` is never launched.
 
-CADCraft 0.15.1 has no file-root confinement of its own (unlike VectorCraft's automation
+CADCraft 0.16.0 has no file-root confinement of its own (unlike VectorCraft's automation
 roots), so the scripts confine themselves. (It only limits xref and data-link paths
 *stored in a drawing* to this computer or the drawing's share — see
 [gotchas.md](gotchas.md); paths passed to commands are used as given.)
@@ -33,7 +33,7 @@ The app can be remote-controlled: started with `--control PORT` (or
 `CADCRAFT_CONTROL_PORT`), it listens for commands, and
 `cadcraft-cli mcp --connect 127.0.0.1:PORT [--lazy] [--launch]` bridges to it
 (`--launch` starts the app). The port binds `127.0.0.1` and speaks JSON lines, with no
-file roots: an authenticated client can run any of the ~440 commands, including LISP and
+file roots: an authenticated client can run any of the ~450 commands, including LISP and
 file writes. It closes a connection at the first line that is not a JSON request — an
 HTTP request line included — and bounds idle time, blocked writes and queued requests.
 
