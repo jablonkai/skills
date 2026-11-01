@@ -1,6 +1,6 @@
-# Gotchas (gridcraft-cli 0.14.2)
+# Gotchas (gridcraft-cli 0.15.0)
 
-Everything here was reproduced on 0.14.2. Most of these fail **silently**: exit 0 and a
+Everything here was reproduced on 0.15.0 (re-checked: run without --out, silent overwrite, abort on failed step, totalRow, range.fill shift, insertSheet active, setValues en-US parsing, #### in PDF). Most of these fail **silently**: exit 0 and a
 plausible file, but the wrong content.
 
 ## Saving
@@ -94,7 +94,9 @@ plausible file, but the wrong content.
 JSON-lines channel on 127.0.0.1. `gridcraft-cli mcp --connect PORT` and
 `gridcraft-cli send PORT METHOD` drive the running app through it.
 
-In 0.14.2 the channel has **no token or other authentication**: any local process,
+In 0.14.2 the channel had **no token or other authentication** (0.15.0 mentions
+`GRIDCRAFT_CONTROL_TOKEN` in the app binary and a "requires the token you set" error;
+not exercised live, since that needs the GUI app, so whether a token is mandatory is UNVERIFIED): any local process,
 including a web page that can reach localhost, could run any command, among them
 `file.saveAs` to arbitrary paths. That fails this repo's bridge rules (token auth,
 cross-origin rejection, documented posture, stop path), so this skill:
@@ -104,4 +106,4 @@ cross-origin rejection, documented posture, stop path), so this skill:
 - edits files headless instead. If the user has the workbook open in GridCraft, it asks
   them to close it, or saves to a new file and tells them to reopen it.
 
-If a later GridCraft adds authentication to this channel, a live mode can be added.
+Once the 0.15.0 token is confirmed mandatory and checked live, a live mode can be added.
