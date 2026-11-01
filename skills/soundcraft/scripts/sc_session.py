@@ -66,7 +66,7 @@ def run_script(lines, session_in=None, save=None, dry=False, label=""):
     if save:
         args += ["--save", save]
         if session_in and os.path.abspath(session_in) == os.path.abspath(save):
-            args += ["--in-place"]  # 0.15.0 refuses --save == --in without it
+            args += ["--in-place"]  # 0.16.0 refuses --save == --in without it
     try:
         out = cli(*args)
     except ScError as exc:

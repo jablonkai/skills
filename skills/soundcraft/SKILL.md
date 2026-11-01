@@ -3,22 +3,22 @@ name: soundcraft
 description: 'Automate SoundCraft, the Pro Tools-style DAW and audio editor, headless with soundcraft-cli: build multitrack sessions from a spec (import clips, place them, fades, clip gain, pan, volume and automation, music ducked under a voice-over), add built-in plugins (EQ, compressor, de-esser, reverb, delay, maximizer...) with exact parameters, edit existing .scraft sessions, bounce the mix or a time range to WAV/AIFF/FLAC at a set bit depth, convert or normalize audio files and folders with dither, and verify every result by reading the session and the bounce back. Use when the user mentions SoundCraft, soundcraft-cli or a .scraft file, or wants a podcast or voice-over mix, a ducked music bed, a bounce or a sample-rate/bit-depth conversion done with SoundCraft. Not for synthesis or live-coded music (supercollider, sonic-pi), beat or onset analysis, video timelines (davinci-resolve, final-cut-pro), or a plain ffmpeg/sox conversion with no SoundCraft involved.'
 summary: "automate SoundCraft headless with soundcraft-cli — multitrack sessions from a spec with clips, fades, clip gain, pan, volume automation and ducking, built-in EQ, dynamics and reverb inserts, range or full bounces, batch conversion with normalize and dither, inspect read-back verified"
 category: audio
-compatibility: "Built for SoundCraft 0.15.0 and soundcraft-cli 0.15.0 on macOS 27 (arm64); pre-1.0, so command ids may change. Scripts need Python 3.9+ (standard library only)."
+compatibility: "Built for SoundCraft 0.16.0 and soundcraft-cli 0.16.0 on macOS 27 (arm64); pre-1.0, so command ids may change. Scripts need Python 3.9+ (standard library only)."
 risk: medium
 tags: [soundcraft, daw, audio-editing, mixing, bounce, podcast, voice-over, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.1.3"
+  version: "1.1.4"
   author: "Tamás Jablonkai"
 ---
 
 # SoundCraft via soundcraft-cli
 
 SoundCraft is a Pro Tools-style DAW. Every menu item and mixer control is a command in one
-engine registry (482 in 0.15.0): `session.*`, `file.*`, `track.*`, `edit.*`, `clip.*`,
+engine registry (483 in 0.16.0): `session.*`, `file.*`, `track.*`, `edit.*`, `clip.*`,
 `mix.*`, `automation.*`. The CLI runs those commands headless against a `.scraft`
 session, with no window or audio device, and the same registry drives the running app.
-Verified against **SoundCraft 0.15.0** and **soundcraft-cli 0.15.0** on macOS. The
+Verified against **SoundCraft 0.16.0** and **soundcraft-cli 0.16.0** on macOS. The
 software is pre-1.0: when a pinned id or param fails, look it up with `describe`.
 
 ```sh
@@ -91,7 +91,7 @@ Call them as `python3 $S/<script>` (or `bash $S/sc_convert.sh`) with `S=<this sk
   **samples** (strings like `"0:05.000"` also work, except fade `length`), but the
   CLI flags `run/script --start/--end` are **seconds** or `m:ss.fff`. `--start 48000`
   means 13 hours and fails with "bounces are limited to 4 hours".
-- **`--save` equal to `--in` is refused** (0.15.0) unless `--in-place` is passed; any other
+- **`--save` equal to `--in` is refused** (0.16.0) unless `--in-place` is passed; any other
   existing `--save` file is replaced, and `convert` overwrites its output, even when that is
   the input. Choose new paths.
 - **`session.new` ignores `path`.** Nothing is written until `--save`. Audio is copied
@@ -103,7 +103,7 @@ Call them as `python3 $S/<script>` (or `bash $S/sc_convert.sh`) with `S=<this sk
   edit.
 - **`mix.*` and `automation.*` need `track`/`tracks`**, otherwise they fail with
   "nothing is selected".
-- **No sidechain input.** The compressor has no key-input routing in 0.15.0. Duck with
+- **No sidechain input.** The compressor has no key-input routing in 0.16.0. Duck with
   volume automation (`duck` in the spec); say so if the user asked for sidechain.
 - **Volume automation overrides the fader.** With a volume lane present, `mix.volume`
   no longer sets the level; `duck` writes its breakpoints relative to the spec's `volume_db`.
