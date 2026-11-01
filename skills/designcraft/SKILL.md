@@ -3,12 +3,12 @@ name: designcraft
 description: 'Automate DesignCraft, the InDesign-style page-layout app, headless with designcraft-cli: build multi-page documents from a spec (parent pages with headers and auto page numbers, paragraph styles, threaded text frames, placed images); data-merge CSV/XLSX records into badges, cards or catalogue pages; edit .designcraft or IDML files (restyle, relink images, replace text); export PDF/X-4 with bleed and marks checked by validate-pdf, page PNGs, IDML, EPUB, with every result read back. Use when the user mentions DesignCraft, designcraft-cli or a .designcraft file, or wants an InDesign-style layout made with DesignCraft: "lay out a 4-page brochure in DesignCraft", "merge this CSV into badges with DesignCraft", "change the Body style in this .designcraft and export page 1 as PNG", "press-ready PDF/X-4 from DesignCraft". Not for Scribus .sla (scribus), Affinity Publisher (affinity), Apple Pages (pages), Word or ODF documents (wordcraft, libreoffice), editing existing PDFs (pdfcraft), or vector art (vectorcraft).'
 summary: "automate DesignCraft headless with designcraft-cli — multi-page layouts with parent pages, auto page numbers, styles, threaded text and placed images from a spec, CSV data merge for badges and catalogues, style and image edits, PDF/X-4 with bleed and marks checked by validate-pdf, per-page PNG, inspect read-back verified"
 category: publishing
-compatibility: "Built for DesignCraft 0.15.2 and designcraft-cli 0.15.2 on macOS, Python 3.9+, poppler (pdfinfo, pdftotext) for PDF checks; pre-1.0, so command ids may change."
+compatibility: "Built for DesignCraft 0.16.0 and designcraft-cli 0.16.0 on macOS, Python 3.9+, poppler (pdfinfo, pdftotext) for PDF checks; pre-1.0, so command ids may change."
 risk: medium
 tags: [designcraft, indesign, page-layout, dtp, data-merge, pdf-x, idml, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.1.3"
+  version: "1.1.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -17,11 +17,11 @@ metadata:
 DesignCraft is an InDesign-style layout app: a document (`.designcraft`, a zip holding
 `document.json`) has spreads of pages, parent (master) spreads, frames on layers, stories
 threaded through text frames, and paragraph/character/object styles. Every menu item and
-panel action is a command in one engine registry (545 in 0.15.2). The same commands run
+panel action is a command in one engine registry (545 in 0.16.0). The same commands run
 from `designcraft-cli run`, from command scripts (`script`), from a headless MCP session
 (`designcraft-cli mcp`) and in the app. This skill drives them **headless**, so no window
 opens, and checks every result by reading the document or the export back. Verified
-against **DesignCraft 0.15.2** and **designcraft-cli 0.15.2** on macOS; the software is
+against **DesignCraft 0.16.0** and **designcraft-cli 0.16.0** on macOS; the software is
 pre-1.0, so if a pinned id fails, look it up rather than guessing.
 
 ```sh
@@ -111,13 +111,14 @@ only, each with a full `--help`.
   (`at` inserts; `end` does not replace).
 - **Overset text is silent.** A story that doesn't fit just stops; exports succeed. Check
   `overset` in `document.inspect` (or `dc_verify.py doc --no-overset`) every time.
-- **Run a document, not the default.** `run` without `--in` starts from an empty Letter
-  document; `--sample` opens the sample magazine.
+- **Run a document, not the default.** `run --cmd` without `--in` starts from an empty
+  Letter document (a bare `run --export` fails: `no active document`); `--sample` opens
+  the sample magazine.
 
 ## References
 
 - [references/cli.md](references/cli.md): subcommands, `run` ordering, `script` syntax and `$N` refs, exports and PDF options, MCP tools.
-- [references/commands.md](references/commands.md): pinned 0.15.2 ids by task, with key params.
+- [references/commands.md](references/commands.md): pinned 0.16.0 ids by task, with key params.
 - [references/recipes.md](references/recipes.md): brochure spec, badges, open-edit-export, catalogue, IDML round trip.
 - [references/gotchas.md](references/gotchas.md): silent failures and surprises.
 - [references/security.md](references/security.md): file roots, and why there is no live-app bridge.
