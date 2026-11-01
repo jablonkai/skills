@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert every DXF/DWG in a folder with `cadcraft-cli convert`.
 
-    cc_batch.py IN_DIR OUT_DIR --to pdf,svg[,png,dxf,dwg] [--view extents | --window x0,y0,x1,y1]
+    cc_batch.py IN_DIR OUT_DIR --to pdf,svg[,png,dxf,dwg] [--view extents | --window=x0,y0,x1,y1]
                 [--recursive] [--overwrite]
 
 - OUT_DIR must not be IN_DIR or lie inside it (the originals' folder is never written).

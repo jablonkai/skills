@@ -1,7 +1,7 @@
-# cadcraft-cli 0.15.1 reference
+# cadcraft-cli 0.16.0 reference
 
 Universal binary at `~/.local/bin/cadcraft-cli`. `cadcraft-cli --version` prints
-`cadcraft-cli 0.15.1`. `--help`/`-h`/`help` print the usage to stdout and exit 0; bad
+`cadcraft-cli 0.16.0`. `--help`/`-h`/`help` print the usage to stdout and exit 0; bad
 usage prints it and exits 1. Since 0.14.0 every subcommand has
 its own `--help` (`cadcraft-cli run --help` lists the flags and the `{last}` chaining).
 
@@ -31,6 +31,8 @@ Settings flags on `info`/`convert`/`run`/`mcp`: `--config-dir DIR` (env
 - Default differs: `convert` fits extents; `run --export` uses the current view **if the
   commands changed it**, else extents. Always pass one explicitly.
 - `--window`/`--view` without an image output is an error.
+- **Write a negative `x0` as `--window=-10,0,10,5`** (the `=` form): `--window -10,…` fails with
+  `unexpected argument '-1' found` (checked on 0.16.0; the scripts already pass the `=` form).
 - PNG is 2400×1600 RGBA on a dark background with layer colours, like the app's model
   space. PDF via `convert`/`--export`/`save` is one page, white, landscape: A4 for a
   metric drawing, Letter for an imperial one.
