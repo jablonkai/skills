@@ -19,7 +19,7 @@ import json
 import os
 import sys
 
-from sclib import Session, ToolError, evaluate, refuse_existing, sha256, summary
+from sclib import Session, ToolError, measure, refuse_existing, sha256
 
 
 def parse_sets(items):
@@ -69,7 +69,7 @@ def main():
         os.makedirs(d, exist_ok=True)
 
     in_hash = sha256(a.design)
-    before = summary(evaluate(a.design))
+    before = measure(a.design)
     s = Session(dirs)
     try:
         s.open(a.design)
@@ -88,7 +88,7 @@ def main():
         sys.exit("error: %s" % e)
     s.close()
 
-    after = summary(evaluate(a.save))
+    after = measure(a.save)
     checks = []
 
     def check(name, ok, detail):
@@ -119,7 +119,7 @@ def main():
               "%s mm³, expected %s ±%s%%" % (v, a.expect_volume, a.tol))
     for o in a.out:
         if o.lower().endswith((".step", ".stp", ".stl", ".3mf", ".obj")) and os.path.isfile(o):
-            v = summary(evaluate(o))["volume_mm3"]
+            v = measure(o)["volume_mm3"]
             pct = 0.1 if o.lower().endswith((".step", ".stp")) else 1.0
             ref = after["volume_mm3"]
             check("volume of " + o, v is not None and ref and abs(v - ref) <= ref * pct / 100,

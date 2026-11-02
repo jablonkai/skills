@@ -15,7 +15,7 @@ import sys
 import tempfile
 import zlib
 
-PINNED_VERSION = "0.29.0"
+PINNED_VERSION = "0.30.0"
 APP_CLI = "/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli"
 _CLI = None
 
@@ -108,6 +108,52 @@ def summary(ev):
         "feature_errors": [{"feature": f["name"], "error": f.get("error"), "warning": f.get("warning")}
                            for f in ev.get("timeline", []) if f.get("error") or f.get("warning")],
     }
+
+
+def obj_volume(path, weld=1e-3):
+    """(volume_mm3, closed) of an OBJ mesh, with vertices welded within `weld` mm.
+
+    eval in 0.30.0 does not weld the seams of SolidCraft's own OBJ export (one vertex per
+    face normal), so it reports the mesh open with no volume; this is the read-back for it.
+    """
+    pts, faces = [], []
+    with open(path, encoding="utf-8", errors="replace") as f:
+        for line in f:
+            p = line.split()
+            if p and p[0] == "v":
+                pts.append([float(x) for x in p[1:4]])
+            elif p and p[0] == "f":
+                faces.append([int(x.split("/")[0]) for x in p[1:]])
+    ids = {}
+    weld_id = [ids.setdefault(tuple(round(c / weld) for c in q), len(ids)) for q in pts]
+    edges = {}
+    vol = 0.0
+    for fc in faces:
+        fc = [i - 1 if i > 0 else len(pts) + i for i in fc]
+        for i in range(len(fc)):
+            e = tuple(sorted((weld_id[fc[i]], weld_id[fc[i - 1]])))
+            edges[e] = edges.get(e, 0) + 1
+        a = pts[fc[0]]
+        for i in range(1, len(fc) - 1):
+            b, c = pts[fc[i]], pts[fc[i + 1]]
+            vol += (a[0] * (b[1] * c[2] - b[2] * c[1]) - a[1] * (b[0] * c[2] - b[2] * c[0])
+                    + a[2] * (b[0] * c[1] - b[1] * c[0])) / 6
+    closed = bool(edges) and all(n == 2 for n in edges.values())
+    return (abs(vol) if closed else None), closed
+
+
+def measure(path):
+    """summary(evaluate(path)), with an OBJ that eval leaves open measured by obj_volume."""
+    sm = summary(evaluate(path))
+    if path.lower().endswith(".obj") and not sm["volume_mm3"]:
+        vol, closed = obj_volume(path)
+        if closed:
+            sm["volume_mm3"] = round(vol, 3)
+            for b in sm["bodies"]:
+                b["closed"] = True
+            sm["open_bodies_skipped"] = 0
+            sm["volume_source"] = "obj_volume (welded read-back; eval leaves OBJ seams open)"
+    return sm
 
 
 def sha256(path):

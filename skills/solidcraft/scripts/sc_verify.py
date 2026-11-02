@@ -18,7 +18,7 @@ import json
 import os
 import sys
 
-from sclib import evaluate, png_diff, png_stats, sha256, summary
+from sclib import measure, png_diff, png_stats, sha256
 
 
 def overall(sm):
@@ -64,7 +64,7 @@ def main():
 
     out = {}
     if a.mode == "part":
-        sm = summary(evaluate(a.file))
+        sm = measure(a.file)
         size = overall(sm)
         out = {"file": a.file, "body_count": sm["body_count"], "volume_mm3": sm["volume_mm3"],
                "size": size, "params": sm["params"], "features": sm["features"]}
@@ -97,7 +97,7 @@ def main():
             got = sum((b.get("face_types") or {}).get(t, 0) for b in sm["bodies"])
             check("%s faces" % t, got == int(n), "%s, expected %s" % (got, n))
         if a.same_as:
-            o = summary(evaluate(a.same_as))
+            o = measure(a.same_as)
             ov, v = o["volume_mm3"], sm["volume_mm3"]
             check("volume same as " + a.same_as, ov and v and abs(v - ov) <= ov * a.same_tol / 100,
                   "%s vs %s (±%s%%)" % (v, ov, a.same_tol))
