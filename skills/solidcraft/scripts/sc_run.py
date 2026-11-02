@@ -23,7 +23,7 @@ import json
 import os
 import sys
 
-from sclib import Session, ToolError, evaluate, load_script, refuse_existing, sha256, summary
+from sclib import Session, ToolError, load_script, measure, refuse_existing, sha256
 
 MESH_EXT = (".stl", ".obj", ".3mf")
 READBACK_EXT = (".solidcraft", ".step", ".stp") + MESH_EXT
@@ -92,7 +92,7 @@ def main():
         if not o.lower().endswith(READBACK_EXT):
             check("written " + o, True, "%d bytes (not read back)" % os.path.getsize(o))
             continue
-        sm = summary(evaluate(o))
+        sm = measure(o)
         report["outputs"][o] = sm
         if ref is None:
             ref = sm

@@ -22,7 +22,7 @@ import os
 import re
 import sys
 
-from sclib import evaluate, png_diff, png_stats, refuse_existing, run_cli, sha256, summary
+from sclib import measure, png_diff, png_stats, refuse_existing, run_cli, sha256
 
 
 def main():
@@ -40,7 +40,7 @@ def main():
     a = ap.parse_args()
 
     h0 = sha256(a.part)
-    sm = summary(evaluate(a.part))
+    sm = measure(a.part)
     bodies = sm["bodies"]
     lo = [min(b["bbox_min"][i] for b in bodies) for i in range(3)] if bodies else None
     hi = [max(b["bbox_max"][i] for b in bodies) for i in range(3)] if bodies else None

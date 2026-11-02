@@ -1,7 +1,7 @@
-# Command ids by task (pinned to 0.29.0)
+# Command ids by task (pinned to 0.30.0)
 
-These ids were checked against `solidcraft-cli commands` from SolidCraft 0.29.0, which
-has 555 commands. The parameter shapes are long and change between releases, so look
+These ids were checked against `solidcraft-cli commands` from SolidCraft 0.30.0, which
+has 570 commands. The parameter shapes are long and change between releases, so look
 them up instead of copying them from here:
 - `sc_commands.py WORD…` for one-line signatures;
 - `sc_commands.py --id ID` for the full text and the typed schema, where there is one;
@@ -26,7 +26,7 @@ In the parameter shapes, `expr` means a number in mm, or text such as `"thicknes
 | Undo and safety | `edit.undo`, `edit.redo`, `edit.checkpoint`, `edit.restore_checkpoint` | |
 | Measure and check | `inspect.measure`, `inspect.section`, `inspect.interference`, `inspect.clearance`, `inspect.center_of_mass`, `inspect.compare`, `inspect.parameter_sweep`, `inspect.minimum_radius`, `document.inspect` | `measure {bodies?}` or `{items:[1-2 selections]}`; `section {plane, at?\|offset?, flip?}` |
 | Materials | `material.assign`, `material.inspect`, `appearance.assign` | Mass uses the assigned material. The default density is 1.29 g/cm³ |
-| Files | `file.new`, `file.save`, `file.save_as`, `file.export`, `file.save_mesh`, `file.insert_step`, `file.insert_mesh`, `sketch.export_dxf`, `file.send_to_slicer` | `export {path, format?, bodies?, quality?}` |
+| Files | `file.new`, `file.save`, `file.save_as`, `file.export` (or `file.export_step`/`_stl`/`_3mf`/`_obj`, new in 0.30.0, which fix the format whatever the extension), `file.save_mesh`, `file.insert_step`, `file.insert_mesh`, `sketch.export_dxf`, `file.send_to_slicer` | `export {path, format?, bodies?, quality?}` |
 | Views | `view.save`, `view.fit`, `view.home` | A view saved in the design can be passed to `snapshot --view NAME` |
 | Components | `component.create`, `component.activate`, `component.move_bodies`, `joint.*`, `motion.*` | Assemblies and mechanisms: `sc_commands.py --doc solidcraft-mechanisms` |
 
