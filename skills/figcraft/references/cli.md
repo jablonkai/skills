@@ -1,7 +1,7 @@
-# figcraft-cli 0.14.0 reference
+# figcraft-cli 0.15.0 reference
 
-Verified on macOS with `figcraft-cli 0.14.0` (`~/.local/bin/figcraft-cli`) and
-`FigCraft.app 0.14.0` (`ai.storyteller.figcraft`). `figcraft-cli --help` is the vendor
+Verified on macOS with `figcraft-cli 0.15.0` (`~/.local/bin/figcraft-cli`) and
+`FigCraft.app 0.15.0` (`ai.storyteller.figcraft`). `figcraft-cli --help` is the vendor
 reference; the `docs/cli.md` / `docs/mcp.md` it mentions are not shipped in the bundle.
 
 ## Contents
@@ -16,12 +16,12 @@ reference; the `docs/cli.md` / `docs/mcp.md` it mentions are not shipped in the 
 | Command | What it does |
 |---|---|
 | `info FILE [--json]` | pages, top-level frames (id, name, type, size), node/style/variable/image counts, `notes` (import losses), `missingFonts` |
-| `export FILE -o OUT [--format F] [--scale N] [--page NAME] [--node ID\|NAME] [--bleed L] [--crop-marks] [--bleed-marks] [--cmyk] [--vd-compat bestEffort\|exact\|ignore]` | images, SVG, PDF, Android vector drawable XML or a `.fig` copy |
+| `export FILE -o OUT [--format F] [--scale N] [--page NAME] [--node ID\|NAME] [--bleed L] [--crop-marks] [--bleed-marks] [--cmyk] [--vd-compat bestEffort\|exact\|ignore]` | images, SVG, PDF, Android vector drawable XML, or the whole file as a `.fig` or Penpot 2.x `.penpot` copy |
 | `convert IN OUT` | any readable format to `.figcraft`, FigCraft `.json`, `.fig`, `.svg`, images (format from OUT's extension) |
 | `render FILE -o OUT.png [--scale N] [--page NAME]` | the whole page with its background, for a look |
 | `run SCRIPT.json\|.jsonl [--in FILE] [--out FILE]` | engine commands in a headless session; one JSON line per step |
 | `commands [--json] [--filter TEXT]` | the command registry (use `scripts/fc_commands.py`) |
-| `mcp [--attach PORT] [--automation-read-root DIR]… [--automation-write-root DIR]…` | MCP server over stdio (use `scripts/fc_session.py`) |
+| `mcp [--attach PORT [--timeout S]] [--automation-read-root DIR]… [--automation-write-root DIR]…` | MCP server over stdio (use `scripts/fc_session.py`) |
 | `plugin publish`, `connect publish`, `perf` | plugin upload, code-connect publishing, benchmarks — out of scope |
 
 There is **no `describe` subcommand**: `commands --filter` / `fc_commands.py --id` show a
