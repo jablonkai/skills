@@ -1,4 +1,4 @@
-# designcraft-cli reference (0.16.0)
+# designcraft-cli reference (0.17.0)
 
 `designcraft-cli` (`~/.local/bin/designcraft-cli`) runs the DesignCraft engine headless.
 Vendor docs: `docs/agents.md`, `docs/mcp.md`, `docs/control-protocol.md` in
@@ -49,7 +49,8 @@ are comments. Results feed later steps:
 (`.pdf`, `.idml`, `.epub`, `.pptx`, `.png`, `.jpg`, page 0 for images) — for PDF/X-4 or a
 page other than the first, end the script with `file.exportPdf {…}` instead. A failing
 step stops the script (`step N (id) failed: …`); `--keep-going` records `{"error": …}`
-and continues. `script.run {text}` runs a script as one command (e.g. from `run --cmd`).
+and continues. A parse error names its file line (`line 5: …`), counting blank and comment
+lines (since 0.17.0). `script.run {text}` runs a script as one command (e.g. from `run --cmd`).
 
 ## Exports
 

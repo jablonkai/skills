@@ -1,6 +1,6 @@
-# Command ids by task (pinned to DesignCraft 0.16.0)
+# Command ids by task (pinned to DesignCraft 0.17.0)
 
-The registry has 545 commands. These are the ones layout work needs; check the full
+The registry has 547 commands. These are the ones layout work needs; check the full
 signature with `scripts/dc_commands.py --id ID` before a first use, since pre-1.0
 releases can rename params. Coordinates are points in spread space; page numbers in
 `file.exportPdf` and `layout.pageSize` are 1-based, `layout.pages.applyParent` indices 0-based; text offsets are UTF-8 bytes.
@@ -15,6 +15,7 @@ releases can rename params. Coordinates are points in spread space; page numbers
 | `document.inspect` | → pageCount, settings, spreads (pages with bounds, margins, side; items with id, kind, bounds, story), parents, stories (frames, overset, preview), styles, swatches, layers |
 | `layout.pages.insert` / `.delete` / `.move` | pages; `layout.pages.applyParent {pages: [index], parent: "B" \| "A-Parent" \| null}` — **0-based** page indices here |
 | `layout.parents.new` / `.options` | extra parents (B-Parent …) |
+| `layout.parentPageSize` | `parent` (spread id from `document.inspect` → `parents[].id`), `page` (**0-based** page of the parent), `width`, `height`, `anchor` — resizes one parent page only (new in 0.17.0) |
 | `layout.marginsAndColumns`, `layout.documentSetup`, `layout.pageSize`, `layout.section` | margins/columns, size/bleed, per-page size, numbering (start, style, prefix) |
 | `guide.add`, `layout.createGuides` | ruler guides, grids |
 
@@ -60,7 +61,7 @@ releases can rename params. Coordinates are points in spread space; page numbers
 | `style.object.create` / `.apply`, `style.table.*`, `style.cell.*` | object, table, cell styles |
 | `style.list`, `style.load` | names; import styles from another document |
 | `swatch.create` | `name`, `color: "#rrggbb" \| {c,m,y,k} (0–100) \| [r,g,b]`, `spot`; or a `gradient` (`swatch.new` only duplicates the selection's colour) |
-| `font.list`, `font.replace` | fonts in use, missing ones, substitution |
+| `font.list`, `font.replace` | fonts in use, missing ones, substitution; `font.list` also reports each face's OS/2 `fsType` embedding bits (`restrictedLicence`, `noSubsetting`, …; new in 0.17.0) |
 
 ## Images and links
 

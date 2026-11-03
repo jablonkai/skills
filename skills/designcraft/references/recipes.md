@@ -1,4 +1,4 @@
-# Recipes (DesignCraft 0.16.0)
+# Recipes (DesignCraft 0.17.0)
 
 `S=<skill>/scripts`. Every recipe ends with a read-back; don't skip it.
 
