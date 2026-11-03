@@ -1,4 +1,4 @@
-# Gotchas (DeckCraft 0.14.1)
+# Gotchas (DeckCraft 0.15.0)
 
 Each of these was hit while building and verifying the skill.
 
@@ -64,14 +64,14 @@ Each of these was hit while building and verifying the skill.
 - Notes pages and handouts default to US Letter portrait; pass `paper`.
 - `convert X.md` writes the outline with tab-indented lines, not Markdown bullets.
 - `.pptx` round trips keep titles, layouts, notes, pictures, tables and charts in
-  0.14.1; check anything exotic (SmartArt, media, animations) with `info` and a render.
+  0.15.0; check anything exotic (SmartArt, media, animations) with `info` and a render.
 
 ## Running it
 
 - **One failing `--cmd` stops `run`; nothing is saved.** Fix the command and rerun the
   batch — partial output never appears.
 - **`deckcraft-cli mcp` accepts repeated `--automation-read-root` / `--automation-write-root`**
-  since 0.14.1 (0.14.1 rejected a second one). `dklib.Session` still uses the common parent
+  since 0.14.1 (0.13.1 rejected a second one). `dklib.Session` still uses the common parent
   of the folders (and refuses one as wide as `/` or `/Users`), which also works on both.
 - Paths in commands should be absolute; `run` resolves relative ones against the
   current directory, MCP roots compare resolved paths (`/tmp` → `/private/tmp` on macOS).

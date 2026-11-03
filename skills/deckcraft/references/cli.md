@@ -1,4 +1,4 @@
-# deckcraft-cli 0.14.1
+# deckcraft-cli 0.15.0
 
 `deckcraft-cli help SUBCOMMAND` explains any subcommand; this page is what the help
 leaves implicit. Slides are 960 × 540 pt by default (16:9); positions are points, x right,
@@ -19,12 +19,17 @@ y down, a rect is `[x, y, w, h]`.
 | `mcp [--sample] [--automation-read-root DIR] [--automation-write-root DIR] [--connect PORT]` | MCP server on stdio. |
 | `bench FILE`, `links`, `--version` | Timing, project links, version. |
 
+If the reader of their output closes early (`| head`), `run`, `render`, `render-transition`
+and `convert` still finish the work; the exit status reflects the work, not the output.
+
 ## `run` in detail
 
 - Without `--in` or `--sample`, `run` starts from a **new presentation with one empty
   title slide** (default theme). `file.new {theme?, template?, size?, blank?}` inside the
   run replaces it with another new one — still with one starter slide.
 - `--cmd-file FILE` (0.14.1): one `ID=JSON` per line, `#` comments, no shell quoting; mixes with `--cmd` in order.
+  Lines up to 16 MiB (embedded media data), CRLF and a BOM are accepted, and errors name
+  the line (`cf.txt:3: slide.new: bad JSON …`).
 - `--cmd ID=JSON`: quote the JSON for the shell; an id with no params is just `ID`.
   Build long JSON with `python3 -c 'import json; print(json.dumps(…))'` or use the
   scripts, so quotes and newlines (`\n` = new paragraph, `\t` at line start = bullet
