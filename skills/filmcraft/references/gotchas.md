@@ -1,4 +1,4 @@
-# Gotchas (FilmCraft 0.16.0)
+# Gotchas (FilmCraft 0.17.0)
 
 Everything here was hit while building the skill. Most of these fail **silently**: exit 0,
 a plausible result, wrong output.
@@ -14,6 +14,9 @@ a plausible result, wrong output.
   Save the edit with `run`, or with `fc_run.py`, first.
 - `--save` writes over `--project`. Save to a new file unless the user asked for an
   in-place edit. `fc_run.py` refuses to overwrite.
+- Since 0.17.0, `--save` runs on the same project wait for each other instead of losing
+  edits, and leave a hidden `.P.fcproj.lock` file next to the project. It is FilmCraft's;
+  leave it. `--save-as` and `fc_run.py` (which saves to a new file) don't need it.
 - `file.saveAs` inside the session works (`fc_run.py` uses it) and returns
   `{path, bytes}`.
 
@@ -45,9 +48,11 @@ a plausible result, wrong output.
   the paths. Use `--allow-offline` only when the user accepts placeholders.
 - Container durations from ffprobe run slightly long (12.010 s for 300 frames) because of
   audio priming. Compare **frame counts**, not seconds.
-- Rendering a sequence with titles or transitions creates a **`FilmCraft Previews/`**
-  folder next to the `.fcproj` (preview render cache). It is FilmCraft's, not an export.
-  Leave it, or tell the user it is there if they asked for a clean output folder.
+- Up to 0.16.0, rendering a sequence with titles or transitions created a
+  **`FilmCraft Previews/`** folder next to the `.fcproj` (preview render cache). Headless
+  exports and renders in 0.17.0 no longer did; the app may still write it. It is
+  FilmCraft's, not an export. Leave it, or tell the user it is there if they asked for a
+  clean output folder.
 - In `filmcraft-cli run`, `file.exportMedia` waits for the file. Through MCP
   (`fc_run.py`), the job is
   asynchronous: without `"wait": true` the session ends and **the file is never
@@ -67,7 +72,7 @@ a plausible result, wrong output.
 - **Marker colours are label names**: Violet, Iris, Caribbean, Lavender, Cerulean,
   Forest, Rose, Mango, Purple, Blue, Teal, Magenta, Tan, Green, Brown, Yellow. Since 0.16.0
   `Red`, `Orange`, `Cyan` and `Pink` are accepted as aliases (Rose, Mango, Teal, Magenta)
-  and `#RRGGBB` is kept as given; any other name fails (`unknown marker color`).
+  and `#RRGGBB` is kept (upper-cased); any other name fails (`unknown marker color`).
 - `timeline.razor` with a time outside the clips, or a non-number, returns `{cuts: 0}`
   and succeeds.
 - An unknown transition or effect name fails (`unknown transition`). List them with
