@@ -15,7 +15,7 @@ import sys
 import tempfile
 import zlib
 
-PINNED_VERSION = "0.30.0"
+PINNED_VERSION = "0.30.1"
 APP_CLI = "/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli"
 _CLI = None
 
@@ -113,8 +113,9 @@ def summary(ev):
 def obj_volume(path, weld=1e-3):
     """(volume_mm3, closed) of an OBJ mesh, with vertices welded within `weld` mm.
 
-    eval in 0.30.0 does not weld the seams of SolidCraft's own OBJ export (one vertex per
-    face normal), so it reports the mesh open with no volume; this is the read-back for it.
+    SolidCraft 0.30.0 wrote OBJ with one vertex per face normal and eval did not weld the
+    seams, so it reported the mesh open with no volume. 0.30.1 writes shared vertices and
+    eval reads it closed; this stays as the read-back for OBJs from 0.30.0.
     """
     pts, faces = [], []
     with open(path, encoding="utf-8", errors="replace") as f:
@@ -152,7 +153,7 @@ def measure(path):
             for b in sm["bodies"]:
                 b["closed"] = True
             sm["open_bodies_skipped"] = 0
-            sm["volume_source"] = "obj_volume (welded read-back; eval leaves OBJ seams open)"
+            sm["volume_source"] = "obj_volume (welded read-back; eval left the OBJ seams open)"
     return sm
 
 
