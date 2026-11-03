@@ -1,4 +1,4 @@
-# Gotchas (SolidCraft 0.30.0)
+# Gotchas (SolidCraft 0.30.1)
 
 ## Silent failures
 
@@ -51,17 +51,17 @@
   parameters or features to edit. Changes go on top: cut, fillet, or `solid.offset_face`.
 - **Mesh volumes differ by about 0.01–0.1 %** from the B-rep (tessellation). Compare an
   STL/3MF export with a tolerance of about 1 %, and a STEP export with 0.1 %.
-- **`eval` reads SolidCraft's own OBJ export as an open mesh** (0.30.0): the OBJ writes one
-  vertex per face normal, so its seams aren't welded on import, and `eval` reports
-  `closed: false` with no volume, although the mesh is watertight. STL and 3MF read back
-  closed. The scripts measure an OBJ themselves in that case (`sclib.obj_volume`, welded
-  at 0.001 mm, and marked `volume_source`); by hand, verify the 3MF or STL instead.
+- **OBJ exports from 0.30.0 read back open** in `eval`: that OBJ wrote one vertex per face
+  normal, so its seams weren't welded and `eval` reported `closed: false` with no volume.
+  0.30.1 writes shared vertices, and `eval` reads its own OBJ closed with the same volume
+  as the STL. For an older OBJ the scripts still measure it themselves (`sclib.obj_volume`,
+  welded at 0.001 mm, and marked `volume_source`); by hand, verify the 3MF or STL instead.
 - **Mass uses a density of 1.29 g/cm³** until `material.assign` sets a material. Report
   mass only together with its material.
 - **The ground grid lies on Z 0.** A part below Z 0 is cut by it in snapshots; use
   `--no-grid`.
 - **`exec` ignores `--connect`.** It always runs on an empty headless design.
 - **The CLI on PATH may be older than the app** (0.22.1 against 0.25.0 once; both were
-  0.30.0 at the last check). Commands it lacks, such as `solid.cone`, fail as unknown, and it refuses
+  0.30.1 at the last check). Commands it lacks, such as `solid.cone`, fail as unknown, and it refuses
   designs saved by the newer app (`format 41; reads up to 36`). Use the app's copy,
   which `sclib.cli()` picks.
