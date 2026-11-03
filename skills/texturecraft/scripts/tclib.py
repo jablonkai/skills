@@ -56,8 +56,7 @@ def command(inp, cid, params=None, save=None):
 
 
 def info(path):
-    if path.startswith("builtin:"):
-        raise TcError("`info` cannot read builtin:<id>; create a project with `new` first")
+    # Since 0.3.0 `info builtin:<id>` works too and returns the built-in mesh with its UV report.
     return run_json(["info", path])
 
 
@@ -106,8 +105,8 @@ def _first_braces(s):
 
 
 def _sig_keys(sig):
-    """Every word in the signature that is written like a key (`name?`, `path:`, `ts,`)."""
-    return set(re.findall(r"([A-Za-z_][A-Za-z0-9_]*)\??(?=\s*[:,}|?])", sig))
+    """Every word in the signature that is written like a key (`name?`, `path:`, `ts,`, `value (…)`)."""
+    return set(re.findall(r"([A-Za-z_][A-Za-z0-9_]*)\??(?=\s*[:,}|?(])", sig))
 
 
 def check_step(cid, params):

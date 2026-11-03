@@ -1,8 +1,9 @@
-# texturecraft-cli reference (0.2.0)
+# texturecraft-cli reference (0.3.0)
 
 `texturecraft-cli` is a headless TextureCraft. It opens no window. It reads and writes
 `.tcraft` projects (zip archives holding `project.json`, the mesh, baked maps, layer
-pixels, and any high-poly and cage meshes). In 0.2.0 it installs to `~/.local/bin`; the app
+pixels, and any high-poly and cage meshes). In 0.3.0 it installs to `~/.local/bin` (a link into
+`~/.local/share/artcraft-cli/texturecraft/current/`); the app
 is `/Applications/TextureCraft.app` (bundle id `ai.storyteller.texturecraft`). The vendor's
 `docs/control-protocol.md` is **not** shipped in the app bundle, so `--help`, `commands`
 and `info` are the ground truth.
@@ -13,8 +14,8 @@ and `info` are the ground truth.
 - a `.tcraft` project;
 - a mesh file: `.glb .gltf .fbx .dae .usd .usda .usdc .usdz .abc .obj .ply .stl`;
 - `builtin:<id>`, one of `material_ball sphere cube rounded_cube cylinder torus plane
-  crate udim_plane`. This works for `new`, `run`, `batch`'s `open` and `render`, but **not**
-  for `info`.
+  crate udim_plane`. This works for `new`, `run`, `batch`'s `open`, `render` and, since
+  0.3.0, `info` (a mesh report with the UV report).
 
 Relative paths, including those inside command params such as `bake.highPoly.add {path}`,
 resolve against the current directory.
@@ -23,15 +24,15 @@ resolve against the current directory.
 
 | Command | What it does | Notes |
 |---|---|---|
-| `--version` | `TextureCraft 0.2.0 (e01dac2 2026-11-01)` | |
+| `--version` | `TextureCraft 0.3.0 (8547514 2026-11-03)` | |
 | `info F` | JSON for a project or a mesh | See below. Mesh files get a UV report; projects get `uv: null`. |
 | `commands [--filter T]` | One line per command: `id  label  {params}` | No JSON form. The filter matches the id and label. |
 | `run IN ID [JSON] [-o OUT]` | Runs one command and prints its JSON result | **Without `-o` nothing is saved.** `-o` overwrites without asking. |
 | `batch SCRIPT.json` | `{"open": IN, "steps": [{"id","params"}…], "save": OUT}`, or a bare list of steps (on an empty project) | Stops at the first failing step, saves nothing, exits 1. Prints `{completed, failed: {id,index,error}, results}`. |
 | `bake IN [-o OUT] [--resolution N] [--maps a,b]` | Bakes every texture set | Without `-o` a project is **saved in place**. `--maps` takes mesh-map ids ([bake.md](bake.md)). |
 | `export IN DIR [--preset P] [--format F] [--padding M] [--size N]` | Exports every set | The default preset is `Document channels + Normal + AO`. It has no flag for the set or the normal convention: use `run IN file.exportTextures` or `tc_export.py`. |
-| `render IN OUT.png [--size WxH] [--view 3d\|2d] [--yaw D] [--pitch D] [--samples N] [--bounces N] [--cpu]` | Viewport render, or path traced with `--samples` | The viewport needs a GPU or software adapter. `--cpu` uses the CPU path tracer. It prints `wrote X (WxH, adapter, s)` to stderr. |
-| `new MESH\|builtin:ID OUT.tcraft [--resolution N] [--sample]` | New project | The default resolution is **2048 for a mesh file but 1024 for a built-in**, so pass `--resolution`. `--sample` bakes and applies a smart material to every set. It overwrites OUT without asking. |
+| `render IN OUT.png [--size WxH] [--view 3d\|2d] [--camera NAME] [--yaw D] [--pitch D] [--samples N] [--bounces N] [--cpu]` | Viewport render, or path traced with `--samples` | The viewport needs a GPU or software adapter. `--samples` path traces on the GPU when it has compute shaders (0.3.0), else on the CPU; `--cpu` forces the CPU. `--camera` looks through a camera saved with `camera.add`. The 2D view shows set 0 only. It prints `wrote X (WxH, adapter, s)` to stderr. |
+| `new MESH\|builtin:ID OUT.tcraft [--resolution N] [--sample]` | New project | The default resolution is **2048 for a mesh file but 1024 for a built-in**, so pass `--resolution`. `--sample` bakes (mesh maps at up to 1024 px) and applies a smart material to every set. It overwrites OUT without asking. |
 | `mcp [--bridge PORT] [--token T] [--read-root D] [--write-root D]` | MCP server on stdio | See [security.md](security.md). |
 | `serve [--port P] [--read-root D] [--write-root D]` | JSON lines (`{"id","method","params"}`) on stdio, or on 127.0.0.1:P with a token | See [security.md](security.md). |
 
@@ -53,8 +54,9 @@ Project (`kind: "project"`):
   {maps, resolution} | null, layers (count), parts, uvTiles, visible, active}`.
 - `layers`: the **active** set's stack only, top first. Use `run P layer.list {"ts": N}` for
   another set.
-- `bakeMeshes`: `{highPoly: [{name, parts, triangles}], cage: {…} | null}`.
-- `activeTextureSet`, `selectedLayer`, `camera`, `display`, `history`, `modified`.
+- `bakeMeshes`: `{highPoly: [{name, parts, triangles}], cage: {…} | null, skew}`.
+- `activeTextureSet`, `selectedLayer`, `camera`, `display`, `history`, `modified`. A saved
+  project reopens with `activeTextureSet` 0, whatever was selected when it was saved.
 - The normal format is not in `info`. It is `normal_format` in `project.json` inside the
   zip, which `tc_inspect.py` reads.
 
@@ -70,4 +72,6 @@ unwrapped it automatically; the warning names the number of charts.
 mask: {background: black|white, enabled, effects: [{id, kind: Generator|Fill|Levels|…,
 name, blend, opacity, generator: {type: EdgeWear|Dirt|…, level, softness, noise}}]},
 children: [...]}`. Layer ids are unique across all sets. Smart materials arrive as a
-`group` with `children`.
+`group` with `children`. A MaterialCraft material (`material.load` of a `.mcmat`) arrives
+as a `fill` whose `fill.link` holds `{graph, package, size, params: [{id, default, min,
+max, value: {t, v}}], presets, inputs}`.

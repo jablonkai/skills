@@ -1,4 +1,4 @@
-# Recipes (verified on TextureCraft 0.2.0)
+# Recipes (verified on TextureCraft 0.3.0)
 
 `S=<skill>/scripts`. Each spec below was run through `tc_build.py` as written.
 
@@ -100,3 +100,31 @@ all of them.
 python3 $S/tc_inspect.py their.tcraft --full > their.json   # stacks, masks, fill sources
 python3 $S/tc_render.py their.tcraft /tmp/their.png --yaw 215 --uv
 ```
+
+## 6. A MaterialCraft material on one set, tuned and re-cooked in place
+
+Export the material from MaterialCraft first (`mc_export.py IN.mcraft maps/ --mcmat
+wood.mcmat`, see the `materialcraft` skill). Its exposed inputs and presets travel with it.
+
+```json
+{"in": "builtin:crate", "resolution": 1024, "steps": [
+  {"id": "bake.run", "params": {"ts": "all", "resolution": 1024}},
+  {"sets": ["Crate"], "steps": [
+    {"id": "material.load", "params": {"path": "/abs/wood.mcmat"}},
+    {"id": "material.link.set", "params": {"id": "grain", "value": 20}},
+    {"id": "material.link.preset", "params": {"name": "fine"}},
+    {"id": "material.link.saveSource", "params": {"path": "/abs/out/wood_back.mcraft"}}
+  ]}
+], "save": "out/wood_crate.tcraft"}
+```
+
+```sh
+python3 $S/tc_build.py wood.json --expect-layer Crate:"Wood planks"
+python3 $S/tc_inspect.py out/wood_crate.tcraft     # layer "link": {graph, params: {grain: 24.0}, presets}
+```
+
+- The layer is a fill named after the material (`Wood planks 1`); the link commands act
+  on the selected layer, which is the one just loaded. Pass `layer` to tune another.
+- Each `link.set` and `link.preset` re-cooks at the set's resolution with its baked mesh
+  maps, so bake first. `"cook": false` only stores the value.
+- `saveSource` writes the `.mcraft` with the tuned values for further work in MaterialCraft.
