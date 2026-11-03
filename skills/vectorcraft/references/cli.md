@@ -1,4 +1,4 @@
-# vectorcraft-cli 0.20.0 reference
+# vectorcraft-cli 0.21.0 reference
 
 `vectorcraft-cli` is a universal binary in `~/.local/bin`. It renders headless, with no
 window and no GPU. The app (`/Applications/VectorCraft.app`, bundle id
@@ -126,9 +126,9 @@ a job.
 
 ## Formats
 
-- **Readable:** .vectorcraft .drawcraft .svg .svgz .pdf .ai .ait .png .jpg .jpeg .gif
-  .webp .tif .tiff .bmp .tga .vda .icb .vst .psd .psb .vctemplate .dxf .emf .wmf .eps
-  .epsf .ps .af .afdesign .afpub
+- **Readable:** .vectorcraft .drawcraft .svg .svgz .pdf .ai .ait .png .pns .jpg .jpeg
+  .gif .webp .tif .tiff .bmp .dib .rle .tga .vda .icb .vst .pcx .pxr .jpf .jpx .jp2 .j2k
+  .j2c .jpc .psd .pdd .psb .vctemplate .dxf .emf .wmf .eps .epsf .ps .af .afdesign .afpub
 - **Writable:** .vectorcraft .svg .svgz .pdf .ai .png .jpg .gif .webp .tif .bmp
   .vctemplate .txt .dxf .eps .emf .wmf .tga .psd, plus `.ait` (an Illustrator template)
   from `run --export` and `convert`
