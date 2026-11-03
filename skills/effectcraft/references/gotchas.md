@@ -1,4 +1,4 @@
-# Gotchas (effectcraft-cli 0.20.0)
+# Gotchas (effectcraft-cli 0.21.0)
 
 ## Silent
 
@@ -30,6 +30,10 @@
   (`it is outside the automation roots`). `ec_build.py` sets roots to the spec's folder,
   footage folders and output folders.
 - **Unknown command params** are rejected with the accepted list — read it, fix the key.
+- **`app.run` in a script acts on the active comp**, and `app.project.items.addComp` doesn't
+  make the new comp active: on an empty project the next `app.run("layer.new…")` fails with
+  "no composition is open" (exit 1, yet `--save-as` still writes the partial project).
+  Call `app.run("comp.open", {comp: NAME})` after `addComp` (checked in 0.21.0).
 - **Expressions with a syntax error** are kept but disabled; `get --json` shows
   `expressionError`. `ec_build.py` fails on it.
 

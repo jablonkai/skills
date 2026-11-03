@@ -1,4 +1,4 @@
-# effectcraft-cli 0.20.0
+# effectcraft-cli 0.21.0
 
 Each invocation runs a headless engine, does its work and exits. `--help` lists everything;
 running the app binary would open a window, so don't.
@@ -29,7 +29,7 @@ a name; `<value>` is JSON (`50`, `[960,540]`, `"#ff0000"`) or a bare string.
 | `exec ID [--params JSON]` / `exec --list [--schemas] --json` | one command / the registry as JSON |
 | `run ID JSON [ID JSON …]` / `run --args-file F` / `run --commands FILE\|-` | several commands in order, one process; no `$N` references. `--commands`: JSON array or JSON Lines of `{"command":ID,"params":{}}`, `-` = stdin (new in 0.20.0, smoke-tested) |
 | `props COMP LAYER [--flat] [--time S]` | a layer's property tree with paths (`--json` nests groups and names effects) |
-| `get COMP LAYER PATH [--time S]` | value at comp time S, `keys[]` (time, compTime, value, in/out interpolation), `expression` |
+| `get COMP LAYER PATH [--time S]` | value at comp time S, `keys[]` (time = layerTime, compTime, value, in/out interpolation), `expression` |
 | `set COMP LAYER PATH VALUE [--time S] [--expression E]` | static value, a keyframe at layer time S (replaces a key already there), or an expression |
 | `render-frame [--comp C] [--time S \| --frame N] [--max-side PX \| --scale K] --out F.png [--transparent]` | one PNG |
 | `render [--comp C] --out FILE [--format F] …` | a deliverable (below) |
@@ -41,7 +41,7 @@ a name; `<value>` is JSON (`50`, `[960,540]`, `"#ff0000"`) or a bare string.
 ## render
 
 ```
-render --project F --comp C --out FILE --format h264|hevc|av1|prores|webm|png|jpeg|tiff|exr|gif|wav|aiff
+render --project F --comp C --out FILE --format h264|hevc|av1|prores|webm|png|jpeg|tiff|exr|tga|gif|wav|aiff
        [--start S] [--end S] [--work-area] [--fps N] [--resolution full|half|third|quarter|K]
        [--quality best|draft] [--channels rgb|rgba] [--prores proxy|lt|standard|hq|4444|4444xq]
        [--bitrate KBPS] [--audio auto|on|off] [--jpeg-quality N]
@@ -54,10 +54,11 @@ render --project F --comp C --out FILE --format h264|hevc|av1|prores|webm|png|jp
   WebM VP9 also carries alpha (`--format webm --channels rgba`). H.264 never does.
 - Image sequences: `--out 'dir/f_[#####].png'` writes `f_00000.png…`; the folder must exist.
 - `--end` is exclusive: `--start 0 --end 0.2` at 25 fps is 5 frames.
-- `--profile`, `--level`, `--rate-control`, `--video-quality`, `--keyint` apply to HEVC / AV1; `--audio-bitrate` and `--opus-app` to WebM Opus audio. Listed in 0.20.0 help; only `--webm-codec vp9` alpha was smoke-tested.
+- `--profile`, `--level`, `--rate-control`, `--video-quality`, `--keyint` apply to HEVC / AV1; `--audio-bitrate` and `--opus-app` to WebM Opus audio. Listed in 0.21.0 help; only `--webm-codec vp9` alpha was smoke-tested.
 - A relative `--out` is relative to the working directory, not the project.
 - `--progress` prints `progress <done> <total> <elapsed> <left>` on stderr.
-- Verified: H.264 MP4 5.000 s, ProRes 4444 alpha, PNG sequence.
+- Verified: H.264 MP4 5.000 s, ProRes 4444 alpha, PNG sequence; in 0.21.0 also a TGA RGBA
+  sequence (`--out 'dir/f_[###].tga' --format tga`, bgra), HEVC `main10`, WebM VP9 alpha.
 
 ## script
 
@@ -70,7 +71,9 @@ effectcraft-cli script --eval 'app.project.item(1).numLayers' in.ecproj --json
 The object model is After Effects': `app.project.items.addComp(name, w, h, pa, dur, fps)`,
 `comp.layers.addText(…)`, `layer.property("ADBE Transform Group").property("ADBE Position")
 .setValueAtTime(t, v)` (comp time). `app.run(id, params)` calls any registry command, so a
-loop over `app.run("layer.newShape", …)` works. `writeLn` output is printed, then the value
+loop over `app.run("layer.newShape", …)` works once the comp is active: `addComp` doesn't
+open it, so call `app.run("comp.open", {comp: "S"})` first (the object model's
+`comp.layers.add…` needs no open comp). `writeLn` output is printed, then the value
 of the last expression; an error exits 1 with `file:line:col`. Scripts may read only the
 project's folder and may not write files or use the network unless the user enables it in
 Preferences ▸ Scripting & Expressions. Wrap edits in `app.beginUndoGroup()` /
