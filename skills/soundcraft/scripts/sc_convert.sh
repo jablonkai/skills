@@ -4,7 +4,7 @@
 # Usage: sc_convert.sh IN_DIR OUT_DIR [--ext wav|aiff|flac] [--overwrite] [convert flags...]
 #   convert flags pass through: --bit-depth 16|24|32f --rate HZ --normalize --dither|--no-dither
 #
-# Not recursive. Refuses OUT_DIR == IN_DIR (convert writes in place without asking) and
+# Not recursive. Refuses OUT_DIR == IN_DIR (keeps the sources untouched) and
 # existing outputs unless --overwrite. Each output is read back with `soundcraft-cli info`;
 # the last line is a JSON summary. Exit 1 if any file failed.
 set -euo pipefail
