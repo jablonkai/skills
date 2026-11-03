@@ -1,6 +1,6 @@
-# SoundCraft gotchas (0.16.0)
+# SoundCraft gotchas (0.17.0)
 
-Each item was reproduced against soundcraft-cli 0.16.0.
+Each item was reproduced against soundcraft-cli 0.17.0.
 
 ## Time and units
 
@@ -19,7 +19,9 @@ Each item was reproduced against soundcraft-cli 0.16.0.
   `--in-place` (without it: "which it would replace: choose another file, or pass --in-place"). It
   keeps the previous version as `Backups/<name> backup N.scraft` beside the session, so
   a mistaken overwrite can be undone from there.
-- `convert IN IN` overwrites the source in place. `sc_convert.sh` refuses OUT == IN.
+- `convert IN IN` is refused ("is the <IN> file, which it would replace") unless `--in-place`
+  is passed (new in 0.17.0; 0.16.0 overwrote the source silently). Any other existing OUT is
+  still replaced without asking. `sc_convert.sh` refuses OUT == IN.
 - Saving copies imported audio to `Audio Files/` beside the `.scraft`
   (`audio_files_written` counts them). A second session in the same folder that imports
   a different `v.wav` gets `v_01.wav`; the first session's file is left alone.
@@ -32,9 +34,14 @@ Each item was reproduced against soundcraft-cli 0.16.0.
   with a read-back, not just the exit code.
 - A script aborts at the first failing line (`FILE:LINE: ID: …`) and saves nothing.
 - `mix.*`/`automation.*`/`clip.*` without `track`/`tracks`/`clips` act on the
-  selection; in a fresh CLI session nothing is selected, so they fail with
-  "nothing is selected". `describe` shows `enabled: false` for the same reason; that is
-  not a missing feature.
+  selection. In an empty CLI session nothing is selected, so they fail with
+  "nothing is selected" (`describe` shows `enabled: false` for the same reason; that is
+  not a missing feature). But `track.new` selects the track it creates, and a saved
+  `.scraft` keeps its selection (often the last imported track and clip), so after either
+  an omitted `tracks` **silently hits that track**. Always pass `track`/`tracks`/`clips`.
+- `clip.gain` with an unknown clip id changes nothing and still exits 0
+  (`{"clips":[999]}` reports `{"clips":1}`; `["m"]` reports `{"clips":0}`). Read the gain
+  back with `sc_inspect.py session`.
 - Clip ids are plain integers (`"clip": "m"` → "clip must be an id"). Track, clip and
   source ids share one counter, so a clip id is not predictable before the import.
 

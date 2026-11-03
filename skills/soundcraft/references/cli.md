@@ -1,4 +1,4 @@
-# soundcraft-cli reference (0.16.0)
+# soundcraft-cli reference (0.17.0)
 
 Every subcommand takes `--help`; the table below summarises them. Every subcommand exits non-zero with `soundcraft-cli: <message>` on stderr
 on failure.
@@ -6,7 +6,7 @@ on failure.
 | Subcommand | Does |
 |---|---|
 | `info FILE [--compact]` | Audio file → JSON `{channels, format, frames, sample_format, sample_rate, seconds, bwf}`. `.scraft` → Pro Tools-style text: name, rate, depth, files, tracks with clip start/end/duration, markers. No plugins, pan, gain or automation. |
-| `convert IN OUT [--bit-depth 16\|24\|32f] [--rate HZ] [--normalize] [--dither \| --no-dither]` | One file. Output format from OUT's extension (wav, aiff, flac). Dithers only when the output loses resolution unless told. `--normalize` → peak −0.1 dBFS. Prints `wrote OUT (N ch, RATE Hz, S s)`. **Overwrites OUT, even when OUT is IN.** |
+| `convert IN OUT [--bit-depth 16\|24\|32f] [--rate HZ] [--normalize] [--dither \| --no-dither] [--in-place]` | One file. Output format from OUT's extension (wav/wave/bwf, aif/aiff, flac). Dithers only when the output loses resolution unless told. `--normalize` → peak −0.1 dBFS. Prints `wrote OUT (N ch, RATE Hz, S s)`. **Overwrites an existing OUT without asking**; OUT equal to IN is refused unless `--in-place` (since 0.17.0). |
 | `run [--in S.scraft \| --demo] [--cmd ID[=JSON]]… [--bounce OUT] [--start T --end T] [--save S.scraft [--in-place]] [--inspect [--compact]]` | Opens a session (or a new empty one, or the demo), runs each `--cmd` in order, then bounces, saves, inspects. |
 | `script FILE [--in S \| --demo] [--save S [--in-place]] [--keep-going] [--bounce OUT [--start T --end T]]` | Same (`--keep-going` reports a failing line and continues instead of stopping), with commands from FILE: one `ID JSON` per line (JSON optional), `#` comments and blank lines allowed. Without `--start/--end`, `--bounce` covers the whole session. |
 | `commands [FILTER]` | Registry table: id, label, menu path. FILTER matches the row text. |
