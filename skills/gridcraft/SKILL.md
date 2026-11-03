@@ -3,22 +3,22 @@ name: gridcraft
 description: 'Automate GridCraft, the Excel-style spreadsheet app, headless with gridcraft-cli: build workbooks from CSV with formulas, number formats, tables and charts, edit inputs in an existing .xlsx and read the recalculated values back, evaluate formulas and search the function list, convert between xlsx/csv/tsv/json/html/pdf one file or a whole folder, and check workbooks for cached-value differences and round-trip fidelity, all verified by read-back and check exit status. Use when the user mentions GridCraft or gridcraft-cli, or wants a spreadsheet built, recalculated, checked or converted with GridCraft: "build a budget workbook from this CSV in GridCraft with a chart", "change B3 and tell me the new totals using gridcraft-cli", "run gridcraft check over this folder". Not for Apple Numbers (numbers), LibreOffice Calc or UNO (libreoffice), openpyxl/pandas work with no GridCraft (xlsx), Word documents (wordcraft) or PDF page edits (pdfcraft).'
 summary: "automate GridCraft headless with gridcraft-cli — workbooks from CSV with formulas, number formats, tables and charts, input edits with recalculated read-back, formula eval, xlsx/csv/pdf conversion and folder batches, cached-value and round-trip checks"
 category: office
-compatibility: "Built for gridcraft-cli 0.15.0 and GridCraft.app 0.15.0 on macOS; pre-1.0, so command ids may change."
+compatibility: "Built for gridcraft-cli 0.16.0 and GridCraft.app 0.16.0 on macOS; pre-1.0, so command ids may change."
 risk: low
 tags: [gridcraft, spreadsheet, excel, xlsx, csv, formulas, charts, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.1.4"
+  version: "1.2.0"
   author: "Tamás Jablonkai"
 ---
 
 # GridCraft via gridcraft-cli
 
 GridCraft is an Excel-style spreadsheet app. Every menu item is a command in one engine
-registry (364 in 0.15.0), and `gridcraft-cli` runs those commands headless against a
+registry (372 in 0.16.0), and `gridcraft-cli` runs those commands headless against a
 workbook, with its own calculation engine, and saves the result. This skill drives that
 route and checks every result by reading the saved file back. Verified against
-**gridcraft-cli 0.15.0** and **GridCraft.app 0.15.0** on macOS. The software is pre-1.0,
+**gridcraft-cli 0.16.0** and **GridCraft.app 0.16.0** on macOS. The software is pre-1.0,
 so when a pinned command id fails, look it up rather than guessing.
 
 ```sh
@@ -39,8 +39,8 @@ gridcraft-cli version
 | Do cached values match a recalculation? (one file or folders) | `scripts/gc_batch.py check PATH…` |
 
 The live app channel (`GridCraft --control PORT`, `GRIDCRAFT_CONTROL_PORT`,
-`gridcraft-cli mcp --connect` / `send`) had no authentication in 0.14.2; the 0.15.0 app
-binary mentions a `GRIDCRAFT_CONTROL_TOKEN`, not live-tested, so whether it is required is
+`gridcraft-cli mcp --connect` / `send`) had no authentication in 0.14.2; the 0.15.0 and 0.16.0 app
+binaries mention a `GRIDCRAFT_CONTROL_TOKEN`, not live-tested, so whether it is required is
 unknown. This skill doesn't start it or connect to it ([gotchas](references/gotchas.md#live-app-channel)).
 Edit files headless; if the workbook is open in the app, ask the user to close it or save
 to a new file.
@@ -50,11 +50,12 @@ to a new file.
 Python 3.9+, standard library only. Call them as `python3 $S/<script>` with
 `S=<this skill>/scripts`. Each prints what it did and exits 1 when something failed.
 
-- **`gc_run.py [--in FILE | --sample NAME] --out FILE [--print RANGE] [--overwrite] STEPS`**
+- **`gc_run.py [--in FILE | --sample NAME] --out FILE [--print RANGE] [--overwrite] [--no-param-check] STEPS`**
   runs a step list (`.json` list of `{"command", "params"}`, `.jsonl`, or `-` for stdin)
   in one process and saves. It refuses to run without `--out` (plain `run` throws the
   work away), refuses to replace an existing file or the input without `--overwrite`,
-  prints each answered step, every sheet's used range, tables and charts, and **flags
+  refuses a step whose param names aren't in the command's registry shape (0.16.0
+  ignores them silently; `--no-param-check` skips this), prints each answered step, every sheet's used range, tables and charts, and **flags
   formula cells lost** between input and output.
 - **`gc_verify.py`**
   - `read FILE [--sheet S] [--range R] [--formulas]`: raw, unformatted values as JSON.
@@ -96,6 +97,9 @@ Python 3.9+, standard library only. Call them as `python3 $S/<script>` with
 
 - **`run` without `--out` saves nothing** and still exits 0. Use `gc_run.py`, which
   requires `--out`.
+- **Misspelled params are ignored silently** (0.16.0): `cell.set {"cel": "C3", …}` writes
+  to the selection (A1) and exits 0. `gc_run.py` checks every param name against the
+  registry first.
 - **A failed step aborts the whole run and writes nothing**, including the steps before
   it. Fix the step and rerun the whole list.
 - **`table.totalRow` writes over the row below the table.** An Average row right under

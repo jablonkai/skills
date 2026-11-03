@@ -2,7 +2,7 @@
 """Run a GridCraft step list in one gridcraft-cli process, save it, and summarise the result.
 
     gc_run.py [--in FILE | --sample budget|sales|grades] --out FILE [--print RANGE]
-              [--overwrite] STEPS
+              [--overwrite] [--no-param-check] STEPS
 
 STEPS is a .json file holding a list of {"command": id, "params": {...}}, a .jsonl file
 (one `id={json}` or {"command", "params"} per line, # comments allowed), or `-` for a JSON
@@ -10,13 +10,16 @@ list on stdin. Without --in/--sample the steps start from a blank workbook.
 
 Guards the silent failures of `gridcraft-cli run`: it refuses to run without --out (run
 discards every change when --out is missing), refuses to overwrite an existing file or the
-input unless --overwrite is given, and compares formula-cell counts before and after so a
+input unless --overwrite is given, refuses a step whose param names don't appear in the
+command's registry shape (0.16.0 ignores unknown params silently, so a typo such as
+`cel` makes cell.set write to the selection; --no-param-check skips this), and compares formula-cell counts before and after so a
 command that wrote over existing formulas (e.g. table.totalRow) is reported. Exits 1 on a
 failed step (nothing is saved then) or on lost formulas.
 """
 import argparse
 import json
 import os
+import re
 import sys
 import tempfile
 
@@ -36,6 +39,39 @@ def load_steps(src):
         if line and not line.startswith(("#", "//")):
             lines.append(line)
     return lines
+
+
+def parse_step(line):
+    """Return (command_id, params) of one script line: {"command", "params"} or id={json}."""
+    if line.startswith("{"):
+        obj = json.loads(line)
+        return obj.get("command"), obj.get("params") or {}
+    cmd, _, rest = line.partition("=")
+    return cmd.strip(), (json.loads(rest) if rest.strip() else {})
+
+
+def unknown_params(lines):
+    """List the param names that don't occur anywhere in their command's registry shape.
+
+    gridcraft-cli 0.16.0 ignores unknown params instead of failing the run. The shape is
+    free text, so every word in it counts as known: permissive, but a typo is still caught.
+    """
+    proc = cli("commands", "--json", check=True)
+    shapes = {c["id"]: c.get("params") or "" for c in json.loads(proc.stdout)}
+    problems = []
+    for n, line in enumerate(lines, 1):
+        try:
+            cmd, params = parse_step(line)
+        except (json.JSONDecodeError, AttributeError):
+            continue  # let gridcraft-cli report the malformed line itself
+        if cmd not in shapes or not isinstance(params, dict):
+            continue  # an unknown id fails the run anyway
+        # `sheet` is accepted by most commands even where the shape omits it (insert.chart)
+        words = set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", shapes[cmd])) | {"sheet"}
+        bad = [k for k in params if k not in words]
+        if bad:
+            problems.append(f"step {n} ({cmd}): unknown param {', '.join(bad)}; shape {shapes[cmd][:160]}")
+    return problems
 
 
 def formula_counts(path):
@@ -59,6 +95,8 @@ def main():
     ap.add_argument("--out", required=True, help="xlsx (default), .csv/.tsv/.json/.html/.pdf by extension")
     ap.add_argument("--print", dest="print_range")
     ap.add_argument("--overwrite", action="store_true", help="allow --out to replace an existing file or the input")
+    ap.add_argument("--no-param-check", action="store_true",
+                    help="skip the check of param names against the registry shapes")
     ap.add_argument("steps")
     a = ap.parse_args()
 
@@ -69,6 +107,12 @@ def main():
         sys.exit(f"{a.out} exists; pass --overwrite or pick a new name")
 
     lines = load_steps(a.steps)
+    if not a.no_param_check:
+        problems = unknown_params(lines)
+        if problems:
+            print("\n".join(problems))
+            sys.exit("refusing to run: gridcraft-cli would ignore these params silently "
+                     "(fix the names, or pass --no-param-check if a shape is incomplete)")
     before = formula_counts(a.inp) if a.inp else {}
 
     with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False, encoding="utf-8") as f:

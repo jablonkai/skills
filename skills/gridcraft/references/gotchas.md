@@ -1,6 +1,6 @@
-# Gotchas (gridcraft-cli 0.15.0)
+# Gotchas (gridcraft-cli 0.16.0)
 
-Everything here was reproduced on 0.15.0 (re-checked: run without --out, silent overwrite, abort on failed step, totalRow, range.fill shift, insertSheet active, setValues en-US parsing, #### in PDF). Most of these fail **silently**: exit 0 and a
+Everything here was reproduced on 0.16.0 (re-checked: run without --out, silent overwrite, abort on failed step, unknown params, totalRow, range.fill shift, insertSheet active, chart without title, multi-area chart range, setValues en-US parsing, European CSV, #### in PDF and autofit without cols, check NOT VERIFIED). Most of these fail **silently**: exit 0 and a
 plausible file, but the wrong content.
 
 ## Saving
@@ -11,8 +11,12 @@ plausible file, but the wrong content.
 - **One failed step aborts the run and writes nothing**, not even the work of the
   earlier steps. The error names the step and line:
   `step 2 (s.jsonl:3, nope.cmd): unknown command`. Fix it and rerun the whole list.
-- **Unknown or misspelled params fail the run** (`invalid parameters for …`). Look up
-  the shape with `commands --search`.
+- **Unknown or misspelled params are ignored silently** (0.16.0; earlier releases
+  failed the run). `cell.set {"cel": "C3", "input": "X"}` writes X to the selection (A1),
+  and `home.bold {"rnge": …}` bolds the selection, both with exit 0. A missing required
+  param still fails (`invalid parameters for cell.set: missing input`). `gc_run.py`
+  refuses a param name that doesn't occur in the command's registry shape (`sheet` is
+  always allowed); look the shape up with `commands --search`.
 
 ## Reading back
 
@@ -94,7 +98,7 @@ plausible file, but the wrong content.
 JSON-lines channel on 127.0.0.1. `gridcraft-cli mcp --connect PORT` and
 `gridcraft-cli send PORT METHOD` drive the running app through it.
 
-In 0.14.2 the channel had **no token or other authentication** (0.15.0 mentions
+In 0.14.2 the channel had **no token or other authentication** (0.15.0 and 0.16.0 mention
 `GRIDCRAFT_CONTROL_TOKEN` in the app binary and a "requires the token you set" error;
 not exercised live, since that needs the GUI app, so whether a token is mandatory is UNVERIFIED): any local process,
 including a web page that can reach localhost, could run any command, among them
@@ -106,4 +110,4 @@ cross-origin rejection, documented posture, stop path), so this skill:
 - edits files headless instead. If the user has the workbook open in GridCraft, it asks
   them to close it, or saves to a new file and tells them to reopen it.
 
-Once the 0.15.0 token is confirmed mandatory and checked live, a live mode can be added.
+Once that token is confirmed mandatory and checked live, a live mode can be added.
