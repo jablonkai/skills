@@ -38,7 +38,8 @@ def resolve_ts(inp, ts):
         return ts
     if ts.isdigit():
         return int(ts)
-    sets = [t["name"] for t in tclib.info(inp)["textureSets"]]
+    # A project lists sets as objects, a mesh file or builtin:<id> as plain names.
+    sets = [t["name"] if isinstance(t, dict) else t for t in tclib.info(inp)["textureSets"]]
     for i, n in enumerate(sets):
         if n.lower() == ts.lower():
             return i
@@ -105,8 +106,8 @@ def main():
     written = [os.path.basename(f) for f in result.get("files", [])]
     warnings += result.get("warnings", [])
 
-    d = tclib.info(a.project) if not a.project.startswith("builtin:") else None
-    res_by_ts = {t["index"]: t["resolution"] for t in d["textureSets"]} if d else {}
+    d = tclib.info(a.project)
+    res_by_ts = {t["index"]: t["resolution"] for t in d["textureSets"]} if d.get("kind") == "project" else {}
     planned = [p["file"] for p in plan]
     checks = [{"check": "written files == export.plan", "ok": sorted(written) == sorted(planned),
                "missing": sorted(set(planned) - set(written)), "extra": sorted(set(written) - set(planned))}]

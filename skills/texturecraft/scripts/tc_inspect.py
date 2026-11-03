@@ -2,13 +2,15 @@
 """Summarise a .tcraft project or a mesh file from `texturecraft-cli info`.
 
 Project: the project's normal format (from project.json), texture sets (index, name,
-resolution, baked maps), each set's layer tree with masks and fill channels, high-poly and
+resolution, baked maps), each set's layer tree with masks, fill channels and any linked
+MaterialCraft material (graph, exposed values, presets), high-poly and
 cage meshes, and the mesh. `info` has no UV report for a project; inspect the mesh file.
-Mesh (.glb .fbx .obj …): texture sets, materials, triangles and the UV report, plus the
+Mesh (.glb .fbx .obj … or builtin:<id>): texture sets, materials, triangles and the UV report, plus the
 embedded images and texture links of a .glb.
 
   tc_inspect.py crate.tcraft
   tc_inspect.py model.glb --json-out model-info.json
+  tc_inspect.py builtin:crate              # a built-in mesh's sets and UV report
   tc_inspect.py crate.tcraft --full        # include each layer's fill sources and mask effects
 """
 import argparse
@@ -37,6 +39,11 @@ def layer_tree(layers, full):
         if l.get("fill"):
             srcs = l["fill"].get("sources", {})
             n["fill"] = srcs if full else sorted(srcs)
+            link = l["fill"].get("link")
+            if link:  # a MaterialCraft material layer (material.load of a .mcmat/.mcraft)
+                n["link"] = {"graph": link.get("graph"), "size": link.get("size"),
+                             "params": {p["id"]: (p.get("value") or {}).get("v") for p in link.get("params", [])},
+                             "presets": [p.get("name") for p in link.get("presets", [])]}
         if l.get("mask"):
             m = l["mask"]
             n["mask"] = {"background": m.get("background"), "enabled": m.get("enabled"),
@@ -50,12 +57,12 @@ def layer_tree(layers, full):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("file", help=".tcraft project or mesh file")
+    ap.add_argument("file", help=".tcraft project, mesh file or builtin:<id>")
     ap.add_argument("--full", action="store_true", help="include fill sources and mask effect settings")
     ap.add_argument("--json-out", help="also write the raw `info` JSON here")
     a = ap.parse_args()
 
-    if not os.path.exists(a.file):
+    if not a.file.startswith("builtin:") and not os.path.exists(a.file):
         raise tclib.TcError("not found: %s" % a.file)
     d = tclib.info(a.file)
     if a.json_out:

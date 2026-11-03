@@ -1,14 +1,14 @@
 ---
 name: texturecraft
-description: 'Automate TextureCraft, the Substance Painter-style PBR texture-painting app, headless with texturecraft-cli: new .tcraft projects from a mesh (glb, fbx, obj, usd) or a built-in, mesh-map bakes (AO, curvature, normal), also high-poly to low-poly with a cage, fill-layer stacks with smart materials, masks and edge-wear or dirt generators, edits to existing .tcraft projects, PBR texture export with engine presets (glTF, Unreal, Unity, Godot; PNG/TGA/EXR; OpenGL or DirectX normals), textured GLB/OBJ/USD export, and 3D or UV renders, read back. Use when the user mentions TextureCraft, texturecraft-cli or a .tcraft file, or wants a model PBR-textured or mesh maps baked with TextureCraft: "texture this crate as rusty metal in TextureCraft", "bake AO and curvature", "export a glTF PBR set with DirectX normals", "bake the high poly onto the low poly with a cage". Not for Blender painting or baking (blender), 2D painting (krita, gimp), modeling (blender, freecad, solidcraft), or AI texture generation (comfyui).'
+description: 'Automate TextureCraft, the Substance Painter-style PBR texture-painting app, headless with texturecraft-cli: new .tcraft projects from a mesh (glb, fbx, obj, usd) or a built-in, mesh-map bakes (AO, curvature, normal), high-poly to low-poly with a cage, fill-layer stacks with smart or MaterialCraft .mcmat materials, masks and edge-wear or dirt generators, edits to .tcraft projects, PBR texture export with engine presets (glTF, Unreal, Unity, Godot; PNG/TGA/EXR; OpenGL or DirectX normals), textured GLB/OBJ/USD export, 3D or UV renders, read back. Use when the user mentions TextureCraft, texturecraft-cli or a .tcraft file, or wants a model PBR-textured or mesh maps baked with TextureCraft: "texture this crate as rusty metal in TextureCraft", "bake AO and curvature", "export a glTF PBR set with DirectX normals", "bake the high poly onto the low poly with a cage". Not for Blender painting or baking (blender), 2D painting (krita, gimp), modeling (blender, freecad, solidcraft), or AI texture generation (comfyui).'
 summary: "automate TextureCraft headless with texturecraft-cli — projects from meshes or built-ins, AO/curvature and high-poly bakes with a cage, fill-layer stacks with smart materials, masks and edge-wear generators, .tcraft edits, glTF/Unreal/Unity/Godot PBR texture export checked against the plan, textured GLB export, 3D and UV renders, info read-back verified"
 category: 3d
-compatibility: "Built for TextureCraft 0.2.0 (e01dac2) and texturecraft-cli 0.2.0 on macOS (Apple Silicon, Metal), Python 3.9+; pre-1.0, so command ids may change."
+compatibility: "Built for TextureCraft 0.3.0 (8547514) and texturecraft-cli 0.3.0 on macOS (Apple Silicon, Metal), Python 3.9+; pre-1.0, so command ids may change."
 risk: low
 tags: [texturecraft, pbr, texturing, baking, mesh-maps, gltf, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "Tamás Jablonkai"
 ---
 
@@ -17,14 +17,14 @@ metadata:
 TextureCraft is a PBR texture-painting app in the style of Substance Painter. A project
 (`.tcraft`, a zip) holds a mesh, one **texture set** per material, each with its own layer
 stack (fill, paint and folder layers with masks and effects), baked mesh maps, and any
-high-poly and cage meshes. Every tool is a command in one registry (135 in 0.2.0) that
+high-poly and cage meshes. Every tool is a command in one registry (162 in 0.3.0) that
 runs headless through `texturecraft-cli`, with no window. This skill drives it headless
-and reads every result back with `info`. Verified against **TextureCraft 0.2.0
-(e01dac2)**. The software is pre-1.0, so if a pinned id fails, look it up with
+and reads every result back with `info`. Verified against **TextureCraft 0.3.0
+(8547514)**. The software is pre-1.0, so if a pinned id fails, look it up with
 `texturecraft-cli commands --filter WORD` rather than guessing.
 
 ```sh
-texturecraft-cli --version     # TextureCraft 0.2.0 (e01dac2 2026-11-01); lives in ~/.local/bin
+texturecraft-cli --version     # TextureCraft 0.3.0 (8547514 2026-11-03); lives in ~/.local/bin
 ```
 
 ## Pick the route
@@ -40,6 +40,7 @@ texturecraft-cli --version     # TextureCraft 0.2.0 (e01dac2 2026-11-01); lives 
 | One command, one-off | `texturecraft-cli run IN ID 'JSON' -o OUT.tcraft` (no `-o`, nothing is saved) |
 | Find a command and its params | `texturecraft-cli commands --filter WORD` |
 | Smart materials, smart masks, presets, filters | `run P material.list` / `mask.smart.list` / `export.presets` / `filter.list` |
+| A MaterialCraft material (`.mcmat`/`.mcraft`) as a live layer | `material.load {path}` in a spec, then `material.link.set {id, value}` / `.preset {name}` ([commands.md](references/commands.md#smart-materials)) |
 
 ## Scripts
 
@@ -56,7 +57,8 @@ overwrite outputs without `--overwrite`, print JSON and exit 1 on any failed che
     it refuses generators or smart materials on a set whose needed maps aren't baked. All
     steps then run as one `batch`, and the result is read back with `info` and `layer.list`.
 - **`tc_inspect.py F [--full] [--json-out J]`**: for a project, the normal format, then per
-  set the resolution, baked maps and layer tree with masks. For a mesh file, the sets,
+  set the resolution, baked maps and layer tree with masks and linked MaterialCraft
+  materials (graph, exposed values, presets). For a mesh file or `builtin:<id>`, the sets,
   triangles and UV report, plus the embedded textures of a `.glb`.
 - **`tc_export.py P DIR [--preset NAME|preset.json] [--ts SET] [--format F] [--bit-depth N] [--size N] [--padding M] [--normal directx|opengl] [--mesh OUT] [--plan-only]`**
   - It runs `export.plan`, then exports. It checks that the written files equal the plan
@@ -92,6 +94,7 @@ overwrite outputs without `--overwrite`, print JSON and exit 1 on any failed che
    `--size` when the user named them, and `--mesh` for a textured model.
 6. **Look at it.** Run `tc_render.py OUT.tcraft preview.png --uv` and Read both PNGs. A
    mask on the wrong set, or a generator that rendered nothing, shows only in the picture.
+   The UV view covers set 0 only; judge the other sets in the 3D view.
 7. **Report** the files, the read-back numbers (sets, layers, baked maps, sizes) and
    anything you could not check.
 
@@ -115,8 +118,11 @@ overwrite outputs without `--overwrite`, print JSON and exit 1 on any failed che
   asking. Chain edits in one `batch` or through `tc_build.py`.
 - **Importing a mesh doesn't import its materials.** Each set starts as one empty
   `Layer 1`. To recolour a set, add a fill layer on that set.
-- **`info builtin:crate` fails.** `info` reads only files, and a project's `info` has no UV
-  report, so inspect the mesh file for that.
+- **A project's `info` has no UV report.** Inspect the mesh file or `builtin:<id>` for that
+  (`info builtin:crate` works since 0.3.0).
+- **The 2D render shows only the first texture set.** A saved project always reopens on
+  set 0, so `render --view 2d` (and `tc_render.py --uv`) can't show a bare `Lid` or
+  `Handle`; check every set in the 3D render, with `--yaw 215` for the back.
 
 ## The running app (optional)
 
@@ -128,9 +134,9 @@ the user wants their open project changed, and read
 ## References
 
 - [references/cli.md](references/cli.md): subcommands, flags, batch format, `info` JSON, exit codes.
-- [references/commands.md](references/commands.md): command ids and params by task, pinned to 0.2.0, and registry lookup.
+- [references/commands.md](references/commands.md): command ids and params by task, pinned to 0.3.0, and registry lookup.
 - [references/bake.md](references/bake.md): mesh-map ids, bake settings, high-poly and cage bakes.
 - [references/export.md](references/export.md): built-in presets and their packing, preset objects, file-name tokens, formats, normals.
-- [references/recipes.md](references/recipes.md): rusty crate, recolouring a set of an imported GLB, high-to-low bake with cage, smart materials on every set.
+- [references/recipes.md](references/recipes.md): rusty crate, recolouring a set of an imported GLB, high-to-low bake with cage, smart materials on every set, a MaterialCraft material re-cooked in place.
 - [references/gotchas.md](references/gotchas.md): silent failures and surprises.
 - [references/security.md](references/security.md): file access, `serve`/`mcp` and the app's control channel.

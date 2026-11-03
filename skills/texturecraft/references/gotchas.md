@@ -1,6 +1,6 @@
-# Gotchas (TextureCraft 0.2.0)
+# Gotchas (TextureCraft 0.3.0)
 
-Each of these was reproduced against texturecraft-cli 0.2.0.
+Each of these was reproduced against texturecraft-cli 0.3.0.
 
 ## Silent failures
 
@@ -46,9 +46,11 @@ Each of these was reproduced against texturecraft-cli 0.2.0.
 
 ## Reading back
 
-- `info builtin:<id>` fails with an I/O error. Create the project first.
-- A project's `info` has `uv: null`. The UV report is in `info` of the mesh file
-  (`overlapRatio`, `uvOutOfRange`, `zeroAreaUvTriangles`, `uvsGenerated`, `warnings`).
+- A project's `info` has `uv: null`. The UV report is in `info` of the mesh file or
+  `builtin:<id>` (`overlapRatio`, `uvOutOfRange`, `zeroAreaUvTriangles`, `uvsGenerated`,
+  `warnings`). `info builtin:<id>` failed with an I/O error in 0.2.0; it works in 0.3.0.
+- A saved project reopens with texture set 0 active. `textureSet.select` lasts only for the
+  rest of that `batch`; the selection isn't saved.
 - The normal format isn't in `info`, and `textureSet.settings` returns `null`. Read
   `normal_format` from `project.json` in the zip (`tc_inspect.py` does).
 - Export file names use `$mesh`, which is `mesh` for any imported file.
@@ -74,5 +76,8 @@ Each of these was reproduced against texturecraft-cli 0.2.0.
   (`tc_render.py` falls back to that by itself).
 - The default camera frames the whole mesh from the front-right (yaw ≈ 34°, pitch ≈ 14°).
   Use `--yaw 215` to see the back.
-- The 2D view lays every texture set's UV square side by side, so an untextured set
-  stands out there.
+- The 2D view shows only the active texture set's UV square, and since a saved project
+  reopens on set 0, `render --view 2d` shows set 0 only (0.3.0). A bare `Lid` or `Handle`
+  shows only in the 3D view, so check every set there.
+- `--samples` path traces on the GPU in 0.3.0 when it has compute shaders (about 6 s for
+  256² at 8 samples on an M1 Pro); `--cpu` is faster for small previews (under 1 s).

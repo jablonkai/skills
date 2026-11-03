@@ -1,6 +1,6 @@
-# Command ids by task (pinned to TextureCraft 0.2.0)
+# Command ids by task (pinned to TextureCraft 0.3.0)
 
-The registry holds 135 commands. These are the ones a headless texturing job needs. For
+The registry holds 162 commands. These are the ones a headless texturing job needs. For
 anything else, or when a pinned id fails after an update:
 
 ```sh
@@ -57,9 +57,12 @@ exactly (`tc_build.py` checks them).
 
 | Id | Params |
 |---|---|
-| `material.list` | `{}`: 75 ids, such as `steel rust iron_rusted steel_painted_worn copper_patina wood_oak wood_weathered concrete_dirty plastic_scuffed leather_worn …` |
+| `material.list` | `{}`: 93 ids, such as `steel rust iron_rusted steel_painted_worn copper_patina wood_oak wood_weathered concrete_dirty plastic_scuffed leather_worn …` |
 | `material.apply` | `{material: id or label, above?, inside?, index?}`. Adds a group to the active set and returns `{"layer": id}`. |
-| `material.save` / `material.load` | `.tcmat` files |
+| `material.save` / `material.load` | `.tcmat` files. `material.load {path, above?, inside?, index?}` also takes a MaterialCraft `.mcmat` or `.mcraft` (0.3.0) and returns `{"layer": id}`: a fill layer linked to the graph, named after the material. |
+| `material.link.set` | `{layer?, id, value, cook?: true}`: sets an exposed input of a linked MaterialCraft layer and re-cooks it. `value` is a number, a list, a bool, `"#rrggbb"` or `{t, v}`. |
+| `material.link.preset` / `material.link.cook` | `{layer?, name, cook?}` / `{layer?}`. A cook uses the set's resolution and baked mesh maps, so bake first. |
+| `material.link.saveSource` | `{layer?, path}`: writes the layer's `.mcraft` back out for MaterialCraft. |
 
 ## Bake, export, files
 
@@ -76,6 +79,8 @@ exactly (`tc_build.py` checks them).
 | `file.new` / `project.new` | `{mesh, resolution?, name?, uvTiles?, template?}` / `{mesh?: builtin, …}` |
 | `file.save` / `file.saveAs` / `file.saveCopy` / `file.reimportMesh` | |
 | `resource.import` | `{path}`: an image for `layer.add.image`, a stencil or a decal. |
+| `camera.add` / `.list` / `.select` / `.remove` / `.rename`, `camera.set` | `camera.add {name?}` saves the current view; `render --camera NAME` looks through it. `camera.set {yaw?, pitch?, distance?, fov?, target?, ortho?}`. |
+| `edit.undo` / `edit.redo` / `edit.history` | `{steps?}`, inside one `batch`. |
 
 Painting (`tool.*`: `tool.select`, `tool.brush`, `tool.material`, `tool.strokeUv
 {points: [[u,v]…]}`, `tool.stroke` in viewport pixels) works headless too, but fills with
