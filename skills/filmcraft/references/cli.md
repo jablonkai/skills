@@ -1,4 +1,4 @@
-# filmcraft-cli 0.16.0 reference
+# filmcraft-cli 0.17.0 reference
 
 `filmcraft-cli [OPTIONS] <SUBCOMMAND> [ARGS]`. It runs a headless FilmCraft engine by
 default, or sends commands to the running app with `--bridge`. `filmcraft-cli help` is the
@@ -10,7 +10,7 @@ authoritative list. The CLI is a symlink into `~/.local/share/artcraft-cli/filmc
 |---|---|
 | `--project p.fcproj` | open this project first (headless) |
 | `--demo` | open the built-in demo project |
-| `--save` | save back to `--project` at the end. **Without it, edits are discarded** |
+| `--save` | save back to `--project` at the end. **Without it, edits are discarded**. Since 0.17.0, parallel `--save` runs on one project take turns (`waiting for another run saving …`), so none loses its edit |
 | `--save-as p.fcproj` | save to a new path at the end |
 | `--bridge 127.0.0.1:PORT` | send commands to an app started with `filmcraft --control PORT` |
 | `--data-dir dir` | the data directory holding user export presets (headless) |
@@ -44,11 +44,12 @@ authoritative list. The CLI is a symlink into `~/.local/share/artcraft-cli/filmc
 - Sequences count from frame 0 (`00:00:00:00`). Subtract a source list's `01:00:00:00`
   start (`fc_markers.py --sequence-start`).
 
-## Export presets (built in, 0.16.0)
+## Export presets (built in, 0.17.0)
 
 - **Match Source**: Adaptive High, Medium and Low Bitrate (H.264 at the sequence size).
 - **Web & Social**: High Quality 1080p HD and 2160p 4K, YouTube 1080p Full HD and 2160p 4K
-  Ultra HD, Vimeo 1080p and 2160p, Social Vertical 1080×1920. All are **fixed frame size**.
+  Ultra HD, Vimeo 1080p and 2160p, Social Vertical 1080×1920, and (new in 0.17.0) TikTok,
+  Instagram Reels and YouTube Shorts 1080×1920. All are **fixed frame size**.
 - **Broadcast**: Apple ProRes 422 HQ, 422, 422 LT, 422 Proxy, 4444, 4444 with Alpha and
   4444 XQ. Avid DNxHR HQ, SQ and LB. APV 422-10 and 422-12. MXF OP1a DNxHR HQ, ProRes 422
   HQ and H.264. MXF OP-Atom DNxHR (Avid).
