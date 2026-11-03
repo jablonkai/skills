@@ -1,6 +1,6 @@
-# wordcraft-cli reference (0.14.0)
+# wordcraft-cli reference (0.15.0)
 
-All behaviour below was verified against wordcraft-cli 0.14.0 on macOS. `-h` on any
+All behaviour below was verified against wordcraft-cli 0.15.0 on macOS. `-h` on any
 subcommand prints this same global help; there is no per-command help and no `describe`.
 
 ## Subcommands
@@ -13,7 +13,7 @@ subcommand prints this same global help; there is no per-command help and no `de
 | `inspect FILE` | Structure JSON (below) |
 | `render FILE OUT.png [--page N] [--scale S]` | One page to PNG. Pages are 1-based; scale is px per pt (default 2) |
 | `run [--file F \| --template T] [--script FILE\|-] --cmd 'id={json}' … [--save OUT] [--print] [--author NAME]` | Runs commands headless, then saves. `--print` prints each command's result |
-| `commands [--json]` | The registry (648 ids). Filter it with `scripts/wc_commands.py` |
+| `commands [--json]` | The registry (651 ids). Filter it with `scripts/wc_commands.py` |
 | `parity [--markdown]` | Feature-catalogue coverage |
 | `mcp [--connect HOST:PORT \| --author NAME] [--automation-read-root DIR] [--automation-write-root DIR]` | MCP server on stdio, headless or bridged to the app |
 | `zotero <command> FILE …` | Zotero citation commands (needs Zotero running) |
@@ -23,7 +23,7 @@ Password-protected files take `--password-file PATH` or `WORDCRAFT_PASSWORD`. A
 
 ## Formats
 
-- **Read:** docx, doc, odt, rtf, html, md, tex, txt, json, xml (Flat OPC / Word 2003 XML).
+- **Read:** docx, doc, odt, rtf, html, mht (0.15.0+), md, tex, txt, json, xml (Flat OPC / Word 2003 XML).
 - **Write:** docx, pdf, odt, rtf, html, md, tex, txt, json, png, xml.
 - **Not supported:** `.doc` output and reading PDF.
 - **Markdown in:** `#`→Heading1, `##`→Heading2, `###`→Heading3, pipe tables → `TableGrid`, lists, `**bold**` and `*italic*` as run props.
