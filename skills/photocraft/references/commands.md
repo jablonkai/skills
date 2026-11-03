@@ -1,6 +1,6 @@
-# Engine commands most tasks need (pinned to 0.19.0)
+# Engine commands most tasks need (pinned to 0.20.1)
 
-The registry has 953 commands. This table pins the ids that were exercised for this
+The registry has 954 commands. This table pins the ids that were exercised for this
 skill. For anything else, look it up instead of guessing an id:
 
 ```sh
@@ -97,7 +97,7 @@ These act on the active pixel layer. On a Smart Object they become smart filters
 | Id | Key params |
 |---|---|
 | `layerComp.new` | `name`, `visibility`, `position`, `appearance` (records the current state) |
-| `layerComp.apply` | `comp` id\|name. an unknown name fails with `no layer comp named …` (0.10.0+) |
+| `layerComp.apply` | `comp` id\|name. an unknown name fails with `no layer comp named …` (0.10.0+); a typed `{"index": n}` (one-based, 0.20.1+) that is out of range does nothing and replies `unchanged: true` |
 | `layerComp.update` | `comp` id\|name\|"*", `what` all\|visibility\|position\|appearance |
 | `layerComp.list` | → `{comps, lastApplied}` |
 | `file.export.layerCompsToFiles` | `dir`, `format` png\|jpg\|psd\|tiff, `prefix`, `comps` [id]. Files are named `<prefix>_NNNN_<comp>.<ext>` (CLI `run` only) |
@@ -113,6 +113,7 @@ These act on the active pixel layer. On a Smart Object they become smart filters
 | Id | Key params |
 |---|---|
 | `actions.load` | `path` (.atn) → `{set, actions, steps, unsupported, warnings}` |
+| `actions.newSet` | `name` → `{set}`; an empty set that `actions.record {"set"}` records into (new in 0.20.1) |
 | `actions.play` | `action` name\|index; check `failed` in the result (the command itself still returns ok) |
 | `file.automate.createDroplet` / `.runDroplet` | see [cli.md](cli.md#droplet) |
 | `file.automate.batch` | `steps`, `input`, `includeSubfolders` (keeps the tree under `output`), `output`, `format`, `quality` 0..12 |
