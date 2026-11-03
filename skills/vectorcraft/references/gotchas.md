@@ -1,4 +1,4 @@
-# Gotchas (VectorCraft 0.20.0)
+# Gotchas (VectorCraft 0.21.0)
 
 ## Paint and geometry
 
@@ -17,8 +17,10 @@
 - **Text `y` is the baseline.** `size` defaults to the current character size (12 pt),
   so always set it. `justify: "center"` centres point type on `x`. For area type, pass
   `area: {width, height, fit: "autoHeight"}`.
-- **Fonts:** a missing family is substituted silently. `info.fonts[].status` is `exact`
-  only when the font resolved. Check it with `vc_verify.py doc --fonts-ok`, and name
+- **Fonts:** a missing family is drawn in the fallback (Source Sans 3) without failing.
+  `text.create` only adds a `warning` to its result (0.21.0), which `run` and
+  `vc_build.py` don't stop on. `info.fonts[].status` is `exact` only when the font
+  resolved (`missing` otherwise). Check it with `vc_verify.py doc --fonts-ok`, and name
   installed families. `Helvetica` (macOS) and `Source Sans 3` (bundled, the default)
   resolve.
 - **Units:** `file.new` takes `units`. Rasters render 1 pt = 1 px at scale 1 (Pixels
