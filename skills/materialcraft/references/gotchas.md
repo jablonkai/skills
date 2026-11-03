@@ -1,0 +1,74 @@
+# Gotchas (MaterialCraft 0.1.0)
+
+## Silent successes that did the wrong thing
+
+| What you do | What happens | Do instead |
+|---|---|---|
+| A misspelled **command** key (`conectFrom`, `colour`) | Ignored; the step reports success | Copy keys from `commands --filter`; `mc_build.py` rejects them. (Unknown node defs, node param ids and port ids *are* errors.) |
+| `graph.node.add {connectFrom}` into `blend`/`lerp`/`height_blend` | Wires the **first** input (`foreground`, `input_a`, `top`); the other stays empty and the result is black or flat, with no cook error | Wire both inputs with explicit `toPort`s |
+| `graph.connect` into an input that already has a wire | Replaces it | Use it to insert nodes; check `mc_inspect.py` wires afterwards |
+| Export `--pattern` with an unknown token (`$(name)`, `$(size)`) | Becomes `_name_` in the file name | Tokens are `$(graph)`, `$(identifier)`, `$(usage)` only |
+| A pattern without `$(identifier)`/`$(usage)` | Every output writes the same file; the last wins | Keep one of them |
+| `--depth 16` on jpg/webp/tga/bmp, `--depth 32` on png/tif, `--depth 8/16` on exr | Ignored: 8-bit, 16-bit, 32-bit float respectively | See export.md; `mc_export.py` refuses |
+| An exposed input with no `bind` | Exists, saves into presets and the `.mcmat`, drives nothing | `mc_inspect.py` warns; `mc_render.py --variants` fails on identical renders |
+| A float default bound to an enum param | `bad default` error | Bind floats to float/int params |
+| `render --view 2d --tiling 3` | Same PNG as without `--tiling`: no repeat | `mc_render.py --tile 3` |
+| `render --view 2d` of a node that cooks black | A black PNG, exit 0 | Read the PNG; `mc_render.py` reports flat images |
+| `cook` without `--full` | Nodes cooked at open time show `cached: true`, `ms: 0` | Use `--full` when the cook report is your check |
+
+## Commands that need a selection
+
+`graph.node.param`, `.reset`, `.base`, `.bind`, `.function`, `.rename`, `.move`, `.disable`
+and `edit.delete`, `.deleteRelink`, `.copy`, `.cut`, `.duplicate` fail with
+`not available: no node is selected` when the selection is empty — **even when `id`/`ids` is
+given**. With any selection they act on the `id`/`ids` you pass. Headless runs start with
+nothing selected, so:
+
+```json
+{"id": "graph.select", "params": {"ids": [13]}},
+{"id": "graph.node.param", "params": {"id": 13, "param": "out_high", "value": 0.4}}
+```
+
+`graph.exposed.add {bind}` and `graph.connect` don't need a selection.
+
+## Colours
+
+- Hex (`"#rrggbb"`) is **sRGB**; typed colours `{"t": "color", "v": [r, g, b, a]}` are
+  **linear**. `graph.exposed.set` / `--set` / `graph.node.param` linearise hex
+  (`#8a5a3c` → `[0.254, 0.102, 0.045]`).
+- `graph.exposed.add` rejects a hex `default` (`bad default`); give the typed linear value.
+- `--set` values are JSON: `--set 'tint="#aa7744"'` (shell quotes around JSON quotes).
+  `--set tint=#aa7744` is not valid JSON.
+
+## Tiling
+
+- `anisotropic_noise` does not wrap along X (seam score ≈ 10–20; every other noise tested
+  scores < 0.5). The `wood` and `rusty_metal` templates use it, so their base colour and
+  roughness show a vertical seam line when tiled. `make_it_tile` after it fixes it (score 0).
+- Node `base.tiling` (`graph.node.base {tiling: false}`) does not change what a generator
+  produces; it is not a seam fix.
+- `render --view 2d --tiling N` is ignored in 0.1.0 — the PNG is byte-identical to the
+  untiled one (so is `view.2d {tiled: true}`). In 3D (`--scene plane --tiling 3`) it repeats
+  the UVs. `mc_render.py --tile N` writes a real N×N 2D repeat so you can *see* seams;
+  `mc_render.py --seam` gives the number.
+
+## Files
+
+- `new`, `run -o`, `batch` `save` and `export` overwrite without asking; `export` into a
+  folder that holds an earlier export mixes old and new files. The `mc_*` scripts refuse
+  existing outputs unless `--overwrite`.
+- `run` without `-o` saves nothing — the change is lost. Chain edits in one `batch` or
+  through `mc_build.py`.
+- A failed `batch` stops at the failing step, exits 1 and saves nothing (`failed.index` names
+  the step).
+- `info` shows the package's open graph — graph 0 after a reload. Another graph:
+  `session.inspect {"graph": I}` or `--graph I` on `cook`/`export`/`render`/scripts.
+- Node ids are never reused: after a delete, the next node gets max-ever + 1. Read ids from
+  the `batch` results, never compute them.
+- New packages default to 1024×1024 and 16-bit (`u16`) — pass `--size`; maps export at the
+  graph size.
+
+## Version drift
+
+Pinned to 0.1.0: 68 commands, 222 nodes (the vendor README says "227"). After an update,
+re-run `materialcraft-cli commands` and `nodes` and compare before trusting these pages.
