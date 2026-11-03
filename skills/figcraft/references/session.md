@@ -4,7 +4,7 @@
 `scripts/fclib.py`'s `Session` speaks its JSON-RPC directly, so no MCP client has to be
 configured; `scripts/fc_session.py` turns a JSON step list into tool calls.
 
-## Tools (0.14.0)
+## Tools (0.15.0)
 
 | Tool | Use |
 |---|---|
