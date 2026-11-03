@@ -1,7 +1,7 @@
 # Recipes
 
 `S=<skill>/scripts`. Every recipe writes to new paths and ends with a read-back.
-Each one was run against pdfcraft-cli 0.17.0.
+Each one was run against pdfcraft-cli 0.18.0.
 
 ## Contents
 
@@ -18,6 +18,7 @@ Each one was run against pdfcraft-cli 0.17.0.
 "Merge q1.pdf, q2.pdf, q3.pdf, drop page 2, turn the last page to landscape, title it 2026 Report."
 
 ```sh
+mkdir -p work                                        # edit/combine/extract don't create folders
 bash $S/pf.sh combine q1.pdf q2.pdf q3.pdf --out work/merged.pdf
 N=$(bash $S/pf.sh info work/merged.pdf | python3 -c 'import sys,json;print(json.load(sys.stdin)["pages"])')
 # --delete runs first, so the last page is now N-1.

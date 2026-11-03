@@ -1,4 +1,4 @@
-# Gotchas (pdfcraft-cli 0.17.0)
+# Gotchas (pdfcraft-cli 0.18.0)
 
 Each was found by running the CLI. Where the fix is mechanical, the scripts
 already apply it.
@@ -33,6 +33,9 @@ already apply it.
 ## Page edits
 
 - `edit --out` onto its own input overwrites it with exit 0. Write elsewhere.
+- `edit`, `combine` and `extract` fail (exit 1, `No such file or directory`)
+  when the `--out` folder doesn't exist. Create it first; `split`, `batch` and
+  `doc_save` create theirs.
 - No `last`/`-1` page keyword. Read `pages` from `info`.
 - `edit` options run in order, and each sees the result of the previous one.
   After `--delete 2`, the old page 9 is page 8.
