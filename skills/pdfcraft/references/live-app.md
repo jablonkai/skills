@@ -21,9 +21,11 @@ rm -f "$C"
 
 - **Save before `quit`.** With unsaved changes it answers
   `{"needs_confirmation": true, "quitting": false}`. In 0.15.0 testing, the app
-  still exited about 3 s later and the changes were lost.
+  still exited about 3 s later and the changes were lost. In 0.18.0 it stays
+  open waiting for an answer in the window (still running 10 s later), so a
+  scripted run never ends until someone answers it or the process is killed.
 
-- Methods (0.17.0): `state`, `inspect`, `click`, `focus`, `resize`, `move`,
+- Methods (0.18.0): `state`, `inspect`, `click`, `focus`, `resize`, `move`,
   `drag`, `type`, `key`, `command`, `commands`, `set`, `open`, `screenshot`,
   `quit`. An unknown method lists them.
 - `open` returns `pending: true`. Poll `state` until `active` is non-null

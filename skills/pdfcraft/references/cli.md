@@ -1,4 +1,4 @@
-# pdfcraft-cli 0.17.0 reference
+# pdfcraft-cli 0.18.0 reference
 
 Run every subcommand through `scripts/pf.sh` (same arguments) so OCR finds its
 models. `pdfcraft-cli help <sub>` prints the same usage text as `--help`.
@@ -43,6 +43,9 @@ pf.sh split IN.pdf (--every N | --before 3,7) [--out-dir DIR]
   changes; the file grows). `--full` rewrites it compactly.
 - `edit --out` onto its own input **overwrites it silently** (exit 0). Always
   write to a new path.
+- `edit`, `combine` and `extract` don't create a missing parent folder of `--out`:
+  they exit 1 with `No such file or directory`. `mkdir -p` it first. (`split`
+  and `batch` create their `--out-dir`, and `doc_save` creates parents.)
 - `combine` adds one top-level bookmark per input, titled after the input's file
   name. Images and `.txt` files can be combined too.
 - `extract` ranges must ascend (`3-1` is an error). Order comes from the list:
