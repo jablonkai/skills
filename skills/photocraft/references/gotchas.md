@@ -1,4 +1,4 @@
-# Gotchas (verified on 0.20.1)
+# Gotchas (verified on 0.20.2)
 
 Each of these was hit while building the skill. Most fail silently, so a read-back is the
 only way to notice them.

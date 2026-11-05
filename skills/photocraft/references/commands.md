@@ -1,6 +1,6 @@
-# Engine commands most tasks need (pinned to 0.20.1)
+# Engine commands most tasks need (pinned to 0.20.2)
 
-The registry has 954 commands. This table pins the ids that were exercised for this
+The registry has 965 commands. This table pins the ids that were exercised for this
 skill. For anything else, look it up instead of guessing an id:
 
 ```sh
