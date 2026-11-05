@@ -1,6 +1,6 @@
-# Gotchas (TextureCraft 0.3.0)
+# Gotchas (TextureCraft 0.3.2)
 
-Each of these was reproduced against texturecraft-cli 0.3.0.
+Each of these was reproduced against texturecraft-cli 0.3.2.
 
 ## Silent failures
 
@@ -37,7 +37,7 @@ Each of these was reproduced against texturecraft-cli 0.3.0.
 
 - `textureSet.select` takes an integer index. `{"ts": "Lid"}` is an error.
   (`tc_build.py` maps set names to indices.)
-- Mesh map ids are long (`ambient_occlusion`, not `ao`). Generator ids are camelCase
+- Mesh map ids are the camelCase ones (`ambientOcclusion`, not `ao` or `ambient_occlusion`; 0.3.2 renamed `normal_base` to `normal`, `world_space_normals` to `worldNormal`). Generator ids are camelCase
   (`edgeWear`, `thinAreas`). Smart material and smart mask ids are snake_case
   (`iron_rusted`, `edge_wear`). Preset names are full titles with parentheses.
 - Layer ids are unique across all sets. The add commands return them as `{"layer": N}`,

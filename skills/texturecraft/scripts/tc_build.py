@@ -6,7 +6,7 @@ Spec (file path or inline JSON):
     "in": "builtin:crate" | "mesh.glb" | "old.tcraft",   (or --in)
     "resolution": 2048,                                    (new projects only; default 2048)
     "steps": [
-      {"id": "bake.run", "params": {"ts": "all", "maps": ["ambient_occlusion", "curvature"]}},
+      {"id": "bake.run", "params": {"ts": "all", "maps": ["ambientOcclusion", "curvature"]}},
       {"sets": "all", "steps": [ {"id": "material.apply", "params": {"material": "iron_rusted"}} ]},
       {"sets": ["Lid"], "steps": [ {"id": "layer.add.fill", "params": {"name": "Paint", "color": [0.1, 0.3, 0.7]}} ]}
     ],
@@ -35,10 +35,10 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import tclib  # noqa: E402
 
-DEFAULT_MAPS = ["normal_base", "world_space_normals", "id", "ambient_occlusion", "curvature", "position", "thickness"]
-GEN_NEEDS = {"edgeWear": "curvature", "curvature": "curvature", "dirt": "ambient_occlusion",
-             "ambientOcclusion": "ambient_occlusion", "thinAreas": "thickness", "position": "position",
-             "direction": "world_space_normals"}
+DEFAULT_MAPS = ["normal", "worldNormal", "id", "ambientOcclusion", "curvature", "position", "thickness"]
+GEN_NEEDS = {"edgeWear": "curvature", "curvature": "curvature", "dirt": "ambientOcclusion",
+             "ambientOcclusion": "ambientOcclusion", "thinAreas": "thickness", "position": "position",
+             "direction": "worldNormal"}
 
 
 def load_spec(arg):

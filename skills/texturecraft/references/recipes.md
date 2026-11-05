@@ -1,4 +1,4 @@
-# Recipes (verified on TextureCraft 0.3.0)
+# Recipes (verified on TextureCraft 0.3.2)
 
 `S=<skill>/scripts`. Each spec below was run through `tc_build.py` as written.
 
@@ -6,7 +6,7 @@
 
 ```json
 {"in": "builtin:crate", "resolution": 2048, "steps": [
-  {"id": "bake.run", "params": {"ts": "all", "resolution": 2048, "maps": ["ambient_occlusion", "curvature"]}},
+  {"id": "bake.run", "params": {"ts": "all", "resolution": 2048, "maps": ["ambientOcclusion", "curvature"]}},
   {"sets": "all", "steps": [
     {"id": "layer.add.fill", "params": {"name": "Steel base", "color": [0.55, 0.56, 0.58], "metallic": 1.0, "roughness": 0.35}},
     {"id": "layer.add.fill", "params": {"name": "Rust", "color": [0.45, 0.20, 0.08], "metallic": 0.0, "roughness": 0.85}},
@@ -17,7 +17,7 @@
 ```
 
 ```sh
-python3 $S/tc_build.py crate.json --expect-layer all:Rust --expect-baked all:ambient_occlusion,curvature
+python3 $S/tc_build.py crate.json --expect-layer all:Rust --expect-baked all:ambientOcclusion,curvature
 python3 $S/tc_export.py out/crate_rust.tcraft out/textures --preset "glTF PBR Metal Roughness"
 python3 $S/tc_render.py out/crate_rust.tcraft out/crate_preview.png --uv
 ```
@@ -71,9 +71,9 @@ python3 $S/tc_export.py out/model.tcraft out/textures --preset "glTF PBR Metal R
 ```
 
 ```sh
-python3 $S/tc_build.py bake.json --expect-baked all:normal_base,ambient_occlusion,curvature
+python3 $S/tc_build.py bake.json --expect-baked all:normal,ambientOcclusion,curvature
 python3 $S/tc_inspect.py out/low_baked.tcraft          # bakeMeshes.highPoly / cage set
-python3 $S/tc_export.py out/low_baked.tcraft out/maps --preset "Mesh maps"    # look at *_normal_base.png
+python3 $S/tc_export.py out/low_baked.tcraft out/maps --preset "Mesh maps"    # look at *_normal.png
 python3 $S/tc_export.py out/low_baked.tcraft out/tex --preset "glTF PBR Metal Roughness" --mesh out/low_textured.glb
 ```
 
