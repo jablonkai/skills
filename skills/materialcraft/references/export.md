@@ -1,4 +1,4 @@
-# Export (0.1.0)
+# Export (0.1.2)
 
 `export` cooks the graph at its full size and writes **one file per output node**. The
 graph size is the map size (`new --size`, `graph.size`); there is no per-export resize except
@@ -64,7 +64,7 @@ linear) and `source.mcraft` (the package, so TextureCraft can re-cook it).
   `~/Documents/TextureCraft/library`, where TextureCraft's shelf lists it. That writes into
   the user's library — do it only when asked.
 
-### Opening it in TextureCraft (verified with TextureCraft 0.3.0)
+### Opening it in TextureCraft (verified with TextureCraft 0.3.2)
 
 ```sh
 texturecraft-cli new builtin:sphere t.tcraft

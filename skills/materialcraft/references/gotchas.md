@@ -1,4 +1,4 @@
-# Gotchas (MaterialCraft 0.1.0)
+# Gotchas (MaterialCraft 0.1.2)
 
 ## Silent successes that did the wrong thing
 
@@ -47,7 +47,7 @@ nothing selected, so:
   roughness show a vertical seam line when tiled. `make_it_tile` after it fixes it (score 0).
 - Node `base.tiling` (`graph.node.base {tiling: false}`) does not change what a generator
   produces; it is not a seam fix.
-- `render --view 2d --tiling N` is ignored in 0.1.0 — the PNG is byte-identical to the
+- `render --view 2d --tiling N` is ignored in 0.1.2 — the PNG is byte-identical to the
   untiled one (so is `view.2d {tiled: true}`). In 3D (`--scene plane --tiling 3`) it repeats
   the UVs. `mc_render.py --tile N` writes a real N×N 2D repeat so you can *see* seams;
   `mc_render.py --seam` gives the number.
@@ -70,5 +70,5 @@ nothing selected, so:
 
 ## Version drift
 
-Pinned to 0.1.0: 68 commands, 222 nodes (the vendor README says "227"). After an update,
+Pinned to 0.1.2: 68 commands, 222 nodes (the vendor README says "227"). After an update,
 re-run `materialcraft-cli commands` and `nodes` and compare before trusting these pages.
