@@ -3,12 +3,12 @@ name: materialcraft
 description: 'Automate MaterialCraft, the Substance Designer-style procedural material app, headless with materialcraft-cli: .mcraft packages from a template (wood, bricks, rusty metal, marble…) or a node graph built from a spec (noises, patterns, filters, normal, outputs), exposed inputs bound to node parameters and presets, variants via --set without editing the package, edits to existing graphs, tileable PBR map export as PNG/EXR/TGA/TIF at 8/16/32-bit with a name pattern, .mcmat export for TextureCraft, 3D and 2D renders with a seam check, read back. Use when the user mentions MaterialCraft, materialcraft-cli, .mcraft or .mcmat, or wants a procedural tileable material authored as a node graph: "make a tileable mossy stone material", "expose a wear slider and render three variants", "export the PBR maps as 16-bit PNG". Not for painting materials onto a mesh or baking (texturecraft), Blender shader nodes (blender), or editing 2D texture images (imagemagick, gimp, krita).'
 summary: "automate MaterialCraft headless with materialcraft-cli — procedural material graphs from templates or a node spec, exposed inputs and presets, --set variants, .mcraft edits, tileable PBR map export in any format and bit depth with a seam check, .mcmat hand-off to TextureCraft, 3D and 2D renders, info and cook read-back verified"
 category: 3d
-compatibility: "Built for MaterialCraft 0.1.0 (cedabf0) and materialcraft-cli 0.1.0 on macOS (CPU renders, no GPU needed), Python 3.9+; .mcmat hand-off verified with TextureCraft 0.3.0. Pre-1.0, so command and node ids may change."
+compatibility: "Built for MaterialCraft 0.1.2 (1639314) and materialcraft-cli 0.1.2 on macOS (CPU renders, no GPU needed), Python 3.9+; .mcmat hand-off verified with TextureCraft 0.3.2. Pre-1.0, so command and node ids may change."
 risk: low
 tags: [materialcraft, procedural, materials, pbr, node-graph, tileable, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   author: "Tamás Jablonkai"
 ---
 
@@ -20,12 +20,12 @@ patterns, filters, blends, normal/AO, material filters) wired into **output** no
 PBR map. A graph can **expose inputs** (bound to node parameters) and store **presets** of
 their values. Everything runs headless through `materialcraft-cli`, with no window or GPU.
 This skill builds and edits graphs headless and reads every result back. Verified against
-**MaterialCraft 0.1.0 (cedabf0)**: 68 commands, 222 nodes. The software is pre-1.0, so if a
+**MaterialCraft 0.1.2 (1639314)**: 68 commands, 222 nodes. The software is pre-1.0, so if a
 pinned id fails, look it up (`commands --filter WORD`, `nodes --filter WORD`) rather than
 guessing.
 
 ```sh
-materialcraft-cli --version     # materialcraft-cli 0.1.0 (cedabf0 2026-11-02); lives in ~/.local/bin
+materialcraft-cli --version     # materialcraft-cli 0.1.2 (1639314 2026-11-05); lives in ~/.local/bin
 ```
 
 ## Pick the route
@@ -112,10 +112,10 @@ library only, full `--help` each. They find the CLI (`MATERIALCRAFT_CLI`, then P
 - **Hex colours are sRGB, typed colours are linear.** `graph.exposed.add` rejects
   `"#rrggbb"` as a default (use `{"t": "color", "v": [r, g, b, a]}`, linear);
   `graph.exposed.set` and `--set` accept hex and linearise it. `mc_build.py` converts.
-- **`anisotropic_noise` does not tile along X** in 0.1.0, so the `wood` and `rusty_metal`
+- **`anisotropic_noise` does not tile along X** in 0.1.2, so the `wood` and `rusty_metal`
   templates have a horizontal seam in base colour and roughness. `mc_render.py --seam`
   shows it; use another noise, or put `make_it_tile` after it, when tiling matters.
-- **`render --view 2d --tiling N` does not repeat anything** in 0.1.0 (the PNG is identical to
+- **`render --view 2d --tiling N` does not repeat anything** in 0.1.2 (the PNG is identical to
   `--tiling 1`); in 3D `--tiling` repeats the UVs. For a tiled 2D view use `mc_render.py
   --tile N`.
 - **Nothing asks before overwriting**: `new`, `-o`, `batch` `save` and `export` into an
@@ -131,7 +131,7 @@ live route only when the user wants their open document changed, and read
 ## References
 
 - [references/cli.md](references/cli.md): subcommands, flags, batch format, value syntax, `info` JSON, exit codes.
-- [references/commands.md](references/commands.md): the 68 command ids by group, pinned to 0.1.0, and registry lookup.
+- [references/commands.md](references/commands.md): the 68 command ids by group, pinned to 0.1.2, and registry lookup.
 - [references/nodes.md](references/nodes.md): node categories, the core nodes with ports and params, library lookup.
 - [references/recipes.md](references/recipes.md): graph from scratch, template tint insert, weathering, multi-output nodes, fixing tiling.
 - [references/exposed.md](references/exposed.md): exposed inputs, bindings, presets, `--set` variants, parameter functions.

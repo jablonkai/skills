@@ -364,7 +364,7 @@ def write_png(path, rows, channels):
 
 
 def tile_png(src, dst, n):
-    """An n x n repeat of a PNG (the CLI's `render --view 2d --tiling` does not repeat in 0.1.0)."""
+    """An n x n repeat of a PNG (the CLI's `render --view 2d --tiling` does not repeat in 0.1.2)."""
     w, h, ch, rows = png_pixels(src, max_side=1 << 16)
     write_png(dst, [r * n for r in rows] * n, ch)
     return {"width": w * n, "height": h * n}

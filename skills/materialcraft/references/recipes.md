@@ -1,4 +1,4 @@
-# Recipes (mc_build.py specs, verified on 0.1.0)
+# Recipes (mc_build.py specs, verified on 0.1.2)
 
 Run each with `python3 $S/mc_build.py spec.json` (add `--dry-run` to see the two batches
 first). New nodes are named; existing nodes are integer ids from `mc_inspect.py`.
@@ -106,7 +106,7 @@ Two materials blended by a mask: `material_blend` (inputs `base_color_1…height
 ## 5. Fix a seam
 
 `mc_render.py IN --seam` names the outputs that don't tile. Walk upstream (`mc_inspect.py`
-wires) to the generator — in 0.1.0 usually `anisotropic_noise` — and either swap it for a
+wires) to the generator — in 0.1.2 usually `anisotropic_noise` — and either swap it for a
 tileable noise or insert `make_it_tile` right after it (`[N, "mit"], ["mit", M]`, where M is
 what N fed). Re-run `--seam`.
 

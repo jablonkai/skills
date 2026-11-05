@@ -1,4 +1,4 @@
-# Security and the live app (0.1.0)
+# Security and the live app (0.1.2)
 
 ## Headless (what this skill uses)
 

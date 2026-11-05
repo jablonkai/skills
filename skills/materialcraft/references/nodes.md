@@ -1,4 +1,4 @@
-# Node library (0.1.0, 222 nodes)
+# Node library (0.1.2, 222 nodes)
 
 Don't guess node ids, ports or parameter ids — ask the library:
 
@@ -30,7 +30,7 @@ converts.
 | Material filters/Blending | 2 | `material_blend`, `material_height_blend` |
 | Graph items | 5 | `output`, `input_color`, `input_grayscale`, `graph_instance`, `dot` |
 
-## Core nodes (ports and params, 0.1.0)
+## Core nodes (ports and params, 0.1.2)
 
 | def | inputs → outputs | params |
 |---|---|---|

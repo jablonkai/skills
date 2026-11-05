@@ -1,4 +1,4 @@
-# Exposed inputs, presets and variants (0.1.0)
+# Exposed inputs, presets and variants (0.1.2)
 
 An **exposed input** is a graph-level parameter (the sliders a user of the material sees).
 It does nothing until it is **bound** to one or more node parameters. Presets store named
