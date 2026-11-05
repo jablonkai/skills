@@ -1,4 +1,4 @@
-# designcraft-cli reference (0.17.0)
+# designcraft-cli reference (0.17.2)
 
 `designcraft-cli` (`~/.local/bin/designcraft-cli`) runs the DesignCraft engine headless.
 Vendor docs: `docs/agents.md`, `docs/mcp.md`, `docs/control-protocol.md` in
