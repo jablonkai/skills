@@ -1,4 +1,4 @@
-# Gotchas (FilmCraft 0.17.0)
+# Gotchas (FilmCraft 0.17.1)
 
 Everything here was hit while building the skill. Most of these fail **silently**: exit 0,
 a plausible result, wrong output.
