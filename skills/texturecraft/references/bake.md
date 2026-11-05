@@ -1,18 +1,18 @@
-# Baking mesh maps (0.3.0)
+# Baking mesh maps (0.3.2)
 
 ## Map ids
 
 | Id | What it holds | Read by |
 |---|---|---|
-| `normal_base` | Tangent-space normal from the high poly (flat without one) | the Normal output (mixed with layer height) |
-| `world_space_normals` | World normals | `direction` generator |
+| `normal` | Tangent-space normal from the high poly (flat without one) | the Normal output (mixed with layer height) |
+| `worldNormal` | World normals | `direction` generator |
 | `id` | Colour per part or material | `mask.add.colorSelection` |
-| `ambient_occlusion` | AO | `dirt`, `ambientOcclusion` generators; `AoMixed` in ORM exports |
+| `ambientOcclusion` | AO | `dirt`, `ambientOcclusion` generators; `AoMixed` in ORM exports |
 | `curvature` | Convex and concave edges | `edgeWear`, `curvature` generators |
 | `position` | Position in the bounding box | `position` generator |
 | `thickness` | Thickness | `thinAreas` generator |
 
-The ids are long. `ao` gives ``unknown mesh map "ao"``, and the error doesn't list the
+Renamed in 0.3.2 (`normal_base`, `world_space_normals`, `ambient_occlusion` now fail). `ao` gives ``unknown mesh map "ao"``, and the error doesn't list the
 valid ones. The default `maps` setting holds all seven.
 
 ## Settings that matter
@@ -39,7 +39,7 @@ valid ones. The default `maps` setting holds all seven.
 ```
 
 - Adding a high poly turns `useLowAsHigh` off. Without a high poly, the low poly bakes onto
-  itself, which gives a flat `normal_base` and AO and curvature from the low poly.
+  itself, which gives a flat `normal` and AO and curvature from the low poly.
 - The cage must have **the low poly's triangles** (same count and order), pushed outward.
   Without a cage, the ray distance comes from `maxFrontal` and `maxRear` (0.01 by default),
   which can miss high-poly detail that stands out further than that.
@@ -50,7 +50,7 @@ valid ones. The default `maps` setting holds all seven.
 - The high-poly and cage files are **copied into the `.tcraft`**, so moving the source
   files later doesn't break re-bakes.
 - Check it: `info` gives `bakeMeshes.highPoly` and `cage`, and each set's `baked`. Export
-  with the `Mesh maps` preset and look at `*_normal_base.png`: a high-poly bake shows
+  with the `Mesh maps` preset and look at `*_normal.png`: a high-poly bake shows
   detail away from flat (128,128,255) where the shapes differ.
 
 ## Exporting the maps themselves

@@ -3,12 +3,12 @@ name: texturecraft
 description: 'Automate TextureCraft, the Substance Painter-style PBR texture-painting app, headless with texturecraft-cli: new .tcraft projects from a mesh (glb, fbx, obj, usd) or a built-in, mesh-map bakes (AO, curvature, normal), high-poly to low-poly with a cage, fill-layer stacks with smart or MaterialCraft .mcmat materials, masks and edge-wear or dirt generators, edits to .tcraft projects, PBR texture export with engine presets (glTF, Unreal, Unity, Godot; PNG/TGA/EXR; OpenGL or DirectX normals), textured GLB/OBJ/USD export, 3D or UV renders, read back. Use when the user mentions TextureCraft, texturecraft-cli or a .tcraft file, or wants a model PBR-textured or mesh maps baked with TextureCraft: "texture this crate as rusty metal in TextureCraft", "bake AO and curvature", "export a glTF PBR set with DirectX normals", "bake the high poly onto the low poly with a cage". Not for Blender painting or baking (blender), 2D painting (krita, gimp), modeling (blender, freecad, solidcraft), or AI texture generation (comfyui).'
 summary: "automate TextureCraft headless with texturecraft-cli — projects from meshes or built-ins, AO/curvature and high-poly bakes with a cage, fill-layer stacks with smart materials, masks and edge-wear generators, .tcraft edits, glTF/Unreal/Unity/Godot PBR texture export checked against the plan, textured GLB export, 3D and UV renders, info read-back verified"
 category: 3d
-compatibility: "Built for TextureCraft 0.3.0 (8547514) and texturecraft-cli 0.3.0 on macOS (Apple Silicon, Metal), Python 3.9+; pre-1.0, so command ids may change."
+compatibility: "Built for TextureCraft 0.3.2 (ef8dfba) and texturecraft-cli 0.3.2 on macOS (Apple Silicon, Metal), Python 3.9+; pre-1.0, so command ids may change."
 risk: low
 tags: [texturecraft, pbr, texturing, baking, mesh-maps, gltf, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
   author: "Tamás Jablonkai"
 ---
 
@@ -17,21 +17,21 @@ metadata:
 TextureCraft is a PBR texture-painting app in the style of Substance Painter. A project
 (`.tcraft`, a zip) holds a mesh, one **texture set** per material, each with its own layer
 stack (fill, paint and folder layers with masks and effects), baked mesh maps, and any
-high-poly and cage meshes. Every tool is a command in one registry (162 in 0.3.0) that
+high-poly and cage meshes. Every tool is a command in one registry (162 in 0.3.2) that
 runs headless through `texturecraft-cli`, with no window. This skill drives it headless
-and reads every result back with `info`. Verified against **TextureCraft 0.3.0
-(8547514)**. The software is pre-1.0, so if a pinned id fails, look it up with
+and reads every result back with `info`. Verified against **TextureCraft 0.3.2
+(ef8dfba)**. The software is pre-1.0, so if a pinned id fails, look it up with
 `texturecraft-cli commands --filter WORD` rather than guessing.
 
 ```sh
-texturecraft-cli --version     # TextureCraft 0.3.0 (8547514 2026-11-03); lives in ~/.local/bin
+texturecraft-cli --version     # TextureCraft 0.3.2 (ef8dfba 2026-11-05); lives in ~/.local/bin
 ```
 
 ## Pick the route
 
 | Task | Route |
 |---|---|
-| New textured project: bake, layer stack, save | `scripts/tc_build.py spec.json --expect-layer all:NAME --expect-baked all:ambient_occlusion,curvature` |
+| New textured project: bake, layer stack, save | `scripts/tc_build.py spec.json --expect-layer all:NAME --expect-baked all:ambientOcclusion,curvature` |
 | Edit a copy of an existing `.tcraft` | `scripts/tc_build.py spec.json --in OLD.tcraft --save NEW.tcraft` |
 | What a project or mesh holds (sets, layers, bakes, UV report) | `scripts/tc_inspect.py F` (`--full` for fill and mask settings) |
 | Export textures, checked against `export.plan` | `scripts/tc_export.py P.tcraft DIR --preset "glTF PBR Metal Roughness" [--size N] [--normal directx] [--ts SET]` |
@@ -79,7 +79,7 @@ overwrite outputs without `--overwrite`, print JSON and exit 1 on any failed che
 2. **Bake before you layer.** Edge wear, dirt, curvature and thin-area generators read the
    baked maps, and so do most smart materials. On an unbaked set they render as nothing, and
    nothing reports it. Bake in the same spec, before the layers: `bake.run {"ts": "all",
-   "resolution": 2048, "maps": ["ambient_occlusion", "curvature"]}`. Bake resolution is
+   "resolution": 2048, "maps": ["ambientOcclusion", "curvature"]}`. Bake resolution is
    separate from texture resolution (it defaults to 1024).
 3. **Write the stack as a spec** ([recipes.md](references/recipes.md)): fill layers (`color`
    as 0–1 floats or `"#rrggbb"`, `metallic`, `roughness`), `mask.add.black` plus
@@ -107,7 +107,7 @@ overwrite outputs without `--overwrite`, print JSON and exit 1 on any failed che
   `{"sets": "all"}` in the spec, or `textureSet.select {"ts": INDEX}` (an index, not a
   name), or `layer.instantiateAll {"copy": true}` after building one set.
 - **Generators need baked maps** (see step 2), and the map ids are long:
-  `ambient_occlusion`, `curvature`, `thickness`, `normal_base`, `world_space_normals`,
+  `ambientOcclusion`, `curvature`, `thickness`, `normal`, `worldNormal`,
   `position`, `id`. A short id like `ao` is an error.
 - **The normal convention lives in the export, not the project.** Presets fix it: glTF,
   Blender, Godot and OpenPBR use OpenGL; Unreal uses DirectX. Only the export's
@@ -134,7 +134,7 @@ the user wants their open project changed, and read
 ## References
 
 - [references/cli.md](references/cli.md): subcommands, flags, batch format, `info` JSON, exit codes.
-- [references/commands.md](references/commands.md): command ids and params by task, pinned to 0.3.0, and registry lookup.
+- [references/commands.md](references/commands.md): command ids and params by task, pinned to 0.3.2, and registry lookup.
 - [references/bake.md](references/bake.md): mesh-map ids, bake settings, high-poly and cage bakes.
 - [references/export.md](references/export.md): built-in presets and their packing, preset objects, file-name tokens, formats, normals.
 - [references/recipes.md](references/recipes.md): rusty crate, recolouring a set of an imported GLB, high-to-low bake with cage, smart materials on every set, a MaterialCraft material re-cooked in place.
