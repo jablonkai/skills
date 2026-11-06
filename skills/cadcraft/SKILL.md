@@ -3,21 +3,21 @@ name: cadcraft
 description: 'Draft, edit, inspect and convert 2D CAD drawings with CADCraft, the AutoCAD-style drafting app, headless through cadcraft-cli: layers, filleted polylines, circles, text, hatches, dimensions and attributed title blocks from a JSON spec, JSON commands or .scr scripts; title-block fill, text replace, layer moves and purge on existing DXF/DWG; DXF↔DWG and PDF/SVG/PNG export with explicit framing; hash-checked folder batches; results read back with info and ezdxf. Use when the user mentions CADCraft or cadcraft-cli, or asks for an AutoCAD-like job in it: "draw a dimensioned mounting plate in CADCraft", "convert these DWGs to PDF with CADCraft", "fill the title block", "run this .scr script". Not for QCAD or a DXF job that does not name CADCraft (qcad), 3D or parametric parts and STEP/STL (freecad), CSG solids (brl-cad), PCBs (kicad), vector art (vectorcraft, inkscape) or diagrams (drawio).'
 summary: "draft and convert 2D CAD drawings headless with cadcraft-cli — layers, filleted polylines, hatches, dimensions and attributed title blocks from a JSON spec, JSON commands or .scr scripts, DXF/DWG/PDF/SVG/PNG export with explicit framing, folder batches, info and ezdxf read-back verified"
 category: cad
-compatibility: "Built for cadcraft-cli 0.17.1 and CADCraft.app 0.17.1 on macOS; pre-1.0, so command ids may change."
+compatibility: "Built for cadcraft-cli 0.18.0 and CADCraft.app 0.18.0 on macOS; pre-1.0, so command ids may change."
 risk: medium
 tags: [cadcraft, cad, dxf, dwg, autocad, drafting, title-block, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.1.6"
+  version: "1.1.7"
   author: "Tamás Jablonkai"
 ---
 
 # CADCraft via cadcraft-cli
 
-CADCraft is an AutoCAD-style 2D drafting app. Its ~450 commands (LINE, PLINE, DIMLINEAR,
+CADCraft is an AutoCAD-style 2D drafting app. Its ~457 commands (LINE, PLINE, DIMLINEAR,
 BLOCK, ATTEDIT, LAYER, PLOT…) live in one engine that `cadcraft-cli` runs **headless**:
 no window opens and nothing listens on a port. This skill drives that engine and reads
-every result back. Verified against **cadcraft-cli 0.17.1** and **CADCraft.app 0.17.1** on
+every result back. Verified against **cadcraft-cli 0.18.0** and **CADCraft.app 0.18.0** on
 macOS. The software is pre-1.0, so command ids may change: when a pinned id fails, look
 it up with `cc_commands.py`.
 
@@ -131,7 +131,7 @@ optional). Each has a full `--help`.
 ## References
 
 - [cli.md](references/cli.md): subcommands, flags, framing, exit codes, the MCP tools.
-- [commands.md](references/commands.md): pinned 0.17.1 command ids by task with params.
+- [commands.md](references/commands.md): pinned 0.18.0 command ids by task with params.
 - [scr-syntax.md](references/scr-syntax.md): what works in `.scr` scripts and what breaks.
 - [formats.md](references/formats.md): read/write matrix, DXF/DWG versions, image output.
 - [recipes.md](references/recipes.md): worked specs and command chains for the jobs above.

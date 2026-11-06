@@ -1,4 +1,4 @@
-# Pinned command ids (CADCraft 0.17.1)
+# Pinned command ids (CADCraft 0.18.0)
 
 Run with `--cmd 'id {json}'`, a `{"cmd": id, "params": …}` session step, or a
 `cc_build.py` draw item. Points are `[x, y]` in drawing units, y up; angles in degrees.
