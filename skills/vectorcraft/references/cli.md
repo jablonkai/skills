@@ -1,4 +1,4 @@
-# vectorcraft-cli 0.21.1 reference
+# vectorcraft-cli 0.22.0 reference
 
 `vectorcraft-cli` is a universal binary in `~/.local/bin`. It renders headless, with no
 window and no GPU. The app (`/Applications/VectorCraft.app`, bundle id
@@ -48,6 +48,7 @@ vectorcraft-cli convert IN OUT [--scale N] [--artboard I | --range R] [--outline
 | `--artboard I` | 0-based artboard (rasters, SVG, PDF) |
 | `--range "1-3,5"` | 1-based artboards (PDF pages) |
 | `--scale N` | raster scale: 2 → @2x pixels |
+| `--ppi N` | raster pixels per inch (72 = 1x, 144 = @2x); wins over `--scale` (0.22.0) |
 | `--outline-text` | SVG: text as paths (no `<text>` left); `.ai` v7: type as outlines |
 | `--decimals N` | SVG coordinate precision 1–7 (default 3) |
 | `--replace-lossy` | allow OUT == IN even though reading IN dropped things — only with the user's consent |

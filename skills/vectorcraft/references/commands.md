@@ -1,4 +1,4 @@
-# Pinned command ids (VectorCraft 0.21.1)
+# Pinned command ids (VectorCraft 0.22.0)
 
 Look up anything not listed here with `python3 scripts/vc_commands.py WORD…`
 (`--id ID` prints the full signature). Lengths are document units, coordinates are
@@ -76,7 +76,7 @@ The session tools `draw_shape` / `draw_path` take paint inline: `fill`, `stroke`
 | `variable.define` | `{name, kind: text\|visibility\|image\|graph}` |
 | `variable.bind` | `{variable, ids}` |
 | `variable.list` | `{}` |
-| `dataset.import` | `{csv \| path \| data \| dataBase64}`. Header: `name`, then the variable names. An unknown header defines an unbound variable: `#Name` visibility, `@Name` image, otherwise text. A row whose name exists is replaced. Visibility values are `true`/`false`. → `{imported, updated, names, defined}` |
+| `dataset.import` | `{csv \| path \| data \| dataBase64}`. Header: one variable name per column (no `name` column since 0.22: a `name` header would define a text variable). Rows replace all datasets and are named `Data Set 1, 2…`; read the names with `dataset.list`. An unknown header defines an unbound variable: `#Name` visibility, `@Name` image, otherwise text. Visibility values are `true`/`false`. → `{imported, names, defined, deletedDataSets}` |
 | `dataset.select` | `{name}`: applies a row → `{applied, skipped, overflow?, warning?}`. `warning` means no bound object took a value, so nothing changed. |
 | `variable.loadLibrary` | `{path \| xml \| dataBase64}`: replaces the variables and data sets with an Illustrator variable library's (text variables only, the rest named in `skipped`) |
 | `dataset.list` | `{}` |
