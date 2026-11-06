@@ -1,4 +1,4 @@
-# Recipes (verified with WordCraft 0.15.2)
+# Recipes (verified with WordCraft 0.16.0)
 
 `S=<skill>/scripts`. Set `export WORDCRAFT_REGION=en-US` (or the user's region) so the
 paper size doesn't depend on the machine.
