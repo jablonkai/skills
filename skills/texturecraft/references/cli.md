@@ -1,4 +1,4 @@
-# texturecraft-cli reference (0.3.2)
+# texturecraft-cli reference (0.4.0)
 
 `texturecraft-cli` is a headless TextureCraft. It opens no window. It reads and writes
 `.tcraft` projects (zip archives holding `project.json`, the mesh, baked maps, layer
@@ -24,7 +24,7 @@ resolve against the current directory.
 
 | Command | What it does | Notes |
 |---|---|---|
-| `--version` | `TextureCraft 0.3.2 (ef8dfba 2026-11-05)` | |
+| `--version` | `TextureCraft 0.4.0 (16e9d21 2026-11-06)` | |
 | `info F` | JSON for a project or a mesh | See below. Mesh files get a UV report; projects get `uv: null`. |
 | `commands [--filter T]` | One line per command: `id  label  {params}` | No JSON form. The filter matches the id and label. |
 | `run IN ID [JSON] [-o OUT]` | Runs one command and prints its JSON result | **Without `-o` nothing is saved.** `-o` overwrites without asking. |

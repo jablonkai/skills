@@ -1,4 +1,4 @@
-# Recipes (verified on TextureCraft 0.3.2)
+# Recipes (verified on TextureCraft 0.4.0)
 
 `S=<skill>/scripts`. Each spec below was run through `tc_build.py` as written.
 
@@ -105,6 +105,13 @@ python3 $S/tc_render.py their.tcraft /tmp/their.png --yaw 215 --uv
 
 Export the material from MaterialCraft first (`mc_export.py IN.mcraft maps/ --mcmat
 wood.mcmat`, see the `materialcraft` skill). Its exposed inputs and presets travel with it.
+
+Verified against materialcraft-cli 0.2.0: its `.mcmat` is `version 2` (source `source.sbs`) and
+its packages are `.sbs` XML, but TextureCraft 0.4.0 reads `.mcmat` up to `version 1` and
+`.mcraft` zips. `material.load` of a 0.2.0 file fails with `unsupported: MaterialCraft material
+version 2 (this version reads up to 1)`. The same file with `"version": 1` patched into
+`material.json` loads (a fill layer comes back), but that is a workaround, not a supported
+path. Until TextureCraft reads version 2, export the material from MaterialCraft 0.1.x.
 
 ```json
 {"in": "builtin:crate", "resolution": 1024, "steps": [
