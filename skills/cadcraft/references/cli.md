@@ -1,7 +1,7 @@
-# cadcraft-cli 0.17.1 reference
+# cadcraft-cli 0.18.0 reference
 
 Universal binary at `~/.local/bin/cadcraft-cli`. `cadcraft-cli --version` prints
-`cadcraft-cli 0.17.1`. `--help`/`-h`/`help` print the usage to stdout and exit 0; bad
+`cadcraft-cli 0.18.0`. `--help`/`-h`/`help` print the usage to stdout and exit 0; bad
 usage prints an error and the usage line to stderr and exits 2. Since 0.14.0 every subcommand has
 its own `--help` (`cadcraft-cli run --help` lists the flags and the `{last}` chaining).
 
@@ -16,6 +16,7 @@ its own `--help` (`cadcraft-cli run --help` lists the flags and the `{last}` cha
 | `sample (bracket|floorplan) OUT.(dxf|dwg|svg|png)` | Demo drawings. `bracket`: 46 entities, hatches, dims, notes MText, no blocks. `floorplan`: 16 entities on A-WALL/A-DOOR/A-GLAZ/A-ANNO…, 2 texts (LIVING ROOM, BEDROOM), no blocks. |
 | `mcp [--connect HOST:PORT [--lazy] [--launch]]` | MCP server on stdio. Without `--connect`: headless backend in-process (what the scripts use). With it: bridge to the app's token-authenticated control port — not used by this skill ([security.md](security.md)). |
 | `perf [N | FILE]` | Performance diagnostics only. |
+| `roundtrip [FILE|FOLDER] [--out DIR]` | Corpus check: opens each DXF/DWG, saves DXF and DWG, reopens, compares; writes `report.md`/`report.json` (default `report` beside the files). Not used by this skill. |
 
 Settings flags on `info`/`convert`/`run`/`mcp`: `--config-dir DIR` (env
 `CADCRAFT_CONFIG_DIR`; plotter configs live in `plotters/`), `--fontalt FONT`,
@@ -32,7 +33,7 @@ Settings flags on `info`/`convert`/`run`/`mcp`: `--config-dir DIR` (env
   commands changed it**, else extents. Always pass one explicitly.
 - `--window`/`--view` without an image output is an error (exit 2).
 - **Write a negative `x0` as `--window=-10,0,10,5`** (the `=` form): `--window -10,…` fails with
-  `unexpected argument '-1' found` (checked on 0.17.1; the scripts already pass the `=` form;
+  `unexpected argument '-1' found` (checked on 0.18.0; the scripts already pass the `=` form;
   `--help` documents it since 0.17.0). The same holds for a dash command: write
   `--cmd='-attedit {…}'`, since `--cmd '-attedit …'` fails with `unexpected argument '-a'`.
 - PNG is 2400×1600 RGBA on a dark background with layer colours, like the app's model
