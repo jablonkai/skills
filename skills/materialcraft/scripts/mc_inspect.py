@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Summarise a MaterialCraft package: graphs, nodes, wires, outputs, exposed inputs, presets, cook errors.
 
-  mc_inspect.py IN.mcraft [--graph N] [--params] [--no-cook] [--json-out FILE]
+  mc_inspect.py IN.sbs [--graph N] [--params] [--no-cook] [--json-out FILE]
 
 IN may be `sample` (the built-in brick wall). Without --graph the package's open graph is shown.
 --params adds every node's parameter values (typed {t, v}), --no-cook skips the full cook.

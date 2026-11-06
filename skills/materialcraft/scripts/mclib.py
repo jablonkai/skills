@@ -364,7 +364,7 @@ def write_png(path, rows, channels):
 
 
 def tile_png(src, dst, n):
-    """An n x n repeat of a PNG (the CLI's `render --view 2d --tiling` does not repeat in 0.1.2)."""
+    """An n x n repeat of a PNG (the CLI's `render --view 2d --tiling` does not repeat in 0.2.0)."""
     w, h, ch, rows = png_pixels(src, max_side=1 << 16)
     write_png(dst, [r * n for r in rows] * n, ch)
     return {"width": w * n, "height": h * n}
@@ -411,6 +411,11 @@ def refuse_overwrite(path, overwrite, what="output"):
         if os.path.isdir(path) and not os.listdir(path):
             return
         raise McError("%s %s exists; pass --overwrite or pick a new path" % (what, path))
+
+
+def sbs_path(path):
+    """The path the CLI really writes: 0.2.0 appends `.sbs` to any save path that doesn't end in it."""
+    return path if path.lower().endswith(".sbs") else path + ".sbs"
 
 
 def same_file(a, b):

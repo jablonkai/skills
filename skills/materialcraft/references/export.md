@@ -1,12 +1,13 @@
-# Export (0.1.2)
+# Export (0.2.0)
 
 `export` cooks the graph at its full size and writes **one file per output node**. The
-graph size is the map size (`new --size`, `graph.size`); there is no per-export resize except
-for `.mcmat` (`size`).
+graph size is the map size (`new --size`, `graph.size`). 0.2.0 adds `export --size PX` (larger
+side, rounded down to a power of two, 16-8192; the `mc_export.py` size check expects the graph size, so
+use the raw CLI for this) and `.mcmat` takes `size`.
 
 ```sh
-python3 $S/mc_export.py IN.mcraft maps/ --format png --depth 16 --pattern '$(graph)_$(identifier)'
-materialcraft-cli export IN.mcraft maps/ --format exr --depth 32 --set wear=0.8
+python3 $S/mc_export.py IN.sbs maps/ --format png --depth 16 --pattern '$(graph)_$(identifier)'
+materialcraft-cli export IN.sbs maps/ --format exr --depth 32 --set wear=0.8
 ```
 
 ## Formats and depths
@@ -48,14 +49,14 @@ Export each variant to its own folder — `export` overwrites files with the sam
 ## `.mcmat` — portable material for TextureCraft
 
 ```sh
-python3 $S/mc_export.py IN.mcraft maps/ --mcmat oak.mcmat --set wear=0.3 --texturecraft-check
-materialcraft-cli run IN.mcraft file.exportMaterial '{"path": "oak.mcmat", "size": 1024, "values": {"wear": 0.3}}'
+python3 $S/mc_export.py IN.sbs maps/ --mcmat oak.mcmat --set wear=0.3 --texturecraft-check
+materialcraft-cli run IN.sbs file.exportMaterial '{"path": "oak.mcmat", "size": 1024, "values": {"wear": 0.3}}'
 ```
 
-A zip: `material.json` (`format: craft-material`, `version 1`, `name`, `graph`, `size`, `maps
+A zip: `material.json` (`format: craft-material`, `version 2`, `name`, `graph`, `size`, `maps
 [{usage, file, colorSpace}]`, `parameters [{id, label, default, min, max, value}]`, `inputs`,
 `presets`, `source`), `maps/<usage>.png` (one per output usage; base colour sRGB, the rest
-linear) and `source.mcraft` (the package, so TextureCraft can re-cook it).
+linear) and `source.sbs` (the package, so TextureCraft can re-cook it).
 
 - `values` sets exposed inputs for the cooked maps and records them as each parameter's
   `value`; `size` (power of two) overrides the graph size; `inputs` binds image files to
@@ -64,7 +65,7 @@ linear) and `source.mcraft` (the package, so TextureCraft can re-cook it).
   `~/Documents/TextureCraft/library`, where TextureCraft's shelf lists it. That writes into
   the user's library — do it only when asked.
 
-### Opening it in TextureCraft (verified with TextureCraft 0.3.2)
+### Opening it in TextureCraft: BROKEN with TextureCraft 0.4.0
 
 ```sh
 texturecraft-cli new builtin:sphere t.tcraft
@@ -72,7 +73,11 @@ texturecraft-cli run t.tcraft material.load '{"path": "/abs/oak.mcmat"}' -o t2.t
 texturecraft-cli run t2.tcraft layer.list            # a fill layer with fill.link.graph = the graph name
 ```
 
-`material.load` also takes a `.mcraft` directly. The linked layer keeps the material live:
+**0.2.0 writes `.mcmat` `version 2`, and TextureCraft 0.4.0 reads up to `version 1`:**
+`material.load` fails with `unsupported: MaterialCraft material version 2 (this version reads up to 1)`,
+so `mc_export.py --texturecraft-check` exits 1 with that error. The `.mcmat` itself checks out (maps,
+parameters, `source.sbs`). Until TextureCraft reads version 2, use MaterialCraft 0.1.x for the hand-off.
+Where it does load, the linked layer keeps the material live:
 `material.link.set {id, value}`, `material.link.preset {name}`, `material.link.cook` and
 `material.link.saveSource {path}` change and re-cook it inside TextureCraft (see the
 `texturecraft` skill). `mc_export.py --texturecraft-check` runs the load into a temporary

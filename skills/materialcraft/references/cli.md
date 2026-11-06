@@ -1,23 +1,25 @@
-# materialcraft-cli reference (0.1.2)
+# materialcraft-cli reference (0.2.0)
 
 `materialcraft-cli` is the headless MaterialCraft: the same engine and command registry as the
 app, no window, no GPU. It lives in `~/.local/bin` (the app bundle is
 `/Applications/MaterialCraft.app`, bundle id `ai.storyteller.materialcraft`). There is no
-per-subcommand `--help` (`mcp --help` is an error); `materialcraft-cli` alone prints the usage.
+per-subcommand `--help` (`mcp --help` is an error); `materialcraft-cli` or `--help` alone prints the usage.
 The vendor's `docs/control-protocol.md` is not installed with the app — `commands` and `nodes`
-are the reference.
+are the reference. Packages are native **SBS** (`.sbs`, XML) since 0.2.0; the CLI appends `.sbs`
+to any save path that doesn't end in it (`new x t.mcraft` writes `t.mcraft.sbs`), and then can't
+open `t.mcraft`.
 
 | Subcommand | What it does |
 |---|---|
-| `--version` | `materialcraft-cli 0.1.2 (1639314 2026-11-05)` |
-| `info IN` | The whole session as JSON (see below). `IN` is a `.mcraft` or `sample` (built-in brick wall). |
+| `--version` | `materialcraft-cli 0.2.0 (a1bbd4a 2026-11-06)` |
+| `info IN` | The whole session as JSON (see below). `IN` is a `.sbs` or `sample` (the built-in atomic sample). |
 | `commands [--filter T]` | JSON list `[{id, label, params}]`; `params` is a signature string. |
 | `nodes [--filter T] [--category T]` | JSON list of node definitions: `id, label, category, description, inputs[{id, kind}], outputs[{id, kind}], params[{id, label, default{t,v}, min, max, options}]`. |
 | `run IN ID [JSON] [-o OUT]` | One command; prints its JSON result. Without `-o` nothing is saved. |
 | `batch SCRIPT.json` | `{"open": IN, "steps": [{"id", "params"}…], "save": OUT}` (or a bare list of steps). Stops at the first error, prints `{completed, failed: {index, id, error}, results}`, exits 1 and saves nothing. |
-| `new TEMPLATE OUT [--size PX] [--name N]` | New package with one graph. Size defaults to 1024 (power of two). Overwrites `OUT`. |
+| `new TEMPLATE OUT [--size PX] [--name N]` | New package with one graph (templates: `empty`, `pbr`, `atomics`; any other id fails with `unknown template`). Size defaults to 1024 (power of two). Overwrites `OUT`. |
 | `cook IN [--graph I] [--set K=V]… [--full]` | Cook; prints `{ms, nodes: [{id, def, ms, size, cached, error}]}`. Without `--full`, nodes cooked when the package was opened are reported as `cached: true` (≈0 ms); `--full` re-cooks every node, which is the check to trust. |
-| `export IN DIR [--graph I] [--set K=V]… [--format F] [--depth 8\|16\|32] [--pattern P]` | Cook at full size and write every output node; prints `{files}`. Creates `DIR`; overwrites files in it. |
+| `export IN DIR [--graph I] [--set K=V]… [--format F] [--depth 8\|16\|32] [--pattern P] [--size PX]` | Cook at full size (or `--size`, rounded down to a power of two: 100 gives 64, 512 re-cooks at 512) and write every output node; prints `{files}`. Creates `DIR`; overwrites files in it. |
 | `render IN OUT.png [--size WxH] [--view 3d\|2d] [--scene S] [--node ID] [--yaw D] [--pitch D] [--graph I] [--set K=V]… [--full] [--tiling N] [--hq [--displacement R]]` | CPU render. 3D default 1024×768 on `rounded_cube`; scenes `rounded_cube, cube, sphere, cylinder, plane, torus, material_ball`. 2D shows one node's output (`--node`); `--tiling N` repeats the UVs in 3D but is **ignored in 2D** (identical PNG) — use `mc_render.py --tile N`. `--hq` adds real displacement from the height output, AO and a key light (≈4 s at 1024×768). |
 | `mcp [--bridge PORT] [--token T] [--read-root D] [--write-root D]` | MCP server on stdio — headless (file access only below the roots) or bridged to a running app. |
 | `serve [--port P] [--read-root D] [--write-root D]` | JSON lines `{"id","method","params"}` on stdio, or on `127.0.0.1:P` with a token. |

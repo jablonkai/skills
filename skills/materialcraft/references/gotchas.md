@@ -1,4 +1,4 @@
-# Gotchas (MaterialCraft 0.1.2)
+# Gotchas (MaterialCraft 0.2.0)
 
 ## Silent successes that did the wrong thing
 
@@ -11,7 +11,12 @@
 | A pattern without `$(identifier)`/`$(usage)` | Every output writes the same file; the last wins | Keep one of them |
 | `--depth 16` on jpg/webp/tga/bmp, `--depth 32` on png/tif, `--depth 8/16` on exr | Ignored: 8-bit, 16-bit, 32-bit float respectively | See export.md; `mc_export.py` refuses |
 | An exposed input with no `bind` | Exists, saves into presets and the `.mcmat`, drives nothing | `mc_inspect.py` warns; `mc_render.py --variants` fails on identical renders |
+| `graph.node.bind` / `graph.preset.save`, then **save** | The `.sbs` keeps the exposed input but **not the binding or the preset**; a reload shows `bindings: {}`, `presets: []`, and `--set` changes nothing | Bind, set and export in one `batch` (recipes.md §3); `mc_build.py` reports the loss as a failed read-back |
+| `--set id="#rrggbb"` for an exposed colour | `takes a float4`: after a reload the input is a float4 and hex is rejected | Pass the array: `--set tint=[0.7,0.02,0.02,1]` |
+| A path that doesn't end in `.sbs` (`-o t.mcraft`, `new`, `batch` `save`) | Writes `t.mcraft.sbs`; `t.mcraft` then doesn't exist | Write `.sbs`; `mc_build.py` normalises its `save` |
 | A float default bound to an enum param | `bad default` error | Bind floats to float/int params |
+| A float exposed input bound to a float4 param (`levels`) | The cook fails: `variable ... has the wrong type for get_float4` | Add the input with a typed default `{"t": "float4", "v": [..]}` |
+| `graph.function.set` with an unknown `op` | Fails (`unknown function`), saves nothing | Use the ops listed in nodes.md |
 | `render --view 2d --tiling 3` | Same PNG as without `--tiling`: no repeat | `mc_render.py --tile 3` |
 | `render --view 2d` of a node that cooks black | A black PNG, exit 0 | Read the PNG; `mc_render.py` reports flat images |
 | `cook` without `--full` | Nodes cooked at open time show `cached: true`, `ms: 0` | Use `--full` when the cook report is your check |
@@ -36,18 +41,19 @@ nothing selected, so:
 - Hex (`"#rrggbb"`) is **sRGB**; typed colours `{"t": "color", "v": [r, g, b, a]}` are
   **linear**. `graph.exposed.set` / `--set` / `graph.node.param` linearise hex
   (`#8a5a3c` → `[0.254, 0.102, 0.045]`).
-- `graph.exposed.add` rejects a hex `default` (`bad default`); give the typed linear value.
+- `graph.exposed.add` rejects a hex `default` (`bad default`); give the typed linear value. The
+  saved input comes back as a **float4** (sRGB-encoded), so later `exposed.set` / `--set` take an array, not hex.
 - `--set` values are JSON: `--set 'tint="#aa7744"'` (shell quotes around JSON quotes).
   `--set tint=#aa7744` is not valid JSON.
 
 ## Tiling
 
-- `anisotropic_noise` does not wrap along X (seam score ≈ 10–20; every other noise tested
-  scores < 0.5). The `wood` and `rusty_metal` templates use it, so their base colour and
-  roughness show a vertical seam line when tiled. `make_it_tile` after it fixes it (score 0).
+- The 0.1.2 `anisotropic_noise` seam is gone with the old library (no noise nodes in 0.2.0). A
+  `pixel_processor` function tiles when it has a whole number of periods across the pixel
+  position; the Atomic sample's height (an FX-Map) scores x=2.41 (not seamless).
 - Node `base.tiling` (`graph.node.base {tiling: false}`) does not change what a generator
   produces; it is not a seam fix.
-- `render --view 2d --tiling N` is ignored in 0.1.2 — the PNG is byte-identical to the
+- `render --view 2d --tiling N` is still ignored in 0.2.0 — the PNG is byte-identical to the
   untiled one (so is `view.2d {tiled: true}`). In 3D (`--scene plane --tiling 3`) it repeats
   the UVs. `mc_render.py --tile N` writes a real N×N 2D repeat so you can *see* seams;
   `mc_render.py --seam` gives the number.
@@ -70,5 +76,6 @@ nothing selected, so:
 
 ## Version drift
 
-Pinned to 0.1.2: 68 commands, 222 nodes (the vendor README says "227"). After an update,
+Pinned to 0.2.0: 86 commands, 30 node entries (0.1.2 had 68 and 222: the old procedural library
+was removed in favour of primitives, and the packages moved from `.mcraft` to `.sbs`). After an update,
 re-run `materialcraft-cli commands` and `nodes` and compare before trusting these pages.

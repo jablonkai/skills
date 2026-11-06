@@ -5,9 +5,9 @@ The spec names its new nodes, so wires, outputs, exposed inputs and raw steps ca
 them before their numeric ids exist:
 
   {
-    "in": "base.mcraft",                    # or "template": "empty", "size": 1024, "name": "Rock"
+    "in": "base.sbs",                    # or "template": "empty", "size": 1024, "name": "Rock"
     "graph": 0,                             # graph index to edit (default: the package's open graph)
-    "nodes": {"noise": {"def": "perlin_noise", "params": {"scale": 8}},
+    "nodes": {"noise": {"def": "pixel_processor"},
               "lev":   {"def": "levels"}},
     "wires": [["noise", "lev"], ["noise:output", "blend:mask"], [12, "lev"]],
     "outputs": {"roughness": {"from": "lev", "usage": "Roughness"}},
@@ -16,7 +16,7 @@ them before their numeric ids exist:
                  "bind": [{"node": "lev", "param": "out_high"}]}],
     "presets": [{"name": "glossy", "values": {"rough": 0.1}}],
     "steps": [{"id": "graph.node.base", "params": {"id": "@noise", "tiling": true}}],
-    "save": "out.mcraft"
+    "save": "out.sbs"
   }
 
 A node reference is a spec name or an existing node's integer id. A wire end is NODE or
@@ -247,6 +247,7 @@ class Builder:
         out = a.save or self.spec.get("save")
         if not out:
             raise m.McError("no output: give `save` in the spec or --save")
+        out = m.sbs_path(out)  # the CLI appends .sbs to any other extension (out.mcraft -> out.mcraft.sbs)
         inp = a.inp or self.spec.get("in")
         if inp and m.same_file(inp, out):
             raise m.McError("refusing to write over the input; save to a new path")
@@ -259,7 +260,7 @@ class Builder:
             base = inp
         else:
             tpl = self.spec.get("template", "empty")
-            base = os.path.join(tmpdir, "base.mcraft")
+            base = os.path.join(tmpdir, "base.sbs")
             args = ["new", tpl, base]
             if self.spec.get("size"):
                 args += ["--size", str(self.spec["size"])]
@@ -272,7 +273,7 @@ class Builder:
             return {"ok": False, "problems": self.problems}
 
         add, order = self.add_steps()
-        mid = os.path.join(tmpdir, "nodes.mcraft")
+        mid = os.path.join(tmpdir, "nodes.sbs")
         if a.dry_run:
             self.names = {n: "<%s>" % n for n in order}
             return {"ok": True, "dry_run": True, "batch_1": add, "batch_2": self.config_steps()}
@@ -319,10 +320,12 @@ class Builder:
             binds = e.get("bind", [])
             for b in binds if isinstance(binds, list) else [binds]:
                 ok = bound.get((self.ref(b["node"]), b["param"])) == e["id"]
-                (checks if ok else fails).append("bind %s -> %s.%s" % (e["id"], b["node"], b["param"]))
+                (checks if ok else fails).append(
+                    "bind %s -> %s.%s (0.2.0 does not save bindings in .sbs)" % (e["id"], b["node"], b["param"]))
         presets = {p["name"] for p in g.get("presets", [])}
         for pr in self.spec.get("presets", []):
-            (checks if pr["name"] in presets else fails).append("preset %s" % pr["name"])
+            (checks if pr["name"] in presets else fails).append(
+                "preset %s (0.2.0 does not save presets in .sbs)" % pr["name"])
         cook_args = ["cook", out, "--full"]
         if self.spec.get("graph") is not None:
             cook_args += ["--graph", str(self.spec["graph"])]
@@ -342,8 +345,8 @@ class Builder:
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("spec", help="JSON spec file")
-    ap.add_argument("--in", dest="inp", help="input .mcraft (overrides the spec's `in`)")
-    ap.add_argument("--save", help="output .mcraft (overrides the spec's `save`)")
+    ap.add_argument("--in", dest="inp", help="input .sbs (overrides the spec's `in`)")
+    ap.add_argument("--save", help="output .sbs (overrides the spec's `save`)")
     ap.add_argument("--overwrite", action="store_true", help="replace an existing output")
     ap.add_argument("--dry-run", action="store_true", help="validate and print the two batches; run nothing")
     a = ap.parse_args()

@@ -1,63 +1,70 @@
-# Node library (0.1.2, 222 nodes)
+# Node library (0.2.0, 30 entries)
 
-Don't guess node ids, ports or parameter ids — ask the library:
+0.2.0 removed the old procedural library (222 nodes in 0.1.2: noises, patterns, material filters,
+`perlin_noise`, `height_normal_ao`, `edge_wear`, `pbr_base_material`, ...). What is left is a
+set of **primitives**: 25 atomic nodes and 5 graph items. Patterns and noises are built from
+`pixel_processor` / `fx_map` functions. Don't guess ids, ports or parameter ids; ask the library:
 
 ```sh
-materialcraft-cli nodes --filter normal                 # any id/label containing the text
-materialcraft-cli nodes --category "Weathering"         # one category
-materialcraft-cli nodes --filter edge_wear | python3 -c 'import json,sys
+materialcraft-cli nodes --filter blur                   # any id/label containing the text
+materialcraft-cli nodes --category "Atomic nodes"       # or "Graph items"
+materialcraft-cli nodes --filter emboss | python3 -c 'import json,sys
 for n in json.load(sys.stdin): print(n["id"], [i["id"] for i in n["inputs"]], [o["id"] for o in n["outputs"]], [p["id"] for p in n["params"]])'
 ```
 
-Port kinds: `Gray`, `Color`, `Any`. A `Gray` output into a `Color` input is fine; the engine
-converts.
+An unmatched filter prints `[]`. Port kinds: `Gray`, `Color`, `Any`.
 
-## Categories
+## Atomic nodes (25)
 
-| Category | Count | Examples |
+| def | inputs | params (default) |
 |---|---|---|
-| Texture generators/Noises | 51 | `perlin_noise`, `clouds_1/2/3`, `fractal_sum_base`, `voronoi`, `cells_1…4`, `grunge_map_1…3`, `dirt`, `crackle`, `cracks`, `stones`, `wood_grain`, `marble`, `concrete`, `bark`, `leather`, `anisotropic_noise` (does not tile on X) |
-| Texture generators/Patterns | 38 | `brick_generator`, `tile_generator`, `tile_sampler`, `planks`, `hexagons`, `weave`, `basketweave`, `herringbone`, `checker`, `stripes`, `shape`, `splatter`, `scratches_generator` |
-| Filters/Adjustments | 25 | `levels`, `histogram_scan`, `auto_levels`, `invert`, `threshold`, `colorize`, `hsl`, `gamma`, `contrast_luminosity`, `replace_color` |
-| Atomic nodes | 24 | `blend`, `gradient_map`, `uniform`, `normal`, `warp`, `directional_warp`, `blur`, `transformation`, `bitmap`, `fx_map`, `pixel_processor`, `svg`, `text` |
-| Filters/Effects | 20 | `ambient_occlusion`, `curvature`, `bevel`, `edge_detect`, `erosion`, `highpass` |
-| Filters/Blending | 10 | `height_blend`, `lerp`, `multiply`, `add`, `subtract`, `maximum`, `minimum`, `switch` |
-| Filters/Normal map | 10 | `height_to_normal`, `normal_from_height_hq`, `normal_blend`, `normal_combine`, `normal_invert` |
-| Filters/Flood fill | 8 | `flood_fill` + `flood_fill_to_random_grayscale/color/gradient/…` |
-| Material filters/Weathering | 7 | `edge_wear`, `dirt_mask`, `dust_mask`, `rust`, `moss`, `leaks`, `edge_damage` |
-| Material filters/PBR utilities | 6 | `pbr_base_material`, `height_normal_ao`, `albedo_safe`, `metallic_mask`, `metal_base_color`, `material_color_adjust` |
-| Filters/Blurs, /Tiling, /Transforms, /Channels | 16 | `slope_blur`, `make_it_tile`, `tile_random`, `safe_transform`, `mirror`, `rgba_merge`, `rgba_split` |
-| Material filters/Blending | 2 | `material_blend`, `material_height_blend` |
-| Graph items | 5 | `output`, `input_color`, `input_grayscale`, `graph_instance`, `dot` |
+| `uniform` | - | `color` (0.5 grey), `color_mode` (true = colour, false = grayscale) |
+| `bitmap` | - | `resource` (name from `file.importBitmap`), `colour_space`, `color_mode` |
+| `svg` | `background` | `resource`, `color_mode`, `background` |
+| `text` | `background` | `text`, `fontsize`, `position`, `matrix`, `alignment`, `fontdata`, `color_mode`, `background` |
+| `fx_map` | `background`, `pattern0` | `pattern` (a `patternGraph`, edit with `graph.pattern.set/edit`), `opacity`, `color_mode`, `background` |
+| `pixel_processor` | `input0` | `function` (a function graph, `$pos` is the pixel position), `color_mode` |
+| `value_processor` | `input0` | `function` (computes one value, no image) |
+| `blend` | `foreground`, `background`, `mask` | `mode` (enum), `opacity`, `alpha` |
+| `levels` | `input` | `in_low`, `in_mid`, `in_high`, `out_low`, `out_high`: **float4** each |
+| `curve` | `input` | `curve` |
+| `gradient_map` | `input` (Gray) | `gradient`, `color_mode` |
+| `gradient_dynamic` | `input` (Gray), `gradient` | `position`, `orientation` |
+| `hsl` | `input` (Color) | `hue`, `saturation`, `lightness` (0.5 = unchanged) |
+| `grayscale_conversion` | `input` (Color) | `red`, `green`, `blue`, `alpha`, `flatten_alpha`, `matte` |
+| `channels_shuffle` | `input1`, `input2` | `red`, `green`, `blue`, `alpha` (enum sources) |
+| `normal` | `input` (Gray) | `intensity`, `opengl`, `height_alpha` |
+| `emboss` | `input`, `height` | `intensity`, `light_angle`, `highlight`, `shadow` |
+| `blur` / `sharpen` | `input` | `intensity` |
+| `directional_blur` / `motion_blur` | `input` | `intensity`, `angle` / `shiftangle` |
+| `warp` | `input`, `gradient` | `intensity` |
+| `directional_warp` | `input`, `intensity_input` | `intensity`, `angle` |
+| `distance` | `mask`, `source` | `distance`, `combine` |
+| `transformation` | `input` | `offset`, `matrix` (float4), `filtering`, `matte` |
 
-## Core nodes (ports and params, 0.1.2)
+`levels` params are float4 (`[r, g, b, a]`), so a plain float exposed input cannot be bound to
+them (see exposed.md). `normal` and `emboss` set the look of a height map; there is no
+ambient-occlusion, curvature or edge-wear node any more.
 
-| def | inputs → outputs | params |
+## Graph items (5)
+
+| def | inputs -> outputs | params |
 |---|---|---|
-| `output` | `input` → — | `identifier` (text, the export name), `usage` (enum 0–9: Base color, Normal, Roughness, Metallic, Height, Ambient occlusion, Emissive, Opacity, Specular, Any) |
-| `perlin_noise` | — → `output` | `scale`, `disorder` |
-| `clouds_2`, `fractal_sum_base` | — → `output` | `scale`, `roughness` (+ `octaves`) |
-| `uniform` | — → `output` | `color`, `mode` (0 Color, 1 Grayscale) |
-| `levels` | `input` → `output` | `in_low`, `in_mid`, `in_high`, `out_low`, `out_high` |
-| `histogram_scan` | `input` → `output` | `position`, `contrast`, `invert` |
-| `gradient_map` | `input` → `output` | `gradient`, `mode` (0 Color, 1 Grayscale) |
-| `colorize` | `input` → `output` | `dark`, `light` |
-| `blend` | `foreground`, `background`, `mask` → `output` | `mode` (0 Copy, 1 Add, 2 Subtract, 3 Multiply, 4 Add Sub, 5 Max, 6 Min, 7 Switch, 8 Divide, 9 Overlay, 10 Screen, 11 Soft light, …), `opacity`, `alpha` |
-| `lerp` | `input_a`, `input_b`, `mask` → `output` | `position` |
-| `height_to_normal` / `normal` | `input` → `output` | `intensity`, `format` |
-| `height_normal_ao` | `height` → `normal`, `ambient_occlusion` | `normal_intensity`, `ao_spread`, `ao_depth` |
-| `ambient_occlusion` | `height` → `output` | `spread`, `intensity` |
-| `curvature` | `normal` → `output` | `intensity` |
-| `height_blend` | `top`, `bottom`, `mask` → `height`, `blend_mask` | `offset`, `contrast` |
-| `edge_wear` | `height`, `curvature` → `output` | `width`, `amount`, `noise_scale`, `noise_amount`, `contrast` |
-| `dirt_mask` | `height`, `ao` → `output` | `spread`, `amount`, `noise_scale`, `noise_amount`, `contrast` |
-| `rust` / `leaks` | `mask` → `output` | `amount`, `scale`, `spread`, `pitting`, `contrast` / `length`, `streaks`, … |
-| `moss` | `height` → `output` | `style`, `amount`, `scale`, `height_bias`, `contrast` |
-| `pbr_base_material` | — → `base_color`, `normal`, `roughness`, `metallic`, `height`, `ambient_occlusion` | `base_color`, `roughness`, `metallic`, `height`, `ao` |
-| `material_blend` | `base_color_1…height_1`, `base_color_2…height_2`, `mask` → `base_color`, `normal`, `roughness`, `metallic`, `height` | `opacity` |
-| `make_it_tile` | `input` → `output` | `blend` |
-| `tile_sampler` | `pattern`, `scale_map` → `output` | `x_amount`, `y_amount`, `scale`, `scale_random`, `offset`, `position_random`, `rotation_random`, `lum_random`, `blend` |
-| `bitmap` | — → `output` | `resource` (a name from `file.importBitmap`) |
+| `output` | `input` -> - | `identifier` (text, the export name), `usage` (enum 0-9: Base color, Normal, Roughness, Metallic, Height, Ambient occlusion, Emissive, Opacity, Specular, Any) |
+| `input_color` / `input_grayscale` | - -> `output` | `identifier`, `usage`, `default` (colour); an image can be bound with `graph.input.bind` |
+| `input_value` | - -> `output` | `identifier`, `usage`, `default` (float); read it in a function with `get_float1 "<identifier>"` |
+| `dot` | `input` -> `output` | none (a reroute) |
+
+## Function graphs (pixel_processor, value_processor)
+
+A function graph is `{"nodes": [{"id", "op", "inputs": [ids], "pos": [x, y], "type_code",
+"value"?}], "output": id}`. Set one with `graph.function.set {target: {kind: "parameter",
+node: N, parameter: "function"}, function}`. `type_code` is 256 for a float and 512 for a
+float2. Ops verified in 0.2.0: `get_float2` (value `"$pos"`, the pixel position in 0..1),
+`get_float1` (value = an `input_value` identifier), `swizzle1` (value = component index),
+`const_float1`, `mul`, `add`, `sin`. An unknown op fails with `unknown function` and the step
+saves nothing. The built-in **Atomic sample** (`new atomics`) shows the format; read its
+`pixel_processor` with `mc_inspect.py --params` or `info`.
 
 Every node also has **base** settings (`graph.node.base`): `sizeMode`
 (relativeToInput / relativeToParent / absolute), `size` (log2 offset or log2 size),

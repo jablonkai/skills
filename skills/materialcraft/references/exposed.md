@@ -1,8 +1,14 @@
-# Exposed inputs, presets and variants (0.1.2)
+# Exposed inputs, presets and variants (0.2.0)
 
 An **exposed input** is a graph-level parameter (the sliders a user of the material sees).
 It does nothing until it is **bound** to one or more node parameters. Presets store named
 sets of exposed-input values. Templates ship with no exposed inputs; add them.
+
+> **0.2.0 limitation:** the `.sbs` save keeps the exposed inputs but drops **bindings and
+> presets**. After a reload nothing is bound, so `--set`, `mc_render.py --variants` and
+> `mc_export.py --set` change nothing, and `mc_build.py` reports `bind ...` / `preset ...` as
+> failed read-backs. Everything below works **inside one process**: do the bind, `exposed.set`
+> and `file.export` in one `batch` (recipes.md §3). 0.1.2 saved both.
 
 ## Adding and binding
 
@@ -17,15 +23,16 @@ sets of exposed-input values. Templates ship with no exposed inputs; add them.
 - `bind` takes one `{node, param}`. To drive more parameters from the same input, add
   `graph.node.bind {id, param, input}` per extra parameter (after `graph.select`, see
   gotchas). In `mc_build.py`, `bind` may be a list.
-- Match the types: a float input on a float/int param, a colour input on a `color` param.
+- Match the types: a float input on a float/int param, a colour input on a `color` param, and a
+  float4 input (typed default `{"t": "float4", "v": [..]}`) on a float4 param such as
+  `levels.out_high`. A float input on a float4 param cooks with `has the wrong type for get_float4`.
   A float default bound to an enum is rejected (`bad default`), and a colour bound to a
   `gradient` is accepted without doing anything useful. To tint a gradient-mapped colour, put
   a `uniform` + `blend` (multiply) after the gradient map (recipes.md §2).
 - `graph.node.function {id, param, function?: {nodes, output}}` drives a parameter with a
   function graph of the inputs (without `function`: a constant of the current value). Its
-  node format is not documented in the CLI and not covered by this skill — to invert or
-  remap an input, bind it plainly and put `invert`, `levels` or `histogram_scan` nodes in
-  the graph instead.
+  node format is the one `graph.function.set` takes (nodes.md); to invert or remap an input,
+  bind it plainly and put a `levels` or `curve` node in the graph instead.
 
 The current values live in the graph's `inputs` (`{"wear": {"t": "float", "v": 0.4}}`)
 and are saved with the package; `exposed[].default` is only the default.
@@ -52,16 +59,16 @@ apply them (`material.link.preset`).
 `--set id=value` on `cook`, `export` and `render` applies values for that run only:
 
 ```sh
-materialcraft-cli render rusty.mcraft v_lo.png --scene sphere --set wear=0.1
-materialcraft-cli export rusty.mcraft maps_hi --set wear=0.9 --set 'tint="#aa7744"'
-python3 $S/mc_render.py rusty.mcraft v.png --scene sphere --variants wear=0.1,0.5,0.9
+materialcraft-cli render rusty.sbs v_lo.png --scene sphere --set wear=0.1
+materialcraft-cli export rusty.sbs maps_hi --set wear=0.9 --set 'tint="#aa7744"'
+python3 $S/mc_render.py rusty.sbs v.png --scene sphere --variants wear=0.1,0.5,0.9
 ```
 
-`--set` values are JSON (`0.4`, `"\"#aa7744\""`, `[1,0,0,1]`); hex colours are sRGB. An
-unknown id is an error (exit 1). `mc_render.py --variants` writes `v_wear-0.1.png`, … and
+`--set` values are JSON (`0.4`, `[1,0,0,1]`). An unknown id is an error (exit 1). Hex colours
+were accepted in 0.1.2; in 0.2.0 an exposed colour is a float4 and hex fails with `takes a float4`. `mc_render.py --variants` writes `v_wear-0.1.png`, … and
 fails when two variants look the same — the input is bound to nothing visible.
 
 There is no `--preset` flag on `render`/`export`: to render a preset, pass its values as
 `--set`s (read them from `mc_inspect.py` `presets`), or `run IN graph.preset.apply
-'{"name": "heavy"}' -o tmp.mcraft` and render that copy (the applied values are saved in
+'{"name": "heavy"}' -o tmp.sbs` and render that copy (the applied values are saved in
 its `inputs`).
