@@ -1,6 +1,6 @@
-# photocraft-cli reference (0.20.2)
+# photocraft-cli reference (0.21.0)
 
-Verified against `photocraft-cli 0.20.2 (7c12f6471, 2026-11-05)`. Every subcommand prints
+Verified against `photocraft-cli 0.21.0 (efb7ebd0c, 2026-11-06)`. Every subcommand prints
 its own help with `photocraft-cli <sub> --help`; a flag the subcommand doesn't take is
 an error. The CLI is the trusted local route: unlike `serve`, MCP and the desktop
 control port, it may use ordinary filesystem paths.
@@ -75,10 +75,14 @@ photocraft-cli batch --actions <actions.json | set.atn> [--action <name>] \
   --in <dir> --out <dir> [--format <ext>] [--quality 1-100] [--in-place] [<format flags>]
 ```
 
-- Applies one action list to every image in `--in` (not recursive; for subfolders run
-  `file.automate.batch` with `"includeSubfolders": true`, see
+- Applies one action list to every image in `--in`. Not recursive unless `--recursive`
+  (0.21.0), which puts every result straight into `--out`, so same-named files in
+  subfolders overwrite each other: add `--naming '{serial}-{name}'` (tokens `{name}`,
+  `{serial}`, `{date}`, `{ext}`; `--start-serial N`) or use `file.automate.batch` with
+  `"includeSubfolders": true` (see
   [recipes.md](recipes.md#folder-batch-resize-sharpen-convert)). The output keeps the
-  base name and takes the `--format` extension.
+  base name and takes the `--format` extension. `--stop-on-error` halts at the first
+  failure and `--error-log FILE` writes the failed inputs and reasons.
 - `--out` equal to `--in` is refused unless `--in-place`. Never use `--in-place` unless the
   user explicitly wants the originals replaced.
 - The JSON steps can be `[id, params]` pairs, `{"command": id, "params": {…}}` objects
@@ -113,7 +117,7 @@ to it. Droplet `quality` is **0..12** (Photoshop's JPEG scale), not 1..100.
 photocraft-cli commands [--json] [--filter <text>]
 ```
 
-The engine registry: 965 commands in 0.20.2. `--filter` matches the id and label. Only
+The engine registry: 993 commands in 0.21.0. `--filter` matches the id and label. Only
 `--json` includes each command's `params` signature (ranges, defaults, enum values), so
 use `scripts/pc_inspect.py commands <words…>` to see it. That's the source of truth
 whenever this reference and the binary disagree.
