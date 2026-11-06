@@ -1,4 +1,4 @@
-# Gotchas (verified on 0.20.2)
+# Gotchas (verified on 0.21.0)
 
 Each of these was hit while building the skill. Most fail silently, so a read-back is the
 only way to notice them.
@@ -111,8 +111,10 @@ Use `"what": "position"` or `"appearance"` for those kinds of change. See
   file, and the others still run.
 - The batch warning `lossy compression` is informational. WebP keeps the resolution
   since 0.16.0, so the old `resolution (DPI) not supported` warning is gone.
-- `photocraft-cli batch` does not recurse into subfolders. Use `file.automate.batch`
-  with `"includeSubfolders": true` for a tree.
+- `photocraft-cli batch` does not recurse into subfolders unless given `--recursive`
+  (0.21.0), and then every result lands flat in `--out`, so same-named files overwrite
+  each other: add `--naming '{serial}-{name}'`. `file.automate.batch` with
+  `"includeSubfolders": true` is the alternative for a tree.
 - Export presets (`file.export.presets.save`) live in the process that saved them: a
   later `photocraft-cli run` lists none. Save and use a preset within one `run` or one
   `serve` session.
