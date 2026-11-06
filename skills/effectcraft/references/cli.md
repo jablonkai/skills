@@ -1,4 +1,4 @@
-# effectcraft-cli 0.21.1
+# effectcraft-cli 0.22.0
 
 Each invocation runs a headless engine, does its work and exits. `--help` lists everything;
 running the app binary would open a window, so don't.
