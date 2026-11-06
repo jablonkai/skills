@@ -1,4 +1,4 @@
-# Gotchas (pdfcraft-cli 0.18.2)
+# Gotchas (pdfcraft-cli 0.19.0)
 
 Each was found by running the CLI. Where the fix is mechanical, the scripts
 already apply it.

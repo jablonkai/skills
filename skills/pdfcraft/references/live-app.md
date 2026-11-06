@@ -47,7 +47,7 @@ bash $S/pf.sh mcp --compact \
      --automation-read-root "$PWD/in" --automation-write-root "$PWD/out"
 ```
 
-- stdio MCP server with the same 189 tools. `--compact` lists a core set plus
+- stdio MCP server with the same 195 tools. `--compact` lists a core set plus
   `tool_search` and `tool_call`.
 - `--automation-read-root` / `--automation-write-root` confine what the tools
   may open and write (links followed). **A root left out grants no access of
