@@ -1,4 +1,4 @@
-# designcraft-cli reference (0.17.2)
+# designcraft-cli reference (0.18.0)
 
 `designcraft-cli` (`~/.local/bin/designcraft-cli`) runs the DesignCraft engine headless.
 Vendor docs: `docs/agents.md`, `docs/mcp.md`, `docs/control-protocol.md` in
@@ -117,5 +117,5 @@ minimal client (`Session`).
 
 ## Other subcommands
 
-`perf`, `bench FILE` (layout/render timing), `links` (community URLs), `app` (sends a
+`thumbnail F.designcraft OUT.png [SIZE]` (the saved first-page preview, at most SIZE px), `perf`, `bench FILE` (layout/render timing), `links` (community URLs), `app` (sends a
 command to an app started with `--control PORT` — not used here), `--version`.
