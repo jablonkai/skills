@@ -1,4 +1,4 @@
-# Command ids by task (pinned to 0.15.1)
+# Command ids by task (pinned to 0.16.0)
 
 The registry has 331 commands. These are the ones the common tasks need; for anything
 else, `scripts/dk_commands.py WORD…` or `deckcraft-cli describe ID`. Indices are
