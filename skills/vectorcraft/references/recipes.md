@@ -1,6 +1,6 @@
 # Recipes
 
-`S=<skill>/scripts`. All of them were verified on vectorcraft-cli 0.21.1.
+`S=<skill>/scripts`. All of them were verified on vectorcraft-cli 0.22.0.
 
 ## Logo sheet
 
@@ -134,7 +134,7 @@ python3 $S/vc_variants.py tpl.vectorcraft people.csv out/badges \
 - An `image` variable takes a file path per row. The CSV column holds the path, which
   must be inside the read root.
 - To fill the variables manually inside a session, use
-  `dataset.import {"csv": "name,title\nr1,Ada\n"}`, then `dataset.select {"name": "r1"}`
+  `dataset.import {"csv": "title\nAda\n"}`, then `dataset.select {"name": "Data Set 1"}`
   and `export`.
 
 ## One-shot `run`

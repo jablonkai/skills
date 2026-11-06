@@ -16,7 +16,7 @@ Visibility cells accept true/false, yes/no, 1/0, show/hide.
 Each row is applied with dataset.select, then exported as OUT_DIR/<pattern>.<ext>;
 --pattern takes {row} (the --name-col value) and {<any column>}.
 Prints a JSON report with each output and any text overflow; exits 1 on error.
-The data sets are recorded in --save-template (rows named row1, row2…).
+The data sets are recorded in --save-template (rows named Data Set 1, Data Set 2…).
 """
 import argparse
 import csv
@@ -99,7 +99,7 @@ def main():
 
         buf = io.StringIO()
         w = csv.writer(buf)
-        w.writerow(["name"] + list(feeds))
+        w.writerow(list(feeds))
         for i, r in enumerate(rows):
             vals = []
             for var, col in feeds.items():
@@ -110,11 +110,15 @@ def main():
                         raise ToolError("row %d: %r is not a visibility value" % (i + 1, v))
                     v = "true" if low in TRUE else "false"
                 vals.append(v)
-            w.writerow(["row%d" % (i + 1)] + vals)
+            w.writerow(vals)
         s.cmd("dataset.import", {"csv": buf.getvalue()})
+        # 0.22 names the imported rows "Data Set 1, 2…" (no name column); take the names as listed
+        names = [d["name"] for d in s.cmd("dataset.list").get("datasets", [])]
+        if len(names) != len(rows):
+            raise ToolError("dataset.import made %d data sets for %d rows" % (len(names), len(rows)))
 
         for i, (r, out) in enumerate(zip(rows, outputs)):
-            res = s.cmd("dataset.select", {"name": "row%d" % (i + 1)})
+            res = s.cmd("dataset.select", {"name": names[i]})
             args = {"path": out}
             if a.scale:
                 args["scale"] = a.scale
