@@ -1,6 +1,6 @@
 # Recipes
 
-`S=<skill>/scripts`. All verified on effectcraft-cli 0.21.1.
+`S=<skill>/scripts`. All verified on effectcraft-cli 0.22.0.
 
 ## Lower third from a spec
 
