@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Export a MaterialCraft graph's outputs (and optionally a portable .mcmat) and prove the result.
 
-  mc_export.py IN.mcraft DIR [--graph N] [--set ID=VALUE]... [--format png] [--depth 16]
+  mc_export.py IN.sbs DIR [--graph N] [--set ID=VALUE]... [--format png] [--depth 16]
                [--pattern '$(graph)_$(identifier)'] [--mcmat OUT.mcmat [--mcmat-size N]]
                [--texturecraft-check] [--overwrite]
 
@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import mclib as m  # noqa: E402
 
 TOKENS = {"graph", "identifier", "usage"}
-# What each format really writes in 0.1.2 (a --depth outside the set is ignored silently).
+# What each format really writes in 0.2.0 (a --depth outside the set is ignored silently).
 DEPTHS = {"png": {8, 16}, "tif": {8, 16}, "exr": {32}, "hdr": {32},
           "jpg": {8}, "bmp": {8}, "tga": {8}, "webp": {8}}
 
@@ -70,7 +70,7 @@ def texturecraft_check(mcmat):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("inp", help=".mcraft package (or `sample`)")
+    ap.add_argument("inp", help=".sbs package (or `sample`)")
     ap.add_argument("dir", help="output folder (must be new or empty unless --overwrite)")
     ap.add_argument("--graph", type=int, help="graph index (default: the open graph)")
     ap.add_argument("--set", action="append", metavar="ID=VALUE", help="exposed input value (JSON or #rrggbb)")
@@ -165,7 +165,7 @@ def main():
                 fails.append(".mcmat has no parameter `%s`" % k)
         result["mcmat"] = {"path": a.mcmat, "maps": maps, "size": meta.get("size"),
                            "parameters": params, "presets": [pr["name"] for pr in meta.get("presets", [])],
-                           "source": "source.mcraft" in names}
+                           "source": ("source.sbs" in names) or ("source.mcraft" in names)}
         if a.texturecraft_check:
             tc = texturecraft_check(a.mcmat)
             result["texturecraft"] = tc

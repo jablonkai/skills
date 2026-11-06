@@ -1,4 +1,4 @@
-# Security and the live app (0.1.2)
+# Security and the live app (0.2.0)
 
 ## Headless (what this skill uses)
 
@@ -6,8 +6,9 @@
 outputs named there (`-o`, `save`, `export DIR`, `render OUT`, `file.exportMaterial path`).
 Nothing listens on a port. `file.sendToTextureCraft` writes into
 `~/Documents/TextureCraft/library` — the user's TextureCraft shelf — so run it only when
-asked. `.mcraft` and `.mcmat` files are zips of JSON and images; a package from someone else
-can embed bitmaps (`file.importBitmap`) but no code.
+asked. `.sbs` packages are XML and `.mcmat` files are zips of JSON, PNGs and the `.sbs`; a package
+from someone else can embed bitmaps (`file.importBitmap`) and function graphs (a fixed op set,
+no scripting), but no code.
 
 ## `mcp` and `serve`
 
