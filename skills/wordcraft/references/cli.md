@@ -1,6 +1,6 @@
-# wordcraft-cli reference (0.16.0)
+# wordcraft-cli reference (0.17.0)
 
-All behaviour below was verified against wordcraft-cli 0.16.0 on macOS. `-h` on any
+All behaviour below was verified against wordcraft-cli 0.17.0 on macOS. `-h` on any
 subcommand prints this same global help; there is no per-command help and no `describe`.
 
 ## Subcommands
@@ -13,7 +13,7 @@ subcommand prints this same global help; there is no per-command help and no `de
 | `inspect FILE` | Structure JSON (below) |
 | `render FILE OUT.png [--page N] [--scale S]` | One page to PNG. Pages are 1-based; scale is px per pt (default 2) |
 | `run [--file F \| --template T] [--script FILE\|-] --cmd 'id={json}' … [--save OUT] [--print] [--author NAME]` | Runs commands headless, then saves. `--print` prints each command's result |
-| `commands [--json]` | The registry (656 ids). Filter it with `scripts/wc_commands.py` |
+| `commands [--json]` | The registry (670 ids). Filter it with `scripts/wc_commands.py` |
 | `parity [--markdown]` | Feature-catalogue coverage |
 | `mcp [--connect HOST:PORT \| --author NAME] [--automation-read-root DIR] [--automation-write-root DIR]` | MCP server on stdio, headless or bridged to the app |
 | `zotero <command> FILE …` | Zotero citation commands (needs Zotero running) |
