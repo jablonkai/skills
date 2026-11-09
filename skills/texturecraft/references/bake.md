@@ -1,4 +1,4 @@
-# Baking mesh maps (0.4.0)
+# Baking mesh maps (0.5.0)
 
 ## Map ids
 
