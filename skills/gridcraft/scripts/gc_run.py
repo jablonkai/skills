@@ -11,7 +11,7 @@ list on stdin. Without --in/--sample the steps start from a blank workbook.
 Guards the silent failures of `gridcraft-cli run`: it refuses to run without --out (run
 discards every change when --out is missing), refuses to overwrite an existing file or the
 input unless --overwrite is given, refuses a step whose param names don't appear in the
-command's registry shape (0.17.0 ignores unknown params silently, so a typo such as
+command's registry shape (0.18.0 ignores unknown params silently, so a typo such as
 `cel` makes cell.set write to the selection; --no-param-check skips this), and compares formula-cell counts before and after so a
 command that wrote over existing formulas (e.g. table.totalRow) is reported. Exits 1 on a
 failed step (nothing is saved then) or on lost formulas.
@@ -53,7 +53,7 @@ def parse_step(line):
 def unknown_params(lines):
     """List the param names that don't occur anywhere in their command's registry shape.
 
-    gridcraft-cli 0.17.0 ignores unknown params instead of failing the run. The shape is
+    gridcraft-cli 0.18.0 ignores unknown params instead of failing the run. The shape is
     free text, so every word in it counts as known: permissive, but a typo is still caught.
     """
     proc = cli("commands", "--json", check=True)
