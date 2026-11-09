@@ -3,23 +3,23 @@ name: photocraft
 description: 'Automate PhotoCraft, the Photoshop-style layered image editor, headless with photocraft-cli: build layered compositions (image, text, shape, fill and adjustment layers, layer styles) from a spec, apply filters and adjustments, edit PSD/.pcraft templates (text, visibility, smart-object images), export layer comps, layers or CSV data-set variants, batch-process folders with JSON actions, Photoshop .atn sets or .pcdroplet droplets, and convert formats, all verified by an info read-back and a rendered preview. Use when the user mentions PhotoCraft, photocraft-cli, a .pcraft file or a .pcdroplet droplet, or wants a PSD edited, a layered image built or an action run over a folder with PhotoCraft: "make a 1080x1080 post in PhotoCraft", "run Vintage.atn over this folder", "export every layer comp". Not for GIMP (gimp), Krita (krita), Pixelmator Pro (pixelmator-pro), Affinity (affinity), SVG (inkscape), or plain resizing with no PhotoCraft (sips/ImageMagick).'
 summary: "automate PhotoCraft headless with photocraft-cli — layered compositions with text, shape and adjustment layers and styles, filters, PSD template edits, layer-comp, layer and CSV data-set export, folder batches from JSON actions, .atn sets or droplets, info read-back verified"
 category: design-automation
-compatibility: "Built for photocraft-cli 0.21.0 and PhotoCraft.app 0.21.0 on macOS; pre-1.0, so command ids may change."
+compatibility: "Built for photocraft-cli 0.22.0 and PhotoCraft.app 0.22.0 on macOS; pre-1.0, so command ids may change."
 risk: medium
 tags: [photocraft, psd, image-editing, layers, batch, photoshop-actions, droplet, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.3.0"
+  version: "1.3.1"
   author: "Tamás Jablonkai"
 ---
 
 # PhotoCraft via photocraft-cli
 
 PhotoCraft is a Photoshop-style layered editor. All of its features are commands in one
-engine registry: every menu item, tool and dialog is a command (993 in 0.21.0). The same
+engine registry: every menu item, tool and dialog is a command (1005 in 0.22.0). The same
 commands are reachable from the CLI, a headless JSON session and the desktop app. This
 skill drives them headless, so no window or GPU is needed, and checks every result by
-reading the document back. Verified against **photocraft-cli 0.21.0** and
-**PhotoCraft.app 0.21.0** on macOS. The software is pre-1.0, so the command ids pinned in
+reading the document back. Verified against **photocraft-cli 0.22.0** and
+**PhotoCraft.app 0.22.0** on macOS. The software is pre-1.0, so the command ids pinned in
 `references/` may change. When a pinned id fails, look it up.
 
 ```sh
@@ -96,9 +96,10 @@ library only. Call them as `python3 $S/<script>` with `S=<skill>/scripts`.
 
 ## The traps that cost the most (details in [gotchas.md](references/gotchas.md))
 
-- **Pass layer ids, not names.** `type.edit` silently ignores a `layer` name (even a
-  correct one) and **edits the active layer instead**, with exit 0; check the `layer` in
-  its reply. `image.variables.define` refuses names outright.
+- **Pass layer ids, not names.** Before 0.22.0 `type.edit` silently ignored a `layer` name
+  (even a correct one) and **edited the active layer instead**, with exit 0; 0.22.0
+  resolves names and errors on an unknown one, but ids stay the portable choice, so check
+  the `layer` in its reply. `image.variables.define` refuses names outright.
   `layer.select {"name": …}` selects by name, which makes a following `type.edit`
   without `layer` safe. Get ids from `pc_inspect.py ids`
   (valid for `run` on that same file) or write `"@layer:Name"` in `pc_session.py` steps.
@@ -133,7 +134,7 @@ library only. Call them as `python3 $S/<script>` with `S=<skill>/scripts`.
 - **Batch**: write a JSON action list (`[["file.automate.fitImage",{"width":2048,"height":2048}],["filter.sharpen.unsharpMask",{"amount":80}]]`),
   run `photocraft-cli batch --actions a.json --in IN --out OUT --format webp --quality 80`,
   then `pc_verify.py files OUT …` and `hash IN --compare`. `batch` recurses only with
-  `--recursive` (flat output, so add `--naming`); or use `file.automate.batch` with `includeSubfolders`
+  `--recursive` (flat output, so add `--naming '{serial}-{name}.{ext}'`); or use `file.automate.batch` with `includeSubfolders`
   ([recipes.md](references/recipes.md#folder-batch-resize-sharpen-convert)).
 - **Template edit and comps, data sets, layer export, smart-object swap, `.atn`,
   droplets**: [recipes.md](references/recipes.md).

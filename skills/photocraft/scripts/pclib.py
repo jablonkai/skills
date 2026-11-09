@@ -62,8 +62,8 @@ LAYER_REF = "@layer:"
 def layer_ids(doc, names):
     """Map layer names to numeric ids; raise on a missing or duplicated name.
 
-    Pass ids, not names, to engine commands: some (type.edit, layer.translate)
-    silently ignore a name they cannot resolve and edit the active layer instead.
+    Pass ids, not names, to engine commands: some (type.edit before 0.22.0)
+    silently ignored a name they cannot resolve and edited the active layer instead.
     """
     found = {}
     for _, layer in walk(doc.get("layers") or []):
