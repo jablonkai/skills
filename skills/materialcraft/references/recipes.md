@@ -1,10 +1,10 @@
-# Recipes (mc_build.py specs, verified on 0.2.0)
+# Recipes (mc_build.py specs, verified on 0.3.0)
 
 Run each with `python3 $S/mc_build.py spec.json` (add `--dry-run` to see the two batches
 first). New nodes are named; existing nodes are integer ids from `mc_inspect.py`. Save paths
 get `.sbs` appended by the CLI, so write `.sbs` yourself.
 
-0.2.0 has no noise or pattern nodes and only three templates (`empty`, `pbr`, `atomics`), so
+0.3.0 has no noise or pattern nodes and only three templates (`empty`, `pbr`, `atomics`), so
 procedural detail comes from a `pixel_processor` **function graph** ([nodes.md](nodes.md)).
 
 ## 1. A tileable PBR graph from an empty package
@@ -68,7 +68,7 @@ both `blend` inputs explicitly, as `connectFrom` only reaches the first one.
 
 ## 3. Exposed input and variants (one process)
 
-Bindings and presets are **not saved in `.sbs`** in 0.2.0 (gotchas.md), so a variant is made
+Bindings and presets are **not saved in `.sbs`** in 0.3.0 (gotchas.md), so a variant is made
 in a single `batch`: bind, set, export.
 
 ```json

@@ -247,7 +247,7 @@ class Builder:
         out = a.save or self.spec.get("save")
         if not out:
             raise m.McError("no output: give `save` in the spec or --save")
-        out = m.sbs_path(out)  # the CLI appends .sbs to any other extension (out.mcraft -> out.mcraft.sbs)
+        out = m.sbs_path(out)  # the CLI keeps .sbs/.mcraft and appends .sbs to any other extension (out.foo -> out.foo.sbs)
         inp = a.inp or self.spec.get("in")
         if inp and m.same_file(inp, out):
             raise m.McError("refusing to write over the input; save to a new path")
@@ -321,11 +321,11 @@ class Builder:
             for b in binds if isinstance(binds, list) else [binds]:
                 ok = bound.get((self.ref(b["node"]), b["param"])) == e["id"]
                 (checks if ok else fails).append(
-                    "bind %s -> %s.%s (0.2.0 does not save bindings in .sbs)" % (e["id"], b["node"], b["param"]))
+                    "bind %s -> %s.%s (0.3.0 does not save bindings in .sbs)" % (e["id"], b["node"], b["param"]))
         presets = {p["name"] for p in g.get("presets", [])}
         for pr in self.spec.get("presets", []):
             (checks if pr["name"] in presets else fails).append(
-                "preset %s (0.2.0 does not save presets in .sbs)" % pr["name"])
+                "preset %s (0.3.0 does not save presets in .sbs)" % pr["name"])
         cook_args = ["cook", out, "--full"]
         if self.spec.get("graph") is not None:
             cook_args += ["--graph", str(self.spec["graph"])]

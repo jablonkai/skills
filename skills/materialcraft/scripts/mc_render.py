@@ -10,7 +10,7 @@
 A 3D render that comes out flat (one colour) fails; a 2D one only warns, since a uniform map is
 legitimate. Variant renders must differ from each other, or the input is not wired to anything
 visible. --tile N renders the node (default: the base colour output) in 2D at the graph size and
-repeats it N x N itself: the CLI's `--view 2d --tiling N` is ignored in 0.2.0 (3D --tiling works,
+repeats it N x N itself: the CLI's `--view 2d --tiling N` is ignored in 0.3.0 (3D --tiling works,
 it repeats the UVs). --seam renders each output (or the given node ids) in 2D at the graph's own size and
 scores the wrap-around edges: up to 1.5 tiles, above it the wrap is a visible seam.
 Prints JSON; exits 1 on any failed check.
@@ -92,7 +92,7 @@ def main():
         m.emit({"ok": False, "error": "no exposed input %s (has %s)" % (bad, sorted(exposed))}, ok=False)
 
     if a.seam is not None:
-        targets = a.seam or [o["node"] for o in m.outputs(g)]
+        targets = a.seam or [o["node"] for o in m.outputs(g) if o["source"] is not None and not o["value"]]  # value outputs (the atomics sample has one) cook to a number, not an image
         names = {o["node"]: o["identifier"] for o in m.outputs(g)}
         tmp = tempfile.mkdtemp(prefix="mc-seam-")
         res, fails = [], []

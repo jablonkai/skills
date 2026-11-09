@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import mclib as m  # noqa: E402
 
 TOKENS = {"graph", "identifier", "usage"}
-# What each format really writes in 0.2.0 (a --depth outside the set is ignored silently).
+# What each format really writes in 0.3.0 (a --depth outside the set is ignored silently).
 DEPTHS = {"png": {8, 16}, "tif": {8, 16}, "exr": {32}, "hdr": {32},
           "jpg": {8}, "bmp": {8}, "tga": {8}, "webp": {8}}
 
@@ -115,8 +115,9 @@ def main():
     files = m.run_json(args)["files"]
 
     fails, report = [], []
-    if len(files) != len(outs):
-        fails.append("%d files for %d outputs" % (len(files), len(outs)))
+    n_img = len([o for o in outs if not o["value"]])  # value outputs write no file
+    if len(files) != n_img:
+        fails.append("%d files for %d image outputs" % (len(files), n_img))
     if len(set(files)) != len(files):
         fails.append("file names collide (the pattern needs $(identifier) or $(usage))")
     want = tuple(g["size"])
@@ -133,6 +134,8 @@ def main():
             fails.append("%s is %s-bit, asked for %d" % (f, h["bit_depth"], a.depth))
         report.append(row)
     for o in outs:
+        if o["value"]:
+            continue
         hit = [f for f in files if o["identifier"] in os.path.basename(f)
                or o["usage"].replace(" ", "").lower() in os.path.basename(f).lower()]
         if a.pattern and "$(identifier)" in a.pattern and not hit:
