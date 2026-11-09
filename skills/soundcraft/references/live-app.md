@@ -1,4 +1,4 @@
-# Running app and MCP (SoundCraft 0.18.0)
+# Running app and MCP (SoundCraft 0.19.0)
 
 Use these only when the user wants to watch the edit in SoundCraft or is already working
 in the open app. Headless `run`/`script` is the default and needs neither.
