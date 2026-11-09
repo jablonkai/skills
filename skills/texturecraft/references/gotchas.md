@@ -1,6 +1,6 @@
-# Gotchas (TextureCraft 0.4.0)
+# Gotchas (TextureCraft 0.5.0)
 
-Each of these was reproduced against texturecraft-cli 0.4.0.
+Each of these was reproduced against texturecraft-cli 0.5.0.
 
 ## Silent failures
 
@@ -30,6 +30,8 @@ Each of these was reproduced against texturecraft-cli 0.4.0.
 - `new`, `run -o`, `batch` `save`, and `export` into a non-empty folder all overwrite
   without asking. The scripts refuse unless given `--overwrite`.
 - `bake IN` with no `-o` saves the project **in place**.
+- A save (`-o`, batch `save`) does not create the output's parent folder: a missing one fails
+  with `I/O: cannot write ...: No such file or directory`. `mkdir -p` it first.
 - A failed batch step stops the batch, saves nothing and exits 1. The JSON names the step
   index and its error.
 
