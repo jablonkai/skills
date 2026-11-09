@@ -1,4 +1,4 @@
-# Gotchas (WordCraft 0.16.0)
+# Gotchas (WordCraft 0.17.0)
 
 Each of these was hit while building or testing this skill. Most fail **silently**: the
 command succeeds and the document is wrong.
@@ -34,13 +34,13 @@ command succeeds and the document is wrong.
 ## Table of contents and fields
 - **`references.toc` at `caret.docStart` leaves an empty Heading1-styled paragraph
   above the TOC.** A Heading1 with no text can still show in navigation.
-- **Deleting that paragraph (`caret.docStart` + `text.delete`) breaks the TOC.** The
-  TOC heading merges into Heading1, and after the next field update "Contents" lists
-  itself above an empty TOC1 line (0.15.0+ keeps the field; older releases lost it).
-  Instead, open a Normal paragraph first: `caret.docStart`, `text.newParagraph`,
-  `caret.up`, `para.style Normal`, then `references.toc`.
+- **Deleting that paragraph (`caret.docStart` + `text.delete`)** broke the TOC up to
+  0.16.0 (the heading merged into Heading1 and "Contents" listed itself). In 0.17.0 the
+  TOC survives the delete and a field update, but the Normal-paragraph route below is
+  still the one verified end to end. Open a Normal paragraph first: `caret.docStart`,
+  `text.newParagraph`, `caret.up`, `para.style Normal`, then `references.toc`.
 - A TOC after edits needs `references.updateFields {"all": true}` (or
-  `convert --update-fields`). Otherwise it shows stale entries. In 0.16.0
+  `convert --update-fields`). Otherwise it shows stale entries. In 0.17.0
   `references.toc` lists the headings that exist when it is inserted, but none added
   later, and a TOC inserted before any heading stays empty. `updateFields`
   without `all` updates only the caret's story.
