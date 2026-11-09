@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Filtered lookup in DeckCraft's command registry (331 commands in 0.16.0).
+"""Filtered lookup in DeckCraft's command registry (331 commands in 0.17.0).
 
   dk_commands.py WORD…              commands whose id or label contains every word
   dk_commands.py --prefix slide.    every command under a prefix
