@@ -27,8 +27,8 @@ VectorCraft can expose a running app for remote control:
 - `vectorcraft-cli mcp --connect ADDR` bridges to it.
 - Plain `vectorcraft-cli mcp` without `--headless` tries `127.0.0.1:7979` first.
 
-In 0.22.0 the CLI help still documents **no authentication** for that server: any local
-process that can reach the port can run any of the 933 commands. The app does offer `--automation-read-root` and
+In 0.23.0 the CLI help still documents **no authentication** for that server: any local
+process that can reach the port can run any of the 966 commands. The app does offer `--automation-read-root` and
 `--automation-write-root` to confine its file access, but that is not authentication.
 
 This repo's bridge rules require four things of a live bridge:
