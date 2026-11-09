@@ -1,4 +1,4 @@
-# Gotchas (MaterialCraft 0.2.0)
+# Gotchas (MaterialCraft 0.3.0)
 
 ## Silent successes that did the wrong thing
 
@@ -13,7 +13,7 @@
 | An exposed input with no `bind` | Exists, saves into presets and the `.mcmat`, drives nothing | `mc_inspect.py` warns; `mc_render.py --variants` fails on identical renders |
 | `graph.node.bind` / `graph.preset.save`, then **save** | The `.sbs` keeps the exposed input but **not the binding or the preset**; a reload shows `bindings: {}`, `presets: []`, and `--set` changes nothing | Bind, set and export in one `batch` (recipes.md §3); `mc_build.py` reports the loss as a failed read-back |
 | `--set id="#rrggbb"` for an exposed colour | `takes a float4`: after a reload the input is a float4 and hex is rejected | Pass the array: `--set tint=[0.7,0.02,0.02,1]` |
-| A path that doesn't end in `.sbs` (`-o t.mcraft`, `new`, `batch` `save`) | Writes `t.mcraft.sbs`; `t.mcraft` then doesn't exist | Write `.sbs`; `mc_build.py` normalises its `save` |
+| A path that is neither `.sbs` nor `.mcraft` (`-o t.foo`, `new`, `batch` `save`) | Writes `t.foo.sbs`; `t.foo` then doesn't exist (`.mcraft` is kept and written as a zip of `package.sbs`, 0.3.0) | Write `.sbs`; `mc_build.py` normalises its `save` |
 | A float default bound to an enum param | `bad default` error | Bind floats to float/int params |
 | A float exposed input bound to a float4 param (`levels`) | The cook fails: `variable ... has the wrong type for get_float4` | Add the input with a typed default `{"t": "float4", "v": [..]}` |
 | `graph.function.set` with an unknown `op` | Fails (`unknown function`), saves nothing | Use the ops listed in nodes.md |
@@ -48,12 +48,12 @@ nothing selected, so:
 
 ## Tiling
 
-- The 0.1.2 `anisotropic_noise` seam is gone with the old library (no noise nodes in 0.2.0). A
+- The 0.1.2 `anisotropic_noise` seam is gone with the old library (no noise nodes in 0.3.0). A
   `pixel_processor` function tiles when it has a whole number of periods across the pixel
   position; the Atomic sample's height (an FX-Map) scores x=2.41 (not seamless).
 - Node `base.tiling` (`graph.node.base {tiling: false}`) does not change what a generator
   produces; it is not a seam fix.
-- `render --view 2d --tiling N` is still ignored in 0.2.0 — the PNG is byte-identical to the
+- `render --view 2d --tiling N` is still ignored in 0.3.0 — the PNG is byte-identical to the
   untiled one (so is `view.2d {tiled: true}`). In 3D (`--scene plane --tiling 3`) it repeats
   the UVs. `mc_render.py --tile N` writes a real N×N 2D repeat so you can *see* seams;
   `mc_render.py --seam` gives the number.
@@ -76,6 +76,6 @@ nothing selected, so:
 
 ## Version drift
 
-Pinned to 0.2.0: 86 commands, 30 node entries (0.1.2 had 68 and 222: the old procedural library
+Pinned to 0.3.0: 112 commands (86 in 0.2.0, every old id kept), 29 node entries (0.1.2 had 68 and 222: the old procedural library
 was removed in favour of primitives, and the packages moved from `.mcraft` to `.sbs`). After an update,
 re-run `materialcraft-cli commands` and `nodes` and compare before trusting these pages.

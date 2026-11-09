@@ -183,7 +183,7 @@ def usage_index(u):
 
 
 def outputs(graph):
-    """[{node, identifier, usage, source}] for every output node of a graph record."""
+    """[{node, identifier, usage, source, value}] for every output node of a graph record."""
     feed = {c["to"]: c["from"] for c in graph.get("connections", []) if c["toPort"] == "input"}
     res = []
     for n in graph.get("nodes", []):
@@ -191,7 +191,9 @@ def outputs(graph):
             u = n["params"].get("usage", {}).get("v", 0)
             res.append({"node": n["id"], "identifier": n["params"].get("identifier", {}).get("v", "output"),
                         "usage": USAGES[u] if isinstance(u, int) and u < len(USAGES) else u,
-                        "source": feed.get(n["id"])})
+                        "source": feed.get(n["id"]),
+                        # a value output (fed by a value_processor, 0.3.0 atomics) cooks to a number: no image
+                        "value": (n.get("cooked") or {}).get("value") is not None})
     return res
 
 
@@ -364,7 +366,7 @@ def write_png(path, rows, channels):
 
 
 def tile_png(src, dst, n):
-    """An n x n repeat of a PNG (the CLI's `render --view 2d --tiling` does not repeat in 0.2.0)."""
+    """An n x n repeat of a PNG (the CLI's `render --view 2d --tiling` does not repeat in 0.3.0)."""
     w, h, ch, rows = png_pixels(src, max_side=1 << 16)
     write_png(dst, [r * n for r in rows] * n, ch)
     return {"width": w * n, "height": h * n}
@@ -414,8 +416,9 @@ def refuse_overwrite(path, overwrite, what="output"):
 
 
 def sbs_path(path):
-    """The path the CLI really writes: 0.2.0 appends `.sbs` to any save path that doesn't end in it."""
-    return path if path.lower().endswith(".sbs") else path + ".sbs"
+    """The path the CLI really writes: `.sbs` and `.mcraft` (a zip holding package.sbs, back in 0.3.0)
+    are kept, any other save path gets `.sbs` appended."""
+    return path if path.lower().endswith((".sbs", ".mcraft")) else path + ".sbs"
 
 
 def same_file(a, b):

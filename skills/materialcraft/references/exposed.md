@@ -1,10 +1,10 @@
-# Exposed inputs, presets and variants (0.2.0)
+# Exposed inputs, presets and variants (0.3.0)
 
 An **exposed input** is a graph-level parameter (the sliders a user of the material sees).
 It does nothing until it is **bound** to one or more node parameters. Presets store named
 sets of exposed-input values. Templates ship with no exposed inputs; add them.
 
-> **0.2.0 limitation:** the `.sbs` save keeps the exposed inputs but drops **bindings and
+> **Limitation since 0.2.0 (still in 0.3.0):** the `.sbs` save keeps the exposed inputs but drops **bindings and
 > presets**. After a reload nothing is bound, so `--set`, `mc_render.py --variants` and
 > `mc_export.py --set` change nothing, and `mc_build.py` reports `bind ...` / `preset ...` as
 > failed read-backs. Everything below works **inside one process**: do the bind, `exposed.set`
@@ -65,7 +65,7 @@ python3 $S/mc_render.py rusty.sbs v.png --scene sphere --variants wear=0.1,0.5,0
 ```
 
 `--set` values are JSON (`0.4`, `[1,0,0,1]`). An unknown id is an error (exit 1). Hex colours
-were accepted in 0.1.2; in 0.2.0 an exposed colour is a float4 and hex fails with `takes a float4`. `mc_render.py --variants` writes `v_wear-0.1.png`, … and
+were accepted in 0.1.2; in 0.3.0 an exposed colour is a float4 and hex fails with `takes a float4`. `mc_render.py --variants` writes `v_wear-0.1.png`, … and
 fails when two variants look the same — the input is bound to nothing visible.
 
 There is no `--preset` flag on `render`/`export`: to render a preset, pass its values as

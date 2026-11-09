@@ -1,8 +1,8 @@
-# Node library (0.2.0, 30 entries)
+# Node library (0.3.0, 29 entries)
 
 0.2.0 removed the old procedural library (222 nodes in 0.1.2: noises, patterns, material filters,
 `perlin_noise`, `height_normal_ao`, `edge_wear`, `pbr_base_material`, ...). What is left is a
-set of **primitives**: 25 atomic nodes and 5 graph items. Patterns and noises are built from
+set of **primitives**: 24 atomic nodes and 5 graph items. Patterns and noises are built from
 `pixel_processor` / `fx_map` functions. Don't guess ids, ports or parameter ids; ask the library:
 
 ```sh
@@ -14,7 +14,7 @@ for n in json.load(sys.stdin): print(n["id"], [i["id"] for i in n["inputs"]], [o
 
 An unmatched filter prints `[]`. Port kinds: `Gray`, `Color`, `Any`.
 
-## Atomic nodes (25)
+## Atomic nodes (24)
 
 | def | inputs | params (default) |
 |---|---|---|
@@ -36,7 +36,7 @@ An unmatched filter prints `[]`. Port kinds: `Gray`, `Color`, `Any`.
 | `normal` | `input` (Gray) | `intensity`, `opengl`, `height_alpha` |
 | `emboss` | `input`, `height` | `intensity`, `light_angle`, `highlight`, `shadow` |
 | `blur` / `sharpen` | `input` | `intensity` |
-| `directional_blur` / `motion_blur` | `input` | `intensity`, `angle` / `shiftangle` |
+| `directional_blur` | `input` | `intensity`, `angle` |
 | `warp` | `input`, `gradient` | `intensity` |
 | `directional_warp` | `input`, `intensity_input` | `intensity`, `angle` |
 | `distance` | `mask`, `source` | `distance`, `combine` |
@@ -60,7 +60,7 @@ ambient-occlusion, curvature or edge-wear node any more.
 A function graph is `{"nodes": [{"id", "op", "inputs": [ids], "pos": [x, y], "type_code",
 "value"?}], "output": id}`. Set one with `graph.function.set {target: {kind: "parameter",
 node: N, parameter: "function"}, function}`. `type_code` is 256 for a float and 512 for a
-float2. Ops verified in 0.2.0: `get_float2` (value `"$pos"`, the pixel position in 0..1),
+float2. Ops verified in 0.3.0: `get_float2` (value `"$pos"`, the pixel position in 0..1),
 `get_float1` (value = an `input_value` identifier), `swizzle1` (value = component index),
 `const_float1`, `mul`, `add`, `sin`. An unknown op fails with `unknown function` and the step
 saves nothing. The built-in **Atomic sample** (`new atomics`) shows the format; read its
