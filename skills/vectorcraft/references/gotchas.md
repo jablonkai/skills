@@ -1,4 +1,4 @@
-# Gotchas (VectorCraft 0.22.0)
+# Gotchas (VectorCraft 0.23.0)
 
 ## Paint and geometry
 
@@ -18,7 +18,7 @@
   so always set it. `justify: "center"` centres point type on `x`. For area type, pass
   `area: {width, height, fit: "autoHeight"}`.
 - **Fonts:** a missing family is drawn in the fallback (Source Sans 3) without failing.
-  `text.create` only adds a `warning` to its result (0.22.0), which `run` and
+  `text.create` only adds a `warning` to its result (0.23.0), which `run` and
   `vc_build.py` don't stop on. `info.fonts[].status` is `exact` only when the font
   resolved (`missing` otherwise). Check it with `vc_verify.py doc --fonts-ok`, and name
   installed families. `Helvetica` (macOS) and `Source Sans 3` (bundled, the default)
@@ -70,7 +70,8 @@
     relative paths against the server's working directory, and the scripts absolutize
     `path`/`folder` keys anyway.
 - `command_run` errors come back as `isError` with a message (unknown command, missing
-  param). Some unknown params are ignored silently, so check the signature with
+  param). Most commands reject an unknown param (`invalid parameters … unknown parameter`), but some
+  (`paint.setFill`) still ignore it silently, so check the signature with
   `vc_commands.py --id`.
 - `command_batch` stops on the first error by default. Its `"$N.id"` refs only work
   inside that one batch, and the index must be digits (`"$0.ids[1]"`, never
