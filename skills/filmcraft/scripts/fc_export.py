@@ -28,7 +28,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fclib import TICKS, cli, ffprobe, fps_of, inspect  # noqa: E402
 
 STILLS = {"png", "tiff", "tif", "bmp", "jpg", "jpeg", "tga", "dpx", "exr"}
-AUDIO = {"wav", "aiff", "aif", "aac", "m4a", "flac"}
+AUDIO = {"wav", "aiff", "aif", "aac", "m4a", "flac", "mp3"}
 
 
 def presets():
