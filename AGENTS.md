@@ -44,6 +44,7 @@ house rules on top of that format; when the two disagree, the spec wins.
      Edit skills/<name>/SKILL.md, then run .github/scripts/generate-catalog.sh -->
 <!-- BEGIN GENERATED SKILLS -->
 - `affinity`: remote-control Affinity (the unified Affinity by Canva app) with JavaScript via its local automation endpoint — document edits, batch operations, and reusable library scripts, with no MCP client configuration
+- `anicraft`: automate AniCraft headless with anicraft-cli — tweened and rigged vector animation from a step spec with symbols, motion paths, easing, shape hints, bone rigs and a camera, frame actions checked by script.check and test_movie, MP4/GIF/PNG-sequence/sprite-sheet/Lottie/HTML export, info and render read-back verified
 - `apple-calendar`: list, find, create and export Apple Calendar events via EventKit and JXA — date-range queries with recurring occurrences, free-slot search, events with alarms and recurrence, .ics/CSV export and .ics import, read-back verified
 - `apple-contacts`: search, export and import Apple Contacts via the Contacts framework and JXA — group and search exports to vCard/CSV, duplicate and incomplete-card reports, contacts and groups created from CSV or vCard, read-back verified
 - `apple-mail`: search, export, draft and organise Apple Mail via JXA and the Envelope Index — sender, subject and date searches, attachment export, reply drafts with attachments left in Drafts, bulk move, flag and archive with preview, read-back verified
