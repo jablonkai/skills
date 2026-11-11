@@ -1,4 +1,4 @@
-# Gotchas (DesignCraft 0.19.0)
+# Gotchas (DesignCraft 0.20.0)
 
 Each was hit while building or testing the skill.
 
@@ -15,7 +15,7 @@ Each was hit while building or testing the skill.
   hint: 0 glyphs on a text page means the wrong page.
 - **PNG renders include the bleed.** At `--scale 2` an A4 page with 3 mm bleed is
   1225 × 1718 px, not 1191 × 1684. Pages without bleed render at exactly page × scale. The MCP `export_png` (what `dc_build.py`
-  `png` uses) renders the trim size only (595 × 842 at scale 1; checked in 0.19.0), so size-check
+  `png` uses) renders the trim size only (595 × 842 at scale 1; checked in 0.20.0), so size-check
   those PNGs against the page, not the bleed.
 
 ## Units and geometry
