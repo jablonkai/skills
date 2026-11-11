@@ -3,12 +3,12 @@ name: texturecraft
 description: 'Automate TextureCraft, the Substance Painter-style PBR texture-painting app, headless with texturecraft-cli: new .tcraft projects from a mesh (glb, fbx, obj, usd) or a built-in, mesh-map bakes (AO, curvature, normal), high-poly to low-poly with a cage, fill-layer stacks with smart or MaterialCraft .mcmat materials, masks and edge-wear or dirt generators, edits to .tcraft projects, PBR texture export with engine presets (glTF, Unreal, Unity, Godot; PNG/TGA/EXR; OpenGL or DirectX normals), textured GLB/OBJ/USD export, 3D or UV renders, read back. Use when the user mentions TextureCraft, texturecraft-cli or a .tcraft file, or wants a model PBR-textured or mesh maps baked with TextureCraft: "texture this crate as rusty metal in TextureCraft", "bake AO and curvature", "export a glTF PBR set with DirectX normals", "bake the high poly onto the low poly with a cage". Not for Blender painting or baking (blender), 2D painting (krita, gimp), modeling (blender, freecad, solidcraft), or AI texture generation (comfyui).'
 summary: "automate TextureCraft headless with texturecraft-cli — projects from meshes or built-ins, AO/curvature and high-poly bakes with a cage, fill-layer stacks with smart materials, masks and edge-wear generators, .tcraft edits, glTF/Unreal/Unity/Godot PBR texture export checked against the plan, textured GLB export, 3D and UV renders, info read-back verified"
 category: 3d
-compatibility: "Built for TextureCraft 0.5.0 (a1f4d40) and texturecraft-cli 0.5.0 on macOS (Apple Silicon, Metal), Python 3.9+; pre-1.0, so command ids may change."
+compatibility: "Built for TextureCraft 0.6.0 (d1ca3fd) and texturecraft-cli 0.6.0 on macOS (Apple Silicon, Metal), Python 3.9+; pre-1.0, so command ids may change."
 risk: low
 tags: [texturecraft, pbr, texturing, baking, mesh-maps, gltf, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.1.3"
+  version: "1.1.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -17,14 +17,14 @@ metadata:
 TextureCraft is a PBR texture-painting app in the style of Substance Painter. A project
 (`.tcraft`, a zip) holds a mesh, one **texture set** per material, each with its own layer
 stack (fill, paint and folder layers with masks and effects), baked mesh maps, and any
-high-poly and cage meshes. Every tool is a command in one registry (175 in 0.5.0) that
+high-poly and cage meshes. Every tool is a command in one registry (177 in 0.6.0) that
 runs headless through `texturecraft-cli`, with no window. This skill drives it headless
-and reads every result back with `info`. Verified against **TextureCraft 0.5.0
-(a1f4d40)**. The software is pre-1.0, so if a pinned id fails, look it up with
+and reads every result back with `info`. Verified against **TextureCraft 0.6.0
+(d1ca3fd)**. The software is pre-1.0, so if a pinned id fails, look it up with
 `texturecraft-cli commands --filter WORD` rather than guessing.
 
 ```sh
-texturecraft-cli --version     # TextureCraft 0.5.0 (a1f4d40 2026-11-09); lives in ~/.local/bin
+texturecraft-cli --version     # TextureCraft 0.6.0 (d1ca3fd 2026-11-11); lives in ~/.local/bin
 ```
 
 ## Pick the route
@@ -120,7 +120,7 @@ overwrite outputs without `--overwrite`, print JSON and exit 1 on any failed che
   `Layer 1`. To recolour a set, add a fill layer on that set.
 - **A project's `info` has no UV report.** Inspect the mesh file or `builtin:<id>` for that
   (`info builtin:crate` works since 0.3.0).
-- **A MaterialCraft 0.2.0 or 0.3.0 `.mcmat` does not load.** It is `version 2`; TextureCraft 0.5.0
+- **A MaterialCraft 0.2.0 to 0.4.0 `.mcmat` does not load.** It is `version 2`; TextureCraft 0.6.0
   reads up to 1 (`material.load` fails with `unsupported`). See
   [recipes.md](references/recipes.md#6-a-materialcraft-material-on-one-set-tuned-and-re-cooked-in-place).
 - **The 2D render shows only the first texture set.** A saved project always reopens on
@@ -137,7 +137,7 @@ the user wants their open project changed, and read
 ## References
 
 - [references/cli.md](references/cli.md): subcommands, flags, batch format, `info` JSON, exit codes.
-- [references/commands.md](references/commands.md): command ids and params by task, pinned to 0.5.0, and registry lookup.
+- [references/commands.md](references/commands.md): command ids and params by task, pinned to 0.6.0, and registry lookup.
 - [references/bake.md](references/bake.md): mesh-map ids, bake settings, high-poly and cage bakes.
 - [references/export.md](references/export.md): built-in presets and their packing, preset objects, file-name tokens, formats, normals.
 - [references/recipes.md](references/recipes.md): rusty crate, recolouring a set of an imported GLB, high-to-low bake with cage, smart materials on every set, a MaterialCraft material re-cooked in place.

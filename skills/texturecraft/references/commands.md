@@ -1,6 +1,6 @@
-# Command ids by task (pinned to TextureCraft 0.5.0)
+# Command ids by task (pinned to TextureCraft 0.6.0)
 
-The registry holds 175 commands. These are the ones a headless texturing job needs. For
+The registry holds 177 commands. These are the ones a headless texturing job needs. For
 anything else, or when a pinned id fails after an update:
 
 ```sh

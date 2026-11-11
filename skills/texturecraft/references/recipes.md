@@ -1,4 +1,4 @@
-# Recipes (verified on TextureCraft 0.5.0)
+# Recipes (verified on TextureCraft 0.6.0)
 
 `S=<skill>/scripts`. Each spec below was run through `tc_build.py` as written.
 
@@ -106,16 +106,16 @@ python3 $S/tc_render.py their.tcraft /tmp/their.png --yaw 215 --uv
 Export the material from MaterialCraft first (`mc_export.py IN.mcraft maps/ --mcmat
 wood.mcmat`, see the `materialcraft` skill). Its exposed inputs and presets travel with it.
 
-Verified against materialcraft-cli 0.2.0 and 0.3.0: the `.mcmat` is still `version 2`, but
-TextureCraft 0.5.0 reads `.mcmat` up to `version 1`. `material.load` of it fails with
+Verified against materialcraft-cli 0.2.0 to 0.4.0: the `.mcmat` is still `version 2`, but
+TextureCraft 0.6.0 reads `.mcmat` up to `version 1`. `material.load` of it fails with
 `unsupported: MaterialCraft material version 2 (this version reads up to 1)`. A `.mcraft`
-saved by MaterialCraft 0.3.0 (`file.save`, which holds `package.sbs`) fails too, with
+saved by MaterialCraft 0.3.0 and 0.4.0 (`file.save`, which holds `package.sbs`) fails too, with
 `malformed project file: specified file not found in archive`. The `.mcmat` with `"version": 1`
 patched into `material.json` still loads (a fill layer comes back), but the
 `material.link.*` steps then fail: `material.link.set` ends with `MaterialCraft could not cook
 the material: ... invalid Zip archive`, because the cook reads `source.sbs` as a `.mcraft` zip.
 So the workaround is not a supported path, and the steps below could not be run against
-MaterialCraft 0.3.0 output. Until TextureCraft reads version 2, export the material
+MaterialCraft 0.3.0 or 0.4.0 output. Until TextureCraft reads version 2, export the material
 from MaterialCraft 0.1.x.
 
 ```json
