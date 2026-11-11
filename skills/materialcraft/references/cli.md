@@ -1,16 +1,16 @@
-# materialcraft-cli reference (0.3.0)
+# materialcraft-cli reference (0.4.0)
 
 `materialcraft-cli` is the headless MaterialCraft: the same engine and command registry as the
 app, no window, no GPU. It lives in `~/.local/bin` (the app bundle is
 `/Applications/MaterialCraft.app`, bundle id `ai.storyteller.materialcraft`). There is no
 per-subcommand `--help` (`mcp --help` is an error); `materialcraft-cli` or `--help` alone prints the usage.
 The vendor's `docs/control-protocol.md` is not installed with the app — `commands` and `nodes`
-are the reference. Packages are native **SBS** (`.sbs`, XML) since 0.2.0; the CLI keeps `.sbs` and `.mcraft` (a zip holding `package.sbs`, writable again in
+are the reference. Packages are native **SBS** (`.sbs`, XML) since 0.2.0; the CLI keeps `.sbs` and `.mcraft` (a zip holding `package.sbs`, writable again since
 0.3.0) and appends `.sbs` to any other save path (`new x t.foo` writes `t.foo.sbs`).
 
 | Subcommand | What it does |
 |---|---|
-| `--version` | `materialcraft-cli 0.3.0 (ac6dc55 2026-11-09)` |
+| `--version` | `materialcraft-cli 0.4.0 (b6f1aa0 2026-11-11)` |
 | `info IN` | The whole session as JSON (see below). `IN` is a `.sbs` or `sample` (the built-in atomic sample). |
 | `commands [--filter T]` | JSON list `[{id, label, params}]`; `params` is a signature string. |
 | `nodes [--filter T] [--category T]` | JSON list of node definitions: `id, label, category, description, inputs[{id, kind}], outputs[{id, kind}], params[{id, label, default{t,v}, min, max, options}]`. |
