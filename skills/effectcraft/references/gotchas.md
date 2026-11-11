@@ -1,4 +1,4 @@
-# Gotchas (effectcraft-cli 0.23.0)
+# Gotchas (effectcraft-cli 0.24.0)
 
 ## Silent
 
@@ -22,8 +22,9 @@
 
 - **`run` has no step references.** `"$1.layer"` is read as a layer name: `no layer
   "$1.layer"`. MCP `batch` supports them, 1-based (`"$1"` is the first step).
-- **`essential.exportTemplate` fails** with "the composition has no Essential Graphics
-  controls" until `essential.addProperty` has added one.
+- **`essential.exportTemplate` fails** with "add properties to Essential Graphics first"
+  (older builds: "the composition has no Essential Graphics controls") until
+  `essential.addProperty` has added one.
 - **Template values:** unknown control names and invalid values fail before rendering;
   `ec_template.py` checks names up front so a batch doesn't stop halfway.
 - **Paths outside the automation roots** are refused in `mcp` sessions
@@ -33,7 +34,7 @@
 - **`app.run` in a script acts on the active comp**, and `app.project.items.addComp` doesn't
   make the new comp active: on an empty project the next `app.run("layer.new…")` fails with
   "no composition is open" (exit 1, yet `--save-as` still writes the partial project).
-  Call `app.run("comp.open", {comp: NAME})` after `addComp` (checked in 0.21.0, 0.21.1).
+  Call `app.run("comp.open", {comp: NAME})` after `addComp` (checked in 0.21.0, 0.21.1, 0.24.0).
 - **Expressions with a syntax error** are kept but disabled; `get --json` shows
   `expressionError`. `ec_build.py` fails on it.
 
