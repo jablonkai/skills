@@ -47,6 +47,7 @@ portable beyond a single tool.
 - `wordcraft`: automate WordCraft with wordcraft-cli — docx template fill with formatting kept (headers and footers too), documents from Markdown with heading styles, tables and an updated TOC, tracked changes and comments by a named author, markup PDFs, docx/odt/rtf/html/md/pdf conversion and folder batches, inspect read-back verified
 
 #### Video, motion & audio
+- `anicraft`: automate AniCraft headless with anicraft-cli — tweened and rigged vector animation from a step spec with symbols, motion paths, easing, shape hints, bone rigs and a camera, frame actions checked by script.check and test_movie, MP4/GIF/PNG-sequence/sprite-sheet/Lottie/HTML export, info and render read-back verified
 - `apple-motion`: author and install Apple Motion templates for Final Cut Pro as ozml XML — lower-third titles, generators and effects with published parameters, branded variant sets, headless renders through Compressor and use in FCPXML timelines
 - `aubio`: analyse audio with the aubio CLI — corrected BPM and beat grids, onsets, pitch and note extraction to CSV or MIDI, silence detection, exported as Resolve marker JSON/EDL or FCPXML marker CSV
 - `cavalry`: remote-control Cavalry (Scene Group's 2D motion-design app) via a scriptable bridge — build scenes procedurally, animate with keyframes and per-letter text effects, then render PNG frames or alpha overlay videos
