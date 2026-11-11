@@ -1,7 +1,7 @@
-# Command ids (pinned to GridCraft 0.18.0)
+# Command ids (pinned to GridCraft 0.19.0)
 
 The ids below cover the common jobs. For anything else, or if one of these fails with
-`unknown command`, look it up. Never guess a param name: in 0.18.0 an unknown param is ignored silently
+`unknown command`, look it up. Never guess a param name: in 0.19.0 an unknown param is ignored silently
 (`gc_run.py` refuses it), and a missing required one fails the run.
 
 ```sh
