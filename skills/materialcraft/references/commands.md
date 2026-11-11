@@ -1,4 +1,4 @@
-# Command registry (0.3.0, 112 commands)
+# Command registry (0.4.0, 119 commands)
 
 Look up the live list rather than trusting this page after an update:
 
@@ -7,7 +7,7 @@ materialcraft-cli commands --filter exposed     # id, label, params signature
 ```
 
 Signatures: `key?` is optional; anything **not** in the signature is ignored without an
-error. Commands marked ◆ refuse to run when nothing is selected — even with `id`/`ids` —
+error. Commands marked ◆ refuse to run when nothing is selected (since 0.4.0 not `graph.node.param`, `.reset`, `.base`, `.bind`) — even with `id`/`ids` —
 so run `graph.select {"ids": [N]}` first (the `id` given is then honoured).
 
 ## file

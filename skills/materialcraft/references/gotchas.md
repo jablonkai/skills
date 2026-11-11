@@ -1,4 +1,4 @@
-# Gotchas (MaterialCraft 0.3.0)
+# Gotchas (MaterialCraft 0.4.0)
 
 ## Silent successes that did the wrong thing
 
@@ -13,7 +13,7 @@
 | An exposed input with no `bind` | Exists, saves into presets and the `.mcmat`, drives nothing | `mc_inspect.py` warns; `mc_render.py --variants` fails on identical renders |
 | `graph.node.bind` / `graph.preset.save`, then **save** | The `.sbs` keeps the exposed input but **not the binding or the preset**; a reload shows `bindings: {}`, `presets: []`, and `--set` changes nothing | Bind, set and export in one `batch` (recipes.md §3); `mc_build.py` reports the loss as a failed read-back |
 | `--set id="#rrggbb"` for an exposed colour | `takes a float4`: after a reload the input is a float4 and hex is rejected | Pass the array: `--set tint=[0.7,0.02,0.02,1]` |
-| A path that is neither `.sbs` nor `.mcraft` (`-o t.foo`, `new`, `batch` `save`) | Writes `t.foo.sbs`; `t.foo` then doesn't exist (`.mcraft` is kept and written as a zip of `package.sbs`, 0.3.0) | Write `.sbs`; `mc_build.py` normalises its `save` |
+| A path that is neither `.sbs` nor `.mcraft` (`-o t.foo`, `new`, `batch` `save`) | Writes `t.foo.sbs`; `t.foo` then doesn't exist (`.mcraft` is kept and written as a zip of `package.sbs`, since 0.3.0) | Write `.sbs`; `mc_build.py` normalises its `save` |
 | A float default bound to an enum param | `bad default` error | Bind floats to float/int params |
 | A float exposed input bound to a float4 param (`levels`) | The cook fails: `variable ... has the wrong type for get_float4` | Add the input with a typed default `{"t": "float4", "v": [..]}` |
 | `graph.function.set` with an unknown `op` | Fails (`unknown function`), saves nothing | Use the ops listed in nodes.md |
@@ -23,10 +23,10 @@
 
 ## Commands that need a selection
 
-`graph.node.param`, `.reset`, `.base`, `.bind`, `.function`, `.rename`, `.move`, `.disable`
+`graph.node.rename`, `.move`, `.disable`
 and `edit.delete`, `.deleteRelink`, `.copy`, `.cut`, `.duplicate` fail with
 `not available: no node is selected` when the selection is empty — **even when `id`/`ids` is
-given**. With any selection they act on the `id`/`ids` you pass. Headless runs start with
+given**. (Since 0.4.0 `graph.node.param`, `.reset`, `.base` and `.bind` run without a selection; selecting first is still harmless, and `mc_build.py` keeps doing it.) With any selection they act on the `id`/`ids` you pass. Headless runs start with
 nothing selected, so:
 
 ```json
@@ -41,19 +41,19 @@ nothing selected, so:
 - Hex (`"#rrggbb"`) is **sRGB**; typed colours `{"t": "color", "v": [r, g, b, a]}` are
   **linear**. `graph.exposed.set` / `--set` / `graph.node.param` linearise hex
   (`#8a5a3c` → `[0.254, 0.102, 0.045]`).
-- `graph.exposed.add` rejects a hex `default` (`bad default`); give the typed linear value. The
+- `graph.exposed.add` rejects a hex `default` (`invalid default`; `bad default` before 0.4.0); give the typed linear value. The
   saved input comes back as a **float4** (sRGB-encoded), so later `exposed.set` / `--set` take an array, not hex.
 - `--set` values are JSON: `--set 'tint="#aa7744"'` (shell quotes around JSON quotes).
   `--set tint=#aa7744` is not valid JSON.
 
 ## Tiling
 
-- The 0.1.2 `anisotropic_noise` seam is gone with the old library (no noise nodes in 0.3.0). A
+- The 0.1.2 `anisotropic_noise` seam is gone with the old library (no noise nodes in 0.4.0). A
   `pixel_processor` function tiles when it has a whole number of periods across the pixel
   position; the Atomic sample's height (an FX-Map) scores x=2.41 (not seamless).
 - Node `base.tiling` (`graph.node.base {tiling: false}`) does not change what a generator
   produces; it is not a seam fix.
-- `render --view 2d --tiling N` is still ignored in 0.3.0 — the PNG is byte-identical to the
+- `render --view 2d --tiling N` is still ignored in 0.4.0 — the PNG is byte-identical to the
   untiled one (so is `view.2d {tiled: true}`). In 3D (`--scene plane --tiling 3`) it repeats
   the UVs. `mc_render.py --tile N` writes a real N×N 2D repeat so you can *see* seams;
   `mc_render.py --seam` gives the number.
@@ -76,6 +76,6 @@ nothing selected, so:
 
 ## Version drift
 
-Pinned to 0.3.0: 112 commands (86 in 0.2.0, every old id kept), 29 node entries (0.1.2 had 68 and 222: the old procedural library
+Pinned to 0.4.0: 119 commands (86 in 0.2.0, 112 in 0.3.0, every old id kept), 29 node entries (0.1.2 had 68 and 222: the old procedural library
 was removed in favour of primitives, and the packages moved from `.mcraft` to `.sbs`). After an update,
 re-run `materialcraft-cli commands` and `nodes` and compare before trusting these pages.

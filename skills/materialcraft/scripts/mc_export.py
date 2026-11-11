@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import mclib as m  # noqa: E402
 
 TOKENS = {"graph", "identifier", "usage"}
-# What each format really writes in 0.3.0 (a --depth outside the set is ignored silently).
+# What each format really writes in 0.4.0 (a --depth outside the set is ignored silently).
 DEPTHS = {"png": {8, 16}, "tif": {8, 16}, "exr": {32}, "hdr": {32},
           "jpg": {8}, "bmp": {8}, "tga": {8}, "webp": {8}}
 

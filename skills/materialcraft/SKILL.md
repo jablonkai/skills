@@ -3,12 +3,12 @@ name: materialcraft
 description: 'Automate MaterialCraft, the Substance Designer-style procedural material app, headless with materialcraft-cli: .sbs packages from a template (empty, pbr, atomics) or a node graph built from a spec (primitive nodes, pixel-processor function graphs, filters, normal, outputs), exposed inputs (variants only within one build run, since 0.2.0 .sbs files drop bindings), edits to existing graphs, tileable PBR map export as PNG/EXR/TGA/TIF at 8/16/32-bit with a name pattern, .mcmat export for TextureCraft, 3D and 2D renders with a seam check, read back. Use when the user mentions MaterialCraft, materialcraft-cli, .sbs, .mcraft or .mcmat, or wants a procedural tileable material authored as a node graph: "make a tileable striped wood material", "expose a tint colour and export a red variant", "export the PBR maps as 16-bit PNG". Not for painting materials onto a mesh or baking (texturecraft), Blender shader nodes (blender), or editing 2D texture images (imagemagick, gimp, krita).'
 summary: "automate MaterialCraft headless with materialcraft-cli — procedural .sbs material graphs from a node spec or the pbr template, primitive nodes and pixel-processor function graphs, exposed inputs, graph edits, tileable PBR map export in any format and bit depth with a seam check, .mcmat hand-off to TextureCraft, 3D and 2D renders, info and cook read-back verified"
 category: 3d
-compatibility: "Built for MaterialCraft 0.3.0 and materialcraft-cli 0.3.0 (ac6dc55) on macOS (CPU renders, no GPU needed), Python 3.9+; the .mcmat hand-off does not load in TextureCraft 0.5.0 (a1f4d40) either (still version 2 vs 1). Pre-1.0, so command and node ids may change."
+compatibility: "Built for MaterialCraft 0.4.0 and materialcraft-cli 0.4.0 (b6f1aa0) on macOS (CPU renders, no GPU needed), Python 3.9+; the .mcmat hand-off does not load in TextureCraft 0.6.0 (d1ca3fd) either (still version 2 vs 1). Pre-1.0, so command and node ids may change."
 risk: low
 tags: [materialcraft, procedural, materials, pbr, node-graph, tileable, headless]
 license: GPL-3.0-only
 metadata:
-  version: "2.0.1"
+  version: "2.0.2"
   author: "Tamás Jablonkai"
 ---
 
@@ -20,13 +20,13 @@ FX-Map/pixel-processor generators, blend, levels, blur, warp, normal ...) wired 
 PBR map. A graph can **expose inputs** (bound to node parameters) and store **presets** of
 their values. Everything runs headless through `materialcraft-cli`, with no window or GPU.
 This skill builds and edits graphs headless and reads every result back. Verified against
-**MaterialCraft 0.3.0 (ac6dc55)**: 112 commands, 29 node entries (0.2.0 replaced the 222-node
+**MaterialCraft 0.4.0 (b6f1aa0)**: 119 commands, 29 node entries (0.2.0 replaced the 222-node
 procedural library with primitives and moved packages from `.mcraft` to `.sbs`). The software is pre-1.0, so if a
 pinned id fails, look it up (`commands --filter WORD`, `nodes --filter WORD`) rather than
 guessing.
 
 ```sh
-materialcraft-cli --version     # materialcraft-cli 0.3.0 (ac6dc55 2026-11-09); lives in ~/.local/bin
+materialcraft-cli --version     # materialcraft-cli 0.4.0 (b6f1aa0 2026-11-11); lives in ~/.local/bin
 ```
 
 ## Pick the route
@@ -37,7 +37,7 @@ materialcraft-cli --version     # materialcraft-cli 0.3.0 (ac6dc55 2026-11-09); 
 | Graph built node by node, or a template/package edited (wires, params, exposed inputs, presets) | `scripts/mc_build.py spec.json` ([recipes.md](references/recipes.md)) |
 | What a package holds, and does it cook | `scripts/mc_inspect.py IN.sbs` (`--params` for values, `--graph N` for another graph) |
 | PBR maps, checked | `scripts/mc_export.py IN.sbs DIR --format png --depth 16 --pattern '$(graph)_$(identifier)' [--set id=v]` |
-| `.mcmat` for TextureCraft (**0.3.0 files do not load in TextureCraft 0.5.0**, [export.md](references/export.md)) | `scripts/mc_export.py IN DIR --mcmat OUT.mcmat --texturecraft-check` |
+| `.mcmat` for TextureCraft (**0.4.0 files do not load in TextureCraft 0.6.0**, [export.md](references/export.md)) | `scripts/mc_export.py IN DIR --mcmat OUT.mcmat --texturecraft-check` |
 | Look at it / variants / tiling | `scripts/mc_render.py IN OUT.png --scene sphere --hq`, `--variants wear=0,0.5,1`, `--tile 3`, `--seam` |
 | One command, one-off | `materialcraft-cli run IN ID 'JSON' -o OUT.sbs` (no `-o`, nothing is saved) |
 | Find a node, its ports and params | `materialcraft-cli nodes --filter WORD` / `--category Noises` ([nodes.md](references/nodes.md)) |
@@ -60,7 +60,7 @@ library only, full `--help` each. They find the CLI (`MATERIALCRAFT_CLI`, then P
   back: nodes, wires, outputs, bindings, presets and a full cook with zero errors.
 - **`mc_inspect.py IN [--graph N] [--params] [--no-cook]`** — graphs, nodes, wires as
   `id:port -> id:port`, outputs with their source, exposed inputs with what they are bound
-  to, presets, cook errors. Warns about exposed inputs bound to nothing (in 0.3.0 that is every saved binding).
+  to, presets, cook errors. Warns about exposed inputs bound to nothing (in 0.4.0 that is every saved binding).
 - **`mc_export.py IN DIR [--graph N] [--set ID=V]… [--format F] [--depth N] [--pattern P] [--mcmat F [--mcmat-size N]] [--texturecraft-check]`**
   — refuses unknown `--set` ids, unknown pattern tokens and depths the format cannot hold
   (the CLI would silently do something else), then checks one file per output at the graph
@@ -102,8 +102,8 @@ library only, full `--help` each. They find the CLI (`MATERIALCRAFT_CLI`, then P
 - **Unknown command keys are ignored silently** (`conectFrom` adds an unwired node and
   "succeeds"). Node defs, node param keys and ports are checked by the engine; command keys
   are not. `mc_build.py` checks them; with raw `run`/`batch` copy keys from `commands`.
-- **`graph.node.*` and `edit.*` commands refuse to run with an empty selection**, even when
-  given `id`/`ids` ("not available: no node is selected"). Put `graph.select {"ids": [N]}`
+- **`graph.node.rename`/`.move`/`.disable` and `edit.*` commands refuse to run with an empty selection**,
+  even when given `id`/`ids` ("not available: no node is selected"; `.param`, `.reset`, `.base` and `.bind` no longer need one since 0.4.0). Put `graph.select {"ids": [N]}`
   first; the `id` is then honoured. `mc_build.py` does this for you.
 - **`connectFrom` wires into the node's first input** — for `blend` that is `foreground`,
   for `lerp` `input_a`. Wire the second input explicitly, or the blend multiplies against
@@ -113,18 +113,18 @@ library only, full `--help` each. They find the CLI (`MATERIALCRAFT_CLI`, then P
 - **Hex colours are sRGB, typed colours are linear.** `graph.exposed.add` rejects
   `"#rrggbb"` as a default (use `{"t": "color", "v": [r, g, b, a]}`, linear);
   `graph.exposed.set` and `--set` accept hex and linearise it. `mc_build.py` converts.
-- **No noise or pattern nodes in 0.3.0.** Detail comes from a `pixel_processor` function
+- **No noise or pattern nodes in 0.4.0.** Detail comes from a `pixel_processor` function
   graph (recipes.md §1) or an `fx_map`; `nodes --filter perlin` prints `[]`. Old specs with
   `perlin_noise`, `height_normal_ao`, `edge_wear` or the `wood`/`bricks` templates fail the
   `mc_build.py` pre-check.
-- **Bindings and presets are not saved in `.sbs`** in 0.3.0: a reload shows exposed inputs
+- **Bindings and presets are not saved in `.sbs`** in 0.4.0: a reload shows exposed inputs
   bound to nothing, so `--set` and `--variants` do nothing. Bind, set and export in one
   `batch` ([exposed.md](references/exposed.md), recipes.md §3).
 - **The CLI appends `.sbs`** to any save path that is not `.sbs` or `.mcraft` (`t.foo` becomes
-  `t.foo.sbs`). `.mcraft` is written again in 0.3.0, as a zip holding one `package.sbs`; it still
+  `t.foo.sbs`). `.mcraft` is written again since 0.3.0, as a zip holding one `package.sbs`; it still
   loses bindings and presets. Write `.sbs`.
-- **`.mcmat` is `version 2` and TextureCraft 0.5.0 reads up to 1**, so `--texturecraft-check` fails.
-- **`render --view 2d --tiling N` does not repeat anything** in 0.3.0 (the PNG is identical to
+- **`.mcmat` is `version 2` and TextureCraft 0.6.0 reads up to 1**, so `--texturecraft-check` fails.
+- **`render --view 2d --tiling N` does not repeat anything** in 0.4.0 (the PNG is identical to
   `--tiling 1`); in 3D `--tiling` repeats the UVs. For a tiled 2D view use `mc_render.py
   --tile N`.
 - **Nothing asks before overwriting**: `new`, `-o`, `batch` `save` and `export` into an
@@ -140,10 +140,10 @@ live route only when the user wants their open document changed, and read
 ## References
 
 - [references/cli.md](references/cli.md): subcommands, flags, batch format, value syntax, `info` JSON, exit codes.
-- [references/commands.md](references/commands.md): the 112 command ids by group, pinned to 0.3.0, and registry lookup.
+- [references/commands.md](references/commands.md): the 119 command ids by group, pinned to 0.4.0, and registry lookup.
 - [references/nodes.md](references/nodes.md): node categories, the core nodes with ports and params, library lookup.
 - [references/recipes.md](references/recipes.md): graph from scratch, template tint insert, weathering, multi-output nodes, fixing tiling.
 - [references/exposed.md](references/exposed.md): exposed inputs, bindings, presets, `--set` variants, parameter functions.
-- [references/export.md](references/export.md): formats and depths, pattern tokens, `.mcmat` and the TextureCraft hand-off (broken in 0.3.0).
+- [references/export.md](references/export.md): formats and depths, pattern tokens, `.mcmat` and the TextureCraft hand-off (broken in 0.4.0).
 - [references/gotchas.md](references/gotchas.md): silent failures and surprises.
 - [references/security.md](references/security.md): file access, `serve`/`mcp` and the app's control channel.
