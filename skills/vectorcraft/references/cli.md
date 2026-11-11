@@ -1,4 +1,4 @@
-# vectorcraft-cli 0.23.0 reference
+# vectorcraft-cli 0.24.0 reference
 
 `vectorcraft-cli` is a universal binary in `~/.local/bin`. It renders headless, with no
 window and no GPU. The app (`/Applications/VectorCraft.app`, bundle id
@@ -39,7 +39,7 @@ vectorcraft-cli run [--in FILE] [--cmd ID [--params JSON] | --commands FILE|-]..
 
 ```sh
 vectorcraft-cli convert IN OUT [--scale N] [--artboard I | --range R] [--outline-text]
-    [--decimals N] [--replace-lossy] [--editing-data] [--preserve-editing] [--ai-version 7|pdf]
+    [--decimals N] [--replace-lossy] [--editing-data] [--legacy-name-encoding ENC] [--preserve-editing] [--ai-version 7|pdf]
     [--hidden-objects layer|omit|visible] [--transparent-images flatten|omit]
 ```
 
@@ -53,6 +53,7 @@ vectorcraft-cli convert IN OUT [--scale N] [--artboard I | --range R] [--outline
 | `--decimals N` | SVG coordinate precision 1–7 (default 3) |
 | `--replace-lossy` | allow OUT == IN even though reading IN dropped things — only with the user's consent |
 | `--editing-data` | open a `.ai` from its editing copy even when it draws differently from its PDF part |
+| `--legacy-name-encoding ENC` | names in a `.ai`/EPS editing data that aren't UTF-8: `windows-1252` (default), `macintosh`, `windows-949`, `shift_jis`, `gbk`, `big5` |
 | `--preserve-editing` | PDF: embed the native VectorCraft document as an attachment (default: omitted; the app's Save As PDF keeps it). The warnings say when it was written; it is left out for `--artboard`/`--range` without every artboard |
 | `--ai-version 7` | legacy AI v7 output (one file per artboard: `OUT-<n>.ai`) |
 | `--hidden-objects layer\|omit\|visible` | AI v7 only: hidden objects go on a hidden layer above their layer (default), are dropped, or are written visible |
@@ -129,7 +130,7 @@ a job.
 
 - **Readable:** .vectorcraft .drawcraft .svg .svgz .pdf .ai .ait .png .pns .jpg .jpeg
   .gif .webp .tif .tiff .bmp .dib .rle .tga .vda .icb .vst .pcx .pxr .jpf .jpx .jp2 .j2k
-  .j2c .jpc .psd .pdd .psb .vctemplate .dxf .emf .wmf .eps .epsf .ps .af .afdesign .afpub
+  .j2c .jpc .heic .heif .psd .pdd .psb .jxl .vctemplate .dxf .emf .wmf .eps .epsf .ps .af .afdesign .afpub
 - **Writable:** .vectorcraft .svg .svgz .pdf .ai .png .jpg .gif .webp .tif .bmp
   .vctemplate .txt .dxf .eps .emf .wmf .tga .psd, plus `.ait` (an Illustrator template)
   from `run --export` and `convert`
