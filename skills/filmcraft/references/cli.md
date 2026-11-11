@@ -1,4 +1,4 @@
-# filmcraft-cli 0.19.0 reference
+# filmcraft-cli 0.20.0 reference
 
 `filmcraft-cli [OPTIONS] <SUBCOMMAND> [ARGS]`. It runs a headless FilmCraft engine by
 default, or sends commands to the running app with `--bridge`. `filmcraft-cli help` is the
@@ -44,7 +44,7 @@ authoritative list. The CLI is a symlink into `~/.local/share/artcraft-cli/filmc
 - Sequences count from frame 0 (`00:00:00:00`). Subtract a source list's `01:00:00:00`
   start (`fc_markers.py --sequence-start`).
 
-## Export presets (built in, 0.19.0)
+## Export presets (built in, 0.20.0)
 
 - **Match Source**: Adaptive High, Medium and Low Bitrate (H.264 at the sequence size).
 - **Web & Social**: High Quality 1080p HD and 2160p 4K, YouTube 1080p Full HD and 2160p 4K
@@ -54,7 +54,7 @@ authoritative list. The CLI is a symlink into `~/.local/share/artcraft-cli/filmc
   4444 XQ. Avid DNxHR HQ, SQ and LB. H.264 High 10 Master and Intra. APV 422-10 and 422-12. MXF OP1a DNxHR HQ, ProRes 422
   HQ and H.264. MXF OP-Atom DNxHR (Avid).
 - **Image Sequence**: PNG, TIFF, BMP, JPEG, Targa, DPX and OpenEXR.
-- **Animated GIF**: 640×360. **Audio Only**: WAV 16 and 24-bit, AIFF, AAC 320 kbps, FLAC.
+- **Animated GIF**: 640×360. **Audio Only**: WAV 16 and 24-bit, AIFF, AAC 320 kbps, MP3 320 kbps, FLAC.
 
 User presets live in the app's data directory (`--data-dir`) and appear in
 `--list-presets` with `builtin: false`.
