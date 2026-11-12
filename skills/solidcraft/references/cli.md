@@ -1,15 +1,15 @@
-# solidcraft-cli 0.30.1
+# solidcraft-cli 0.40.1
 
 Use the CLI inside the app (`/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli`).
 A separately installed copy (`~/.local/bin/solidcraft-cli`, a link into
 `~/.local/share/artcraft-cli/solidcraft/current/`, from the artcraft-cli installer) can be
-older: it was once 0.22.1, with 461 commands instead of 493. At 0.30.1 both copies match,
+older: it was once 0.22.1, with 461 commands instead of 493. At 0.40.1 both copies match,
 and without the app the standalone copy works on its own. `sclib.cli()` picks
 `SOLIDCRAFT_CLI`, then the app's copy, then PATH, and warns when PATH is older.
 
 ```sh
 SC=/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli
-$SC --version          # solidcraft-cli 0.30.1
+$SC --version          # solidcraft-cli 0.40.1
 $SC --help             # the full usage text below
 ```
 
