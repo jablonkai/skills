@@ -1,4 +1,4 @@
-# soundcraft-cli reference (0.19.0)
+# soundcraft-cli reference (0.20.1)
 
 Every subcommand takes `--help`; the table below summarises them. Every subcommand exits non-zero with `soundcraft-cli: <message>` on stderr
 on failure.

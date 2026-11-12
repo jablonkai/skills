@@ -1,6 +1,6 @@
-# Pinned command ids (SoundCraft 0.19.0)
+# Pinned command ids (SoundCraft 0.20.1)
 
-The ids the recipes rely on, with their `describe` signatures as of 0.19.0. For anything
+The ids the recipes rely on, with their `describe` signatures as of 0.20.1. For anything
 else: `python3 scripts/sc_inspect.py commands <words>` or `soundcraft-cli describe ID`.
 Positions are samples unless noted; `track`/`tracks` take names or ids.
 
