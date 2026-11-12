@@ -1,4 +1,4 @@
-# Gotchas (VectorCraft 0.24.0)
+# Gotchas (VectorCraft 0.24.1)
 
 ## Paint and geometry
 
@@ -18,7 +18,7 @@
   so always set it. `justify: "center"` centres point type on `x`. For area type, pass
   `area: {width, height, fit: "autoHeight"}`.
 - **Fonts:** a missing family is drawn in the fallback (Source Sans 3) without failing.
-  `text.create` only adds a `warning` to its result (0.24.0), which `run` and
+  `text.create` only adds a `warning` to its result (0.24.1), which `run` and
   `vc_build.py` don't stop on. `info.fonts[].status` is `exact` only when the font
   resolved (`missing` otherwise). Check it with `vc_verify.py doc --fonts-ok`, and name
   installed families. `Helvetica` (macOS) and `Source Sans 3` (bundled, the default)
