@@ -1,6 +1,6 @@
 # Shading — materials, shader nodes, world, lights, cameras
 
-Verified on Blender 5.2.3 LTS.
+Verified on Blender 5.3.0.
 
 ## Principled BSDF
 
@@ -18,13 +18,14 @@ bsdf.inputs["Coat Weight"].default_value = 0.3
 ob.data.materials.append(m)
 ```
 
-Full input list in 5.2, in order:
+Full input list in 5.3, in order:
 
 ```
 Base Color, Metallic, Roughness, IOR, Alpha, Thin Wall, Normal, Weight,
 Diffuse Roughness, Subsurface Weight, Subsurface Radius, Subsurface Scale,
 Subsurface IOR, Subsurface Anisotropy, Specular IOR Level, Specular Tint,
-Anisotropic, Anisotropic Rotation, Tangent, Transmission Weight, Coat Weight,
+Anisotropic, Anisotropic Rotation, Tangent, Transmission Weight,
+Transmission Dispersion Scale, Transmission Dispersion Abbe Number (new in 5.3), Coat Weight,
 Coat Roughness, Coat IOR, Coat Tint, Coat Normal, Sheen Weight, Sheen Roughness,
 Sheen Tint, Emission Color, Emission Strength, Thin Film Thickness, Thin Film IOR
 ```
@@ -109,6 +110,9 @@ img.save()
 ```
 
 For non-colour data (roughness, normal maps) set `img.colorspace_settings.name = "Non-Color"`.
+To *test* a colour space, compare `img.colorspace_settings.interop_id` (new in 5.3: `"data"` for
+Non-Color, `"srgb_rec709_scene"`/`"srgb_rec709_display"` for sRGB) rather than the display name,
+which depends on the OCIO config.
 
 ## Shader node groups
 
@@ -140,6 +144,10 @@ bg = nt.nodes["Background"]
 bg.inputs["Strength"].default_value = 1.5
 bg.inputs["Color"].default_value = (0.05, 0.05, 0.06, 1.0)
 ```
+
+`w.color` is only the solid-viewport colour — renders take the Background node, so a flat
+white backdrop (e.g. behind 2D Grease Pencil art) is `bg.inputs["Color"]` = white, strength 1,
+plus `scene.view_settings.view_transform = "Standard"` — the default AgX maps white to ~0.83 grey.
 
 Procedural sky — **`NISHITA` is gone**, use the scattering models:
 

@@ -1,6 +1,6 @@
 # Geometry Nodes — building trees from script
 
-Verified on Blender 5.2.3 LTS. The important 5.x change is how the **modifier exposes its
+Verified on Blender 5.3.0. The important 5.x change is how the **modifier exposes its
 inputs** — see "Driving the modifier" below; the 4.x idiom raises `TypeError`.
 
 ## A complete scatter tree
@@ -56,7 +56,7 @@ The interface assigns each socket a stable identifier (`Socket_0`, `Socket_1`, �
 #  ('Density',  'Socket_2', 'INPUT')]
 ```
 
-Then set the value — **Blender 5.2 path** (inputs are real RNA properties now):
+Then set the value — **Blender 5.x path** (inputs are real RNA properties now):
 
 ```python
 mod.properties.inputs.Socket_2.value = 120.0

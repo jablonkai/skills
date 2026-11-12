@@ -1,6 +1,6 @@
 # Import / export
 
-Verified on Blender 5.2.3 LTS — every export below was run and produced a non-empty file.
+Verified on Blender 5.3.0 — every export below was run and produced a non-empty file.
 
 ## Where each operator lives
 
@@ -97,7 +97,7 @@ bpy.ops.wm.alembic_export(filepath=OUT + "/cache.abc",
 ```
 
 **OBJ / STL / PLY** — geometry only. STL is triangles with no colour, materials or UVs;
-use it for 3D printing and nothing else. 5.2's STL exporter takes
+use it for 3D printing and nothing else. The STL exporter takes
 `evaluation_mode="DAG_EVAL_RENDER"` (default) or `"DAG_EVAL_VIEWPORT"` to pick which
 modifier levels (e.g. subdivision) are baked in.
 
