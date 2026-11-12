@@ -1,6 +1,6 @@
-# photocraft-cli reference (0.22.0)
+# photocraft-cli reference (0.23.1)
 
-Verified against `photocraft-cli 0.22.0 (5000240c6, 2026-11-09)`. Every subcommand prints
+Verified against `photocraft-cli 0.23.1 (45066c482, 2026-11-12)`. Every subcommand prints
 its own help with `photocraft-cli <sub> --help`; a flag the subcommand doesn't take is
 an error. The CLI is the trusted local route: unlike `serve`, MCP and the desktop
 control port, it may use ordinary filesystem paths.
@@ -21,6 +21,11 @@ The format flags, shared by `run`, `convert` and `batch`: `--tiff-layers`,
 `--tiff-compression none|lzw|zip`, `--jpeg-format baseline|optimized|progressive`,
 `--tga-bits 24|32`, `--dpx-bits 8|10|12|16`, `--dds-compression none|bc1|bc2|bc3`,
 `--dds-mipmaps`.
+Further flags seen in 0.23.1 help: `--metadata none|all` (flat exports embed the XMP packet
+by default), `--tiff-transparency on|off`, `--tiff-pyramid`, `--no-maximize-compatibility`
+(layered PSD without the merged image), `--pcraft-full-composite`, `--gpu`/`--no-gpu`,
+`--approve-high-memory` (PSD/PSB imports), and for `convert` `--pdf-dpi`, `--pdf-pages`
+and `--pdf-editable` (experimental). Not exercised by this skill.
 
 - Opens the file (or creates one with `file.new` params), runs the commands in order, and
   saves to `--out`. Each `--params` belongs to the `--cmd` before it.
@@ -79,7 +84,7 @@ photocraft-cli batch --actions <actions.json | set.atn> [--action <name>] \
   (0.21.0), which puts every result straight into `--out`, so same-named files in
   subfolders overwrite each other: add `--naming '{serial}-{name}.{ext}'` (tokens `{name}`,
   `{serial}`, `{date}`, `{ext}`; `--start-serial N`; a template without `{ext}` writes
-  files with no extension, verified on 0.22.0) or use `file.automate.batch` with
+  files with no extension, verified on 0.23.1) or use `file.automate.batch` with
   `"includeSubfolders": true` (see
   [recipes.md](recipes.md#folder-batch-resize-sharpen-convert)). The output keeps the
   base name and takes the `--format` extension. `--stop-on-error` halts at the first
@@ -118,7 +123,7 @@ to it. Droplet `quality` is **0..12** (Photoshop's JPEG scale), not 1..100.
 photocraft-cli commands [--json] [--filter <text>]
 ```
 
-The engine registry: 1005 commands in 0.22.0. `--filter` matches the id and label. Only
+The engine registry: 1009 commands in 0.23.1. `--filter` matches the id and label. Only
 `--json` includes each command's `params` signature (ranges, defaults, enum values), so
 use `scripts/pc_inspect.py commands <words…>` to see it. That's the source of truth
 whenever this reference and the binary disagree.
