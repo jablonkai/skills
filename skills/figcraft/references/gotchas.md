@@ -1,6 +1,6 @@
-# Gotchas (FigCraft 0.17.0)
+# Gotchas (FigCraft 0.18.1)
 
-Each was reproduced with figcraft-cli 0.17.0.
+Each was reproduced with figcraft-cli 0.18.1.
 
 ## Building
 
