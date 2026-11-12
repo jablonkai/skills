@@ -1,7 +1,7 @@
-# cadcraft-cli 0.20.0 reference
+# cadcraft-cli 0.20.1 reference
 
 Universal binary at `~/.local/bin/cadcraft-cli`. `cadcraft-cli --version` prints
-`cadcraft-cli 0.20.0`. `--help`/`-h`/`help` print the usage to stdout and exit 0; bad
+`cadcraft-cli 0.20.1`. `--help`/`-h`/`help` print the usage to stdout and exit 0; bad
 usage prints an error and the usage line to stderr and exits 2. Since 0.14.0 every subcommand has
 its own `--help` (`cadcraft-cli run --help` lists the flags and the `{last}` chaining).
 
@@ -33,7 +33,7 @@ Settings flags on `info`/`convert`/`run`/`mcp`: `--config-dir DIR` (env
   commands changed it**, else extents. Always pass one explicitly.
 - `--window`/`--view` without an image output is an error (exit 2).
 - **Write a negative `x0` as `--window=-10,0,10,5`** (the `=` form): `--window -10,…` fails with
-  `unexpected argument '-1' found` (checked on 0.20.0; the scripts already pass the `=` form;
+  `unexpected argument '-1' found` (checked on 0.20.1; the scripts already pass the `=` form;
   `--help` documents it since 0.17.0). The same holds for a dash command: write
   `--cmd='-attedit {…}'`, since `--cmd '-attedit …'` fails with `unexpected argument '-a'`.
 - PNG is 2400×1600 RGBA on a dark background with layer colours, like the app's model

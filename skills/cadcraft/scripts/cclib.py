@@ -11,7 +11,7 @@ import shutil
 import subprocess
 import sys
 
-PINNED_VERSION = "0.20.0"
+PINNED_VERSION = "0.20.1"
 IMAGE_EXTS = (".png", ".svg", ".pdf")
 DRAWING_EXTS = (".dxf", ".dwg")
 
