@@ -3,23 +3,23 @@ name: lightcraft
 description: 'Automate LightCraft, the Lightroom-style photo library and raw developer, headless with lightcraft-cli: import folders into a library, rate, flag, label and keyword photos, query the library by rating, keyword, date or camera, develop raw and JPEG files (exposure, white balance, auto tone, presets, B&W), copy or sync develop settings across photos, merge HDR/panoramas, and export JPEG/TIFF/WebP/AVIF/DNG at a set size, quality and colour space, verified by read-back, export sizes and unchanged originals. Use when the user mentions LightCraft or lightcraft-cli, or wants a LightCraft library culled, keyworded or queried, or raws developed and exported with LightCraft: "import this shoot into LightCraft and export 2048 px JPEGs", "sync these develop settings to the rest", "list my 5-star photos in LightCraft". Not for the Apple Photos library (apple-photos), layered PSD or composite editing (photocraft), Pixelmator Pro (pixelmator-pro), GIMP/Krita, or plain resizing with no LightCraft (sips/ImageMagick).'
 summary: "automate LightCraft headless with lightcraft-cli — folder import into libraries, rating, flags and keywords, library queries, raw and JPEG develop with auto tone, white balance and presets, settings sync, sized JPEG/TIFF/AVIF/DNG export, read-back verified with originals untouched"
 category: design-automation
-compatibility: "Built for lightcraft-cli 0.20.0 and LightCraft.app 0.20.0 on macOS; pre-1.0, so command ids may change."
+compatibility: "Built for lightcraft-cli 0.21.1 and LightCraft.app 0.21.1 on macOS; pre-1.0, so command ids may change."
 risk: medium
 tags: [lightcraft, lightroom, raw, photo-library, develop, keywords, export, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.0.9"
+  version: "1.0.10"
   author: "Tamás Jablonkai"
 ---
 
 # LightCraft via lightcraft-cli
 
 LightCraft is a Lightroom-style photo library and raw developer. Every feature is a
-command in one engine registry (389 in 0.20.0): import, rate, keyword, develop, export.
+command in one engine registry (392 in 0.21.1): import, rate, keyword, develop, export.
 `lightcraft-cli run` executes those commands headless against a library folder, with no
 window or GPU, and answers each one with a JSON line. This skill drives that route and
 checks every result by reading the library back. Verified against **lightcraft-cli
-0.20.0** and **LightCraft.app 0.20.0** on macOS. The software is pre-1.0, so when a
+0.21.1** and **LightCraft.app 0.21.1** on macOS. The software is pre-1.0, so when a
 pinned command id fails, look it up rather than guessing.
 
 ```sh
@@ -38,7 +38,7 @@ lightcraft-cli --version
 | Try a command safely | `lightcraft-cli run --demo …` (in-memory 24-photo library) |
 
 The live app port (`LightCraft --control`, `run --connect`) has **no authentication** in
-0.16.0 (not re-checked in 0.20.0). This skill doesn't start it or connect to it ([gotchas](references/gotchas.md#live-app-port)).
+0.16.0 (not re-checked in 0.21.1). This skill doesn't start it or connect to it ([gotchas](references/gotchas.md#live-app-port)).
 
 ## Scripts
 
@@ -88,10 +88,11 @@ They need Python 3.9+ and the standard library only. Call them as
 
 - **Active-photo commands ignore `ids` and the selection.** This covers `develop.auto`,
   `develop.adjust`, `develop.wb`, `develop.profile` and `develop.treatment`.
-  `selectAll` then `develop.auto` tones **one** photo and still says `ok`. Use `forEach`.
-- **`develop.autoSync` + `develop.auto` copies one photo's auto values to all of
-  them.** It does not auto-tone each photo. Real per-photo auto tone is `forEach` →
-  `develop.auto`.
+  `selectAll` then `develop.auto` tones **one** photo and still says `ok` (0.21.1 tones
+  every selected photo, but only `develop.auto` does). Use `forEach`.
+- **`develop.autoSync` + `develop.auto` copied one photo's auto values to all of
+  them up to 0.20.0**; 0.21.1 no longer does. Real per-photo auto tone is `forEach` →
+  `develop.auto` on every version.
 - **`develop.set` is absolute.** "Auto, then +0.5 EV" is
   `develop.quickAdjust {control: "light.exposure", delta: 0.5, ids}`, which works from
   each photo's own value. `set value=0.5` would wipe the auto exposure.
