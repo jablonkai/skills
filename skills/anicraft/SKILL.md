@@ -3,12 +3,12 @@ name: anicraft
 description: 'Automate AniCraft (Flash/Animate-style 2D vector animation) headless with anicraft-cli: build .anicraft documents from a step spec (symbols, layers, classic, motion and shape tweens with easing and hints, motion paths, bone rigs with limits and poses, a camera, sounds, frame actions and ActionScript checked by script.check and test_movie); edit .anicraft files (swap text and bitmaps, add tweens); export MP4/WebM, GIF, PNG sequence, sprite sheet with JSON map, Lottie, HTML and SVG, with read-back and rendered frames. Use when the user mentions AniCraft, anicraft-cli or a .anicraft file, or wants Flash/Animate-style tweened or rigged vector animation: "animate a bouncing ball in AniCraft", "rig this arm with bones and make it wave", "add a stop() action and test the movie", "export this .anicraft as Lottie and a sprite sheet". Not for Cavalry (cavalry), After Effects-style comps (effectcraft), painted animation (rebelle), Godot scenes (godot), or turning existing video or images into GIFs (ffmpeg, imagemagick).'
 summary: "automate AniCraft headless with anicraft-cli — tweened and rigged vector animation from a step spec with symbols, motion paths, easing, shape hints, bone rigs and a camera, frame actions checked by script.check and test_movie, MP4/GIF/PNG-sequence/sprite-sheet/Lottie/HTML export, info and render read-back verified"
 category: motion-design
-compatibility: "Built for AniCraft 0.2.0 (6dbf120) and anicraft-cli 0.2.0 on macOS, Python 3.9+, FFmpeg 7+ (ffmpeg for video export, ffprobe for checks); pre-1.0, so command ids may change."
+compatibility: "Built for AniCraft 0.2.1 (d0beaf2) and anicraft-cli 0.2.1 on macOS, Python 3.9+, FFmpeg 7+ (ffmpeg for video export, ffprobe for checks); pre-1.0, so command ids may change."
 risk: low
 tags: [anicraft, animate, flash, 2d-animation, tween, bones, lottie, sprite-sheet, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   author: "Tamás Jablonkai"
 ---
 
@@ -17,15 +17,15 @@ metadata:
 AniCraft is a Flash/Animate-style vector animation app: a document (`.anicraft`, JSON)
 holds scenes, each scene a timeline of layers, each layer keyframes with elements
 (shapes, text, symbol instances, bitmaps). Every menu item is a command in one engine
-registry (225 in 0.2.0); the same commands run in the app, from `anicraft-cli exec`/`run`,
+registry (240 in 0.2.1); the same commands run in the app, from `anicraft-cli exec`/`run`,
 and in a stateful `serve` session. This skill drives them **headless** — no window opens —
 and checks every result by reading the document, the exports or rendered frames back.
-Verified against **AniCraft 0.2.0** and **anicraft-cli 0.2.0** on macOS; pre-1.0, so when a
+Verified against **AniCraft 0.2.1** and **anicraft-cli 0.2.1** on macOS; pre-1.0, so when a
 pinned id fails, look it up rather than guess.
 
 ```sh
 command -v anicraft-cli || ls ~/.local/bin/anicraft-cli
-anicraft-cli --version        # 0.2.0
+anicraft-cli --version        # 0.2.1
 ```
 
 ## Pick the route
@@ -78,7 +78,7 @@ only, each with a full `--help`.
    cropping an object at the end of a zoom only show up there. `ac_verify.py edges F
    --frames 1 15 30 [--color #rrggbb]` flags anything cut off by the frame edge.
 6. **Report** outputs, the checks that passed, and anything you could not verify. Pass
-   on every export's `notes`/`report` — e.g. Lottie in 0.2.0 leaves bitmap fills out, so
+   on every export's `notes`/`report` — e.g. Lottie in 0.2.1 leaves bitmap fills out, so
    a swapped logo is missing there even though the HTML and the document have it.
 
 ## The traps that cost the most (details in [gotchas.md](references/gotchas.md))
@@ -107,7 +107,7 @@ only, each with a full `--help`.
 ## References
 
 - [references/cli.md](references/cli.md) — subcommands, `serve`/`mcp`, frame bases, plug-ins.
-- [references/commands.md](references/commands.md) — pinned 0.2.0 ids by task, with key params.
+- [references/commands.md](references/commands.md) — pinned 0.2.1 ids by task, with key params.
 - [references/recipes.md](references/recipes.md) — spec recipes for each workflow.
 - [references/export.md](references/export.md) — export commands, outputs, and how to check them.
 - [references/gotchas.md](references/gotchas.md) — silent failures and surprises.

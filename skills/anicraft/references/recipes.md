@@ -1,7 +1,7 @@
 # Recipes (ac_build.py specs)
 
 All specs are run as `python3 $S/ac_build.py spec.json` and use **1-based frames**.
-Every recipe here was run on AniCraft 0.2.0; ids in results (`$name.key`) are what the
+Every recipe here was run on AniCraft 0.2.1; ids in results (`$name.key`) are what the
 engine returned.
 
 ## Contents

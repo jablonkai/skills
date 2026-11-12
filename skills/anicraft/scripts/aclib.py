@@ -5,7 +5,7 @@ headless session in which each command's result (element, instance, bone, layer 
 available to the next one. `run` can't do that, so every multi-step build goes through
 `Serve`.
 
-Frame bases (verified on 0.2.0):
+Frame bases (verified on 0.2.1):
 - CLI flags (`render --frame`, `render-seq/gif --from/--to`) are 1-based, like the timeline.
 - Command params (`frame`, export `from`/`to`), `info` and the file are 0-based.
 """
@@ -15,7 +15,7 @@ import shutil
 import subprocess
 import sys
 
-PINNED_VERSION = "0.2.0"
+PINNED_VERSION = "0.2.1"
 
 # Commands whose `from` / `to` params are frames (in all others `from`/`to` are ids,
 # e.g. bone.add). `frame` is a frame index in every command that takes it at top level.

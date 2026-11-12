@@ -17,11 +17,11 @@ creates them).
 | `file.export_png {path, frame, scale}` | one frame | view it |
 | `file.export_audio {path .wav, from, to, rate, bits}` | the mixed soundtrack | ffprobe |
 
-Notes from 0.2.0:
+Notes from 0.2.1:
 - **Sprite-sheet limit**: 16 777 216 px total. 60 frames of 800×800 fail; `scale: 0.25` fits.
   The map's per-frame `duration` is in ms, rounded.
 - **Lottie** reports what it approximated or left out in `notes`/`report` — bitmap fills
-  are "not exported yet" in 0.2.0. Read the report and tell the user.
+  are "not exported yet" in 0.2.1. Read the report and tell the user.
 - **HTML** embeds code, paths, images and sounds; `stored_frames`/`timelines` show what it kept.
 - Video frame count equals the timeline frame count; duration = frames / fps.
 - Text is outlined in SVG/Lottie, so verify text changes in the document
