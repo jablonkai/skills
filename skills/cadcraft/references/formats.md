@@ -1,4 +1,4 @@
-# Formats (CADCraft 0.20.0)
+# Formats (CADCraft 0.20.1)
 
 | Format | Read | Write | Notes |
 |---|---|---|---|
