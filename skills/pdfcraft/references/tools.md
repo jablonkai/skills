@@ -1,6 +1,6 @@
-# PdfCraft 0.21.0 tools used by the recipes
+# PdfCraft 0.21.1 tools used by the recipes
 
-Pinned for 0.21.0 (208 tools in all). For anything not listed, or when a call
+Pinned for 0.21.1 (208 tools in all). For anything not listed, or when a call
 here fails after an upgrade, look it up instead of guessing:
 
 ```sh
