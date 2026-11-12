@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Filtered lookup in DesignCraft's command registry (555 commands in 0.20.0).
+"""Filtered lookup in DesignCraft's command registry (555 commands in 0.20.1).
 
   dc_commands.py WORD…              commands whose id, label or menu path contains every word
   dc_commands.py --prefix style.    every command under a prefix
