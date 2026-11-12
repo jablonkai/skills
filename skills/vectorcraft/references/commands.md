@@ -1,4 +1,4 @@
-# Pinned command ids (VectorCraft 0.24.0)
+# Pinned command ids (VectorCraft 0.24.1)
 
 Look up anything not listed here with `python3 scripts/vc_commands.py WORD…`
 (`--id ID` prints the full signature). Lengths are document units, coordinates are
