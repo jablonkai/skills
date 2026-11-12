@@ -1,4 +1,4 @@
-# materialcraft-cli reference (0.4.0)
+# materialcraft-cli reference (0.4.1)
 
 `materialcraft-cli` is the headless MaterialCraft: the same engine and command registry as the
 app, no window, no GPU. It lives in `~/.local/bin` (the app bundle is
@@ -10,7 +10,7 @@ are the reference. Packages are native **SBS** (`.sbs`, XML) since 0.2.0; the CL
 
 | Subcommand | What it does |
 |---|---|
-| `--version` | `materialcraft-cli 0.4.0 (b6f1aa0 2026-11-11)` |
+| `--version` | `materialcraft-cli 0.4.1 (65f7bfd 2026-11-12)` |
 | `info IN` | The whole session as JSON (see below). `IN` is a `.sbs` or `sample` (the built-in atomic sample). |
 | `commands [--filter T]` | JSON list `[{id, label, params}]`; `params` is a signature string. |
 | `nodes [--filter T] [--category T]` | JSON list of node definitions: `id, label, category, description, inputs[{id, kind}], outputs[{id, kind}], params[{id, label, default{t,v}, min, max, options}]`. |

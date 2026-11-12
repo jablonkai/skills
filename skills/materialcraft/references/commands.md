@@ -1,4 +1,4 @@
-# Command registry (0.4.0, 119 commands)
+# Command registry (0.4.1, 119 commands)
 
 Look up the live list rather than trusting this page after an update:
 

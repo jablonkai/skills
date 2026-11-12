@@ -1,4 +1,4 @@
-# Node library (0.4.0, 29 entries)
+# Node library (0.4.1, 29 entries)
 
 0.2.0 removed the old procedural library (222 nodes in 0.1.2: noises, patterns, material filters,
 `perlin_noise`, `height_normal_ao`, `edge_wear`, `pbr_base_material`, ...). What is left is a
@@ -60,7 +60,7 @@ ambient-occlusion, curvature or edge-wear node any more.
 A function graph is `{"nodes": [{"id", "op", "inputs": [ids], "pos": [x, y], "type_code",
 "value"?}], "output": id}`. Set one with `graph.function.set {target: {kind: "parameter",
 node: N, parameter: "function"}, function}`. `type_code` is 256 for a float and 512 for a
-float2. Ops verified in 0.4.0: `get_float2` (value `"$pos"`, the pixel position in 0..1),
+float2. Ops verified in 0.4.1: `get_float2` (value `"$pos"`, the pixel position in 0..1),
 `get_float1` (value = an `input_value` identifier), `swizzle1` (value = component index),
 `const_float1`, `mul`, `add`, `sin`. An unknown op fails with `unknown function` and the step
 saves nothing. The built-in **Atomic sample** (`new atomics`) shows the format; read its
