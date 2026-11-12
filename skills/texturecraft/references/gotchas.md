@@ -1,6 +1,6 @@
-# Gotchas (TextureCraft 0.6.0)
+# Gotchas (TextureCraft 0.6.1)
 
-Each of these was reproduced against texturecraft-cli 0.6.0.
+Each of these was reproduced against texturecraft-cli 0.6.1.
 
 ## Silent failures
 
