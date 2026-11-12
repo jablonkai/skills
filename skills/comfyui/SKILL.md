@@ -1,6 +1,6 @@
 ---
 name: comfyui
-description: 'Drive a local ComfyUI server (source or Desktop) via its HTTP API with a dependency-free Python client — run workflow templates with overrides (prompt, seed, size, steps, model), batch over prompt lists or image folders with fixed seeds, img2img and inpainting with uploaded inputs, list installed nodes and models, convert editor-saved workflows to API format, validate before queuing, cancel runs, and collect outputs with their parameters. Use whenever the user wants images generated or transformed with ComfyUI or local diffusion models on their own machine (Stable Diffusion, SDXL, FLUX, Qwen-Image, GGUF), or mentions a ComfyUI workflow JSON, node_errors or the ComfyUI queue — e.g. "run my ComfyUI workflow with seeds 1–4", "img2img this folder in ComfyUI", "which checkpoints do I have", "generate variations locally with FLUX". Not for cloud generators (picsart-*, generate-media), painting or retouching in Krita/GIMP/Pixelmator, plain resizing or conversion (imagemagick), or 3D renders (blender).
+description: 'Drive a local ComfyUI server (source or Desktop) via its HTTP API with a dependency-free Python client — run workflow templates with overrides (prompt, seed, size, steps, model), batch over prompt lists or image folders with fixed seeds, img2img and inpainting with uploaded inputs, list installed nodes and models, convert editor-saved workflows to API format, validate before queuing, cancel runs, and collect outputs with their parameters. Use whenever the user wants images generated or transformed with ComfyUI or local diffusion models on their own machine (Stable Diffusion, SDXL, FLUX, Qwen-Image, GGUF), or mentions a ComfyUI workflow JSON, node_errors or the ComfyUI queue — e.g. "run my ComfyUI workflow with seeds 1–4", "img2img this folder in ComfyUI", "which checkpoints do I have", "generate variations locally with FLUX". Not for cloud generators (picsart-*, generate-media), painting or retouching in Krita/GIMP/Pixelmator, plain resizing or conversion (imagemagick), or 3D renders (blender).'
 summary: "drive a local ComfyUI server over its HTTP API — parameterised workflow runs, prompt and image-folder batches with seed control, img2img and inpainting uploads, node and model inspection, editor-to-API workflow conversion, pre-queue validation, scoped cancel, outputs with params sidecars and PNG-metadata checks"
 category: design-automation
 compatibility: "Built for ComfyUI 0.42.0 (source install, Python 3.12 venv) and Comfy Desktop 1.1.8 on macOS 27, Apple silicon (MPS); ComfyUI-GGUF for .gguf models. Client scripts need Python 3.9+."
@@ -13,7 +13,7 @@ tags:
     - local-ai
 license: GPL-3.0-only
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   author: "Tamás Jablonkai"
 ---
 

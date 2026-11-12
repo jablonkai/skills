@@ -185,6 +185,37 @@ check_skill_frontmatter_lengths() {
   done < <(skill_dirs)
 }
 
+# Every SKILL.md frontmatter must parse as real YAML. The field readers above are
+# line-based and tolerate malformed quoting, but installers such as
+# `gh skill install` parse the block strictly and refuse the skill.
+check_skill_frontmatter_yaml() {
+  local dir_name
+  local error
+
+  if ! python3 -c 'import yaml' 2>/dev/null; then
+    echo "PyYAML is required to parse frontmatter (python3 -m pip install pyyaml)"
+    exit 1
+  fi
+
+  while IFS= read -r dir_name; do
+    if ! error=$(frontmatter_block "skills/$dir_name/SKILL.md" | python3 -c '
+import sys, yaml
+try:
+    data = yaml.safe_load(sys.stdin)
+except yaml.YAMLError as exc:
+    print(exc)
+    sys.exit(1)
+if not isinstance(data, dict):
+    print("frontmatter is not a YAML mapping")
+    sys.exit(1)
+' 2>&1); then
+      echo "Invalid frontmatter YAML in skills/$dir_name/SKILL.md:"
+      echo "$error"
+      exit 1
+    fi
+  done < <(skill_dirs)
+}
+
 # Progressive disclosure (see AGENTS.md): a long SKILL.md with nothing in
 # references/ means detail that should load on demand is instead loaded on every
 # invocation. Only a warning — the budget is a smell, not a rule, and some skills
@@ -343,6 +374,7 @@ check_markdown_links() {
 }
 
 check_skill_frontmatter
+check_skill_frontmatter_yaml
 check_skill_frontmatter_fields
 check_skill_frontmatter_lengths
 check_skill_versions

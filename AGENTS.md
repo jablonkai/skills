@@ -268,7 +268,7 @@ Always run before committing:
 bash .github/scripts/validate.sh
 ```
 
-Checks: frontmatter completeness, the allowed frontmatter field set and `risk`
+Checks: frontmatter completeness and strict YAML parsing (PyYAML), the allowed frontmatter field set and `risk`
 vocabulary, `metadata.version` format and that every changed skill bumped it, `name:` and `description:` length caps, `name:`↔directory match, skill
 directory structure, kebab-case names, README/AGENTS catalog sync (by regenerating both
 sections and failing on any difference), and broken relative Markdown links (links
