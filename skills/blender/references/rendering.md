@@ -1,6 +1,6 @@
 # Rendering — engines, passes, compositor, output
 
-Verified on Blender 5.2.3 LTS.
+Verified on Blender 5.3.0.
 
 ## Engines
 
@@ -118,6 +118,10 @@ g.links.new(ni.outputs[0], glare.inputs["Image"])
 g.links.new(glare.outputs["Image"], no.inputs[0])
 ```
 
+A compositor created in the 5.3 UI starts as Group Input → Group Output with **no Render
+Layers node** — the Group Input already carries the render, so a script-built group needs no
+`RLayers` node either; add one only for extra passes.
+
 **An unterminated group silently swallows the render** — `bpy.ops.render.render()` returns
 `{'FINISHED'}` and writes nothing. Either finish the graph or set
 `sc.render.use_compositing = False`.
@@ -129,13 +133,14 @@ Compositor node **settings became input sockets** in 5.x. `glare.glare_type` rai
 glare.inputs["Type"].default_value        # also: Quality, Threshold, Smoothness, Clamp,
                                           # Maximum, Strength, Saturation, Tint, Size,
                                           # Streaks, Streaks Angle, Iterations, Fade,
-                                          # Color Modulation, Diagonal, Sun Position, Jitter
+                                          # Color Modulation, Diagonal, Sun Position, Jitter,
+                                          # Kernel Data Type, Kernel
 glare.outputs                             # ['Image', 'Glare', 'Highlights']
 ```
 
-92 `CompositorNode*` types exist. Common ones: `RLayers`, `Image`, `Viewer`, `OutputFile`,
+About 90 `CompositorNode*` types exist. Common ones: `RLayers`, `Image`, `Viewer`, `OutputFile`,
 `Blur`, `Denoise`, `Glare`, `AlphaOver`, `SetAlpha`, `ColorBalance`, `Levels`, `Tonemap`,
-`LensDistortion`, `Crop`, `Scale`, `Translate`, `MovieDistortion`, `BlankImage`,
+`Lensdist`, `Crop`, `Scale`, `Translate`, `MovieDistortion`, `BlankImage`,
 `ImageCoordinates`, `ImageInfo`, `StringToImage`, `BokehImage`.
 
 `CompositorNodeRLayers` feeds render passes in; `CompositorNodeOutputFile` writes extra
@@ -191,7 +196,7 @@ Raw form:
 sc.render.filepath = "/abs/path/still.png"
 bpy.ops.render.render(write_still=True)
 os.path.exists(sc.render.filepath)        # ALWAYS verify — at the path you set
-# NOT frame_path(): in 5.2 it reports "still.png0001.png" although the file is "still.png"
+# NOT frame_path(): in 5.x it reports "still.png0001.png" although the file is "still.png"
 ```
 
 Animation:

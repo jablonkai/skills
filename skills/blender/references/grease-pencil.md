@@ -1,9 +1,9 @@
 # Grease Pencil v3 — 2D drawing in 3D space
 
-Verified on Blender 5.2.3 LTS. Grease Pencil was rewritten for 4.3; everything from the
+Verified on Blender 5.3.0. Grease Pencil was rewritten for 4.3; everything from the
 legacy API is gone:
 
-| Legacy (≤4.2) | Blender 5.2 |
+| Legacy (≤4.2) | Blender 5.x |
 |---|---|
 | object type `GPENCIL` | `GREASEPENCIL` |
 | `bpy.ops.gpencil.*` | removed entirely |

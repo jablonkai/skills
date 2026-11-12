@@ -1,6 +1,6 @@
 # Animation & rigging — keyframes, slotted actions, drivers, NLA, armatures
 
-Verified on Blender 5.2.3 LTS. **Read the first section before writing any animation code** —
+Verified on Blender 5.3.0. **Read the first section before writing any animation code** —
 `Action.fcurves` no longer exists and almost every example online still uses it.
 
 ## Keyframes
@@ -181,6 +181,8 @@ invalid — re-fetch through `arm.bones[...]` or `rig.pose.bones[...]`.
 ```python
 pb = rig.pose.bones["bone1"]
 pb.rotation_mode = "XYZ"                 # default is QUATERNION
+# setting rotation_mode does not convert the values, so a rotated bone jumps; 5.3 can convert:
+# pb.convert_rotation_mode("XYZ")      # also Object.convert_rotation_mode(mode, bake=False)
 pb.rotation_euler = (0.3, 0, 0)
 pb.keyframe_insert("rotation_euler", frame=1)
 

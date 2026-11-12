@@ -1,4 +1,4 @@
-# Blender scripting gotchas — verified on Blender 5.2.3 LTS (Python 3.13)
+# Blender scripting gotchas — verified on Blender 5.3.0 (Python 3.13)
 
 Everything here was reproduced through the bridge on this machine. Most of it contradicts
 what older tutorials, forum answers, and pre-5.x training data will tell you — Blender's
@@ -26,7 +26,7 @@ Every bridge helper that reads transforms (`world_bounds`, `metrics`, `frame_vie
 Blender 4.4 introduced slotted actions and 5.x removed the legacy accessor entirely:
 
 ```python
-ob.animation_data.action.fcurves          # AttributeError in 5.2
+ob.animation_data.action.fcurves          # AttributeError in 5.x
 ```
 
 Curves now live under `action.layers[i].strips[j].channelbag(slot)`. Use the bridge helpers
@@ -41,7 +41,7 @@ The Blender 4.x idiom is gone:
 mod["Socket_2"] = 120.0        # AttributeError: bpy_struct: no __getitem__ support
 ```
 
-5.2 exposes them as real RNA properties, keyed by the socket **identifier**:
+5.x exposes them as real RNA properties, keyed by the socket **identifier**:
 
 ```python
 mod.properties.inputs.Socket_2.value = 120.0      # getattr(inputs, ident) for a variable
@@ -63,7 +63,7 @@ scene.render.use_compositing = False   # or give the group a NodeGroupOutput
 scene.render.use_sequencer = False     # or the VSE renders instead of the 3D scene
 ```
 
-Always check the file exists — at `scene.render.filepath` itself. In 5.2 a still written with
+Always check the file exists — at `scene.render.filepath` itself. In 5.x a still written with
 `write_still=True` lands at the path exactly as given, while `render.frame_path()` still
 reports it with a frame number appended, so testing `frame_path()` reads as a failure even
 after a good render. The bridge's `render()` / `snapshot()` raise a diagnostic
@@ -119,7 +119,7 @@ engines that really accept assignment.
 
 ## Renamed / moved in 5.x
 
-| Old (≤4.x, what tutorials say) | Blender 5.2 |
+| Old (≤4.x, what tutorials say) | Blender 5.x |
 |---|---|
 | `scene.node_tree` (compositor) | `scene.compositing_node_group` — a real node group |
 | `CompositorNodeComposite` output node | `NodeGroupOutput` inside that group |
