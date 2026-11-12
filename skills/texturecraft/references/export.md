@@ -1,4 +1,4 @@
-# Exporting textures (0.6.0)
+# Exporting textures (0.6.1)
 
 Always run `export.plan` first (`tc_export.py --plan-only`): it lists exactly the files an
 export will write, per set, after dropping maps for channels the project doesn't have

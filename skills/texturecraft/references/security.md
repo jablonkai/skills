@@ -17,7 +17,7 @@ mesh and copy it into the project.
 
 ## `serve` and `mcp` (not used by the skill)
 
-These were checked against 0.6.0:
+These were checked against 0.6.1:
 
 - `texturecraft-cli serve` speaks JSON lines on stdio. `serve --port P` listens on
   **127.0.0.1 only** and writes a fresh token to
