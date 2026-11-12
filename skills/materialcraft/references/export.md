@@ -1,4 +1,4 @@
-# Export (0.4.0)
+# Export (0.4.1)
 
 `export` cooks the graph at its full size and writes **one image file per output node**; an output fed by a `value_processor` (the `atomics`
 template's `brightness_value`) is a number and writes no file (`mc_export.py` and `mc_render.py --seam` skip it). The
@@ -66,7 +66,7 @@ linear) and `source.sbs` (the package, so TextureCraft can re-cook it).
   `~/Documents/TextureCraft/library`, where TextureCraft's shelf lists it. That writes into
   the user's library — do it only when asked.
 
-### Opening it in TextureCraft: BROKEN with TextureCraft 0.6.0
+### Opening it in TextureCraft: BROKEN with TextureCraft 0.6.1
 
 ```sh
 texturecraft-cli new builtin:sphere t.tcraft
@@ -74,10 +74,10 @@ texturecraft-cli run t.tcraft material.load '{"path": "/abs/oak.mcmat"}' -o t2.t
 texturecraft-cli run t2.tcraft layer.list            # a fill layer with fill.link.graph = the graph name
 ```
 
-**0.4.0 writes `.mcmat` `version 2`, and TextureCraft 0.6.0 reads up to `version 1`:**
+**0.4.1 writes `.mcmat` `version 2`, and TextureCraft 0.6.1 reads up to `version 1`:**
 `material.load` fails with `unsupported: MaterialCraft material version 2 (this version reads up to 1)`,
 so `mc_export.py --texturecraft-check` exits 1 with that error. The `.mcmat` itself checks out (maps,
-parameters, `source.sbs`). Re-tested with MaterialCraft 0.4.0 and TextureCraft 0.6.0 (d1ca3fd; also 0.5.0 earlier): still version 2 and still refused. Until TextureCraft reads version 2, use MaterialCraft 0.1.x for the hand-off.
+parameters, `source.sbs`). Re-tested with MaterialCraft 0.4.1 and TextureCraft 0.6.1 (34a1961; also 0.6.0 (d1ca3fd) and 0.5.0 earlier): still version 2 and still refused. Until TextureCraft reads version 2, use MaterialCraft 0.1.x for the hand-off.
 Where it does load, the linked layer keeps the material live:
 `material.link.set {id, value}`, `material.link.preset {name}`, `material.link.cook` and
 `material.link.saveSource {path}` change and re-cook it inside TextureCraft (see the

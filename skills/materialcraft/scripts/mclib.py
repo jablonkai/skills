@@ -192,7 +192,7 @@ def outputs(graph):
             res.append({"node": n["id"], "identifier": n["params"].get("identifier", {}).get("v", "output"),
                         "usage": USAGES[u] if isinstance(u, int) and u < len(USAGES) else u,
                         "source": feed.get(n["id"]),
-                        # a value output (fed by a value_processor, 0.4.0 atomics) cooks to a number: no image
+                        # a value output (fed by a value_processor, 0.4.1 atomics) cooks to a number: no image
                         "value": (n.get("cooked") or {}).get("value") is not None})
     return res
 
@@ -366,7 +366,7 @@ def write_png(path, rows, channels):
 
 
 def tile_png(src, dst, n):
-    """An n x n repeat of a PNG (the CLI's `render --view 2d --tiling` does not repeat in 0.4.0)."""
+    """An n x n repeat of a PNG (the CLI's `render --view 2d --tiling` does not repeat in 0.4.1)."""
     w, h, ch, rows = png_pixels(src, max_side=1 << 16)
     write_png(dst, [r * n for r in rows] * n, ch)
     return {"width": w * n, "height": h * n}

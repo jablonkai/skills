@@ -1,4 +1,4 @@
-# Gotchas (MaterialCraft 0.4.0)
+# Gotchas (MaterialCraft 0.4.1)
 
 ## Silent successes that did the wrong thing
 
@@ -48,12 +48,12 @@ nothing selected, so:
 
 ## Tiling
 
-- The 0.1.2 `anisotropic_noise` seam is gone with the old library (no noise nodes in 0.4.0). A
+- The 0.1.2 `anisotropic_noise` seam is gone with the old library (no noise nodes in 0.4.1). A
   `pixel_processor` function tiles when it has a whole number of periods across the pixel
   position; the Atomic sample's height (an FX-Map) scores x=2.41 (not seamless).
 - Node `base.tiling` (`graph.node.base {tiling: false}`) does not change what a generator
   produces; it is not a seam fix.
-- `render --view 2d --tiling N` is still ignored in 0.4.0 — the PNG is byte-identical to the
+- `render --view 2d --tiling N` is still ignored in 0.4.1 — the PNG is byte-identical to the
   untiled one (so is `view.2d {tiled: true}`). In 3D (`--scene plane --tiling 3`) it repeats
   the UVs. `mc_render.py --tile N` writes a real N×N 2D repeat so you can *see* seams;
   `mc_render.py --seam` gives the number.
@@ -76,6 +76,6 @@ nothing selected, so:
 
 ## Version drift
 
-Pinned to 0.4.0: 119 commands (86 in 0.2.0, 112 in 0.3.0, every old id kept), 29 node entries (0.1.2 had 68 and 222: the old procedural library
+Pinned to 0.4.1: 119 commands (86 in 0.2.0, 112 in 0.3.0, every old id kept), 29 node entries (0.1.2 had 68 and 222: the old procedural library
 was removed in favour of primitives, and the packages moved from `.mcraft` to `.sbs`). After an update,
 re-run `materialcraft-cli commands` and `nodes` and compare before trusting these pages.
