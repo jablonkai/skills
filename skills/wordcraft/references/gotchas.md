@@ -1,4 +1,4 @@
-# Gotchas (WordCraft 0.18.0)
+# Gotchas (WordCraft 0.18.1)
 
 Each of these was hit while building or testing this skill. Most fail **silently**: the
 command succeeds and the document is wrong.
@@ -40,7 +40,7 @@ command succeeds and the document is wrong.
   still the one verified end to end. Open a Normal paragraph first: `caret.docStart`,
   `text.newParagraph`, `caret.up`, `para.style Normal`, then `references.toc`.
 - A TOC after edits needs `references.updateFields {"all": true}` (or
-  `convert --update-fields`). Otherwise it shows stale entries. In 0.18.0
+  `convert --update-fields`). Otherwise it shows stale entries. In 0.18.1
   `references.toc` lists the headings that exist when it is inserted, but none added
   later, and a TOC inserted before any heading stays empty. `updateFields`
   without `all` updates only the caret's story.
