@@ -1,9 +1,10 @@
-# Commands pinned for 0.2.0
+# Commands pinned for 0.2.1
 
-225 commands: `timeline` 21, `file` 20, `layer` 16, `draw` 14, `element` 14, `motion` 13,
+240 commands: `file` 24, `timeline` 21, `layer` 16, `element` 15, `draw` 14, `motion` 13,
 `raw` 11, `edit` 10, `library` 10, `scene` 9, `frames` 9, `modify` 8, `align` 8, `bone` 7,
 `tween` 5, `path` 5, `stroke` 5, `plugin` 5, `sound` 5, `script` 5, `camera` 4, `paint` 4,
-`arrange` 4, `symbol` 3, `text` 3, `actions` 3, `doc` 2, `control` 1, `instance` 1.
+`arrange` 4, `symbol` 4, `text` 3, `actions` 3, `find` 3, `prefs` 3, `doc` 2, `publish` 2,
+`control` 1, `instance` 1, `explorer` 1.
 Look anything else up: `ac_commands.py WORD…`, `--prefix GROUP.`, `--id ID`.
 `frame` below is 0-based for the engine (1-based in `ac_build.py` specs).
 

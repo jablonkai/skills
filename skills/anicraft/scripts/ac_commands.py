@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Look up AniCraft engine commands without dumping the whole registry (225 in 0.2.0).
+"""Look up AniCraft engine commands without dumping the whole registry (240 in 0.2.1).
 
   ac_commands.py bone pose          ids/labels/params containing every word
   ac_commands.py --prefix motion.   one group

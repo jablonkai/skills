@@ -1,4 +1,4 @@
-# Gotchas (AniCraft 0.2.0)
+# Gotchas (AniCraft 0.2.1)
 
 Each of these was hit while building the skill.
 
