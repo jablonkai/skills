@@ -1,4 +1,4 @@
-# LightCraft gotchas (verified on lightcraft-cli 0.20.0)
+# LightCraft gotchas (verified on lightcraft-cli 0.21.1)
 
 Everything here was reproduced against the real CLI. Most of these fail **silently**:
 the command replies `"ok": true` and exits 0, and the result is still wrong. That is
@@ -27,8 +27,10 @@ and most `crop.*`, `mask.*` and `spot.*` commands.
 
 - An `ids` param passed to an active-photo command is **ignored without an error**.
   `develop.wb mode=daylight ids=[2]` changed photo 1, the active one.
-- A multi-selection does not help either. `library.selectAll develop.auto` tones only
-  the active photo and leaves the other four at zero.
+- A multi-selection does not help either for `develop.wb`, `develop.adjust` and the
+  like: they change only the active photo. The exception is `develop.auto`, which since
+  0.21.1 tones **every selected photo** from its own content (it toned only the active
+  photo up to 0.20.0). Do not rely on that: `forEach` works on every version.
 - Fix: one `library.select {ids:[n], active:n}` per photo, followed by the command.
   `lc_run.py`'s `forEach` writes that loop for you.
 - Check the signature in the registry (`lc_query.py commands <id>`). If `ids?` isn't
@@ -38,9 +40,10 @@ and most `crop.*`, `mask.*` and `spot.*` commands.
 
 - `develop.auto` computes the values from **the photo's own content**. On 5 different
   images it gave exposures of −1.04, −1.09, −0.84, −1.16 and +0.53.
-- `develop.autoSync on=true` followed by `develop.auto` does **not** auto-tone each
-  photo. It copies the active photo's auto result to every selected photo, so all five
-  get −0.54. Use it only when the user wants the same values everywhere.
+- Up to 0.20.0, `develop.autoSync on=true` followed by `develop.auto` copied the active
+  photo's auto result to every selected photo (all five got −0.54). Re-checked on 0.21.1:
+  it no longer does; each selected photo gets its own auto values, with the mode on or
+  off. Keep it off and use `forEach` so the result does not depend on the version.
 - `develop.autoSync` is a mode switch (`{on}`, toggles when omitted), not an action.
   Leave it off.
 - The auto result is in the reply (`exposure`, `contrast`, `highlights`, `shadows`,
@@ -72,7 +75,7 @@ and most `crop.*`, `mask.*` and `spot.*` commands.
 - **`app.export path=<folder>` treats the folder as a file stem.** With `path=/x/out`,
   LightCraft wrote `p0.png`, `p1.png`… into the **current directory**, as PNG, with
   `ok: true`. For a folder use `dir=<folder>`, and always pass `format`.
-  Re-checked on 0.20.0 with `format=jpeg`: one id writes a file named exactly the stem
+  Re-checked on 0.21.1 with `format=jpeg`: one id writes a file named exactly the stem
   (no extension); several ids write `IMG_0001.jpg`, … (the originals' names) into the
   cwd. Earlier releases wrote PNGs named `p1.png`, `p2.png`.
 - Create the `dir` first. Use absolute paths.
@@ -138,7 +141,7 @@ and most `crop.*`, `mask.*` and `spot.*` commands.
 ## Live app port
 
 - `LightCraft --control PORT` (and `lightcraft-cli run --connect`) is a JSON-lines
-  channel on 127.0.0.1 **with no authentication** in 0.16.0 (not re-checked in 0.20.0: that needs the GUI app). Any local process can
+  channel on 127.0.0.1 **with no authentication** in 0.16.0 (not re-checked in 0.21.1: that needs the GUI app). Any local process can
   drive the app and read the library through it.
 - This skill does not start it or connect to it. If the user insists on watching the
   edits live, say this plainly, let them start the app with `--control` themselves, and
