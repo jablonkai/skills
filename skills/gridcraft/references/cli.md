@@ -1,8 +1,8 @@
-# gridcraft-cli 0.19.0 reference
+# gridcraft-cli 0.19.1 reference
 
 `gridcraft-cli` is the headless front end of GridCraft's engine: same command registry,
 same calculation engine, same file readers and writers as the app, with no window.
-Binary: `~/.local/bin/gridcraft-cli`. `gridcraft-cli version` prints `0.19.0`.
+Binary: `~/.local/bin/gridcraft-cli`. `gridcraft-cli version` prints `0.19.1`.
 
 ## run: commands, then save
 
@@ -116,4 +116,4 @@ gridcraft-cli send PORT METHOD [json]
   workbook held in the server. This skill doesn't need it.
 - `mcp --connect PORT` and `send PORT …` talk to a running app started with
   `GridCraft --control PORT` (or `GRIDCRAFT_CONTROL_PORT`). 0.14.2 had no
-  authentication; 0.15.0 to 0.19.0 mention a `GRIDCRAFT_CONTROL_TOKEN` (strings only, UNVERIFIED live), so this skill still doesn't use it (see gotchas).
+  authentication; 0.15.0 to 0.19.1 mention a `GRIDCRAFT_CONTROL_TOKEN` (strings only, UNVERIFIED live), so this skill still doesn't use it (see gotchas).
