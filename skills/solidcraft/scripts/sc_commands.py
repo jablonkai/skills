@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Filtered lookup in SolidCraft's command registry (642 commands in 0.41.0) and its bundled docs.
+"""Filtered lookup in SolidCraft's command registry (658 commands in 0.43.0) and its bundled docs.
 
   sc_commands.py WORD…                 commands whose id or label contains every word
   sc_commands.py --prefix solid.       every command under a prefix

@@ -1,15 +1,15 @@
-# solidcraft-cli 0.41.0
+# solidcraft-cli 0.43.0
 
 Use the CLI inside the app (`/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli`).
 A separately installed copy (`~/.local/bin/solidcraft-cli`, a link into
 `~/.local/share/artcraft-cli/solidcraft/current/`, from the artcraft-cli installer) can be
-older: it was once 0.22.1, with 461 commands instead of 493. At 0.41.0 both copies match,
+older: it was once 0.22.1, with 461 commands instead of 493. At 0.43.0 both copies match,
 and without the app the standalone copy works on its own. `sclib.cli()` picks
 `SOLIDCRAFT_CLI`, then the app's copy, then PATH, and warns when PATH is older.
 
 ```sh
 SC=/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli
-$SC --version          # solidcraft-cli 0.41.0
+$SC --version          # solidcraft-cli 0.43.0
 $SC --help             # the full usage text below
 ```
 
@@ -31,7 +31,7 @@ format. `eval` and `run` replay it.
 
 | Command | What it does |
 |---|---|
-| `run SCRIPT [--in DESIGN] [--out F]… [--save F.solidcraft] [--quiet] [--results] [--timings] [--profile] [--json-out F] [--allow-errors] [--param-check off\|warn\|strict]` | Replays the script on a new design, or on `--in`. A failing feature exits 1 and writes nothing unless `--allow-errors` is given. `--out` exports by extension. `--results` prints every step's reply, which is very large; prefer `--quiet` followed by `eval`. |
+| `run SCRIPT [--in DESIGN] [--out F]… [--save F.solidcraft] [--quiet] [--results] [--timings] [--profile] [--json-out F] [--allow-errors] [--param-check off\|warn\|strict] [--quality standard\|fine\|finest] [--script-relative] [--validation each_step\|each_feature\|off] [--profile-out trace.json]` | Replays the script on a new design, or on `--in`. A failing feature exits 1 and writes nothing unless `--allow-errors` is given. `--out` exports by extension. `--quality` sets how closely an STL/OBJ/3MF `--out` follows curved faces (`fine` roughly doubles the file). `--script-relative` resolves file paths inside the script from the script's folder. `--results` prints every step's reply, which is very large; prefer `--quiet` followed by `eval`. |
 | `run --in F --out G…` | Converts with no script, for example STEP → STL/3MF. |
 | `eval FILE [--json-out F]` (alias `inspect`) | Measures a design, part (STEP/STL/3MF/OBJ) or script and returns JSON. This is the read-back oracle. |
 | `eval SCRIPT --in DESIGN` | Runs the script on DESIGN, measures the result and saves nothing. Use it to preview an edit. |
