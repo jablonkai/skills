@@ -5,3 +5,6 @@ __pycache__/
 
 # skill-creator eval workspaces
 *-workspace/
+
+# agent worktrees
+.claude/worktrees/
