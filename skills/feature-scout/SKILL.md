@@ -1,7 +1,20 @@
 ---
 name: feature-scout
 description: Find improvement opportunities and new feature ideas for a software product by profiling the product itself (the current repo by default, or a named app or URL) and researching comparable apps on the web, then write a ranked, source-linked opportunity report. Use whenever the user asks to find feature ideas, what to build next, for a competitor or competitive analysis, how this app could be better, what similar apps do better, what the roadmap is missing, or how the product compares with alternatives, even if they never say "competitor". Not for a bug, security or code-quality audit (code-analyzer), and not for implementing a feature that is already chosen.
+summary: "find feature ideas and improvement opportunities for a product — profile the repo or a named app, research comparable apps on the web, build a feature matrix, and write a ranked, source-linked opportunity report"
+category: product-research
+compatibility: "Not tied to an application version; needs web search and fetch for competitor research, and uses the gh CLI when the repository is on GitHub."
+risk: low
+tags:
+  - feature-ideas
+  - competitor-analysis
+  - product-research
+  - roadmap
 argument-hint: "[focus area] [competitors: A, B] [quick|deep] [app name or URL]"
+license: GPL-3.0-only
+metadata:
+  version: "1.0.0"
+  author: "Tamás Jablonkai"
 ---
 
 # Feature Scout
@@ -180,8 +193,8 @@ files that would change and note the technical risks.
 
 ### 6. Write the report
 
-Read the report template, [templates/report.md](templates/report.md) (in this
-skill's directory, `${CLAUDE_SKILL_DIR}`), and follow its structure.
+Read the report template, [assets/report.md](assets/report.md) (in this skill's
+directory), and follow its structure.
 Give each opportunity a single effort size, not a range; if it splits into a small
 and a large version, rank the small one and mention the large one. An opportunity
 listed only as a table row still carries its source link.

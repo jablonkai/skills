@@ -34,7 +34,7 @@ readonly CATALOG_SECTIONS=(
   "App automation/Maps & GIS|gis"
   "App automation/macOS|mac-automation"
   "GitHub workflows|git,development-workflow,project-management"
-  "Development & analysis|code-quality,debugging,testing,documentation,document-conversion"
+  "Development & analysis|code-quality,debugging,testing,documentation,document-conversion,product-research"
   "Research|research"
   "Game development|game-dev"
   "Ultrarunning domain|data-lookup,branding"
