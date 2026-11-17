@@ -1,15 +1,15 @@
-# solidcraft-cli 0.43.0
+# solidcraft-cli 0.44.0
 
 Use the CLI inside the app (`/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli`).
 A separately installed copy (`~/.local/bin/solidcraft-cli`, a link into
 `~/.local/share/artcraft-cli/solidcraft/current/`, from the artcraft-cli installer) can be
-older: it was once 0.22.1, with 461 commands instead of 493. At 0.43.0 both copies match,
+older: it was once 0.22.1, with 461 commands instead of 493. At 0.44.0 both copies match,
 and without the app the standalone copy works on its own. `sclib.cli()` picks
 `SOLIDCRAFT_CLI`, then the app's copy, then PATH, and warns when PATH is older.
 
 ```sh
 SC=/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli
-$SC --version          # solidcraft-cli 0.43.0
+$SC --version          # solidcraft-cli 0.44.0
 $SC --help             # the full usage text below
 ```
 
@@ -36,11 +36,11 @@ format. `eval` and `run` replay it.
 | `eval FILE [--json-out F]` (alias `inspect`) | Measures a design, part (STEP/STL/3MF/OBJ) or script and returns JSON. This is the read-back oracle. |
 | `eval SCRIPT --in DESIGN` | Runs the script on DESIGN, measures the result and saves nothing. Use it to preview an edit. |
 | `script DESIGN [--out s.json]` | The feature history as a replayable script. |
-| `snapshot SCRIPT\|DESIGN [--in F] --out shot.png [--width W --height H] [--view V \| --camera JSON] [--no-grid] [--no-axes] [--body NAME:opacity=0.3,color=#rrggbb]… [--tool NAME]… [--section SPEC]` | Headless viewport render (CPU), 1280×800 by default. |
+| `snapshot SCRIPT\|DESIGN [--in F] --out shot.png [--width W --height H] [--view V \| --camera JSON] [--no-grid] [--no-axes] [--body NAME:opacity=0.3,color=#rrggbb]… [--tool NAME]… [--section SPEC] [--quality coarse\|normal\|fine\|ultra]` | Headless viewport render (CPU), 1280×800 by default. `--quality` is the display meshing (default `normal`). |
 | `render SCRIPT\|DESIGN --out img.png [--samples N] [--transparent] …` | Path-traced render. It is slow; use it for presentation images, not for checks. |
 | `exec COMMAND [json]` | Runs one command on an empty headless design. `--connect` has no effect here. |
 | `commands` | The whole registry as JSON: id, label, `params` signature, `enabled`, `disabled_reason`. About 400 KB, so filter it with `sc_commands.py`. |
-| `mcp [--headless] [--in F] [--connect 127.0.0.1:PORT [--token T]] [--allow-path DIR]… [--param-check off\|warn\|strict]` | MCP server over stdio. See below. |
+| `mcp [--headless] [--in F] [--connect 127.0.0.1:PORT [--token T]] [--allow-path DIR]… [--require-allow-path] [--param-check off\|warn\|strict] [--compact]` | MCP server over stdio. See below. `--compact` (or `SOLIDCRAFT_MCP_COMPACT=1`) shortens tool output: `inspect_design` summarises sketches and takes `sketches`/`bodies` filters. |
 | `mcp setup [--dry-run] [--client …] [--live]` | Writes a `solidcraft` entry into AI-client configs. It changes the user's config files, so run it only when asked. |
 | `crashes [list\|show ID\|replay ID]`, `gpu`, `licences`, `bench-*`, `oracle`, `fuzz`, `recipe` | Diagnostics and benchmarks; not needed for normal work. |
 
