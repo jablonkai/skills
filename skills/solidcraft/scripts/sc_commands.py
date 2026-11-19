@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Filtered lookup in SolidCraft's command registry (673 commands in 0.44.0) and its bundled docs.
+"""Filtered lookup in SolidCraft's command registry (819 commands in 0.45.0) and its bundled docs.
 
   sc_commands.py WORD…                 commands whose id or label contains every word
   sc_commands.py --prefix solid.       every command under a prefix
@@ -8,7 +8,7 @@
   sc_commands.py --doc solidcraft-modeling[/reference.md]   one of them
 
 Prints `id — label: params` lines, cut to --width. Use it instead of reading the whole
-`solidcraft-cli commands` output (about 400 KB of JSON).
+`solidcraft-cli commands` output (about 540 KB of JSON).
 """
 import argparse
 import json
