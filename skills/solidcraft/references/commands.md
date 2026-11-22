@@ -1,7 +1,7 @@
-# Command ids by task (pinned to 0.45.0)
+# Command ids by task (pinned to 0.46.2)
 
-These ids were checked against `solidcraft-cli commands` from SolidCraft 0.45.0, which
-has 819 commands. The parameter shapes are long and change between releases, so look
+These ids were checked against `solidcraft-cli commands` from SolidCraft 0.46.2, which
+has 853 commands. The parameter shapes are long and change between releases, so look
 them up instead of copying them from here:
 - `sc_commands.py WORD…` for one-line signatures;
 - `sc_commands.py --id ID` for the full text and the typed schema, where there is one;
@@ -28,6 +28,7 @@ In the parameter shapes, `expr` means a number in mm, or text such as `"thicknes
 | Materials | `material.assign`, `material.inspect`, `appearance.assign` | Mass uses the assigned material. The default density is 1.29 g/cm³ |
 | Files | `file.new`, `file.save`, `file.save_as`, `file.export` (or `file.export_step`/`_stl`/`_3mf`/`_obj`, new in 0.30.0, which fix the format whatever the extension), `file.save_mesh`, `file.insert_step`, `file.insert_mesh`, `sketch.export_dxf`, `file.send_to_slicer` | `export {path, format?, bodies?, quality?}` |
 | Views | `view.save`, `view.fit`, `view.home` | A view saved in the design can be passed to `snapshot --view NAME` |
+| Sheet metal | `sheet.convert`, `sheet.flange`, `sheet.path_flange`, `sheet.hem`, `sheet.fold`, `sheet.unfold`, `sheet.refold`, `sheet.rules`, `sheet.flat_pattern`, `sheet.export_dxf`, `sheet.export_bend_table` | Bend rules, the segment contract and a worked part: `sc_commands.py --doc solidcraft-sheetmetal/reference.md` |
 | Components | `component.create`, `component.activate`, `component.move_bodies`, `joint.*`, `motion.*` | Assemblies and mechanisms: `sc_commands.py --doc solidcraft-mechanisms` |
 
 **Added in 0.25.0** (missing from the 0.22.1 CLI):

@@ -1,15 +1,15 @@
-# solidcraft-cli 0.45.0
+# solidcraft-cli 0.46.2
 
 Use the CLI inside the app (`/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli`).
 A separately installed copy (`~/.local/bin/solidcraft-cli`, a link into
 `~/.local/share/artcraft-cli/solidcraft/current/`, from the artcraft-cli installer) can be
-older: it was once 0.22.1, with 461 commands instead of 493. At 0.45.0 both copies match,
+older: it was once 0.22.1, with 461 commands instead of 493. At 0.46.2 both copies match,
 and without the app the standalone copy works on its own. `sclib.cli()` picks
 `SOLIDCRAFT_CLI`, then the app's copy, then PATH, and warns when PATH is older.
 
 ```sh
 SC=/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli
-$SC --version          # solidcraft-cli 0.45.0
+$SC --version          # solidcraft-cli 0.46.2
 $SC --help             # the full usage text below
 ```
 
@@ -101,7 +101,12 @@ which:
   error}` and `nothing was run`), `execute`, `open`, `save`, `export`, `measure`,
   `inspect_design`, `set_parameter`, `screenshot`, `undo`/`redo`, `describe_command`,
   `list_commands`, `check_parameters`, `body_topology`, `compare_picture`, `new_design`,
-  `version`, `crash_reports` and `skill_reference`.
+  `version`, `crash_reports` and `skill_reference`;
+- `running`, `pending` and `cancel` (new in 0.46.x) only matter when the server is
+  bridged to the open app: a slow call there returns an error starting `still running:`
+  without being cancelled. Don't resend it; `pending` waits for its result, `running`
+  lists what the app is busy with, `cancel` stops it. Headless calls, which the scripts
+  make, always run to their end.
 
 `skill_reference {skill, file}` returns SolidCraft's own agent docs:
 - `solidcraft-modeling` (`SKILL.md`, `reference.md`): command shapes, sketch-plane axes,
@@ -109,5 +114,7 @@ which:
 - `solidcraft-editing`;
 - `solidcraft-checking` (`SKILL.md`, `reference/porting.md`);
 - `solidcraft-mechanisms` (joints, motion).
+- `solidcraft-sheetmetal` (`SKILL.md`, `reference.md`): `sheet.*` commands, bend
+  arithmetic, rule values, a worked example.
 
 `sc_commands.py --doc NAME[/FILE]` prints them.
