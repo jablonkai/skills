@@ -1,6 +1,6 @@
 # Affinity SDK map — curated digest of `sdk-docs/`
 
-Distilled from the vendored SDK source (Affinity 3.3.0; unchanged in 3.3.1). Use this file to find the right
+Distilled from the vendored SDK source (Affinity 3.3.0; updated for 3.3.3). Use this file to find the right
 module and API shape *before* grepping `sdk-docs/`; grep only for exact signatures/params.
 All modules load as `require('/name.js')` or `require('/name')` (vendored file `name.js`
 mirrors the module).
@@ -17,7 +17,7 @@ way to discover what a node, fill or selection actually holds.
    `(args…, selection, [options], preview)`; pass `null` selection to use the current one.
    **Prefer these** — one call, one undo step.
 2. **`DocumentCommand.create*(...)` + `doc.executeCommand(cmd, preview)`** — same verbs as
-   statics (~300 in `commands.js`), needed when batching via
+   statics (~400 in `commands.js`), needed when batching via
    `CompoundCommandBuilder.create()` → `addCommand(cmd)` → `createCommand()`.
 3. **Node insertion** — single node: `doc.addNode(nodeDefinition, targetNode = null,
    childList = NodeChildType.Main, preview)` (returns nothing; inserts relative to the
@@ -70,9 +70,11 @@ snapshots (`doc.snapshots`, `DocumentCommand.createAddDocumentSnapshot`).
   Midtones/Shadows/Reds/Greens/Blues/Transparent/Opaque`, `rasterEdgeDetect` (+ H/V),
   `rasterPolarToRectangular` / reverse; layers `mergeDown()`, `mergeSelected()`,
   `flipCanvas(isHorizontal)`, `unlockAll()`; per-page props `setPageDocumentProperties`.
-- Layer-effect setters: ~150 `set<Fx>LayerEffect*` methods (Bevel/Emboss, Outline, Inner/Outer
+- Layer-effect setters: ~100 `set<Fx>LayerEffect*` methods (Bevel/Emboss, Outline, Inner/Outer
   Shadow & Glow, ColourOverlay, GradientOverlay, PhongBevel, GaussianBlur) — all take
-  `(selection, …, enableIfDisabled, preview)`; `removeAllLayerEffects(selection)`.
+  `(selection, …, enableIfDisabled, preview)`; `removeAllLayerEffects(selection)`. For the
+  multi-instance effects (Outline, shadows, overlays) the instance `index` comes **after** the
+  value since 3.3.3: `setOutlineLayerEffectRadius(sel, radius, index, …)`.
 
 ## nodes.js — node model (the ~300 KB one)
 
@@ -121,7 +123,8 @@ adjustments, live filters), `EmbeddedDocumentNode`.
   // FrameTextNodeDefinition.createFromStoryBuilder(frameRect, sb) for text frames
   ```
 - **Image**: `ImageNodeDefinition.create(format)` + `.setBitmap(Bitmap.loadFromFile(path))`;
-  pixel layer: `RasterNodeDefinition` + `.setBitmap(bm)` (see `tests/rasterNodeTests.js`).
+  pixel layer: `RasterNodeDefinition` + `.setBitmap(bm)`; mask layer (3.3.3):
+  `MaskRasterNodeDefinition.create(bitmap)` → `builder.addMaskRasterNode(def)`.
 - **Freeform path**: `PolyCurveNodeDefinition.create(curve, brushFill, lineStyle, lineFill,
   transparencyFill)` with a `PolyCurve` from geometry.
 - **Measurement** (3.3): `MeasurementNodeDefinition` → `AddChildNodesCommandBuilder
@@ -132,8 +135,10 @@ adjustments, live filters), `EmbeddedDocumentNode`.
 
 ## Text stack (story*.js, glyphatts, paragraphatts, fonts)
 
-- Read: `textNode.text` / `.getText(start, maxLen, format)`, `.story`, `.storyRange`,
-  `.textFrameInterface` (overflow/flow info).
+- Read: `textNode.text` / `.getText(start, maxLen, format)`, `.story` (`.words` since 3.3.3),
+  `.storyRange`, `.textFrameInterface` → `.textFlow` (3.3.3, `textflow.js`): `frameCount`,
+  `hideOverflow`, `getOverflowInfo()`; hide overflow with
+  `DocumentCommand.createSetTextFrameHideOverflow(sel, bool)`.
 - Write: `doc.setText(text, selection)` replaces; `doc.formatText(delta, selection)` styles
   the *text selection* (or whole node selection).
 - `StoryDelta` statics = every text attribute: `createFamilyName/Weight/Italic/Width`,
@@ -181,7 +186,10 @@ Curves: `Curve.createLine/Rectangle/Ellipse/Diamond/Lozenge`, `CurveBuilder`
   exposes `.buffer` for byte access.
 - `PixelReaderWriterRGBA8` (+ 16-bit/CMYK/LAB/mono variants) — direct pixel IO on raster
   nodes/bitmaps; working example `examples/bitmapWriter.js`.
-- `doc.rasterSelection` (`RasterSelection`), brushes: `RasterBrush`, `VectorBrush`.
+- `doc.rasterSelection` (`RasterSelection`), brushes: `RasterBrush` (`VectorBrush` and
+  `vectorbrush.js` are gone in 3.3.3 — vector strokes use `PathBrush`).
+- `Bitmap.loadFromFile(path, format)` keeps the file's own format by default since 3.3.3
+  (was RGBA8) — pass `RasterFormat.RGBA8` when pixel code expects it.
 
 ## Selections (selections.js)
 
@@ -200,6 +208,11 @@ it to `doc.set*` / `doc.boolOp*`. Sub-selections
 - **fs.js** — `fs`/`File.readAll(path)`, `File.open`, `Directory`, `FileSystemPromises`
   (exists/copy/remove/createDirectories…). Sandbox: Desktop only (`app.userDesktopPath`).
 - **network.js** — `HttpRequest` exists but script networking is normally disabled.
+  3.3.3: `doAsync(callback)` is Node-style `(err, result)`; `HttpResponse.isSuccess`.
+- **resource.js** (3.3.3) — `Environment.resources` → `ResourceBundle` of files bundled with a
+  library script (no filesystem permission needed); `Bitmap.loadFromResource`,
+  `File.createFromResource`.
+- **locale.js** (3.3.3) — `Locale.current` (`id`, `isoCode`), `userPreferredLanguageIDs`.
 - **timers.js** — `setTimeout/setInterval/setImmediate` (scripts can be async;
   console output only while script runs).
 - **collection.js** — node `.children` (and most node-list getters) are lazy `Collection`s:
@@ -234,8 +247,13 @@ it to `doc.set*` / `doc.boolOp*`. Sub-selections
 - `examples/*.js` wrap code in `function main()` + `module.exports.main` — live execution
   needs top-level code instead; the logic inside is still accurate.
 - 3.3 renames: `ShapeRectangleCornerProxy` → `ShapeRectangleCorner`; `LineStyle.vectorBrush`
-  → `.pathBrush`. Scripts or hints written for 3.2 may use the old names. `tests/*.js` are partly
-  stale — treat as idea sources only.
+  → `.pathBrush`. Scripts or hints written for 3.2 may use the old names.
+- 3.3.3 changes that break older scripts/hints: layer-effect `index` moved after the value
+  (above); `createSetPen/TransparencyHatchFillAttributes(selection, attr, options)` (selection
+  first now); `setBevelEmbossLayerEffectColour/Param` split into `…HighlightColour`,
+  `…ShadowColour`, `…Azimuth/Depth/Elevation/Soften`; `Gradient.getStop(i)` returns a
+  `ColourStop`; `QRPayloadVCard.getpPrefixes()` → `.prefixes`; `VectorBrush` removed.
+  `tests/` is no longer shipped.
 - Enum classes expose `keys`/`values`/`entries` as **properties**; log
   `SomeEnum.keys` to discover valid values.
 - Param bounds live in `param_ranges.min.json` / `struct_ranges.min.json` — check before
@@ -251,16 +269,17 @@ it to `doc.set*` / `doc.boolOp*`. Sub-selections
 | Shapes (30+ classes, QR payloads) | `shapes.js`, `shapeinterface.js` |
 | Geometry, curves, transforms | `geometry.js`, `curvesinterface.js`, `drawingscale.js`, `units.js` |
 | Colour, fills, strokes | `colours.js`, `fills.js`, `linestyle.js`, `linestyleinterface.js`, `hatch.js`, `brushfillinterface.js`, `pathbrush.js` |
-| Text | `story.js`, `storybuilder.js`, `storydelta.js`, `storyinterface.js`, `glyphs.js`, `glyphatts.js`, `paragraphatts.js`, `fonts.js`, `textframeinterface.js` |
-| Raster, pixels, brushes | `rasterobject.js`, `rasterinterface.js`, `pixelaccessor.js`, `rasterbrush.js`, `vectorbrush.js`, `rasterselection.js`, `buffer.js` |
+| Text | `story.js`, `storybuilder.js`, `storydelta.js`, `storyinterface.js`, `glyphs.js`, `glyphatts.js`, `paragraphatts.js`, `fonts.js`, `textframeinterface.js`, `textflow.js`, `baselinegridinterface.js` |
+| Raster, pixels, brushes | `rasterobject.js`, `rasterinterface.js`, `pixelaccessor.js`, `rasterbrush.js`, `rasterselection.js`, `buffer.js` |
 | Layer effects | `layereffects.js`, `layereffectsinterface.js` |
 | Selections | `selections.js`, `selectable.js` |
 | Export | `exportconfig.js`, `exportableinterface.js` (+ `doc.export` in `document.js`) |
 | Artboards, spreads, pages | `artboardinterface.js`, `artboardproperties.js`, `pageboxinterface.js`, `marginsinterface.js`, `physicalroot*.js` |
 | UI dialogs | `dialog.js` |
 | Files, network, timers | `fs.js`, `network.js`, `timers.js` |
-| Runtime, permissions, debugging | `environment.js`, `os.js`, `logging.js`, `inspect.js`, `configuration.js` |
+| Runtime, permissions, debugging | `environment.js`, `os.js`, `logging.js`, `inspect.js`, `configuration.js`, `locale.js`, `resource.js` |
+| Native API signatures | `ts/<module>.d.ts`, `ts/dom/<ApiName>.d.ts`, `ts/dom.d.ts`, `ts/handles.d.ts` |
 | Node aspect interfaces | `baseboxinterface.js`, `blendmodeinterface.js`, `transforminterface.js`, `transparencyinterface.js`, `visibilityinterface.js`, `taginterface.js`, `descriptioninterface.js`, `editabilityinterface.js`, `imageresourceinterface.js`, `pictureframeinterface.js`, `compoundoperationinterface.js`, `exportableinterface.js` |
 | Embedded documents | `nodes.js` (`EmbeddedDocumentNode`) |
 | Valid ranges | `param_ranges.min.json`, `struct_ranges.min.json`, `struct_array_sizes.min.json` |
-| Working examples | `examples/` — layout: artboardGrid, makeGrid, stepAndRepeat, alignToPage, cropMarks, addGuides, flexibleLayout; text: tableFromJson, splitStory, breakFrame, textOnCurvesAndShapes, boldItalics; curves: roundAnyCorner, cornerEffects, pathEffects, bulgedPolyline, divideLength, arrowheads; selection: selectObjects, swapObjects, randomise, countSelectedItems; pixels/fills: bitmapWriter, meshBubble; misc: logToFile |
+| Working examples | `examples/` — layout: artboardGrid, makeGrid, stepAndRepeat, alignToPage, cropMarks, addGuides, flexibleLayout; text: tableFromJson, splitStory, breakFrame, textOnCurvesAndShapes, boldItalics; curves: roundAnyCorner, cornerEffects, pathEffects, bulgedPolyline, divideLength, arrowheads; selection: selectObjects, swapObjects, randomise, countSelectedItems; pixels/fills: bitmapWriter, meshBubble; misc: logToFile, setDocumentFormat, adjustPageItems, opticalForward/Backward, strokesWeightUp/Down |

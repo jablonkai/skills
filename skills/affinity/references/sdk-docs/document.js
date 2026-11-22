@@ -18,13 +18,15 @@ const {
     FileExportOptionsApi,
     ImagePlacement,
     LoadDocumentOptionsApi,
+    LoadDwgLayoutSelection,
+    LoadDwgOptionsApi,
     NewDocumentOptionsApi,
     PackageResourcesPolicy,
     SpatialAnchor
 } = require('affinity:dom');
 const { RasterFormat } = require('affinity:raster');
 const { Collection } = require('/collection.js');
-const { ColourProfile } = require('/colours.js');
+const { Colour, ColourProfile } = require('/colours.js');
 const { DrawingScale } = require('/drawingscale.js');
 const { makeFillDescriptor } = require('/fills.js');
 const { HandleObject } = require('/handleobject.js');
@@ -66,9 +68,9 @@ class DocumentSnapshot extends HandleObject {
                 let document = documentHandle ? new Document(documentHandle) : null;
                 return callback(errorCode, document);
             }
-            return DocumentApi.createFromSnapshotAsync(this.handle, false, wrappedCallback);
+            return DocumentApi.createFromSnapshotAsync(this.handle, wrappedCallback);
         }
-        return DocumentApi.createFromSnapshotAsync(this.handle, false, callback);
+        return DocumentApi.createFromSnapshotAsync(this.handle, callback);
     }
 }
 
@@ -321,8 +323,13 @@ class Document extends HandleObject {
         return res;
     }
 
-    static load(path) {
-        return new Document(DocumentApi.load(path).document);
+    static load(path, options = null) {
+        return new Document(DocumentApi.load(path, options?.handle).document);
+    }
+
+    // opens a document Resource from the script's bundle read-only; it keeps the resource's name but must be saved as
+    static loadFromResource(resource, options = null) {
+        return new Document(DocumentApi.loadFromResource(resource.handle, options?.handle).document);
     }
 
     get isEmbedded() {
@@ -497,15 +504,38 @@ class Document extends HandleObject {
         return DocumentApi.getCurrentAsync(callback);
     }
     
-    static loadAsync(path, callback) {
-        if (typeof callback === 'function') {
-            function wrapped(errorCode, desc, documentHandle) {
-                const document = documentHandle ? new Document(documentHandle) : null;
-                callback(errorCode, desc, document);
-            }
-            return DocumentApi.loadAsync(path, null, wrapped);
+    // loadAsync(path, callback) or loadAsync(path, options, callback)
+    static loadAsync(path, options, callback) {
+        if (typeof options === 'function') {
+            callback = options;
+            options = null;
         }
-        return DocumentApi.loadAsync(path, null, callback);
+        if (typeof callback === 'function') {
+            // keeps the (err, desc, document) shape that 3.3.1 shipped with
+            function wrapped(errorCode, result) {
+                const document = result?.document ? new Document(result.document) : null;
+                callback(errorCode, result?.description ?? null, document);
+            }
+            return DocumentApi.loadAsync(path, options?.handle, wrapped);
+        }
+        return DocumentApi.loadAsync(path, options?.handle, callback);
+    }
+
+    // loadFromResourceAsync(resource, callback) or loadFromResourceAsync(resource, options, callback)
+    static loadFromResourceAsync(resource, options, callback) {
+        if (typeof options === 'function') {
+            callback = options;
+            options = null;
+        }
+        if (typeof callback === 'function') {
+            // keeps the (err, desc, document) shape that 3.3.1 shipped with
+            function wrapped(errorCode, result) {
+                const document = result?.document ? new Document(result.document) : null;
+                callback(errorCode, result?.description ?? null, document);
+            }
+            return DocumentApi.loadFromResourceAsync(resource.handle, options?.handle, wrapped);
+        }
+        return DocumentApi.loadFromResourceAsync(resource.handle, options?.handle, callback);
     }
 
     static createFromPresetAsync(preset, isLandscape, callback) {
@@ -533,7 +563,7 @@ class Document extends HandleObject {
     }
 
     executeCommandAsync(command, callback, preview) {
-        return DocumentApi.executeCommandAsync(this.handle, command.handle, callback, preview);
+        return DocumentApi.executeCommandAsync(this.handle, command.handle, preview, callback);
     }
 
     saveAsync(callback) {
@@ -589,6 +619,10 @@ class Document extends HandleObject {
     get spreads() {
         return new NodesModule.NodeChildrenOnly(this.rootNode.handle, NodesModule.NodeChildType.Main, false);
     }
+
+    get masterSpreads() {
+        return new NodesModule.NodeChildrenOnly(this.rootNode.handle, NodesModule.NodeChildType.MasterSpread, false);
+    }
     
     get artboards() {
         return this.spreads.first.artboards;
@@ -628,6 +662,32 @@ class Document extends HandleObject {
 
     redo() {
         this.history.redo();
+    }
+
+    addPages(firstPageIndex, insertAfter, pageCount,
+             masterSpreadIndex = CommandsModule.MasterSpreadIndex.None,
+             insertMode = CommandsModule.PageInsertMode.DocumentFlow,
+             preview) {
+        const cmd = CommandsModule.DocumentCommand.createAddPages(
+            firstPageIndex, insertAfter, pageCount, masterSpreadIndex, insertMode);
+        return this.executeCommand(cmd, preview);
+    }
+
+    deletePages(firstPageIndex, pageCount, preview) {
+        const cmd = CommandsModule.DocumentCommand.createDeletePages(firstPageIndex, pageCount);
+        return this.executeCommand(cmd, preview);
+    }
+
+    addMasterPages(insertAfterMasterSpreadIndex, masterSpreadCount, pageCount, preview) {
+        const cmd = CommandsModule.DocumentCommand.createAddMasterPages(
+            insertAfterMasterSpreadIndex, masterSpreadCount, pageCount);
+        return this.executeCommand(cmd, preview);
+    }
+
+    deleteMasterPages(firstMasterSpreadIndex, masterSpreadCount, preview) {
+        const cmd = CommandsModule.DocumentCommand.createDeleteMasterPages(
+            firstMasterSpreadIndex, masterSpreadCount);
+        return this.executeCommand(cmd, preview);
     }
 
     selectAll(selectOnCurrentLayerOnly, preview) {
@@ -686,13 +746,23 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
     
-    addNode(nodeDefinition, targetNode = null, childList = NodesModule.NodeChildType.Main, preview) {
+    addNode(nodeDefinition, targetNode = null, childList = NodesModule.NodeChildType.Main, preview = false) {
         const builder = CommandsModule.AddChildNodesCommandBuilder.create();
         if (targetNode != null) {
             builder.setInsertionTarget(targetNode);
         }
         builder.addNode(nodeDefinition);
         return this.executeCommand(builder.createCommand(true, childList), preview);
+    }
+
+    addMask(selection, andSelect = false, childList = NodesModule.NodeChildType.Main, preview = false) {
+        const cmd = CommandsModule.DocumentCommand.createAddMask(this.#ensureSelection(selection), andSelect, childList);
+        return this.executeCommand(cmd, preview);
+    }
+
+    addEmptyMask(selection, andSelect = false, childList = NodesModule.NodeChildType.Main, preview = false) {
+        const cmd = CommandsModule.DocumentCommand.createAddEmptyMask(this.#ensureSelection(selection), andSelect, childList);
+        return this.executeCommand(cmd, preview);
     }
 
     setBlendMode(blendMode, setPassthrough, selection, preview) {
@@ -826,6 +896,21 @@ class Document extends HandleObject {
     
     generativeEditImage(prompt) {
         const cmd = CommandsModule.DocumentCommand.createGenerativeEditImage(prompt);
+        return this.executeCommand(cmd);
+    }
+
+    generativeUpscale(scale, selection) {
+        const cmd = CommandsModule.DocumentCommand.createGenerativeUpscale(this.#ensureSelection(selection), scale);
+        return this.executeCommand(cmd);
+    }
+
+    decomposeLayer() {
+        const cmd = CommandsModule.DocumentCommand.createDecomposeLayer();
+        return this.executeCommand(cmd);
+    }
+
+    layerTo3DModel() {
+        const cmd = CommandsModule.DocumentCommand.createLayerTo3DModel();
         return this.executeCommand(cmd);
     }
 
@@ -1142,6 +1227,26 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
+    rasterMLDenoise(selection, lumaStrength, chromaStrength, preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterMLDenoise(this.#ensureSelection(selection), lumaStrength, chromaStrength);
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterMotionBlurReduction(selection, strength, preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterMotionBlurReduction(this.#ensureSelection(selection), strength);
+        return this.executeCommand(cmd, preview);
+    }
+
+    rasterSDRToHDR(selection, strength, preview) {
+        const cmd = CommandsModule.DocumentCommand.createRasterSDRToHDR(this.#ensureSelection(selection), strength);
+        return this.executeCommand(cmd, preview);
+    }
+
+    mixedLightCorrection(selection, strength, preserveWhiteBalance, temperature, preview) {
+        const cmd = CommandsModule.DocumentCommand.createMixedLightCorrection(this.#ensureSelection(selection), strength, preserveWhiteBalance, temperature);
+        return this.executeCommand(cmd, preview);
+    }
+
     rasterFill(selection, mode, colour, opacity, blendMode, preview) {
         const cmd = CommandsModule.DocumentCommand.createRasterFill(this.#ensureSelection(selection), mode, colour, opacity, blendMode);
         return this.executeCommand(cmd, preview);
@@ -1267,8 +1372,23 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setBevelEmbossLayerEffectColour(selection, colourType, colour, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetBevelEmbossLayerEffectColour(this.#ensureSelection(selection), colourType, colour, enableIfDisabled);
+    setBevelEmbossLayerEffectHighlightColour(selection, colour, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetBevelEmbossLayerEffectHighlightColour(this.#ensureSelection(selection), colour, enableIfDisabled);
+        return this.executeCommand(cmd, preview);
+    }
+
+    setBevelEmbossLayerEffectHighlightBlendMode(selection, blendMode, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetBevelEmbossLayerEffectHighlightBlendMode(this.#ensureSelection(selection), blendMode, enableIfDisabled);
+        return this.executeCommand(cmd, preview);
+    }
+
+    setBevelEmbossLayerEffectHighlightOpacity(selection, opacity, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetBevelEmbossLayerEffectHighlightOpacity(this.#ensureSelection(selection), opacity, enableIfDisabled);
+        return this.executeCommand(cmd, preview);
+    }
+
+    setBevelEmbossLayerEffectShadowColour(selection, colour, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetBevelEmbossLayerEffectShadowColour(this.#ensureSelection(selection), colour, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1287,8 +1407,28 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setBevelEmbossLayerEffectParam(selection, param, value, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetBevelEmbossLayerEffectParam(this.#ensureSelection(selection), param, value, enableIfDisabled);
+    setBevelEmbossLayerEffectAzimuth(selection, azimuth, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetBevelEmbossLayerEffectAzimuth(this.#ensureSelection(selection), azimuth, enableIfDisabled);
+        return this.executeCommand(cmd, preview);
+    }
+
+    setBevelEmbossLayerEffectDepth(selection, depth, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetBevelEmbossLayerEffectDepth(this.#ensureSelection(selection), depth, enableIfDisabled);
+        return this.executeCommand(cmd, preview);
+    }
+
+    setBevelEmbossLayerEffectElevation(selection, elevation, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetBevelEmbossLayerEffectElevation(this.#ensureSelection(selection), elevation, enableIfDisabled);
+        return this.executeCommand(cmd, preview);
+    }
+
+    setBevelEmbossLayerEffectShadowOpacity(selection, shadowOpacity, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetBevelEmbossLayerEffectShadowOpacity(this.#ensureSelection(selection), shadowOpacity, enableIfDisabled);
+        return this.executeCommand(cmd, preview);
+    }
+
+    setBevelEmbossLayerEffectSoften(selection, soften, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetBevelEmbossLayerEffectSoften(this.#ensureSelection(selection), soften, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1313,8 +1453,8 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setOutlineLayerEffectEnabled(selection, index, enabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetOutlineLayerEffectEnabled(this.#ensureSelection(selection), index, enabled);
+    setOutlineLayerEffectEnabled(selection, enabled, index, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetOutlineLayerEffectEnabled(this.#ensureSelection(selection), enabled, index);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1323,13 +1463,13 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setOutlineLayerEffectOpacity(selection, index, opacity, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetOutlineLayerEffectOpacity(this.#ensureSelection(selection), index, opacity, enableIfDisabled);
+    setOutlineLayerEffectOpacity(selection, opacity, index, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetOutlineLayerEffectOpacity(this.#ensureSelection(selection), opacity, index, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
-    setOutlineLayerEffectRadius(selection, index, radius, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetOutlineLayerEffectRadius(this.#ensureSelection(selection), index, radius, enableIfDisabled);
+    setOutlineLayerEffectRadius(selection, radius, index, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetOutlineLayerEffectRadius(this.#ensureSelection(selection), radius, index, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1338,8 +1478,8 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setOutlineLayerEffectScaleWithObject(selection, index, scaleWithObject, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetOutlineLayerEffectScaleWithObject(this.#ensureSelection(selection), index, scaleWithObject, enableIfDisabled);
+    setOutlineLayerEffectScaleWithObject(selection, scaleWithObject, index, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetOutlineLayerEffectScaleWithObject(this.#ensureSelection(selection), scaleWithObject, index, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1470,8 +1610,8 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setInnerShadowLayerEffectEnabled(selection, index, enabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetInnerShadowLayerEffectEnabled(this.#ensureSelection(selection), index, enabled);
+    setInnerShadowLayerEffectEnabled(selection, enabled, index, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetInnerShadowLayerEffectEnabled(this.#ensureSelection(selection), enabled, index);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1480,13 +1620,13 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setInnerShadowLayerEffectOpacity(selection, index, opacity, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetInnerShadowLayerEffectOpacity(this.#ensureSelection(selection), index, opacity, enableIfDisabled);
+    setInnerShadowLayerEffectOpacity(selection, opacity, index, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetInnerShadowLayerEffectOpacity(this.#ensureSelection(selection), opacity, index, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
-    setInnerShadowLayerEffectRadius(selection, index, radius, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetInnerShadowLayerEffectRadius(this.#ensureSelection(selection), index, radius, enableIfDisabled);
+    setInnerShadowLayerEffectRadius(selection, radius, index, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetInnerShadowLayerEffectRadius(this.#ensureSelection(selection), radius, index, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1495,8 +1635,8 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setInnerShadowLayerEffectScaleWithObject(selection, index, scaleWithObject, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetInnerShadowLayerEffectScaleWithObject(this.#ensureSelection(selection), index, scaleWithObject, enableIfDisabled);
+    setInnerShadowLayerEffectScaleWithObject(selection, scaleWithObject, index, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetInnerShadowLayerEffectScaleWithObject(this.#ensureSelection(selection), scaleWithObject, index, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1510,8 +1650,8 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setInnerShadowLayerEffectIntensity(selection, index, intensity, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetInnerShadowLayerEffectIntensity(this.#ensureSelection(selection), index, intensity, enableIfDisabled);
+    setInnerShadowLayerEffectIntensity(selection, intensity, index, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetInnerShadowLayerEffectIntensity(this.#ensureSelection(selection), intensity, index, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1582,8 +1722,8 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setColourOverlayLayerEffectEnabled(selection, index, enabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetColourOverlayLayerEffectEnabled(this.#ensureSelection(selection), index, enabled);
+    setColourOverlayLayerEffectEnabled(selection, enabled, index, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetColourOverlayLayerEffectEnabled(this.#ensureSelection(selection), enabled, index);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1592,8 +1732,8 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setColourOverlayLayerEffectOpacity(selection, index, opacity, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetColourOverlayLayerEffectOpacity(this.#ensureSelection(selection), index, opacity, enableIfDisabled);
+    setColourOverlayLayerEffectOpacity(selection, opacity, index, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetColourOverlayLayerEffectOpacity(this.#ensureSelection(selection), opacity, index, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1602,8 +1742,8 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setColourOverlayLayerEffectScaleWithObject(selection, index, scaleWithObject, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetColourOverlayLayerEffectScaleWithObject(this.#ensureSelection(selection), index, scaleWithObject, enableIfDisabled);
+    setColourOverlayLayerEffectScaleWithObject(selection, scaleWithObject, index, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetColourOverlayLayerEffectScaleWithObject(this.#ensureSelection(selection), scaleWithObject, index, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1628,8 +1768,8 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setGradientOverlayLayerEffectEnabled(selection, index, enabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetGradientOverlayLayerEffectEnabled(this.#ensureSelection(selection), index, enabled);
+    setGradientOverlayLayerEffectEnabled(selection, enabled, index, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetGradientOverlayLayerEffectEnabled(this.#ensureSelection(selection), enabled, index);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1638,8 +1778,8 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setGradientOverlayLayerEffectOpacity(selection, index, opacity, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetGradientOverlayLayerEffectOpacity(this.#ensureSelection(selection), index, opacity, enableIfDisabled);
+    setGradientOverlayLayerEffectOpacity(selection, opacity, index, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetGradientOverlayLayerEffectOpacity(this.#ensureSelection(selection), opacity, index, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1648,8 +1788,8 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setGradientOverlayLayerEffectScaleWithObject(selection, index, scaleWithObject, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetGradientOverlayLayerEffectScaleWithObject(this.#ensureSelection(selection), index, scaleWithObject, enableIfDisabled);
+    setGradientOverlayLayerEffectScaleWithObject(selection, scaleWithObject, index, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetGradientOverlayLayerEffectScaleWithObject(this.#ensureSelection(selection), scaleWithObject, index, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1730,8 +1870,8 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setOuterShadowLayerEffectEnabled(selection, index, enabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetOuterShadowLayerEffectEnabled(this.#ensureSelection(selection), index, enabled);
+    setOuterShadowLayerEffectEnabled(selection, enabled, index, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetOuterShadowLayerEffectEnabled(this.#ensureSelection(selection), enabled, index);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1740,13 +1880,13 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setOuterShadowLayerEffectOpacity(selection, index, opacity, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetOuterShadowLayerEffectOpacity(this.#ensureSelection(selection), index, opacity, enableIfDisabled);
+    setOuterShadowLayerEffectOpacity(selection, opacity, index, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetOuterShadowLayerEffectOpacity(this.#ensureSelection(selection), opacity, index, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
-    setOuterShadowLayerEffectRadius(selection, index, radius, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetOuterShadowLayerEffectRadius(this.#ensureSelection(selection), index, radius, enableIfDisabled);
+    setOuterShadowLayerEffectRadius(selection, radius, index, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetOuterShadowLayerEffectRadius(this.#ensureSelection(selection), radius, index, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1755,8 +1895,8 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setOuterShadowLayerEffectScaleWithObject(selection, index, scaleWithObject, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetOuterShadowLayerEffectScaleWithObject(this.#ensureSelection(selection), index, scaleWithObject, enableIfDisabled);
+    setOuterShadowLayerEffectScaleWithObject(selection, scaleWithObject, index, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetOuterShadowLayerEffectScaleWithObject(this.#ensureSelection(selection), scaleWithObject, index, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1770,8 +1910,8 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    setOuterShadowLayerEffectIntensity(selection, index, intensity, enableIfDisabled, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetOuterShadowLayerEffectIntensity(this.#ensureSelection(selection), index, intensity, enableIfDisabled);
+    setOuterShadowLayerEffectIntensity(selection, intensity, index, enableIfDisabled, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetOuterShadowLayerEffectIntensity(this.#ensureSelection(selection), intensity, index, enableIfDisabled);
         return this.executeCommand(cmd, preview);
     }
 
@@ -1893,8 +2033,33 @@ class Document extends HandleObject {
         return this.executeCommand(cmd, preview);
     }
 
-    divideShapes(selection, preview) {
-        const cmd = CommandsModule.DocumentCommand.createDivideShapes(this.#ensureSelection(selection));
+    divideShapes(selection, retainAllParts = false, preview = false) {
+        const cmd = CommandsModule.DocumentCommand.createDivideShapes(this.#ensureSelection(selection), retainAllParts);
+        return this.executeCommand(cmd, preview);
+    }
+
+    groupNodes(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createGroupNodes(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    liveStackGroupNodes(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createLiveStackGroupNodes(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    liveToneBlendGroupNodes(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createLiveToneBlendGroupNodes(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    ungroupNodes(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createUngroupNodes(this.#ensureSelection(selection));
+        return this.executeCommand(cmd, preview);
+    }
+
+    ungroupAllNodes(selection, preview) {
+        const cmd = CommandsModule.DocumentCommand.createUngroupAllNodes(this.#ensureSelection(selection));
         return this.executeCommand(cmd, preview);
     }
 
@@ -1909,8 +2074,8 @@ class Document extends HandleObject {
         return this.executeCommandAsync(cmd, callback, preview);
     }
 
-    setShapeAsync(shape, selection, callback, preview) {
-        const cmd = CommandsModule.DocumentCommand.createSetShape(this.#ensureSelection(selection), shape);
+    setShapeAsync(shape, selection, options, callback, preview) {
+        const cmd = CommandsModule.DocumentCommand.createSetShape(this.#ensureSelection(selection), shape, options);
         return this.executeCommandAsync(cmd, callback, preview);
     }
 
@@ -1958,84 +2123,170 @@ class NewDocumentOptions extends HandleObject {
         return NewDocumentOptionsApi.getMaxSize(unit, dpi);
     }
     
+    get units() {
+        return NewDocumentOptionsApi.getUnits(this.handle);
+    }
+    
     set units(unit) {
         NewDocumentOptionsApi.setUnits(this.handle, unit);
+    }
+    
+    get imagePlacement() {
+        return NewDocumentOptionsApi.getImagePlacement(this.handle);
     }
     
     set imagePlacement(placement) {
         NewDocumentOptionsApi.setImagePlacement(this.handle, placement);
     }
     
+    get isTransparentBackground() {
+        return NewDocumentOptionsApi.getIsTransparentBackground(this.handle);
+    }
+    
     set isTransparentBackground(isTransparent) {
         NewDocumentOptionsApi.setIsTransparentBackground(this.handle, isTransparent);
+    }
+    
+    get createArtboard() {
+        return NewDocumentOptionsApi.getCreateArtboard(this.handle);
     }
     
     set createArtboard(createArtboard) {
         NewDocumentOptionsApi.setCreateArtboard(this.handle, createArtboard);
     }
     
+    get isFacing() {
+        return NewDocumentOptionsApi.getIsFacing(this.handle);
+    }
+    
     set isFacing(facing) {
         NewDocumentOptionsApi.setIsFacing(this.handle, facing);
+    }
+    
+    get isVerticalStack() {
+        return NewDocumentOptionsApi.getIsVerticalStack(this.handle);
     }
     
     set isVerticalStack(verticalStack) {
         NewDocumentOptionsApi.setIsVerticalStack(this.handle, verticalStack);
     }
     
+    get isDoublePageStart() {
+        return NewDocumentOptionsApi.getIsDoublePageStart(this.handle);
+    }
+    
     set isDoublePageStart(doublePageStart) {
         NewDocumentOptionsApi.setIsDoublePageStart(this.handle, doublePageStart);
+    }
+    
+    get rasterFormat() {
+        return NewDocumentOptionsApi.getRasterFormat(this.handle);
     }
     
     set rasterFormat(format) {
         NewDocumentOptionsApi.setRasterFormat(this.handle, format);
     }
     
+    get colourProfile() {
+        const handle = NewDocumentOptionsApi.getColourProfile(this.handle);
+        return handle ? new ColourProfile(handle) : null;
+    }
+    
     set colourProfile(profile) {
         NewDocumentOptionsApi.setColourProfile(this.handle, profile.handle);
+    }
+    
+    get width() {
+        return NewDocumentOptionsApi.getWidth(this.handle);
     }
     
     set width(w) {
         NewDocumentOptionsApi.setWidth(this.handle, w);
     }
     
+    get height() {
+        return NewDocumentOptionsApi.getHeight(this.handle);
+    }
+    
     set height(h) {
         NewDocumentOptionsApi.setHeight(this.handle, h);
+    }
+    
+    get dpi() {
+        return NewDocumentOptionsApi.getDpi(this.handle);
     }
     
     set dpi(dpi) {
         NewDocumentOptionsApi.setDpi(this.handle, dpi);
     }
     
+    get viewDpi() {
+        return NewDocumentOptionsApi.getViewDpi(this.handle);
+    }
+    
     set viewDpi(dpi) {
         NewDocumentOptionsApi.setViewDpi(this.handle, dpi);
+    }
+    
+    get margins() {
+        return NewDocumentOptionsApi.getMargins(this.handle);
     }
     
     set margins(margins) {
         NewDocumentOptionsApi.setMargins(this.handle, margins);
     }
     
+    get marginsEnabled() {
+        return NewDocumentOptionsApi.getMarginsEnabled(this.handle);
+    }
+    
     set marginsEnabled(enabled) {
         NewDocumentOptionsApi.setMarginsEnabled(this.handle, enabled);
+    }
+    
+    get bleed() {
+        return NewDocumentOptionsApi.getBleed(this.handle);
     }
     
     set bleed(bleed) {
         NewDocumentOptionsApi.setBleed(this.handle, bleed);
     }
     
+    get pageCount() {
+        return NewDocumentOptionsApi.getPageCount(this.handle);
+    }
+    
     set pageCount(pCount) {
         NewDocumentOptionsApi.setPageCount(this.handle, pCount);
+    }
+    
+    get createMaster() {
+        return NewDocumentOptionsApi.getCreateMaster(this.handle);
     }
     
     set createMaster(create) {
         NewDocumentOptionsApi.setCreateMaster(this.handle, create);
     }
     
+    get useDrawingScale() {
+        return NewDocumentOptionsApi.getUseDrawingScale(this.handle);
+    }
+    
     set useDrawingScale(use) {
         NewDocumentOptionsApi.setUseDrawingScale(this.handle, use);
     }
     
+    get drawingScale() {
+        const handle = NewDocumentOptionsApi.getDrawingScale(this.handle);
+        return handle ? new DrawingScale(handle) : null;
+    }
+    
     set drawingScale(drawingScale) {
         NewDocumentOptionsApi.setDrawingScale(this.handle, drawingScale.handle);
+    }
+    
+    get isMultiPage() {
+        return NewDocumentOptionsApi.getIsMultiPage(this.handle);
     }
     
     set isMultiPage(isMultiPage) {
@@ -2069,7 +2320,7 @@ class DocumentHistoryItem extends HandleObject {
     }
 
     dispose() {
-        DocumentHistoryItemApi.dispose();
+        DocumentHistoryItemApi.dispose(this.handle);
     }
 }
 
@@ -2170,12 +2421,12 @@ class DocumentHistory extends HandleObject {
 
     undoAsync(callback, preview) {
         const commandHandle = DocumentCommandApi.createUndoCommand();
-        DocumentApi.executeCommandAsync(this.documentHandle, commandHandle, callback, preview);
+        DocumentApi.executeCommandAsync(this.documentHandle, commandHandle, preview, callback);
     }
 
     redoAsync(callback, preview) {
         const commandHandle = DocumentCommandApi.createRedoCommand();
-        DocumentApi.executeCommandAsync(this.documentHandle, commandHandle, callback, preview);
+        DocumentApi.executeCommandAsync(this.documentHandle, commandHandle, preview, callback);
     }
 }
 
@@ -2264,7 +2515,7 @@ class FileExportOptions extends HandleObject {
         return new FileExportOptions(FileExportOptionsApi.createWithPresetName(presetName));
     }
 
-    static createForCanvaExport(dpi) {
+    static createForCanvaExport(dpi = 72) {
         return new FileExportOptions(FileExportOptionsApi.createForCanvaExport(dpi));
     }
 
@@ -2333,8 +2584,16 @@ class LoadDocumentOptions extends HandleObject {
         return 'LoadDocumentOptions';
     }
 
+    get dpi() {
+        return LoadDocumentOptionsApi.getDpi(this.handle);
+    }
+
     set dpi(dpi) {
         LoadDocumentOptionsApi.setDpi(this.handle, dpi);
+    }
+
+    get hostDpi() {
+        return LoadDocumentOptionsApi.getHostDpi(this.handle);
     }
 
     set hostDpi(dpi) {
@@ -2345,22 +2604,140 @@ class LoadDocumentOptions extends HandleObject {
         LoadDocumentOptionsApi.setPassword(this.handle, password);
     }
 
+    get colourSpace() {
+        return LoadDocumentOptionsApi.getColourSpace(this.handle);
+    }
+
     set colourSpace(colourSpace) {
         LoadDocumentOptionsApi.setColourSpace(this.handle, colourSpace);
+    }
+
+    get format() {
+        return LoadDocumentOptionsApi.getFormat(this.handle);
     }
 
     set format(colourFormat) {
         LoadDocumentOptionsApi.setFormat(this.handle, colourFormat);
     }
 
+    get loadMode() {
+        return LoadDocumentOptionsApi.getLoadMode(this.handle);
+    }
+
     set loadMode(loadmode) {
         LoadDocumentOptionsApi.setLoadMode(this.handle, loadmode);
+    }
+
+    clone() {
+        return new LoadDocumentOptions(LoadDocumentOptionsApi.clone(this.handle));
     }
 
     static createDefault() {
         return new LoadDocumentOptions(LoadDocumentOptionsApi.createDefault());
     }
 }
+
+// Options for loading DWG and DXF files; accepted wherever LoadDocumentOptions are
+class LoadDwgOptions extends LoadDocumentOptions {
+    constructor(handle) {
+        super(handle);
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'LoadDwgOptions';
+    }
+
+    get backgroundColour() {
+        const colour = LoadDwgOptionsApi.getBackgroundColour(this.handle);
+        return colour ? new Colour(colour) : null;
+    }
+
+    set backgroundColour(colour) {
+        LoadDwgOptionsApi.setBackgroundColour(this.handle, colour.handle);
+    }
+
+    get removeHiddenItems() {
+        return LoadDwgOptionsApi.getRemoveHiddenItems(this.handle);
+    }
+
+    set removeHiddenItems(value) {
+        LoadDwgOptionsApi.setRemoveHiddenItems(this.handle, value);
+    }
+
+    get overrideColour() {
+        const colour = LoadDwgOptionsApi.getOverrideColour(this.handle);
+        return colour ? new Colour(colour) : null;
+    }
+
+    set overrideColour(colour) {
+        LoadDwgOptionsApi.setOverrideColour(this.handle, colour.handle);
+    }
+
+    get showHandles() {
+        return LoadDwgOptionsApi.getShowHandles(this.handle);
+    }
+
+    set showHandles(value) {
+        LoadDwgOptionsApi.setShowHandles(this.handle, value);
+    }
+
+    get overrideLineWeights() {
+        return LoadDwgOptionsApi.getOverrideLineWeights(this.handle);
+    }
+
+    set overrideLineWeights(value) {
+        LoadDwgOptionsApi.setOverrideLineWeights(this.handle, value);
+    }
+
+    get modelUnits() {
+        return LoadDwgOptionsApi.getModelUnits(this.handle);
+    }
+
+    set modelUnits(unitType) {
+        LoadDwgOptionsApi.setModelUnits(this.handle, unitType);
+    }
+
+    get layoutSelection() {
+        return LoadDwgOptionsApi.getLayoutSelection(this.handle);
+    }
+
+    // only valid when layoutSelection is Single
+    get selectedLayoutName() {
+        return LoadDwgOptionsApi.getSelectedLayoutName(this.handle);
+    }
+
+    setLayoutSelectionToAllPages() {
+        LoadDwgOptionsApi.setLayoutSelectionToAllPages(this.handle);
+    }
+
+    setLayoutSelectionToModel() {
+        LoadDwgOptionsApi.setLayoutSelectionToModel(this.handle);
+    }
+
+    setLayoutSelectionToSingle(layoutName) {
+        LoadDwgOptionsApi.setLayoutSelectionToSingle(this.handle, layoutName);
+    }
+
+    clone() {
+        return new LoadDwgOptions(LoadDwgOptionsApi.clone(this.handle));
+    }
+
+    static createDefault() {
+        return new LoadDwgOptions(LoadDwgOptionsApi.createDefault());
+    }
+}
+
+// I chose to reject with the Error itself, so callers get a message and a stack.
+// The error and desc properties keep the { error, desc } shape that 3.3.1
+// rejected with, so scripts written for it still work.
+function loadError(err, desc) {
+    // error refers back to the Error itself, so it isn't enumerable or JSON.stringify would hit the cycle
+    const obj = Object(err);
+    Object.defineProperty(obj, 'error', { value: err, writable: true, configurable: true });
+    obj.desc = desc ?? null;
+    return obj;
+}
+
 
 class DocumentPromises {
     #document;
@@ -2380,15 +2757,33 @@ class DocumentPromises {
         return this.#document;
     }
 
-    static load(path) {
+    static load(path, options = null) {
         return new Promise((resolve, reject) => {
-            Document.loadAsync(path, (err, desc, document) => {
-                if (err)
-                    reject({ "error" : err, "desc" : desc });
-                else {
-                    resolve(document ? new DocumentPromises(document) : null);
-                }
-            });
+            try {
+                Document.loadAsync(path, options, (err, desc, document) => {
+                    if (err)
+                        reject(loadError(err, desc));   // an Error, plus 3.3.1's error and desc
+                    else
+                        resolve(document ? new DocumentPromises(document) : null);
+                });
+            } catch (e) {
+                reject(loadError(e));   // an Error, plus 3.3.1's error and desc
+            }
+        });
+    }
+
+    static loadFromResource(resource, options = null) {
+        return new Promise((resolve, reject) => {
+            try {
+                Document.loadFromResourceAsync(resource, options, (err, desc, document) => {
+                    if (err)
+                        reject(loadError(err, desc));   // an Error, plus 3.3.1's error and desc
+                    else
+                        resolve(document ? new DocumentPromises(document) : null);
+                });
+            } catch (e) {
+                reject(loadError(e));   // an Error, plus 3.3.1's error and desc
+            }
         });
     }
 
@@ -2499,6 +2894,7 @@ module.exports.DocumentExportRecord = DocumentExportRecord;
 module.exports.DocumentExportRecords = DocumentExportRecords;
 module.exports.DocumentHistory = DocumentHistory;
 module.exports.DocumentLoadMode = DocumentLoadMode;
+module.exports.LoadDwgLayoutSelection = LoadDwgLayoutSelection;
 module.exports.DocumentLoadResult = DocumentLoadResult;
 module.exports.DocumentPreset = DocumentPreset;
 module.exports.DocumentPromises = DocumentPromises;
@@ -2509,6 +2905,7 @@ module.exports.FileExportOptions = FileExportOptions;
 module.exports.ImagePlacement = ImagePlacement;
 module.exports.InsertionMode = InsertionMode;
 module.exports.LoadDocumentOptions = LoadDocumentOptions;
+module.exports.LoadDwgOptions = LoadDwgOptions;
 module.exports.NewDocumentOptions = NewDocumentOptions;
 module.exports.PackageResourcesPolicy = PackageResourcesPolicy;
 module.exports.RasterFormat = RasterFormat;

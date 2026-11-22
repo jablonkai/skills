@@ -3,7 +3,7 @@ name: affinity
 description: 'Remote-control Affinity (the unified Affinity by Canva app: vector, pixel, and layout studios) with JavaScript through its local automation endpoint — no MCP client configuration needed. Automate document edits, batch operations, text/layer manipulation, and reusable library scripts, with rendered-JPEG visual verification. Use whenever the user wants to script or automate Affinity, programmatically edit .af / .afdesign / .afphoto / .afpub documents, batch-process designs, or says "Affinity", "Affinity script", "automate Affinity", "batch edit in Affinity", "control Affinity" — even if they don''t mention scripting.'
 summary: "remote-control Affinity (the unified Affinity by Canva app) with JavaScript via its local automation endpoint — document edits, batch operations, and reusable library scripts, with no MCP client configuration"
 category: design-automation
-compatibility: "Built for Affinity (by Canva) 3.3.1, build 4940, on macOS, with its local automation endpoint enabled; the CLI needs Node."
+compatibility: "Built for Affinity (by Canva) 3.3.3, build 5004, on macOS, with its local automation endpoint enabled; the CLI needs Node."
 risk: medium
 tags:
     - affinity
@@ -12,7 +12,7 @@ tags:
     - scripting
 license: GPL-3.0-only
 metadata:
-  version: "1.0.4"
+  version: "1.1.0"
   author: "Tamás Jablonkai"
 ---
 
@@ -23,14 +23,14 @@ dictionary, CLI, or URL scheme, and its file formats are proprietary. Its only a
 surface is the **AI connector**: when enabled, the app serves its JavaScript scripting SDK
 on `http://localhost:6767/sse`. The endpoint speaks the MCP protocol, but this skill drives
 it directly over HTTP/SSE with a zero-dependency Node CLI — no MCP client configuration,
-no tool schemas loaded into context. Verified end-to-end against Affinity 3.3.1 (build 4940).
+no tool schemas loaded into context. Verified end-to-end against Affinity 3.3.3 (build 5004).
 
 - [scripts/affinity-cli.mjs](scripts/affinity-cli.mjs) — the CLI (Node ≥ 18, no npm install needed).
 - [references/api-reference.md](references/api-reference.md) — verified endpoint tool contracts + SDK preamble digest. **Read it before writing scripts.**
 - [references/sdk-map.md](references/sdk-map.md) — curated SDK digest: module map, node model, creation recipes (text, image, adjustments), gotchas. Read it when writing anything beyond the basic drawing recipe.
-- [references/sdk-docs/](references/sdk-docs/) — the complete vendored SDK documentation (142 topics, ~1.8 MB). Grep it for exact signatures only after sdk-map.md; never read the big files whole (`nodes.js` is ~300 KB).
-- Online signature reference for the native `*Api` layer the vendored JS wraps:
-  <https://sdk.affinity.studio/latest/js/> (`apis/<ApiName>/<method>.html`, `enums/<Enum>.html`).
+- [references/sdk-docs/](references/sdk-docs/) — the complete vendored SDK documentation (401 topics, ~2.9 MB, incl. the `ts/` TypeScript declarations of every native API). Grep it for exact signatures only after sdk-map.md; never read the big files whole (`nodes.js` is ~300 KB).
+- Native `*Api` signatures the vendored JS wraps: `references/sdk-docs/ts/<module>.d.ts` and
+  `ts/dom/<ApiName>.d.ts` (3.3.3+); online fallback <https://sdk.affinity.studio/latest/js/>.
 
 ## The control loop
 

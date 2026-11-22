@@ -38,11 +38,11 @@ function formatNumber(value, opts) {
     return opts.prefix + (negative ? "-" : "") + digits + opts.suffix;
 }
 
-function createSequenceCommand(doc, sources, opts) {
+function createSequenceCommand(sources, opts) {
     const builder = CompoundCommandBuilder.create();
-    orderNodes(sources, opts.order).forEach(({ node }, i) => {
+    orderNodes(sources, opts.order).forEach(({ selection }, i) => {
         const text = formatNumber(opts.start + i * opts.increment, opts);
-        builder.addCommand(DocumentCommand.createSetText(storySelection(doc, node), text));
+        builder.addCommand(DocumentCommand.createSetText(selection, text));
     });
     return builder.createCommand();
 }
@@ -88,9 +88,10 @@ function main() {
         alert("Please select one or more text objects");
         return;
     }
-    const sources = nodes.map(node => ({ node, rc: node.getSpreadBaseBox() }));
+    // Capture text ranges before the first preview changes the stories.
+    const sources = nodes.map(node => ({ selection: storySelection(doc, node), rc: node.getSpreadBaseBox() }));
     const dlg = buildDialog();
-    const update = (preview) => doc.executeCommand(createSequenceCommand(doc, sources, readOptions(dlg)), preview);
+    const update = (preview) => doc.executeCommand(createSequenceCommand(sources, readOptions(dlg)), preview);
     dlg.onControlValueChangedHandler = () => update(true);
     update(true);
     if (isOk(dlg.runModal()))

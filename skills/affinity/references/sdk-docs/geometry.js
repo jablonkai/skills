@@ -50,13 +50,15 @@ Object.assign(CubicBezier.prototype, {
     transform: function(xf) { CubicBezierApi.transform(this, xf); return this; },
     evaluate: function(t) { return CubicBezierApi.evaluate(this, t); },
     getCurvature: function(t) { return CubicBezierApi.getCurvature(this, t); },
-    getNormal: function(t, normalise = true) { return CubicBezierApi.getNormal(this, t, normalise); },
-    getTangent: function(t, normalise = true) { return CubicBezierApi.getTangent(this, t, normalise); },
+    getNormal: function(t) { return CubicBezierApi.getNormal(this, t); },
+    getTangent: function(t) { return CubicBezierApi.getTangent(this, t); },
     getClosestPoint: function(pt) { return CubicBezierApi.getClosestPoint(this, pt); },
     split: function(t) { return CubicBezierApi.split(this, t); },
     splitLeft: function(t) { return CubicBezierApi.splitLeft(this, t); },
     splitRight: function(t) { return CubicBezierApi.splitRight(this, t); },
     getParamAtLength: function(length) { return CubicBezierApi.getParamAtLength(this, length); },
+    getVelocity: function(t) { return CubicBezierApi.getVelocity(this, t); },
+    getAcceleration: function(t) { return CubicBezierApi.getAcceleration(this, t); },
 
     // non-mutating helpers
     clone: function() { const res = new CubicBezier(); res.assign(this); return res; },
@@ -141,10 +143,10 @@ Object.assign(Transform.prototype, {
     // mutating API functions:
     assign: function(source) { TransformApi.assign(this, source); return this; },
     compose: function(data) { TransformApi.compose(this, data); return this; },
-    scale: function(x, y = x) { TransformApi.scale(this, x, y); return this;},
-    shear: function(x, y) { TransformApi.shear(this, x, y); return this;},
-    rotate: function(rads) { TransformApi.rotate(this, rads); return this;},
-    translate: function(x, y) { TransformApi.translate(this, x, y); return this;},
+    scale: function(x = 1, y = x) { TransformApi.scale(this, x, y); return this;},
+    shear: function(x = 0, y = 0) { TransformApi.shear(this, x, y); return this;},
+    rotate: function(rads = 0) { TransformApi.rotate(this, rads); return this;},
+    translate: function(x = 0, y = 0) { TransformApi.translate(this, x, y); return this;},
     invert: function() { TransformApi.invert(this); return this; },
     
     // non-mutating API functions:
@@ -1279,31 +1281,38 @@ class Polygon extends HandleObject {
     }
     
     clear() {
-        return PolygonApi.clear(this.handle);
+        PolygonApi.clear(this.handle);
+        return this;
     }
     
     addPoint(point) {
-        return PolygonApi.addPoint(this.handle, point);
+        PolygonApi.addPoint(this.handle, point);
+        return this;
     }
 
     addPointXY(x, y) {
-        return PolygonApi.addPoint(this.handle, { x:x, y:y });
+        PolygonApi.addPoint(this.handle, { x:x, y:y });
+        return this;
     }
     
     insertPoint(pointIndex, point) {
-        return PolygonApi.insertPoint(this.handle, this.#convIndex(pointIndex), point);
+        PolygonApi.insertPoint(this.handle, this.#convIndex(pointIndex), point);
+        return this;
     }
 
     insertPointXY(pointIndex, x, y) {
-        return PolygonApi.insertPoint(this.handle, this.#convIndex(pointIndex), { x:x, y:y });
+        PolygonApi.insertPoint(this.handle, this.#convIndex(pointIndex), { x:x, y:y });
+        return this;
     }
     
     close() {
-        return PolygonApi.close(this.handle);
+        PolygonApi.close(this.handle);
+        return this;
     }
     
     reverse() {
-        return PolygonApi.reverse(this.handle);
+        PolygonApi.reverse(this.handle);
+        return this;
     }
 
     clone() {

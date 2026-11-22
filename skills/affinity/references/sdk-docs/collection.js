@@ -456,7 +456,7 @@ function filter(genFunc, predicateFunc, thisArg) {
     }
 }
 
-function flat(genFunc, depth = 1, flattenStrings) {
+function flat(genFunc, depth = 1, flattenStrings = false) {
     function* safeInner(genFunc, depth) {
         if (depth <= 0) {
             for (const value of genFunc())

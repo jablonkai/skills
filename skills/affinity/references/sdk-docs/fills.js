@@ -75,7 +75,11 @@ class Fill extends HandleObject {
     }
 
     get isVisible() {
-        return FillApi.getIsVisible(this.handle);
+        return this.getIsVisible();
+    }
+
+    getIsVisible(minAlpha = 0.01) {
+        return FillApi.getIsVisible(this.handle, minAlpha);
     }
 
     get isSpatiallyInvariant() {
@@ -345,7 +349,7 @@ class DiffusionCurveSet extends HandleObject {
         DiffusionCurveSetApi.setCurveLine(this.handle, index, start, end);
     }
 
-    addEllipse(centre, radiusX, radiusY, rotation = 0, leftColour, rightColour) {
+    addEllipse(centre, radiusX, radiusY, rotation = 0, leftColour = null, rightColour = null) {
         DiffusionCurveSetApi.addEllipse(this.handle, centre, radiusX, radiusY, rotation, leftColour?.handle, rightColour?.handle);
     }
 
@@ -550,7 +554,7 @@ class ColourMesh extends Mesh {
         return new ColourMesh(ColourMeshApi.createDefaultWhite());
     }
 
-    static createFromColour(colour, size) {
+    static createFromColour(colour, size = 2) {
         return new ColourMesh(ColourMeshApi.createFromColour(colour.handle, size));
     }
 

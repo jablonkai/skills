@@ -27,7 +27,7 @@ function newA4Empty(isLandscape) {
     return Document.createFromPreset(a4, isLandscape);
 }
 
-// Returns the parsed JSON body, or null if the request is not denied
+// Returns the parsed JSON body, or null if the request is denied or fails
 function fetchJson(url) {
     let result;
     try {
@@ -37,6 +37,14 @@ function fetchJson(url) {
             return null;
         }
         throw e;
+    }
+    if (!result.response) {
+        console.log(`Request failed: ${result.failureReason}`);
+        return null;
+    }
+    if (!result.response.isSuccess) {
+        console.log(`Request failed: HTTP ${result.response.statusCode}`);
+        return null;
     }
     const content = result.response.content;
     const text = (typeof content === 'string')

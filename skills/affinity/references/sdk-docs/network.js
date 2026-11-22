@@ -46,14 +46,16 @@ class HttpRequest extends HandleObject {
 
     do() {
         var result = HttpRequestApi.do(this.handle);
-        result.response = new HttpResponse(result.response);
+        result.response = result.response ? new HttpResponse(result.response) : null;
         return result;
     }
 
     doAsync(callback) {
         if (typeof callback === 'function') {
-            function wrapped(state, responseHandle, reason) {
-                callback(state, new HttpResponse(responseHandle), reason);
+            function wrapped(err, result) {
+                if (result)
+                    result.response = result.response ? new HttpResponse(result.response) : null;
+                callback(err, result);
             }
             return HttpRequestApi.doAsync(this.handle, wrapped);
         }
@@ -76,6 +78,10 @@ class HttpResponse extends HandleObject {
     
     get statusCode() {
         return HttpResponseApi.getStatusCode(this.handle);
+    }
+
+    get isSuccess() {
+        return HttpResponseApi.getIsSuccess(this.handle);
     }
 
     getHeaderValue(headerKey) {

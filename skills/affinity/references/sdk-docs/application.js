@@ -21,8 +21,8 @@ class ApplicationDocuments {
         return Document.current;
     }
 
-    static load(path) {
-        return Document.load(path);
+    static load(path, options = null) {
+        return Document.load(path, options);
     }
 }
 

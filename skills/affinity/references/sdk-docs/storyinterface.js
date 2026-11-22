@@ -55,11 +55,14 @@ class StoryInterface extends HandleObject {
     }
 
     getText(startPos = 0, maxLength = -1, format = StoryIoFormat.ClipboardDescriptions) {
+        if (startPos < 0)
+            throw new RangeError("startPos must not be negative");
         const range = this.storyRange;
         if (startPos > range.length)
             return "";
-        if (maxLength < 0)
-            maxLength = range.length;
+        const available = range.length - startPos;
+        if (maxLength < 0 || maxLength > available)
+            maxLength = available;
         return this.story.getText(range.begin + startPos, maxLength, format);
     }
 

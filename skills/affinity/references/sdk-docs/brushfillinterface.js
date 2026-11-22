@@ -29,7 +29,7 @@ class BrushFillInterface extends HandleObject {
         return BrushFillInterfaceApi.isNoFill(this.handle);
     }
 
-    getIsVisible(minAlpha) {
+    getIsVisible(minAlpha = 0.01) {
         return BrushFillInterfaceApi.isBrushFillVisible(this.handle, minAlpha);
     }
 

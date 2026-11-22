@@ -51,7 +51,7 @@ class ShapeInterface extends HandleObject {
     // mutating async helpers
     setShapeAsync(shape, callback, preview) {
         const node = this.node;
-        return node.document.setShapeAsync(shape, node, callback, preview);
+        return node.document.setShapeAsync(shape, node, null, callback, preview);
     }
 
     // mutating properties
