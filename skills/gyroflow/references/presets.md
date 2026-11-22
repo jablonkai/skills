@@ -25,7 +25,7 @@ sync offsets, trims and, for types 2/3, the motion data itself.
 
 - Only the keys present are applied. Everything else keeps the defaults from the
   GUI's `settings.json` and the CLI.
-- `version` isn't checked on import. Exported projects say 3.
+- `version` isn't checked on import. Exported projects say 4 (1.7.1; 3 in 1.6.3).
 - Save presets as `.gyroflow`. A `.json` positional input is a lens profile.
 - `output.codec` in a preset doesn't change the file extension. `gf-render.py`
   moves the `output` block into `-p`. With the raw CLI, pass the codec in `-p`.
@@ -34,7 +34,7 @@ sync offsets, trims and, for types 2/3, the motion data itself.
 
 | Key | Meaning |
 |---|---|
-| `method` | `Default`, `Plain 3D`, `Fixed camera`, `No smoothing` (exact; unknown → Default) |
+| `method` | `Default`, `Optimal path` (1.7+), `Plain 3D`, `Fixed camera`, `No smoothing` (exact; unknown → Default) |
 | `smoothing_params` | list of `{name, value}` for the method (table below) |
 | `fov` | FOV factor. 1.0 = default crop; >1 zooms out (wider, may show edges) |
 | `max_zoom` | dynamic zoom cap in percent (default 130) |
@@ -51,12 +51,14 @@ sync offsets, trims and, for types 2/3, the motion data itself.
 | `additional_rotation`, `additional_translation` | `[pitch, yaw, roll]` / `[x, y, z]` |
 | `video_speed`, `video_speed_affects_smoothing`, `video_speed_affects_zooming`, `video_speed_affects_zooming_limit` | for retimed clips |
 | `frame_offset` | clip-specific frame shift |
+| `horizon_lock_pitch`, `horizon_lock_pitch_enabled`, `automatic_lock`, `turn_*`, `tilt_accel_limit`, `output_projection` (`rectilinear`), `fixed_zoom`, `zoom_limit_whole_clip`, `focal_length_*`, `lens_breathing_enabled`, `frame_readout_direction` | newer GUI options, written by 1.7.1 projects; set them in the GUI and derive a preset with `--from` |
 
 ### Smoothing parameters per method
 
 | Method | Params (range, default) |
 |---|---|
 | Default | `smoothness` (0.001–1, 0.5); `smoothness_pitch`/`_yaw`/`_roll` (used when `per_axis` > 0.1); `per_axis` (0/1); `max_smoothness` (0.1–5 s, 1); `alpha_0_1s` (0.01–1, 0.1); `trim_range_only` (0/1) |
+| Optimal path (1.7+) | `smoothness` (0.5), `smoothness_pitch`/`_yaw`/`_roll`, `per_axis` (0), `crop_constraint` (1: keep the frame within the zoom limit), `max_time_constant` (s, 2), `trim_range_only` (1). Plans the path for the whole clip; never lags behind pans |
 | Plain 3D | `time_constant` (0.01–10 s, 0.25); `trim_range_only` |
 | Fixed camera | `roll`, `pitch`, `yaw` (degrees, 0): a locked-off virtual tripod |
 | No smoothing | none: lens correction and rolling-shutter fix only |
@@ -84,8 +86,10 @@ preset, `output_width`/`output_height` become the preset output size.
 The top-level keys are `title`, `version`, `app_version`, `videofile`,
 `calibration_data` (the lens profile), `video_info`, `stabilization`,
 `gyro_source` (`filepath`, `detected_source`, `imu_orientation`,
-`file_metadata`), `offsets` (sync points, ms), `keyframes`, `trim_ranges_ms`,
-`output` and `synchronization`, plus background and `*_bookmark` fields
+`file_metadata`, and in 1.7+ `optical_correction_*` plus the measured
+`optical_correction`), `offsets` (sync points, ms), `keyframes`, `trim_ranges_ms`,
+`output` and `synchronization`, in 1.7+ also `image_sequence_fps`,
+`image_sequence_start` and `light_refraction_coefficient`, plus background and `*_bookmark` fields
 (sandbox bookmarks, safe to drop).
 
 `gf-preset.py create NEW.gyroflow --from PROJECT.gyroflow` keeps

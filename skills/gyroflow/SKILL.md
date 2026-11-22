@@ -1,9 +1,9 @@
 ---
 name: gyroflow
-description: 'Stabilize video with Gyroflow''s CLI using gyroscope data: GoPro, Sony, DJI, Insta360 and other cameras with embedded motion data, or footage plus an external gyro log (.gcsv, Betaflight blackbox for FPV). Single clips or parallel folder batches with progress; smoothing, FOV, horizon lock and lens profile settings; ProRes/H.264/H.265/DNxHR output; reusable JSON presets; .gyroflow projects for the Resolve/FCP/Premiere plugins and STMap EXRs for Nuke or Fusion. Use for "stabilize my GoPro clips", "gyro-stabilize this FPV footage with the blackbox log", "batch stabilize this folder to ProRes", "make a Gyroflow preset with horizon lock", "export an STMap for Nuke", "Gyroflow project for the Resolve plugin". Not for footage without gyro data or stabilizing in a Resolve timeline (davinci-resolve), plain transcoding or compression (handbrake, compressor), Nuke comps beyond the STMap handoff (nuke), or FCP timelines (final-cut-pro).'
-summary: "stabilize video with the Gyroflow CLI from embedded or external gyro data — single clips and parallel folder batches with progress, reusable JSON presets, .gyroflow project and STMap export for Resolve and Nuke, ffprobe-verified outputs"
+description: 'Stabilize video with Gyroflow''s CLI using gyroscope data: GoPro, Sony, DJI, Insta360 and other cameras with embedded motion data, or footage plus an external gyro log (.gcsv, Betaflight blackbox for FPV), or optical correction when a clip has no usable gyro. Single clips or parallel folder batches with progress; smoothing, FOV, horizon lock and lens settings; ProRes/H.264/H.265/DNxHR output; reusable JSON presets; .gyroflow projects for the Resolve/FCP/Premiere plugins, STMap EXRs for Nuke or Fusion. Use for "stabilize my GoPro clips", "gyro-stabilize this FPV footage with the blackbox log", "batch stabilize this folder to ProRes", "make a Gyroflow preset with horizon lock", "export an STMap for Nuke", "Gyroflow project for the Resolve plugin", "no gyro, stabilize it optically". Not for stabilizing in a Resolve timeline (davinci-resolve), plain transcoding or compression (handbrake, compressor), Nuke comps beyond the STMap handoff (nuke), or FCP timelines (final-cut-pro).'
+summary: "stabilize video with the Gyroflow CLI from embedded or external gyro data, or optical flow when there is none — single clips and parallel folder batches with progress, reusable JSON presets, .gyroflow project and STMap export for Resolve and Nuke, ffprobe-verified outputs"
 category: video
-compatibility: "Built for Gyroflow 1.6.3 (Mac App Store build) on macOS 27."
+compatibility: "Built for Gyroflow 1.7.1 (Mac App Store build) on macOS 27.2; scripts also handle 1.6.x."
 risk: low
 tags:
     - gyroflow
@@ -14,7 +14,7 @@ tags:
     - stmap
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.1.0"
   author: "Tamás Jablonkai"
 ---
 
@@ -25,13 +25,15 @@ analysis. It needs motion data, either embedded in the clip (GoPro GPMF, Sony,
 DJI, Insta360, ...) or in an external log. The app ships a headless CLI at
 `/Applications/Gyroflow.app/Contents/MacOS/gyroflow` that renders, and exports
 projects, STMaps and metadata, without opening a window. Verified against
-**Gyroflow 1.6.3** (Mac App Store build) on macOS 27.
+**Gyroflow 1.7.1** (Mac App Store build) on macOS 27.2.
 
-Use the scripts, not the raw CLI. In 1.6.3 the CLI:
-- **exits 0 on every failure** (missing file, write denied, unreadable input);
-- **hangs** after an unreadable input, and one bad clip stalls the whole queue;
+Use the scripts, not the raw CLI. In 1.7.1 the CLI:
 - in the App Store build, is **sandboxed**: it can only touch
-  `~/Library/Application Support/Gyroflow/`.
+  `~/Library/Application Support/Gyroflow/`;
+- exits 1 on a render failure and 2 on bad arguments, but **exits 0 when a clip
+  without motion data renders unstabilized**, and a wrong `codec_options`
+  string silently falls back to ProRes Standard;
+- (1.6.x only: exits 0 on every failure and hangs after an unreadable input.)
 
 The scripts stage clips into that folder (APFS clones, so no extra disk space),
 check every clip first, judge success from the log and the files, kill stalled
@@ -64,9 +66,11 @@ python3 $S/gf-verify.py --summary OUT/gf-summary.json --codec prores --profile H
 
 1. **Probe first.** A clip without gyro data cannot be stabilized from embedded
    data. Gyroflow would still render it, just unstabilized, and still exit 0. So
-   `gf-render.py` refuses such clips unless they have an external log: pass
+   `gf-render.py` refuses such clips unless they have an external log (pass
    `--gyro-file LOG`, or put `CLIP.gcsv` next to the clip, where it is picked up
-   automatically. Report "no gyro data" to the user rather than rendering anyway.
+   automatically) or `--optical 100`, which measures the motion from the
+   picture (1.7+). Tell the user the clip has no gyro data and offer optical
+   correction rather than silently rendering it unstabilized.
 2. **Translate the request into flags** (table below) and show the dry run. Its
    `gyroflow ...` line is the reproducible raw command.
 3. **Render.** Progress goes to stderr per clip in 10 % steps (`--progress-json`
@@ -84,10 +88,11 @@ python3 $S/gf-verify.py --summary OUT/gf-summary.json --codec prores --profile H
 
 | The user says | Flags |
 |---|---|
-| "ProRes" / "ProRes 422 HQ" / "4444" | `--codec ProRes --profile HQ` (profiles: `Proxy`, `LT`, `Standard`, `HQ`, `4444`, `4444XQ`; anything else silently falls back to the default) |
+| "ProRes" / "ProRes 422 HQ" / "4444" | `--codec ProRes --profile HQ` (profiles: `Proxy`, `LT`, `Standard`, `HQ`, `4444`, `4444XQ`; anything else, including the `ProRes 422 HQ` that `--help` shows, silently gives Standard) |
 | "H.265" / "H.264" + "100 Mbps" | `--codec hevc` / `--codec h264`, `--bitrate 100`. The default bitrate is auto, and small |
 | "DNxHR for Resolve" | `--codec dnxhd --profile "DNxHR HQ"` (`DNxHR LB/SQ/HQ/HQX/444`) |
 | "smoothing 0.8", "smoother", "less smooth" | `--smoothing 0.8` (0.001–1, default 0.5; FPV/action 0.6–0.9) |
+| "much smoother", "no lag behind pans" | `--method "Optimal path"` (1.7+; plans the whole path at once, `--smoothing` still applies) |
 | "locked-off / tripod look" | `--method "Fixed camera"` |
 | "keep the horizon level" | `--horizon-lock 100` (percent; `--horizon-roll DEG` to tilt). Needs accelerometer data, which `gf-probe` shows as `+accel` |
 | "less crop / zoom out" | `--fov 1.2` (>1 shows more of the frame and may expose black edges), or raise `--max-zoom` |
@@ -96,6 +101,7 @@ python3 $S/gf-verify.py --summary OUT/gf-summary.json --codec prores --profile H
 | "use my preset" / "same settings as last time" | `--preset FILE` (a preset or a `.gyroflow` project). Flags override it |
 | "blackbox log" / "external gyro" / "gcsv" | `--gyro-file LOG` (applies to every clip; autosync runs by default). One log per clip: `CLIP.gcsv` sidecars |
 | "use this lens profile" | `--lens profile.json` (when Gyroflow didn't match one; GoPro, DJI and Insta360 usually match automatically) |
+| "no gyro" / "stabilize it from the video" / "bad gyro, vibrations" | `--optical 100` (1.7+; strength %, `--optical 50` on a clip with gyro corrects it). `--optical-only` ignores the file's motion data, `--optical-per-frame` for global shutter. Needs a matching lens profile to look right |
 | "no audio" | `--no-audio` |
 
 ## Presets
@@ -138,17 +144,20 @@ Recipes for each: [recipes.md](references/recipes.md).
 
 ## Limits
 
-- **Image sequences (PNG/EXR) don't render in the App Store build.** It writes
-  one empty `..._%2505d.png`, and the script refuses the job with that message.
+- **Image sequences (PNG/EXR) don't render in the App Store build.** 1.7.1
+  fails with `Failed to check the output` and writes no frames (1.6.3 wrote one
+  empty `..._%2505d.png`), so the script refuses the job up front.
   Render `--codec ProRes --profile 4444` and extract frames with ffmpeg, or
   install the DMG build from gyroflow.xyz and point `GYROFLOW_BIN` at it, which
   also skips staging.
 - `--watch FOLDER` (the CLI's hot-folder daemon) is not wrapped: it never exits,
   and in the sandbox it can only watch inside the Gyroflow folder. See
   [cli-reference.md](references/cli-reference.md).
-- Gyroflow can't stabilize footage that has no motion data. Optical-flow
-  stabilization belongs to the NLE (Resolve's stabilizer, the `davinci-resolve`
-  skill).
+- Optical correction (`--optical`) needs texture to track and a valid lens
+  profile. `--optical-tracking dis` failed on both test clips here (an OpenCV
+  assertion, "Not enough of the image could be tracked"); keep the default
+  `klt`. Footage that won't track belongs to the NLE's stabilizer
+  (`davinci-resolve`).
 
 ## Safety
 

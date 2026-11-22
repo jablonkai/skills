@@ -97,6 +97,7 @@ def main():
     ap.add_argument("--codec", help="output codec stored in the project (e.g. ProRes)")
     ap.add_argument("--profile", help="codec_options stored in the project (e.g. HQ)")
     gf.add_stab_args(ap)
+    gf.add_optical_args(ap)
     ap.add_argument("-g", "--gyro-file")
     ap.add_argument("--lens")
     ap.add_argument("--sync", help="-s sync params JSON")
@@ -118,6 +119,7 @@ def main():
         if args.profile:
             params["codec_options"] = args.profile
         sync = gf.load_json_arg(args.sync) or {}
+        gf.optical_argv(args, binary)  # validate early (needs 1.7+)
     except gf.GFError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
@@ -189,6 +191,7 @@ def export_one(binary, sandboxed, clip, kind, args, preset, params, sync, out_di
         mapping.append((stage.out + "/", out_dir + "/"))
         mapping.append((urllib.parse.quote(stage.out + "/"), urllib.parse.quote(out_dir + "/")))
         stem = os.path.splitext(os.path.basename(clip))[0]
+        argv += gf.optical_argv(args)
         if kind == "project":
             argv += ["--export-project", args.project]
         elif kind == "stmap":
