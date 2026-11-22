@@ -3,7 +3,7 @@ name: pages
 description: 'Automate Apple Pages on macOS through its AppleScript/JXA dictionary (osascript) — create documents from Pages templates, replace {{placeholder}} tokens in body text, text boxes and tables without losing their formatting, swap or insert images, mail-merge a .pages template against CSV/JSON rows into one PDF/DOCX per row, and export or batch-convert .pages files to PDF, Word (DOCX), EPUB with title/author/language metadata, RTF or plain text — then verify the exports (PDF text and page count, EPUB metadata). Use whenever the user mentions Pages or a .pages file: "fill my Pages template", "export this .pages to PDF", "convert these Pages documents to Word", "make an EPUB from my Pages book", "mail merge this CSV into a Pages letter". Not for .docx files edited without Pages (use docx), generic PDF work (use pdf), converting files to Markdown (use markitdown), or Keynote and Numbers documents.'
 summary: "automate Apple Pages via AppleScript/JXA — fill templates and {{placeholders}} without losing formatting, swap images, CSV mail merge, and PDF/DOCX/EPUB export or batch conversion of .pages files"
 category: office
-compatibility: "Built for Pages Creator Studio 15.4 on macOS 27."
+compatibility: "Built for Pages Creator Studio 16.0 on macOS 27.2."
 risk: low
 tags:
     - pages
@@ -14,7 +14,7 @@ tags:
     - epub
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.1.0"
   author: "Tamás Jablonkai"
 ---
 
@@ -23,7 +23,7 @@ metadata:
 Apple Pages is driven through its **AppleScript dictionary via `osascript`**: each
 script call opens the documents it needs, works, and closes them again. There is no
 bridge or listener; macOS Automation consent is the only gate. Verified against
-**Pages Creator Studio 15.4** (bundle id `com.apple.Pages`) on macOS 27.
+**Pages Creator Studio 16.0** (bundle id `com.apple.Pages`) on macOS 27.2.
 
 Everything goes through the scripts below. They encode workarounds for several
 dictionary features that look usable but are broken (see Pitfalls), so reach for raw
@@ -114,7 +114,7 @@ python3 $S/pages-verify.py ~/Docs/docx/*.docx --contains 'expected text'
   script can't set (see gotchas).
 - `--password` encrypts PDF and DOCX. `pages-verify` can't read an encrypted file.
 
-## Pitfalls (all measured on 15.4)
+## Pitfalls (all measured on 16.0)
 
 - **A modal alert blocks all scripting.** Examples are "can't be opened", a password
   prompt, or a missing-fonts sheet. Every later call times out (error -1712). The
@@ -130,8 +130,10 @@ python3 $S/pages-verify.py ~/Docs/docx/*.docx --contains 'expected text'
 - **`make new document` leaves an "Untitled" file in iCloud Drive's Pages folder**,
   even after `close saving no`. The scripts save new documents to their target path
   at once. In raw AppleScript, do the same.
-- **Headers and footers can't be filled.** Their text isn't in `body text`, shapes or
-  tables. Put tokens in the body or a text box instead.
+- **Header and footer `{{tokens}}` can't be filled.** Their text isn't in `body text`,
+  shapes or tables. Put tokens in the body or a text box instead. A built-in template's
+  header/footer *placeholders* are the exception: since 16.0 `set placeholder text i of
+  d to "…"` fills them ([recipes](references/recipes.md#fill-a-templates-placeholders-header-and-footer-too)).
 - **Fixed-size text boxes clip overflow silently.** A longer value disappears from the
   PDF. Verify with `--contains`, and keep token boxes roomy.
 
