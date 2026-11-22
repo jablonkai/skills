@@ -1,7 +1,7 @@
 # Keynote scripting gotchas
 
-Each item was reproduced against Keynote Creator Studio 15.4 on macOS 27, with the UI
-in Hungarian, while this skill was being built. The scripts handle every one of them.
+Each item was reproduced against Keynote Creator Studio 16.0 on macOS 27.2, with the UI
+in Hungarian. The scripts handle every one of them.
 The notes explain why the scripts work the way they do, and what to watch for in raw
 AppleScript.
 
@@ -32,7 +32,7 @@ AppleScript.
 | `set characters 2 thru 4 of object text of t to "x"` turns `ABCDEF` into `AxxxEF` | A range set is broken, as in Pages | Delete the tail (`delete characters (o+1) thru (o+L-1)`), then `set character o to value`. The value inherits character o's style (bold stays bold). This is `replaceIn`. |
 | `set object text of t to "…"` loses mixed styling | It replaces the whole run with text in the first character's style | Fine for building; use `replaceIn` to edit. |
 | Nested bullets come out flat, with a gap after the bullet | A leading tab or spaces is literal text; the indent level isn't in the dictionary | `keynote-build` flattens nested items and warns. Indent in the Keynote UI (Tab) if the hierarchy matters. |
-| Slide text read twice | `every text item of s` lists each placeholder more than once, plus a hidden one with a 0×0 frame | Deduplicate by text and frame, skip 0-sized items. `containerTexts` does this. |
+| Slide text read twice | `every text item of s` lists each placeholder more than once, plus an extra empty one (a 0×0 frame, or a full-width empty strip on a fresh slide) | Deduplicate by text and frame, skip empty and 0-sized items. `containerTexts` does this. |
 | A numeric table cell reads back as `120,0` | `value` is a real, coerced with the locale's decimal comma | Read `formatted value` for what the slide shows. |
 | Filling `{{amount}}` in a cell with "1 250 000 Ft" leaves the real `1.25E+6` behind (it *displays* right) | Cells default to the `automatic` format, which parses numbers, currency and dates out of text | `set format of c to text` before `set value of c`. `replaceInTables` does this, so a filled cell stays the text you wrote. |
 | `transition effect of (transition properties of s)` fails (-1700) | Nested property access on a record property | Read the record into a variable first. |

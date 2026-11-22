@@ -1,9 +1,10 @@
-# Keynote scripting dictionary (Creator Studio 15.4)
+# Keynote scripting dictionary (Creator Studio 16.0)
 
 Confirmed with `sdef "/Applications/Keynote Creator Studio.app"` on macOS 27. Suites:
 Keynote Suite, iWork Suite, iWork Text Suite, Compatibility Suite, plus `open`,
 `save`, `close` and `count` from the Cocoa Standard Suite (`xi:include`). Nothing the
-older Keynote dictionary documents is missing from this edition.
+older Keynote dictionary documents is missing from this edition, and every term below
+was still present in 16.0.
 
 Address the app by bundle id, `application id "com.apple.Keynote"`, because the app
 name ("Keynote Creator Studio") differs between editions.
@@ -43,6 +44,13 @@ Elements of a slide (iWork container): `text item`, `shape`, `image`, `table`, `
   `text color`, `background color`, `alignment`, `format`.
 - Rich text (`object text`, `presenter notes`): `color` (16-bit RGB list), `font`
   (PostScript name), `size`; elements `character`, `word`, `paragraph`.
+- Also scriptable (checked on 16.0): `document` → `id` (r/o, a UUID); every iWork item
+  → `locked` (moving a locked item fails with -10006); `reflection showing` /
+  `reflection value` on text items, shapes, images, lines and movies; `movie` and
+  `audio clip` → `file name`, volume, `repetition method` (`none`, `loop`, `loop back
+  and forth`); tables → `sort tb by (column 1 of tb) direction ascending` (a bare
+  `column 1` fails with -1728), `merge` / `unmerge` / `clear` on a `range`, and
+  `vertical alignment`, `text wrap` on a range.
 
 ## Commands
 
@@ -53,7 +61,7 @@ Elements of a slide (iWork container): `text item`, `shape`, `image`, `table`, `
 | `move slide a of d to before/after slide b of d` | reorder |
 | `delete slide n of d` | |
 | `duplicate slide n of d to after slide m of d` | |
-| `make image slides d files {alias, …} [set titles bool] [slide layout …]` | **broken in 15.4**: every picture is added twice |
+| `make image slides d files {alias, …} [set titles bool] [slide layout …]` | **broken (15.4, still in 16.0)**: every picture is added twice |
 | `add chart` (Compatibility) | `row names`, `column names`, `data`, `type` (legacy chart type), `group by` |
 | `start d from slide n`, `show next`, `show previous`, `stop d` | live slideshow; takes over the screen |
 | `export d to file as FMT [with properties {…}]` | see below |
