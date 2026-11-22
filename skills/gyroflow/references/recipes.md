@@ -45,6 +45,23 @@ python3 $S/gf-render.py flight.mp4 -g flight.bbl --out-dir out --codec h264 --bi
   In-body or lens stabilization should be off when shooting for Gyroflow.
 - **Blackmagic BRAW/RED R3D**: supported when their gyro metadata is present.
   Decoding needs the vendor SDKs Gyroflow bundles.
+- Footage shot with RockSteady/OSS on, or with bad gyro (vibrations, DJI O4,
+  older GoPros on FPV): add `--optical 50`–`100` to correct the gyro optically.
+
+## No gyro data at all: optical correction (1.7+)
+
+```bash
+python3 $S/gf-probe.py drone.mp4                    # "NO GYRO DATA"
+python3 $S/gf-render.py drone.mp4 --out-dir out --optical 100 --codec ProRes --profile HQ
+python3 $S/gf-render.py clip.mp4 --out-dir out --optical-only    # ignore the file's gyro
+```
+
+The motion is measured from the picture, so it needs texture to track, few
+moving subjects and a matching lens profile (`--lens` when none is matched).
+Check the log for `Optical correction: measured in X of N frames`. Keep the
+default `klt` tracker: `--optical-tracking dis` failed on both test clips.
+`gf-export.py --project 2 --optical 100` stores the analysis in the project for
+the NLE plugins.
 
 ## Build a preset, apply it to a new clip
 

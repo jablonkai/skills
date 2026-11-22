@@ -3,17 +3,18 @@
 
   gf-render.py CLIP|FOLDER... --out-dir DIR [--codec ProRes --profile HQ]
                [--smoothing 0.8 --fov 1.1 --horizon-lock 100] [--preset FILE]
-               [-j 2] [--gyro-file LOG] [--lens PROFILE.json] [--summary FILE]
+               [-j 2] [--gyro-file LOG] [--lens PROFILE.json] [--optical 100]
+               [--summary FILE]
   gf-render.py --stop       kill renders started by this skill and drop their runs
 
 What it adds over the raw CLI:
 - stages inputs into the sandbox folder the App Store build can read, and moves
   finished outputs to --out-dir;
 - checks each clip first (ffprobe + Gyroflow's own motion parse) and leaves out
-  unreadable clips and clips without gyro data, because one unreadable input
-  stalls the whole queue;
-- judges success per clip from the log and the files (the exit code is always 0)
-  and kills a stalled process;
+  unreadable clips and clips without gyro data (unless --optical measures the
+  motion from the video), because in 1.6.x one unreadable input stalls the queue;
+- judges success per clip from the log and the files (1.6.x exits 0 on every
+  failure) and kills a stalled process;
 - prints progress per clip, and writes a JSON summary that gf-verify.py checks.
 
 Exit: 0 all done, 1 some failed, 2 setup error, 124 --timeout, 130 interrupted.
@@ -86,6 +87,7 @@ def main():
     o.add_argument("--suffix", default="_stabilized", help="output name suffix (default _stabilized)")
     o.add_argument("--params", help="extra -p output params as JSON (keys in references/cli-reference.md)")
     gf.add_stab_args(ap)
+    gf.add_optical_args(ap)
     m = ap.add_argument_group("motion data")
     m.add_argument("-g", "--gyro-file", help="external gyro log for every clip (.gcsv, blackbox, ...)")
     m.add_argument("--lens", help="lens profile .json to use for every clip")
@@ -126,9 +128,11 @@ def main():
         codec = params.get("codec")
         if sandboxed and codec in ("PNG Sequence", "EXR Sequence"):
             raise gf.GFError(
-                f"{codec} does not work in the sandboxed (App Store) build: it writes one empty "
-                "file named '..._%2505d.*'. Render --codec ProRes --profile 4444 and extract "
-                "frames with ffmpeg, or use the gyroflow.xyz DMG build (GYROFLOW_BIN=...)")
+                f"{codec} does not work in the sandboxed (App Store) build: no frames are "
+                "written (1.7: 'Failed to check the output', 1.6: one empty '..._%2505d.*'). "
+                "Render --codec ProRes --profile 4444 and extract frames with ffmpeg, or use "
+                "the gyroflow.xyz DMG build (GYROFLOW_BIN=...)")
+        optical = gf.optical_argv(args, binary)
         sync = gf.load_json_arg(args.sync) or {}
         for f in (args.gyro_file, args.lens):
             if f and not os.path.isfile(f):
@@ -175,9 +179,10 @@ def main():
         j["motion"] = motion
         if not motion.get("readable"):
             j.update(status="failed", reason=f"Gyroflow cannot read it: {motion.get('error')}")
-        elif not motion.get("gyro_ok") and not args.allow_no_gyro:
+        elif not motion.get("gyro_ok") and not (args.allow_no_gyro or optical):
             j.update(status="failed", reason="no gyro data in the clip; pass --gyro-file LOG "
-                     "(or put LOG.gcsv next to it), or --allow-no-gyro")
+                     "(or put LOG.gcsv next to it), --optical 100 to measure the motion from "
+                     "the video, or --allow-no-gyro")
         elif motion.get("gyro_file") and not args.gyro_file:
             j["sidecar"] = motion["gyro_file"]
     todo = [j for j in jobs if j["status"] == "pending"]
@@ -235,6 +240,7 @@ def build_argv(clips, out_folder, params, preset, sync, args, gyro=None, lens=No
         argv += ["-s", gf.pjson(sync)]
     if gyro:
         argv += ["-g", gyro]
+    argv += gf.optical_argv(args)
     if args.no_gpu_decoding:
         argv.append("--no-gpu-decoding")
     return argv

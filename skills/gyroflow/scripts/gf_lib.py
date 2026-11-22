@@ -5,9 +5,10 @@ Gyroflow's CLI has sharp edges this module absorbs:
 - The Mac App Store build is sandboxed. It reads and writes only under
   ~/Library/Application Support/Gyroflow/, so inputs are staged there (APFS
   clones, near-free) and outputs are moved back afterwards.
-- The exit code is 0 even when a file is missing or a render fails, and an
-  unreadable input makes the process hang. Success is judged from the log and
-  the files, and a watchdog kills a stalled process.
+- Exit codes (0 ok, 1 render failure, 2 bad arguments) only exist since 1.7.0;
+  1.6.x exits 0 on every failure and hangs after an unreadable input. Success
+  is judged from the log and the files either way, and a watchdog kills a
+  stalled process.
 - Inputs must be absolute paths to files (a folder is read as one bad video).
 - -p/-s/--preset take JSON; the codec belongs in -p, because a preset's codec
   does not change the output file extension.
@@ -198,7 +199,8 @@ def add_stab_args(parser):
     g = parser.add_argument_group("stabilization (override the preset)")
     g.add_argument("--preset", help="preset or .gyroflow project: file path or JSON text")
     g.add_argument("--smoothing", type=float, help="smoothness 0.001-1 (Default method; GUI default 0.5)")
-    g.add_argument("--method", help='smoothing method, e.g. "Default", "Plain 3D", "Fixed camera", "No smoothing"')
+    g.add_argument("--method", help='smoothing method: "Default", "Optimal path" (1.7+), "Plain 3D", '
+                   '"Fixed camera", "No smoothing"')
     g.add_argument("--fov", type=float, help="FOV factor, >1 zooms out (default 1.0)")
     g.add_argument("--max-zoom", type=float, help="max zoom in percent (default 130)")
     g.add_argument("--horizon-lock", type=float, metavar="PCT",
@@ -207,6 +209,52 @@ def add_stab_args(parser):
     g.add_argument("--lens-correction", type=float, metavar="0-1",
                    help="lens distortion correction amount 0-1 (default 1)")
     return g
+
+
+OPTICAL_TRACKING = ("klt", "dis", "gmflow")
+
+
+def add_optical_args(parser):
+    """Optical-correction flags (Gyroflow 1.7.0+): motion measured from the picture."""
+    g = parser.add_argument_group("optical correction (Gyroflow 1.7+)")
+    g.add_argument("--optical", type=float, metavar="PCT",
+                   help="correct the motion data with an optical analysis of this strength, "
+                   "1-100; clips without motion data get all their motion from the video")
+    g.add_argument("--optical-only", action="store_true",
+                   help="ignore the file's motion data, measure all motion from the video")
+    g.add_argument("--optical-per-frame", action="store_true",
+                   help="one correction per frame instead of per band of rows (global shutter)")
+    g.add_argument("--optical-tracking", choices=OPTICAL_TRACKING,
+                   help="klt (default, corners), dis (dense flow, slower), gmflow (AI, much slower)")
+    return g
+
+
+def optical_wanted(args):
+    return (getattr(args, "optical", None) is not None or getattr(args, "optical_only", False)
+            or getattr(args, "optical_per_frame", False) or getattr(args, "optical_tracking", None))
+
+
+def optical_argv(args, binary=None):
+    """CLI flags for the optical options; raises GFError on a CLI older than 1.7."""
+    if not optical_wanted(args):
+        return []
+    if binary:
+        v = version(binary)
+        m = re.match(r"(\d+)\.(\d+)", v)
+        if m and (int(m.group(1)), int(m.group(2))) < (1, 7):
+            raise GFError(f"optical correction needs Gyroflow 1.7 or later (found {v})")
+    argv = []
+    if args.optical is not None:
+        if not 0 < args.optical <= 100:
+            raise GFError("--optical is a strength in percent, 1-100")
+        argv += ["--optical-correction", f"{args.optical:g}"]
+    if args.optical_only:
+        argv.append("--ignore-file-motion")
+    if args.optical_per_frame:
+        argv.append("--optical-per-frame")
+    if args.optical_tracking:
+        argv += ["--optical-tracking", args.optical_tracking]
+    return argv
 
 
 def build_preset(args):
