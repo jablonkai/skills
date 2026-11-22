@@ -72,6 +72,10 @@ def remove_path(path):
 
 def export_as(path):
     ext = os.path.splitext(path)[1].lower().lstrip(".")
+    if ext == "numbers09":
+        # Numbers 16 writes Numbers '09 only to a .numbers path.
+        raise NumbersError("Numbers '09 can't be written to .numbers09; use "
+                           "numbers-export.py --to numbers09 (writes X-09.numbers)")
     if ext not in EXPORT_AS:
         raise NumbersError("unsupported export extension .%s (use %s)"
                            % (ext, ", ".join(sorted(EXPORT_AS))))

@@ -1,7 +1,7 @@
 # Numbers scripting dictionary
 
 Checked with `sdef "/Applications/Numbers Creator Studio.app"` on **Numbers Creator
-Studio 15.4** (bundle id `com.apple.Numbers`). The suites are Numbers Suite, iWork
+Studio 16.0** (bundle id `com.apple.Numbers`) on macOS 27.2. The suites are Numbers Suite, iWork
 Suite, iWork Text Suite, Compatibility Suite and CocoaStandard (open, save, close).
 Nothing that the documented Numbers dictionary offers is missing from the Creator
 Studio edition.
@@ -22,7 +22,7 @@ application ─ documents ─ sheets ─ tables ─ rows / columns / ranges / ce
 | document | `name`, `file`, `modified`, `id` (r/o), `password protected` (r/o), `document template` (r/o), `active sheet`, `selection` |
 | template | `id`, `name` (localized) |
 | sheet | `name` |
-| table | `name`, `row count`, `column count`, `header row count`, `header column count`, `footer row count`, `cell range` (r/o), `selection range`, plus iWork item `position`, `width`, `height`, `locked`, `parent`; in JXA also `filtered`, `headerRowsFrozen`, `headerColumnsFrozen` |
+| table | `name`, `row count`, `column count`, `header row count`, `header column count`, `footer row count`, `cell range` (r/o), `selection range`, plus iWork item `position`, `width`, `height`, `locked`, `parent`; also `filtered` (read it only), `header rows frozen`, `header columns frozen` (settable; JXA `headerRowsFrozen`, `headerColumnsFrozen`) |
 | range | `name` (r/o, e.g. `"B2:C5"`), `format`, `font name`, `font size`, `text color`, `background color`, `alignment`, `vertical alignment`, `text wrap` |
 | cell (a range) | `value`, `formatted value` (r/o), `formula` (r/o), `row`, `column` |
 | row / column (ranges) | `address`, `height` / `width` |
@@ -35,7 +35,8 @@ properties one at a time.
 
 | Command | Signature | Notes |
 |---|---|---|
-| `make` | `make new document` / `tell doc to make new sheet` / `make new table with properties {…}` inside `tell sheet …` | `make new sheet at end of sheets of d` and `make new sheet with properties {name:…}` fail. In JXA use `doc.sheets.push(N.Sheet())` and `sheet.tables.push(N.Table({rowCount: …}))`. |
+| `make` | `make new document` / `tell doc to make new sheet` / `make new table with properties {…}` inside `tell sheet …` | `make new sheet at end of sheets of d` fails (-10000, -10006 with properties); `tell d to make new sheet with properties {name:…}` works on 16.0. `make new document with data POSIX file "….nmbtemplate"` starts from a user template (documented in the sdef, not run). In JXA `N.make` fails ("can't convert types"): use `doc.sheets.push(N.Sheet())` and `sheet.tables.push(N.Table({rowCount: …}))`. |
+| `remove` | `remove row 3` / `remove column 2` (in a `tell table` block) | Deletes rows or columns; the table shrinks (Compatibility Suite) |
 | `add row above` / `add row below` | `add row below row 3` (in a `tell table` block) | Formula references shift to follow |
 | `add column before` / `add column after` | `add column after column 2` | |
 | `sort` | `sort <table> by column N direction ascending/descending in rows <range>` | Sorts the body rows; empty cells go last |
@@ -49,8 +50,11 @@ properties one at a time.
 | `delete` | `delete table 2 of sheet 1 of d`, `delete chart 1 of …` | |
 
 `value` accepts a number, text, a boolean or a formula string (`"=SUM(A2:A9)"`, with
-English function names). Setting `format` before `value` controls how text is
-interpreted.
+English function names, but the region's decimal mark and argument separator:
+`=ROUND(A2/3;2)` under hu_HU). Setting `format` before `value` controls how text is
+interpreted. On 16.0 writing a number resets a `currency`, `duration` or `date and
+time` cell to `automatic`; set `currency` after the value. `number` and `text` formats
+read back as `missing value` from `format`.
 
 ## Enumerations
 
@@ -61,7 +65,9 @@ interpreted.
 - **alignment**: `auto align`, `center`, `justify`, `left`, `right`. **vertical
   alignment**: `top`, `center`, `bottom`.
 - **sort direction**: `ascending`, `descending`.
-- **export format**: `Numbers`, `PDF`, `Microsoft Excel`, `CSV`, `Numbers 09`.
+- **export format**: `PDF`, `Microsoft Excel`, `CSV`, `Numbers 09` (`Numbers` is the
+  separate saveable file format). `Numbers 09` must go to a `.numbers` path; any other
+  extension fails.
 - **image quality** (PDF): `Good`, `Better`, `Best`.
 
 ## Export options (`with properties`)
@@ -85,8 +91,9 @@ Output shapes:
 
 ## Not in the dictionary
 
-- **Chart creation or chart data.** `make new chart` fails (-10000), and charts expose
-  only their frame. Charts can be counted, moved, resized and deleted. Their type,
+- **Chart data.** On 16.0 `make new chart` (inside `tell sheet`) succeeds but inserts a
+  placeholder column chart with sample data, ignoring the selection; 15.4 failed with
+  -10000. Charts expose only their frame. Charts can be counted, moved, resized and deleted. Their type,
   series and data ranges can be changed only in the UI.
 - Conditional highlighting, filters (only `filtered`, read only), pivot tables,
   categories, cell borders, per-character text styles in cells, and column widths

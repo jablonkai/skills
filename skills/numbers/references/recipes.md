@@ -1,8 +1,7 @@
 # Raw AppleScript recipes
 
 For what the scripts don't cover. Every snippet here ran against Numbers Creator Studio
-15.4, except moving and deleting a chart. No chart can be created by script, so that
-part follows the dictionary and wasn't run. Run them with `osascript file.applescript /abs/path.numbers` and read values
+16.0 on macOS 27.2. Run them with `osascript file.applescript /abs/path.numbers` and read values
 from `argv`. Never splice values into the script text.
 
 Always open a **copy**, and close without saving unless the user asked for the edit:
@@ -63,6 +62,8 @@ tell table 1 of sheet 1 of d
 	unmerge range "A5:B5"
 	clear range "C2:C4"                      -- contents and style
 	transpose                                -- rows <-> columns
+	remove row 3                             -- delete a row (or: remove column 2)
+	set header rows frozen to false          -- also header columns frozen
 end tell
 ```
 
@@ -83,7 +84,8 @@ end tell
 
 ```applescript
 tell d to make new sheet                 -- not "make new sheet at end of sheets of d"
-set name of last sheet of d to "Notes"   -- not "with properties {name:…}"
+set name of last sheet of d to "Notes"
+-- on 16.0 also: tell d to make new sheet with properties {name:"Notes"}
 ```
 
 ## Password
@@ -107,8 +109,9 @@ tell sheet 1 of d
 end tell
 ```
 
-Charts can't be created, and their data can't be read or set (`make new chart` →
--10000). When the user needs a chart, build the table by script and tell them to insert
+Chart data can't be read or set. On 16.0 `make new chart` inside `tell sheet` works,
+but it inserts a placeholder column chart with sample data, not the table's (15.4
+failed with -10000). When the user needs a chart, build the table by script and tell them to insert
 the chart in the UI (select the table, then Chart ▸ type). If a picture of the chart is
 enough, render it with matplotlib and place the image, or export XLSX and add a chart
 with openpyxl.
