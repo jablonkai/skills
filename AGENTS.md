@@ -216,7 +216,7 @@ that breaks after an app update can be traced to the version change:
 
 - name the app and its exact version, plus the OS when it matters, e.g.
   `"Built for Blender 5.2.2 LTS (bundled Python 3.13)."` or
-  `"Built for Keynote Creator Studio 15.4 on macOS 27."`
+  `"Built for Keynote Creator Studio 16.0 on macOS 27.2."`
 - add the companion tools and their versions the skill depends on (osxphotos, Node,
   obs-websocket, Better BibTeX, …)
 - keep the body's *Verified against* line in step with it

@@ -3,7 +3,7 @@ name: keynote
 description: 'Automate Apple Keynote on macOS via its AppleScript dictionary (osascript) — build a deck from a Markdown/JSON outline with a theme, layouts, bullets, images and presenter notes; edit a copy of a .key deck (replace {{placeholder}} text in titles, bodies, text boxes, tables and notes without losing formatting; skip, delete or reorder slides); export or batch-convert .key files to PDF (with or without notes), PPTX, slide images or movie; verify by reading slides back. Use whenever the user mentions Keynote or a .key file: "turn this outline into a Keynote deck", "export deck.key to PDF with speaker notes", "convert these Keynote files to PowerPoint", "fill the {{client}} placeholders in my Keynote template", "skip the appendix slides". Not for .pptx decks made or edited without Keynote (use pptx), generic PDF work (use pdf), slides to Markdown (use markitdown), or Pages and Numbers documents.'
 summary: "automate Apple Keynote via AppleScript/JXA — build decks from an outline with themes, layouts and presenter notes, edit .key text without losing formatting, skip or reorder slides, and PDF/PPTX/image export or batch conversion"
 category: office
-compatibility: "Built for Keynote Creator Studio 15.4 on macOS 27."
+compatibility: "Built for Keynote Creator Studio 16.0 on macOS 27.2."
 risk: low
 tags:
     - keynote
@@ -14,7 +14,7 @@ tags:
     - pdf
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -23,7 +23,7 @@ metadata:
 Apple Keynote is driven through its **AppleScript dictionary via `osascript`**: each
 script call opens the decks it needs, works, and closes them again. There is no
 bridge or listener; macOS Automation consent is the only gate. Verified against
-**Keynote Creator Studio 15.4** (bundle id `com.apple.Keynote`) on macOS 27.
+**Keynote Creator Studio 16.0** (bundle id `com.apple.Keynote`) on macOS 27.2.
 
 Everything goes through the scripts below. They encode workarounds for dictionary
 features that look usable but are broken or localized (see Pitfalls), so reach for
@@ -149,7 +149,7 @@ python3 $S/keynote-verify.py ~/Decks/pptx/*.pptx --contains 'expected text'
   encrypted PDF).
 - Existing outputs are skipped unless `--force`. Sources are closed without saving.
 
-## Pitfalls (all measured on 15.4)
+## Pitfalls (all measured on 16.0)
 
 - **A modal alert blocks all scripting.** Examples are "can't be opened", a password
   prompt, or missing fonts. Every later call times out (-1712). The scripts then report
