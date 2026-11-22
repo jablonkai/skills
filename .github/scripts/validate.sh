@@ -343,10 +343,16 @@ check_markdown_links() {
   local file
   local file_dir
   local target
+  local targets
   local resolved_target
 
+  # The inner loop reads a here-string, not a process substitution: macOS's
+  # /bin/bash 3.2 dies (SIGTRAP, exit 133) after a few hundred `< <(...)` in one
+  # run, and this loop runs one per Markdown file.
   while IFS= read -r file; do
-    file_dir=$(dirname "$file")
+    if [[ "$file" == */* ]]; then file_dir=${file%/*}; else file_dir=.; fi
+    targets=$(strip_fenced_code_blocks "$file" |
+      grep -oE '\[[^]]+\]\(([^)]+)\)' | sed -E 's/.*\(([^)]+)\)/\1/' | sort -u || true)
 
     while IFS= read -r target; do
       [[ -n "$target" ]] || continue
@@ -368,8 +374,7 @@ check_markdown_links() {
         echo "Broken relative Markdown link in $file: $target"
         exit 1
       fi
-    done < <(strip_fenced_code_blocks "$file" |
-      grep -oE '\[[^]]+\]\(([^)]+)\)' | sed -E 's/.*\(([^)]+)\)/\1/' | sort -u)
+    done <<< "$targets"
   done < <(markdown_files)
 }
 
