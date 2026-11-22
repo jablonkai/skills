@@ -4,8 +4,8 @@
 
 | Kind | Location |
 |---|---|
-| Built-in (5.4: 94 files in 21 groups) | `/Applications/Compressor.app/Contents/PlugIns/Compressor/CompressorKit.bundle/Contents/Frameworks/Compressor.framework/Versions/A/Frameworks/StompUI.framework/Versions/A/Resources/BuiltInSettings/<Group>/` |
-| Display names of built-ins | `…/Frameworks/StompTypes.framework/Versions/A/Resources/en.lproj/Localizable.strings` (key = `<setting name="…">` or `<nameKey>`) |
+| Built-in (6.0: 94 files in 21 groups, the same count as 5.4) | `/Applications/Compressor.app/Contents/PlugIns/Compressor/CompressorKit.bundle/Contents/Frameworks/Compressor.framework/Versions/A/Frameworks/StompUI.framework/Versions/A/Resources/BuiltInSettings/<Group>/` |
+| Display names of built-ins | `…/Frameworks/StompTypes.framework/Versions/A/Resources/en.lproj/Localizable.strings` (key = `<setting name="…">` or `<nameKey>`). A few are only in `LocalizableOther.strings` next to it (`AppleDevicesCinematicName` → "Apple Devices Cinematic", a `ClassicCinematic` encoder with no `<video-encode>`, listed with codec `?`) |
 | Custom (the app's "Custom" section) | `~/Library/Application Support/Compressor/Settings/*.compressorsetting` |
 
 `python3 scripts/cmp-settings.py` lists all of them. `--resolve NAME` gives the path. The
@@ -17,7 +17,7 @@ HEVC, Uncompressed, Website Sharing. The Blu-ray, DVD and HLS groups also contai
 individual settings files were considered here. Group-level output (disc images, HLS
 packages) through the CLI is untested.
 
-## Common built-ins (5.4)
+## Common built-ins (6.0)
 
 | Display name | Ext | Video | Size |
 |---|---|---|---|
@@ -66,8 +66,9 @@ FourCC. Image-sequence settings use `<encoder name="TIFF">` with `file-extension
 | `-P -P` | P % of the source (P may be fractional) | `-50 -50` half size, `-12.5 -12.5` eighth |
 | `-W H` | scale down to fit inside W×H, keep the aspect ratio, never upscale | `-1920 1080` HD 1080p |
 | `W H` | exactly W×H | written by `cmp-setting-new.py --size` |
+| `0 0` | use `<bounds width height>` | what the Compressor app saves for a custom size (6.0: `<bounds 1280 720>` encoded 1280×720) |
 
-`<bounds>` alone is ignored for sizing (tested). `cmp-setting-new.py` writes both: exact
+`<bounds>` is ignored for sizing while `<automatic>` has any other value (tested on 5.4). `cmp-setting-new.py` writes both: exact
 sizes go into both elements, and fit/percent sizes go into `<automatic>` with `<bounds>`
 left at `-100`.
 

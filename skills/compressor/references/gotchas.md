@@ -1,10 +1,17 @@
 # Compressor CLI gotchas
 
-All of these were observed on Compressor 5.4 (macOS 27, arm64). `cmp-encode.py` and the
-other scripts handle each one. Read this before writing raw `Compressor` commands.
+These were first observed on Compressor 5.4 and re-checked on 6.0 (build 460012, macOS 27.2,
+arm64). `cmp-encode.py` and the other scripts handle each one. Read this before writing raw `Compressor` commands.
 
 ## Submitting
 
+- **6.0 writes only inside its sandbox.** Outputs may go to `~/Movies`, `~/Desktop` or a
+  folder the user added as a custom Location in the app. Any other folder (`~/` itself,
+  `/tmp`, an external volume) rejects the **whole batch** before anything is queued:
+  `Errors:` then *"The file "x.mov" cannot be saved in the folder "out" because you don't
+  have permission. Add the location "out" as a custom Location in Compressor."* (exit 1).
+  Sources are readable from anywhere. Write to `--out-dir ~/Movies/...`, or ask the user
+  to add the folder as a Location. Don't try to work around the sandbox.
 - **`-locationpath` is a file, not a folder.** A folder fails with *"Destination is a
   directory; Expected complete output file path with file name."* (exit 255). Give the
   full name including the extension the setting writes (`.mov`, `.m4v`, `.mp4`, `.mxf`).
@@ -16,6 +23,10 @@ other scripts handle each one. Read this before writing raw `Compressor` command
 - **Exit 0 only means the batch was queued.** The encode runs in the background and the
   command returns within about a second. The batch and job IDs are in the
   `-outputformat json` reply.
+- **Errors arrive as NSLog lines.** `Submission Error: …` and `Errors:` carry the
+  `2026-… Compressor[pid:tid]` prefix. Drop the prefix, not the line.
+- **`Submission Error: … the cluster could not be found` (exit 3)** happens while the
+  background service is restarting. Submit again a few seconds later.
 - **A bad source rejects the whole batch.** A missing file exits 255 with `Parameter
   error`. An unreadable file exits 3 with `Submission Error: INVOKING METHOD OR ACCESSING
   MEMBER FOR NULL REFERENCE`. Nothing is queued, including the good jobs.
@@ -44,7 +55,15 @@ other scripts handle each one. Read this before writing raw `Compressor` command
   - a batch that stayed invisible to `-monitor` (only `[ ]`) until a 600 s timeout.
     `cmp-encode.py` now gives up after `--lost-after` (90 s).
 
-  On an idle machine, the same commands always succeeded. A heavy batch of our own (8
+  On 6.0 one other client's failing job was enough. While another agent rendered Motion
+  `.moti` templates through Compressor (those jobs fail on 6.0 with `job controller down`;
+  `.motn` jobs render fine), the shared CompressorHelper quit and relaunched every 10–20 s,
+  and almost every job of both clients ended `Failed: 2x job controller down`. Nobody had
+  reset the service. With no other client, the same jobs succeeded every time. A job can also report that failure after its output was
+  fully written; `cmp-encode.py` then skips that output on the next run, since it checks
+  the duration.
+
+  On an idle machine, the same commands succeeded. A heavy batch of our own (8
   parallel jobs, 2 of them TIFF sequences) failed one job once. **Recovery: run the same
   command again** (complete outputs are skipped). **Don't** reach for
   `-resetBackgroundProcessing`: it is exactly what breaks the other clients.
@@ -62,7 +81,8 @@ other scripts handle each one. Read this before writing raw `Compressor` command
   and as an MXF setting. The scripts prefer the QuickTime one. For MXF, pass the path.
 - **Frame size is set by `<automatic width height>`, not `<bounds>`.** A setting with only
   `<bounds width="1280" height="720">` changed still encoded 1920×1080. Set both (see
-  [settings.md](settings.md)).
+  [settings.md](settings.md)). The exception: `<automatic width="0" height="0">`, which is
+  what the app saves for a custom size, makes `<bounds>` count (verified on 6.0).
 - **`<data-rate>` edits didn't cap the bitrate.** Setting 250000 on an HEVC Apple Devices
   setting gave about 4.4 Mb/s. Its units and its interaction with the quality mode are
   unverified, so don't promise a bitrate from an XML edit. Choose a built-in at the right

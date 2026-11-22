@@ -3,12 +3,12 @@ name: compressor
 description: 'Batch-transcode video with Apple Compressor from the command line: encode files or whole folders with built-in or custom Compressor settings (ProRes 422/LT/HQ/4444/Proxy, H.264, HEVC, Apple Devices, Website Sharing, proxy sizes, MXF, TIFF/EXR image sequences), several deliverables per source in one batch, outputs next to the originals or in a folder; look up settings by name; derive and save a custom setting with a new frame size; monitor, stop and resume batches; verify outputs with ffprobe (codec, frame size, duration). Use for "make ProRes Proxy files of this card with Compressor", "H.264 and HEVC deliverables from this master", "use my Compressor setting on these", "create a 720p HEVC Compressor preset", "which Compressor settings make HEVC?". Not for HandBrake or open-source encodes (use handbrake), plain ffmpeg conversions, FCPXML timelines (use final-cut-pro), or rendering inside DaVinci Resolve (use davinci-resolve).'
 summary: "batch-transcode with Apple Compressor via its CLI — ProRes, H.264, HEVC and image-sequence deliverables from files or folders, built-in and custom settings lookup, derived custom settings, monitored, stoppable and resumable batches, ffprobe-verified outputs"
 category: video
-compatibility: "Built for Compressor 5.4 on macOS 27 (arm64)."
+compatibility: "Built for Compressor 6.0 on macOS 27.2 (arm64)."
 risk: medium
 tags: [compressor, apple, prores, hevc, h264, transcode, proxy, macos, video]
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.0.4"
   author: "Tamás Jablonkai"
 ---
 
@@ -18,7 +18,7 @@ Compressor's binary takes command-line batches: `-batchname`, `-jobpath`, `-sett
 and `-locationpath` to submit, then `-monitor` and `-kill`. Jobs run in Compressor's
 background service, so the app window doesn't need to be open. There is no AppleScript
 dictionary and no network listener. This skill uses the CLI and the settings files only.
-It was verified against **Compressor 5.4** on macOS 27 (arm64).
+Verified against **Compressor 6.0** (build 460012) on macOS 27.2 (arm64).
 
 The CLI's `-help` text is incomplete and partly wrong, and its failure modes are easy to
 miss. The scripts handle that:
@@ -93,10 +93,16 @@ they can change between Compressor versions.
 
 Built-in H.264/HEVC settings don't let you set the size or bitrate from the CLI. For a
 specific frame size, create a custom setting (next section). Don't edit `data-rate` in the
-XML: on 5.4 it didn't cap the bitrate (see gotchas).
+XML: it didn't cap the bitrate when tested (see gotchas).
 
 ## Output layout
 
+- **Compressor 6 only writes where its sandbox lets it**: `~/Movies`, `~/Desktop`, and
+  folders the user added as a custom Location in the app. Anywhere else (other home
+  folders, `/tmp`, external volumes) the whole batch is rejected with *"cannot be saved
+  in the folder … Add the location … as a custom Location"*. Sources can be read from
+  anywhere. For sources outside those folders, pass `--out-dir ~/Movies/...`, or ask the
+  user to add the folder as a Location.
 - **Default: next to each source**, named `<name><suffix>.<ext>`. The default suffix is
   `_<setting-slug>`, e.g. `A001_C001_apple-prores-422-proxy.mov`. Pass `--suffix _proxy`
   for each `--setting`, in the same order, to choose the name.

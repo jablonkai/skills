@@ -3,6 +3,10 @@
 `H=scripts`, with paths relative to the skill directory. Every recipe ends with
 `cmp-verify.py`. Report its lines, not just "done".
 
+Compressor 6 writes only to `~/Movies`, `~/Desktop` and folders added as custom Locations
+in the app (see [gotchas.md](gotchas.md)). The recipes that write next to the sources, or
+to a volume, need that folder added as a Location first. Otherwise use `--out-dir ~/Movies/…`.
+
 ## Card dump → ProRes Proxy next to the originals
 
 ```bash
@@ -14,8 +18,8 @@ python3 $H/cmp-verify.py --summary /tmp/proxy.json
 Each `clip.mp4` gets a `clip_proxy.mov` beside it at full resolution. Re-running skips
 finished proxies and doesn't treat `*_proxy.mov` as new sources. For smaller proxies, use
 `"ProRes Proxy half size"` and the frame size halves (verify checks that too). If the card
-is read-only, write elsewhere with `--out-dir ~/Proxies/Card01 --recursive`, which mirrors
-the subfolders.
+is read-only, or isn't a Location, write elsewhere with
+`--out-dir ~/Movies/Proxies/Card01 --recursive`, which mirrors the subfolders.
 
 ## One master → several deliverables
 
@@ -60,6 +64,7 @@ python3 $H/cmp-verify.py --summary …   # frame count = duration × fps
 ```bash
 python3 $H/cmp-encode.py footage/ --recursive --setting "Apple ProRes 422 LT" \
     --out-dir /Volumes/Raid/LT --summary /Volumes/Raid/LT/summary.json --timeout 7200
+# /Volumes/Raid must be a custom Location in Compressor 6, or the batch is rejected
 # exit 124 → stopped at the limit: run the same command again to continue
 ```
 
