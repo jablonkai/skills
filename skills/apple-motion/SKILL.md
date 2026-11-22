@@ -3,7 +3,7 @@ name: apple-motion
 description: 'Author, edit and install Apple Motion templates for Final Cut Pro as ozml XML, without opening Motion: Titles (.moti), Generators (.motn), Effects (.moef) and Transitions (.motr). Change text, PostScript fonts, sizes, text and shape colours; set and publish the parameters FCP shows in its inspector; turn one base template into a branded variant set from JSON or CSV; install into ~/Movies/Motion Templates with thumbnails and get the FCPXML uid; render a headless preview through Compressor with pixel colour checks. Use for "make a lower third template for Final Cut", "rebrand this Motion title in our colours and font", "title variants for each event from a CSV", "publish the backplate colour", "install this .moti so FCP sees it", "what parameters does this template publish". Not for building or editing FCP timelines (final-cut-pro), transcoding (compressor/handbrake), procedural motion graphics in Cavalry (cavalry), Resolve/Fusion titles (davinci-resolve) or 3D (blender).'
 summary: "author and install Apple Motion templates for Final Cut Pro as ozml XML — lower-third titles, generators and effects with published parameters, branded variant sets, headless renders through Compressor and use in FCPXML timelines"
 category: motion-design
-compatibility: "Built for Motion 6.4, Final Cut Pro 12.4 and Compressor 5.4 on macOS 27."
+compatibility: "Built for Motion 7.0, Final Cut Pro 13.0 and Compressor 6.0 on macOS 27.2."
 risk: low
 tags:
     - apple-motion
@@ -14,7 +14,7 @@ tags:
     - branding
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.1.0"
   author: "Tamás Jablonkai"
 ---
 
@@ -24,8 +24,8 @@ Motion has **no usable scripting API**: `NSAppleScriptEnabled` is false and ther
 dictionary. What it does have is a text file format: every template is **ozml XML**
 (`<!DOCTYPE ozxmlscene>`). This skill edits that XML, installs the result where Final
 Cut Pro looks, and checks it with a headless **Compressor** render. The Motion window
-never opens. Verified against **Motion 6.4**, **Final Cut Pro 12.4** and **Compressor**
-on macOS 27.
+never opens. Verified against **Motion 7.0**, **Final Cut Pro 13.0** and **Compressor 6.0**
+on macOS 27.2.
 
 | Script | Does |
 |---|---|
@@ -35,7 +35,7 @@ on macOS 27.
 | `python3 scripts/motn-edit.py IN --out OUT --text/--font/--size/--color/--fill/--set/--publish/--unpublish …` | edit → new file, re-parsed and font-checked |
 | `python3 scripts/motn-variants.py SPEC.json` / `--csv ROWS --base B --category C` | one base → N branded variants, optionally rendered and installed |
 | `python3 scripts/motn-install.py FILE --category C [--name N] [--thumb PNG]` | install into Motion Templates; prints the FCPXML uid. `--list`, `--uninstall Cat/Name`, `--in-library LIB` (templates an FCP library resolved) |
-| `python3 scripts/motn-render.py FILE --out DIR [--at 2,5] [--expect "X,Y=#hex"]` | Compressor render → movie + PNG frames, blank and pixel-colour checks |
+| `python3 scripts/motn-render.py FILE --out DIR [--at 2,5] [--expect "X,Y=#hex"]` | Compressor render → movie + PNG frames, blank and pixel-colour checks (stages the job in `~/Movies`, where sandboxed Compressor 6 may write) |
 | `bash scripts/motn-fcp-browser.sh "Name" …` | does FCP's Titles/Generators browser list them? (FCP running, Accessibility) |
 
 All Python is standard library (system `python3` 3.9+). Rendering needs Compressor and
@@ -81,9 +81,8 @@ on failure, so read the JSON rather than assuming success.
    colour the way the render encodes it (sRGB in the file, gamma-1.961 Rec. 709 out).
 5. **Install**: `motn-install.py work/Brand-EMU.moti --category "EMU" --thumb
    render/Brand-EMU@5s.png`. Use the printed `uid` in the timeline.
-6. **In Final Cut Pro**: FCP scans templates at launch, so **relaunch FCP** (ask
-   first if it's open with the user's work) and confirm with
-   `motn-fcp-browser.sh "Brand-EMU"`. For a timeline, pass the template to the
+6. **In Final Cut Pro**: FCP 13 lists a new template while it runs (no relaunch);
+   confirm with `motn-fcp-browser.sh "Brand-EMU"`, which needs a library open. For a timeline, pass the template to the
    `final-cut-pro` skill's builder as
    `"template": {"name": "Brand-EMU", "uid": "~/Titles.localized/EMU/Brand-EMU/Brand-EMU.moti"}`.
    **Leave out `font`/`size`/`color`**, because any FCPXML text style replaces the

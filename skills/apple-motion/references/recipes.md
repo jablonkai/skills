@@ -60,7 +60,7 @@ python3 $S/motn-variants.py --csv events.csv --base "Brand LT.moti" --category "
   --out-dir variants --render
 ```
 
-Check each reported `render.frames[].png`. Then relaunch FCP and run
+Check each reported `render.frames[].png`. Then run
 `motn-fcp-browser.sh "EMU 6-Day" "EMU 24h" "EMU 100 km"`.
 
 ## A brand-colour generator (solid)

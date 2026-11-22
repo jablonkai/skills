@@ -4,10 +4,14 @@
   motn-render.py FILE --out DIR [--at 1,5] [--setting half|full|proxy|PATH]
                  [--expect "X,Y=#RRGGBB" ...] [--tolerance 8] [--timeout 300]
 
-Compressor renders .moti/.motn/.moef/.motr directly (Motion must be installed; its
-window never opens). Then ffmpeg grabs a PNG at each --at second and reports its luma
-range (`blank` when the frame is flat). --expect samples a pixel (X,Y as pixels, or as
-0..1 fractions of the frame) and compares it with the colour as written in the
+Compressor renders .motn/.moef/.motr directly (Motion must be installed; its window
+never opens). Compressor 6 fails every .moti with "job controller down", so a title is
+rendered from a .motn copy of the same document (identical output). Compressor 6 is
+sandboxed and only writes inside ~/Movies, so the render runs in a staging folder there
+(MOTN_RENDER_STAGING overrides it) and the movie is then moved to --out.
+
+ffmpeg grabs a PNG at each --at second and reports its luma range (`blank` when the
+frame is flat). --expect samples a pixel (X,Y as pixels, or as 0..1 fractions of the frame) and compares it with the colour as written in the
 template: Motion stores sRGB values and the render is BT.709-encoded, so mid-tones come
 out a little darker (0.678 -> 0.640, 0.102 -> 0.094): the expected value is converted the same way (sRGB -> linear -> gamma 1/1.961, fitted to measured renders).
 
@@ -23,6 +27,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 
 APP = os.environ.get("COMPRESSOR_APP", "/Applications/Compressor.app")
@@ -32,6 +37,7 @@ BUILTIN = ("Contents/PlugIns/Compressor/CompressorKit.bundle/Contents/Frameworks
 SETTINGS = {"half": "Proxy Settings/H264 Proxy half size.compressorsetting",
             "full": "Website Sharing/HD1080WebShareName.compressorsetting",
             "proxy": "ProRes/proRes422ProxyName.compressorsetting"}
+STAGING = os.environ.get("MOTN_RENDER_STAGING", os.path.expanduser("~/Movies/.motn-render"))
 ACTIVE = re.compile(r"(?i)process|pend|queue|prepar|submit|activ|wait")
 
 
@@ -70,6 +76,32 @@ def wait(batch, mov, timeout):
                 return status, round(time.time() - t0, 1)
     cli(["-kill", "-batchid", batch])
     raise TimeoutError(f"render still {status or 'queued'} after {timeout}s — batch {batch} cancelled")
+
+
+def stage(src):
+    """Copy the template (and its Media/ folder) into a fresh folder Compressor may write to."""
+    os.makedirs(STAGING, exist_ok=True)
+    d = tempfile.mkdtemp(prefix="job-", dir=STAGING)
+    stem, ext = os.path.splitext(os.path.basename(src))
+    job = os.path.join(d, stem + (".motn" if ext.lower() == ".moti" else ext))
+    shutil.copyfile(src, job)
+    media = os.path.join(os.path.dirname(os.path.abspath(src)), "Media")
+    if os.path.isdir(media):
+        shutil.copytree(media, os.path.join(d, "Media"))
+    return d, job
+
+
+def render(job, setting, mov, name, timeout, res):
+    batch = submit(job, setting, mov, name)
+    status, secs = wait(batch, mov, timeout)
+    if re.search(r"(?i)controller down", status or ""):
+        # transient Compressor failure ("Failed: 2x job controller down"): render once more
+        res["retried"] = status
+        if os.path.exists(mov):
+            os.remove(mov)
+        batch = submit(job, setting, mov, name)
+        status, secs = wait(batch, mov, timeout)
+    return batch, status, secs
 
 
 def probe(mov):
@@ -145,15 +177,18 @@ def main():
         mov = os.path.join(os.path.abspath(a.out), stem + ".mov")
         if os.path.exists(mov):
             os.remove(mov)
-        batch = submit(a.file, setting, mov, "motn-render " + stem)
-        status, secs = wait(batch, mov, a.timeout)
-        if re.search(r"(?i)controller down", status or ""):
-            # transient Compressor failure ("Failed: 2x job controller down"): render once more
-            res["retried"] = status
-            if os.path.exists(mov):
-                os.remove(mov)
-            batch = submit(a.file, setting, mov, "motn-render " + stem)
-            status, secs = wait(batch, mov, a.timeout)
+        sdir, job = stage(a.file)
+        try:
+            smov = os.path.join(sdir, stem + ".mov")
+            batch, status, secs = render(job, setting, smov, "motn-render " + stem, a.timeout, res)
+            if os.path.exists(smov):
+                shutil.move(smov, mov)
+        finally:
+            shutil.rmtree(sdir, ignore_errors=True)
+            try:
+                os.rmdir(STAGING)  # only when no other render is using it
+            except OSError:
+                pass
         res.update(batch=batch, status=status, render_seconds=secs, mov=mov)
         info = probe(mov) if os.path.exists(mov) else None
         if not info or not info["frames"]:

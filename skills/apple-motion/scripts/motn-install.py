@@ -15,8 +15,8 @@ motn-render.py; otherwise large/small.png next to FILE are used if present.
 Prints the FCPXML uid for the final-cut-pro skill. --uninstall moves the template
 folder to the Trash (recoverable). --in-library reads the library's Effects.map, where
 FCP records every user template it resolved on import; an FCPXML uid that pointed
-nowhere never shows up there (FCP imports it without a warning). Final Cut Pro picks up new templates when it
-(re)opens the Titles/Generators browser; a running FCP may need a relaunch.
+nowhere never shows up there (FCP imports it without a warning). Final Cut Pro 13
+lists a new or removed template while it runs; an older FCP may need a relaunch.
 """
 import argparse
 import json
