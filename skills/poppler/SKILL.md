@@ -3,12 +3,12 @@ name: poppler
 description: 'Work on PDFs fast from the command line with poppler (pdfinfo, pdffonts, pdftotext, pdfimages, pdftoppm, pdftocairo, pdfseparate, pdfunite) and qpdf: extract page ranges or every n-th page, merge files in a given order, reorder, rotate and remove pages, split into single pages or chunks, extract text with layout or word boxes, pull embedded images out in their original format, render pages to PNG/JPEG/SVG at a chosen DPI, add or remove passwords, linearise for the web, check and repair damaged files, and report page count, page sizes, fonts (embedded or not) and metadata, every output checked by qpdf --check. Use for "merge these PDFs but only pages 1-3 of the second", "render page 2 at 300 DPI", "extract all images from this PDF", "password-protect this PDF", "which fonts are not embedded", "this PDF is corrupted, fix it". Not for PDF to Markdown (markitdown), Office to PDF or PDF/A (libreoffice), creating PDFs or filling forms in Python (pdf), OCR or redaction (pdfcraft), or when the user names PdfCraft.'
 summary: "split, merge and inspect PDFs with the poppler and qpdf CLIs — page extract, reorder, rotate and remove, text with layout, original-format image extraction, DPI page renders, password add and remove, linearise and repair, qpdf --check verified"
 category: document-conversion
-compatibility: "Built for poppler 26.10.0 and qpdf 12.4.2 (Homebrew) on macOS 27.2; Python 3.9+ for the helper scripts. Also runs with poppler-utils and qpdf on Linux."
+compatibility: "Built for poppler 26.11.0 and qpdf 12.4.2 (Homebrew) on macOS 27.2; Python 3.9+ for the helper scripts. Also runs with poppler-utils and qpdf on Linux."
 risk: low
 tags: [pdf, poppler, qpdf, pdftotext, pdfimages, pdftoppm, merge, split, encryption]
 license: GPL-3.0-only
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   author: "Tamás Jablonkai"
 ---
 
@@ -18,7 +18,7 @@ Headless command-line tools only: no app, no bridge. Each operation is one short
 process. poppler reads and renders, qpdf rewrites structure (pages, encryption,
 linearisation, repair). The bundled scripts wrap both. They pick the right tool for each
 job, keep passwords off the command line, and **check every output**: `qpdf --check`,
-page count, text or pixel size. Verified against **poppler 26.10.0** and **qpdf 12.4.2**
+page count, text or pixel size. Verified against **poppler 26.11.0** and **qpdf 12.4.2**
 on macOS 27.2.
 
 ```sh

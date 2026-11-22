@@ -1,6 +1,6 @@
 # Raw-CLI recipes beyond the scripts
 
-All verified with poppler 26.10.0 and qpdf 12.4.2. Check every output afterwards with
+All verified with poppler 26.11.0 and qpdf 12.4.2. Check every output afterwards with
 `qpdf --check OUT` and `qpdf --show-npages OUT`.
 
 ## Overlay / underlay (stamp, letterhead, watermark page)

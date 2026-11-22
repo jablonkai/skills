@@ -1,4 +1,4 @@
-# Gotchas — behaviour verified on poppler 26.10.0 / qpdf 12.4.2
+# Gotchas — behaviour verified on poppler 26.11.0 / qpdf 12.4.2
 
 Each item looks right on the first try and isn't.
 
