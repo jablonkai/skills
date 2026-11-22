@@ -1,7 +1,8 @@
-# The ozml format (Motion 6.4)
+# The ozml format (Motion 7.0)
 
-Reverse-engineered from the templates shipped with Final Cut Pro 12.4 / Motion 6.4,
-then checked by editing and rendering through Compressor and importing into FCP.
+Reverse-engineered from the templates shipped with Final Cut Pro and Motion (last
+checked against Final Cut Pro 13.0 / Motion 7.0), then checked by editing and rendering
+through Compressor and importing into FCP.
 Apple doesn't document it. Treat what isn't listed here as opaque and leave it alone.
 
 ## File anatomy
@@ -9,7 +10,7 @@ Apple doesn't document it. Treat what isn't listed here as opaque and leave it a
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE ozxmlscene>
-<ozml version="5.13">                       <!-- 5.8 in older templates; both load -->
+<ozml version="5.13">                       <!-- 5.14 in the newest, 4.0–5.11 in older ones; all load -->
 <displayversion>5.7</displayversion>
 <factory id="25" uuid="…"><description>Text</description>…</factory>   <!-- one per object type -->
 …
@@ -25,6 +26,10 @@ Apple doesn't document it. Treat what isn't listed here as opaque and leave it a
 </ozml>
 ```
 
+- Versions: FCP 13 ships mostly 5.13, 5.14 for the newest Dynamic Titles and
+  Backgrounds, and 5.5–5.11 for older ones. 5.14 adds no new factory types and keeps
+  `publishSettings` version 2, so the scripts treat them all alike and keep a file's
+  own version when they save it.
 - `factoryID` on an object points at a `<factory>`, whose `<description>` names the
   type: `Text`, `Shape`, `Image`, `Group`, `Widget`, `Rig`, `Rig Behavior`,
   `Sequence Text`, `Style`, `Generator`… The ids are per file, so compare by
@@ -112,7 +117,7 @@ contain wide-gamut values outside 0–1 (e.g. 1.027 / 0.858 / −0.289).
 FCP shows these, **in this order**, under *Published Parameters* in the Title
 inspector, with the right control for the type: colour well, font popup with weight,
 checkbox, popup, slider. Adding a `<target>` is enough. The parameter itself must
-exist, so the edit script creates a missing colour param. Verified in FCP 12.4: "Name
+exist, so the edit script creates a missing colour param. Verified in FCP 12.4 and 13.0: "Name
 Color" and "Role Font" added by the script appeared with working controls.
 
 ## Rigs
@@ -152,8 +157,18 @@ file (`<relativeURL>Media/Drop_Zone.png</relativeURL>`). `motn-find --copy` and
 
 ## Rendering
 
-`Compressor -jobpath file:///abs/path.moti -settingpath X.compressorsetting -locationpath out.mov`
-renders any template type headless, provided Motion is installed. Titles and effects
+`Compressor -jobpath file:///abs/path.motn -settingpath X.compressorsetting -locationpath out.mov`
+renders a template headless, provided Motion is installed. Two Compressor 6 limits,
+both handled by `motn-render.py`:
+
+- A `.moti` job always fails with `Failed: 2x job controller down`; `.motn`, `.moef`
+  and `.motr` render. The same title document saved as `.motn` renders identically,
+  drop zone included, so the script submits a `.motn` copy.
+- Compressor is sandboxed: `-locationpath` outside `~/Movies` (or a custom Location
+  added in Compressor) is refused with "you don't have permission". The script renders
+  into `~/Movies/.motn-render/` and moves the movie to `--out`.
+
+Titles and effects
 render over the drop-zone placeholder (a grey square with an arrow), and the length is
 the template's own (`sceneSettings/duration`). The built-in "H264 Proxy half size"
 setting renders a 10 s 4K title in about 15 s.

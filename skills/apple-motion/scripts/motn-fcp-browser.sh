@@ -5,11 +5,12 @@
 #   bash motn-fcp-browser.sh --all            print every name the browser shows
 #
 # Reads FCP's window through Accessibility (System Events): it shows the Titles and
-# Generators sidebar if it is hidden (one checkbox click; nothing else is clicked or
-# typed), then collects the browser item names. FCP must be running with a library
-# open. Exit 0 when every name is listed, 1 when one is missing, 2 when FCP or
-# Accessibility is unavailable. A template installed while FCP runs may only appear
-# after FCP is relaunched — that is FCP's cache, not a failed install.
+# Generators sidebar if it is hidden (one checkbox click), selects each top-level
+# sidebar row (Titles, then Generators) to collect the browser item names, and puts
+# the previous sidebar selection back. Nothing else is clicked or typed. FCP must be
+# running with a library open. Exit 0 when every name is listed, 1 when one is
+# missing, 2 when FCP or Accessibility is unavailable. FCP 13 picks up a newly
+# installed template while it runs; an older FCP may need a relaunch.
 set -euo pipefail
 
 if ! pgrep -xq "Final Cut Pro"; then
@@ -23,33 +24,57 @@ function run() {
   const p = se.processes.byName('Final Cut Pro');
   const w = p.windows.byName('Final Cut Pro');
   // descend only through layout containers, so the thousands of timeline items stay unvisited
-  function find(e, test, d) {
+  function find(e, test, d, via) {
     if (d > 9) return null;
     let kids = []; try { kids = e.uiElements(); } catch (x) {}
     for (const k of kids) { try { if (test(k)) return k; } catch (x) {} }
     for (const k of kids) {
       let r = ''; try { r = k.role(); } catch (x) {}
-      if (r === 'AXGroup' || r === 'AXSplitGroup') { const f = find(k, test, d + 1); if (f) return f; }
+      if ((via || ['AXGroup', 'AXSplitGroup']).includes(r)) { const f = find(k, test, d + 1, via); if (f) return f; }
     }
     return null;
   }
-  const cb = find(w, e => e.role() === 'AXCheckBox' && /Titles and Generators/.test(e.description()), 0);
+  const isCb = re => e => e.role() === 'AXCheckBox' && re.test(e.description());
+  const cb = find(w, isCb(/Titles and Generators/), 0);
   if (!cb) return 'ERR no Titles and Generators sidebar button (is a library open?)';
-  if (String(cb.value()) !== '1') { cb.click(); delay(2); }
   const box = cb.attributes.byName('AXParent').value();
+  // the checkbox values track the last chosen sidebar, not what is on screen (clicking the
+  // active one hides the sidebar), so look at the list itself: Titles and Generators rows
+  // hold static text, library rows an editable text field
+  function titlesList() {
+    const o = find(box, e => e.role() === 'AXOutline', 0, ['AXSplitGroup', 'AXScrollArea']);
+    try { if (o && o.rows[0].uiElements[0].uiElements[0].staticTexts.length) return o; } catch (x) {}
+    return null;
+  }
+  let outline = titlesList();
+  for (let i = 0; i < 2 && !outline; i++) { cb.click(); delay(2); outline = titlesList(); }
+  if (!outline) return 'ERR no Titles and Generators sidebar list';
   // breadth-first with bulk queries (one Apple Event per level, not per item):
   // the element whose children are all AXImage is the browser grid
-  let q = [box], out = [];
-  for (let d = 0; d < 6 && q.length && !out.length; d++) {
-    const next = [];
-    for (const e of q) {
-      let roles = []; try { roles = e.uiElements.role(); } catch (x) {}
-      if (roles.length && roles.every(r => r === 'AXImage')) { out = out.concat(e.uiElements.name()); continue; }
-      roles.forEach((r, i) => { if (!['AXImage', 'AXOutline', 'AXStaticText', 'AXButton', 'AXCheckBox', 'AXTextField'].includes(r)) next.push(e.uiElements[i]); });
+  function grid() {
+    let q = [box], out = [];
+    for (let d = 0; d < 6 && q.length && !out.length; d++) {
+      const next = [];
+      for (const e of q) {
+        let roles = []; try { roles = e.uiElements.role(); } catch (x) {}
+        if (roles.length && roles.every(r => r === 'AXImage')) { out = out.concat(e.uiElements.name()); continue; }
+        roles.forEach((r, i) => { if (!['AXImage', 'AXOutline', 'AXStaticText', 'AXButton', 'AXCheckBox', 'AXTextField'].includes(r)) next.push(e.uiElements[i]); });
+      }
+      q = next;
     }
-    q = next;
+    return out;
   }
-  return out.join('\n');
+  // with no sidebar row selected the browser is empty, so list each top-level row (Titles, Generators)
+  const levels = outline.rows.attributes.byName('AXDisclosureLevel').value();
+  const before = outline.rows.selected().indexOf(true);
+  let names = [];
+  levels.forEach((lv, i) => {
+    if (lv !== 0) return;
+    outline.rows[i].selected = true; delay(1.5);
+    names = names.concat(grid());
+  });
+  if (before >= 0) outline.rows[before].selected = true;
+  return names.join('\n');
 }
 JXA
 ) || true
@@ -67,6 +92,9 @@ fi
 NAMES="$names" python3 - "$@" <<'PY'
 import json, os, sys
 shown = [n for n in os.environ["NAMES"].splitlines() if n]
+if not shown:
+    print(json.dumps({"ok": False, "error": "the Titles and Generators browser is empty (is a library open?)"}))
+    sys.exit(2)
 # FCP shows a template in a nested category as "Sub - Name"; match either form
 found = {w: any(s == w or s.endswith(" - " + w) for s in shown) for w in sys.argv[1:]}
 print(json.dumps({"ok": all(found.values()), "browser_items": len(shown), "found": found}, ensure_ascii=False))
