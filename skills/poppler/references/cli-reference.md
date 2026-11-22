@@ -1,4 +1,4 @@
-# CLI reference — poppler 26.10.0 and qpdf 12.4.2
+# CLI reference — poppler 26.11.0 and qpdf 12.4.2
 
 The flags that matter, checked against the installed `-h` / `--help=` output. Full
 help: `pdftotext -h`, `qpdf --help=all`, <https://qpdf.readthedocs.io>.
