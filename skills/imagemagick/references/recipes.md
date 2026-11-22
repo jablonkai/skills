@@ -1,7 +1,7 @@
 # More recipes
 
 Raw `magick` commands for jobs the scripts don't wrap. Each was run against
-7.1.2-34. `F` is a font file (`bash scripts/im.sh --check` prints one).
+7.1.2-36. `F` is a font file (`bash scripts/im.sh --check` prints one).
 
 ```sh
 F=/System/Library/Fonts/Supplemental/Arial.ttf
