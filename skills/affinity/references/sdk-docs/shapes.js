@@ -55,8 +55,8 @@ const {
 } = require('affinity:geometry');
 const { HandleObject } = require('/handleobject.js');
 
-// monkey patches:
-require('/geometry.js');
+// also monkey patches:
+const { PolyCurve } = require('/geometry.js');
 
 function createTypedQRPayload(payloadHandle) {
     if (payloadHandle == null)
@@ -392,7 +392,7 @@ class QRPayloadVCard extends QRPayload {
         return new QRPayloadVCard(QRPayloadVCardApi.clone(this.handle));
     }
 
-    getpPrefixes() {
+    get prefixes() {
         return QRPayloadVCardApi.getPrefixes(this.handle);
     }
 
@@ -659,7 +659,7 @@ class Shape extends HandleObject {
     }
 
     getCurves(bounds, transform = null) {
-        return ShapeApi.getCurves(this.handle, bounds, transform);
+        return new PolyCurve(ShapeApi.getCurves(this.handle, bounds, transform));
     }
 
     get rotationOrder() {

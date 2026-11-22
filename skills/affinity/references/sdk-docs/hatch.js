@@ -21,7 +21,7 @@ class HatchLine extends HandleObject {
     }
 
     static create(origin, rotation, step, pattern) {
-        return new HatchLine(HatchLineApi.create(origin, rotation, step, pattern?.handle));
+        return new HatchLine(HatchLineApi.create(origin, rotation, step, pattern));
     }
 
     get origin() {

@@ -36,6 +36,14 @@ class RasterInterface extends HandleObject {
         return RasterInterfaceApi.getPixelSize(this.handle);
     }
 
+    get rasterBoundingBox() {
+        return RasterInterfaceApi.getRasterBoundingBox(this.handle);
+    }
+
+    get inverseRasterBoundingBox() {
+        return RasterInterfaceApi.getInverseRasterBoundingBox(this.handle);
+    }
+
     createCompatibleBitmap(copyContents) {
         return new Bitmap(RasterInterfaceApi.createCompatibleBitmap(this.handle, copyContents));
     }

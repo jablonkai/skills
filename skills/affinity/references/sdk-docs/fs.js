@@ -34,6 +34,13 @@ class File extends HandleObject {
         return file;
     }
     
+    // a read-only File over a resource from the script's bundle; no file system permission is involved
+    static createFromResource(resource) {
+        const file = new File(FileApi.create());
+        file.openFromResource(resource);
+        return file;
+    }
+
     static length(path) {
         return File.create(path, 'rb').length;
     }
@@ -46,6 +53,10 @@ class File extends HandleObject {
         if (!mode)
             mode = 'r';
         return FileApi.open(this.handle, path, mode);
+    }
+
+    openFromResource(resource) {
+        return FileApi.openFromResource(this.handle, resource.handle);
     }
     
     seek(offset, origin) {
@@ -80,8 +91,8 @@ class File extends HandleObject {
         return this.writeStringAsUtf8(str);
     }
     
-    tell() {
-        return FileApi.tell(this.handle);
+    tell(asBigInt = false) {
+        return FileApi.tell(this.handle, asBigInt);
     }
     
     get isEof() {
@@ -108,44 +119,36 @@ class File extends HandleObject {
         return FileApi.seekAsync(this.handle, offset, origin, callback);
     }
     
+    // the native callback is (err, bytes), as in C; JSLib adds the buffer, as Node's fs.read and fs.write do
     readAsync(buffer, offset, length, position, callback) {
-        if (buffer instanceof Buffer) {
-            let wrapped = callback;
-            if (typeof callback === 'function') {
-                wrapped = (errorCode, numBytes) => callback(errorCode, numBytes, buffer);
-            }
-            return FileApi.readAsync(this.handle, buffer.handle, offset, length, position, wrapped);
-        }
-        return FileApi.readAsync(this.handle, buffer, offset, length, position, callback);
+        const wrapped = typeof callback === 'function' ? (errorCode, numBytes) => callback(errorCode, numBytes, buffer) : callback;
+        return FileApi.readAsync(this.handle, buffer instanceof Buffer ? buffer.handle : buffer, offset, length, position ?? -1, wrapped);
     }
     
     writeAsync(buffer, offset, length, position, callback) {
-        if (buffer instanceof Buffer) {
-            let wrapped = callback;
-            if (typeof callback === 'function') {
-                wrapped = (errorCode, numBytes) => callback(errorCode, numBytes, buffer);
-            }
-            return FileApi.writeAsync(this.handle, buffer.handle, offset, length, position, wrapped);
-        }
-        return FileApi.writeAsync(this.handle, buffer, offset, length, position, callback);
+        const wrapped = typeof callback === 'function' ? (errorCode, numBytes) => callback(errorCode, numBytes, buffer) : callback;
+        return FileApi.writeAsync(this.handle, buffer instanceof Buffer ? buffer.handle : buffer, offset, length, position ?? -1, wrapped);
     }
 
+    // these pass the temporary buffer's handle back, as they did when the native callback supplied it
     writeStringAsUtf8Async(str, position, callback) {
         let buf = Buffer.utf8(str);
-        return FileApi.writeAsync(this.handle, buf.handle, 0, buf.length, position, callback);
+        const wrapped = typeof callback === 'function' ? (errorCode, numBytes) => callback(errorCode, numBytes, buf.handle) : callback;
+        return FileApi.writeAsync(this.handle, buf.handle, 0, buf.length, position ?? -1, wrapped);
     }
 
     writeStringAsUtf16Async(str, position, callback) {
         let buf = Buffer.utf16(str);
-        return FileApi.writeAsync(this.handle, buf.handle, 0, buf.length, position, callback);
+        const wrapped = typeof callback === 'function' ? (errorCode, numBytes) => callback(errorCode, numBytes, buf.handle) : callback;
+        return FileApi.writeAsync(this.handle, buf.handle, 0, buf.length, position ?? -1, wrapped);
     }
 
     writeStringAsync(str, position, callback) {
         return this.writeStringAsUtf8Async(str, position, callback);
     }
     
-    tellAsync(callback) {
-        return FileApi.tellAsync(this.handle, callback);
+    tellAsync(callback, asBigInt = false) {
+        return FileApi.tellAsync(this.handle, callback, asBigInt);
     }
     
     isEofAsync(callback) {
@@ -246,7 +249,7 @@ class FilePromises {
         });
     }
     
-    read(buffer, offset, length, position) {
+    read(buffer, offset, length, position = -1) {
         let file = this.file;
         return new Promise((resolve, reject) => {
             file.readAsync(buffer, offset, length, position, (err, numBytes, buffer) => {
@@ -258,7 +261,7 @@ class FilePromises {
         });
     }
     
-    write(buffer, offset, length, position) {
+    write(buffer, offset, length, position = -1) {
         let file = this.file;
         return new Promise((resolve, reject) => {
             file.writeAsync(buffer, offset, length, position, (err, numBytes, buffer) => {
@@ -270,7 +273,7 @@ class FilePromises {
         });
     }
     
-    tell() {
+    tell(asBigInt = false) {
         let file = this.file;
         return new Promise((resolve, reject) => {
             file.tellAsync((err, pos) => {
@@ -278,7 +281,7 @@ class FilePromises {
                     reject(err);
                 else
                     resolve(pos);
-            });
+            }, asBigInt);
         });
     }
     
@@ -388,6 +391,7 @@ class DirectoryIterator extends HandleObject {
 
 class DirectoryEntries extends Collection {
     #path;
+    #resolveSymlink;
     constructor(path, resolveSymlink = true) {
         const gen = function*() {
             const iter = DirectoryIterator.at(path);
@@ -398,10 +402,11 @@ class DirectoryEntries extends Collection {
         };
         super(gen);
         this.#path = path;
+        this.#resolveSymlink = resolveSymlink;
     }
     
     get all() {
-        return new RecursiveDirectoryEntries(this.#path);
+        return new RecursiveDirectoryEntries(this.#path, this.#resolveSymlink);
     }
     
     get files() {
@@ -422,8 +427,9 @@ class RecursiveDirectoryEntries extends Collection {
             while (!iter.done) {
                 const entry = iter.entry(resolveSymlink);
                 yield entry;
-                if (entry.status.type.value == PathType.Directory) {
-                    const sub = new RecursiveDirectoryEntries(entry.path);
+                // Like Node and Python, never descend through a symlink, so a link to an ancestor can't loop
+                if (iter.symlinkStatus.type.value == PathType.Directory) {
+                    const sub = new RecursiveDirectoryEntries(entry.path, resolveSymlink);
                     for (const e of sub) {
                         yield e;
                     }
@@ -457,6 +463,10 @@ class Directory {
 
     get entries() {
         return new DirectoryEntries(this.#path);
+    }
+
+    getEntries(resolveSymlink = true) {
+        return new DirectoryEntries(this.#path, resolveSymlink);
     }
 }
 
@@ -677,11 +687,11 @@ class FileSystemPromises
     
     static getSpace(path, useBigInts) {
         return new Promise((resolve, reject) => {
-            FileSystemApi.getSpaceAsync(path, (err, available, free, capacity) => {
+            FileSystemApi.getSpaceAsync(path, (err, space) => {
                 if (err)
                     reject(err);
                 else
-                    resolve({available:available, free:free, capacity:capacity});
+                    resolve(space);
             }, useBigInts);
         });
     }

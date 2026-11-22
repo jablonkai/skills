@@ -30,6 +30,8 @@ const {
     LineDescriptors,
     LogicalNodeApi,
     LogicalNodeDefinitionApi,
+    MaskRasterNodeApi,
+    MaskRasterNodeDefinitionApi,
     NodeApi,
     NodeDefinitionApi,
     PatternRasterNodeApi,
@@ -270,6 +272,7 @@ const { createTypedShape, Shape } = require('/shapes.js');
 // cyclics:
 const ArtboardInterfaceModule = require('/artboardinterface.js');
 const BaseBoxInterfaceModule = require('/baseboxinterface.js');
+const BaselineGridInterfaceModule = require('/baselinegridinterface.js');
 const BlendModeInterfaceModule = require('/blendmodeinterface.js');
 const BrushFillInterfaceModule = require('/brushfillinterface.js');
 const CommandsModule  = require('/commands.js');
@@ -405,6 +408,10 @@ class Node extends Selectable {
 
     isSameNode(otherNode) {
         return NodeApi.isSameNode(this.handle, otherNode.handle);
+    }
+
+    get nodeId() {
+        return NodeApi.getNodeId(this.handle);
     }
 
     get document() {
@@ -580,6 +587,19 @@ class Node extends Selectable {
         return this.blendModeInterface.antialiasingMode;
     }
 
+    // baseline grid interface
+    #baselineGridInterface;
+    get baselineGridInterface() {
+        if (this.#baselineGridInterface === undefined) {
+            this.#baselineGridInterface = BaselineGridInterfaceModule.BaselineGridInterface.fromNode(this);
+        }
+        return this.#baselineGridInterface;
+    }
+
+    get baselineGridOptions() {
+        return this.baselineGridInterface?.baselineGridOptions ?? null;
+    }
+
     // description interface
     #descriptionInterface;
     get descriptionInterface() {
@@ -644,13 +664,13 @@ class Node extends Selectable {
 
     lock(preview) {
         const selection = this.selfSelection;
-        const command = CommandsModule.DocumentCommand.createSetEditable(selection.handle, false);
+        const command = CommandsModule.DocumentCommand.createSetEditable(selection, false);
         return this.document.executeCommand(command, preview);
     }
 
     unlock(preview) {
         const selection = this.selfSelection;
-        const command = CommandsModule.DocumentCommand.createSetEditable(selection.handle, true);
+        const command = CommandsModule.DocumentCommand.createSetEditable(selection, true);
         return this.document.executeCommand(command, preview);
     }
 
@@ -786,7 +806,9 @@ class Node extends Selectable {
 
     duplicate(transform = null) {
         const doc = this.document;
-        const selection = SelectionsModule.Selection.create(doc, this);
+        const selection = SelectionsModule.Selection.createEmpty(doc);
+        if (!selection.addNode(this))
+            throw new Error(`${this[Symbol.toStringTag]} can't be duplicated`);
         const cmd = CommandsModule.DocumentCommand.createTransform(selection, transform, {duplicateNodes:true});
         doc.executeCommand(cmd);
         return cmd.newNodes[0];
@@ -1087,6 +1109,17 @@ class DocumentNode extends LogicalNode {
 
     get isDocumentNode() {
         return true;
+    }
+
+    #baselineGridInterface;
+    get baselineGridInterface() {
+        if (!this.#baselineGridInterface)
+            this.#baselineGridInterface = new BaselineGridInterfaceModule.BaselineGridInterface(DocumentNodeApi.getBaselineGridInterface(this.handle));
+        return this.#baselineGridInterface;
+    }
+
+    get baselineGridOptions() {
+        return this.baselineGridInterface.baselineGridOptions;
     }
 
     get pageCount() {
@@ -2155,6 +2188,14 @@ class RasterNode extends PhysicalNode {
         return this.rasterInterface.pixelSize;
     }
 
+    get rasterBoundingBox() {
+        return this.rasterInterface.rasterBoundingBox;
+    }
+
+    get inverseRasterBoundingBox() {
+        return this.rasterInterface.inverseRasterBoundingBox;
+    }
+
     createCompatibleBitmap(copyContents) {
         return this.rasterInterface.createCompatibleBitmap(copyContents);
     }
@@ -2186,12 +2227,14 @@ class RasterNodeDefinition extends PhysicalNodeDefinition {
         return true;
     }
     
+    // null clears it; an enclosure definition then gets a system-generated mask on add.
     set bitmap(bm) {
-        RasterNodeDefinitionApi.setBitmap(this.handle, bm.handle);
+        RasterNodeDefinitionApi.setBitmap(this.handle, bm?.handle);
     }
     
     get bitmap() {
-        return new RasterObject(RasterNodeDefinitionApi.getBitmap(this.handle));
+        const handle = RasterNodeDefinitionApi.getBitmap(this.handle);
+        return handle ? new RasterObject(handle) : null;
     }
 
     setBitmap(bm) {
@@ -2282,6 +2325,59 @@ class EnclosureRasterNodeDefinition extends RasterNodeDefinition {
     
     get isEnclosureRasterNodeDefinition() {
         return true;
+    }
+
+    // Beyond the mask bitmap: false = Full (the node default), true = empty.
+    get extendEmpty() {
+        return EnclosureRasterNodeDefinitionApi.getExtendEmpty(this.handle);
+    }
+
+    set extendEmpty(value) {
+        EnclosureRasterNodeDefinitionApi.setExtendEmpty(this.handle, value);
+    }
+
+    setExtendEmpty(value) {
+        this.extendEmpty = value;
+        return this;
+    }
+}
+
+
+class MaskRasterNode extends EnclosureRasterNode {
+    constructor(handle) {
+        super(handle);
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'MaskRasterNode';
+    }
+
+    get isMaskRasterNode() {
+        return true;
+    }
+}
+
+
+// Like every enclosure definition: no bitmap means the mask is generated on add (reveal-all, or hide-all when
+// extendEmpty); a bitmap in document.maskFormat is used as-is, positioned by `transform`.
+class MaskRasterNodeDefinition extends EnclosureRasterNodeDefinition {
+    constructor(handle) {
+        super(handle);
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'MaskRasterNodeDefinition';
+    }
+
+    get isMaskRasterNodeDefinition() {
+        return true;
+    }
+
+    static create(bitmap = null) {
+        const def = new MaskRasterNodeDefinition(MaskRasterNodeDefinitionApi.create());
+        if (bitmap)
+            def.bitmap = bitmap;
+        return def;
     }
 }
 
@@ -8596,177 +8692,177 @@ class VectorNodeDefinition extends PhysicalNodeDefinition {
 
 
 class MeasurementNode extends VectorNode {
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'MeasurementNode';
-	}
+    get [Symbol.toStringTag]() {
+        return 'MeasurementNode';
+    }
 
-	get isMeasurementNode() {
-		return true;
-	}
+    get isMeasurementNode() {
+        return true;
+    }
 
-	get factor() {
-		return MeasurementNodeApi.getFactor(this.handle);
-	}
+    get factor() {
+        return MeasurementNodeApi.getFactor(this.handle);
+    }
 
-	get scaledUnitType() {
-		return MeasurementNodeApi.getScaledUnitType(this.handle);
-	}
+    get scaledUnitType() {
+        return MeasurementNodeApi.getScaledUnitType(this.handle);
+    }
 
-	// UnitType.number means "follow the document units" rather than a unit the user pinned.
-	get displayUnitType() {
-		return MeasurementNodeApi.getDisplayUnitType(this.handle);
-	}
+    // UnitType.number means "follow the document units" rather than a unit the user pinned.
+    get displayUnitType() {
+        return MeasurementNodeApi.getDisplayUnitType(this.handle);
+    }
 
-	get annotationOffset() {
-		return MeasurementNodeApi.getAnnotationOffset(this.handle);
-	}
+    get annotationOffset() {
+        return MeasurementNodeApi.getAnnotationOffset(this.handle);
+    }
 
-	get showEndpointMarkers() {
-		return MeasurementNodeApi.getShowEndpointMarkers(this.handle);
-	}
+    get showEndpointMarkers() {
+        return MeasurementNodeApi.getShowEndpointMarkers(this.handle);
+    }
 
-	get useDocumentPrecision() {
-		return MeasurementNodeApi.getUseDocumentPrecision(this.handle);
-	}
+    get useDocumentPrecision() {
+        return MeasurementNodeApi.getUseDocumentPrecision(this.handle);
+    }
 
-	get decimalPlaces() {
-		return MeasurementNodeApi.getDecimalPlaces(this.handle);
-	}
+    get decimalPlaces() {
+        return MeasurementNodeApi.getDecimalPlaces(this.handle);
+    }
 
-	get spreadDistance() {
-		return MeasurementNodeApi.getSpreadDistance(this.handle);
-	}
+    get spreadDistance() {
+        return MeasurementNodeApi.getSpreadDistance(this.handle);
+    }
 
-	// Returns {start, end} as Points in spread space.
-	get spreadEndpoints() {
-		return MeasurementNodeApi.getSpreadEndpoints(this.handle);
-	}
+    // Returns {start, end} as Points in spread space.
+    get spreadEndpoints() {
+        return MeasurementNodeApi.getSpreadEndpoints(this.handle);
+    }
 }
 
 
 class MeasurementNodeDefinition extends VectorNodeDefinition {
-	constructor(handle) {
-		super(handle);
-	}
+    constructor(handle) {
+        super(handle);
+    }
 
-	get [Symbol.toStringTag]() {
-		return 'MeasurementNodeDefinition';
-	}
+    get [Symbol.toStringTag]() {
+        return 'MeasurementNodeDefinition';
+    }
 
-	get isMeasurementNodeDefinition() {
-		return true;
-	}
+    get isMeasurementNodeDefinition() {
+        return true;
+    }
 
-	get annotationOffset() {
-		return MeasurementNodeDefinitionApi.getAnnotationOffset(this.handle);
-	}
+    get annotationOffset() {
+        return MeasurementNodeDefinitionApi.getAnnotationOffset(this.handle);
+    }
 
-	set annotationOffset(offset) {
-		MeasurementNodeDefinitionApi.setAnnotationOffset(this.handle, offset);
-	}
+    set annotationOffset(offset) {
+        MeasurementNodeDefinitionApi.setAnnotationOffset(this.handle, offset);
+    }
 
     setAnnotationOffset(offset) {
-		this.annotationOffset = offset;
+        this.annotationOffset = offset;
         return this;
-	}
+    }
 
-	get showEndpointMarkers() {
-		return MeasurementNodeDefinitionApi.getShowEndpointMarkers(this.handle);
-	}
+    get showEndpointMarkers() {
+        return MeasurementNodeDefinitionApi.getShowEndpointMarkers(this.handle);
+    }
 
-	set showEndpointMarkers(show) {
-		MeasurementNodeDefinitionApi.setShowEndpointMarkers(this.handle, show);
-	}
+    set showEndpointMarkers(show) {
+        MeasurementNodeDefinitionApi.setShowEndpointMarkers(this.handle, show);
+    }
 
-	setShowEndpointMarkers(show) {
-		this.showEndpointMarkers = show;
-		return this;
-	}
+    setShowEndpointMarkers(show) {
+        this.showEndpointMarkers = show;
+        return this;
+    }
 
-	// {start, end} as Points.
-	get endpoints() {
-		return MeasurementNodeDefinitionApi.getEndpoints(this.handle);
-	}
+    // {start, end} as Points.
+    get endpoints() {
+        return MeasurementNodeDefinitionApi.getEndpoints(this.handle);
+    }
 
-	set endpoints(endpoints) {
-		MeasurementNodeDefinitionApi.setEndpoints(this.handle, endpoints.start, endpoints.end);
-	}
+    set endpoints(endpoints) {
+        MeasurementNodeDefinitionApi.setEndpoints(this.handle, endpoints.start, endpoints.end);
+    }
 
-	setEndpoints(start, end) {
-		MeasurementNodeDefinitionApi.setEndpoints(this.handle, start, end);
-		return this;
-	}
+    setEndpoints(start, end) {
+        MeasurementNodeDefinitionApi.setEndpoints(this.handle, start, end);
+        return this;
+    }
 
-	get factor() {
-		return MeasurementNodeDefinitionApi.getFactor(this.handle);
-	}
+    get factor() {
+        return MeasurementNodeDefinitionApi.getFactor(this.handle);
+    }
 
-	set factor(factor) {
-		MeasurementNodeDefinitionApi.setFactor(this.handle, factor);
-	}
+    set factor(factor) {
+        MeasurementNodeDefinitionApi.setFactor(this.handle, factor);
+    }
 
-	setFactor(factor) {
-		this.factor = factor;
-		return this;
-	}
+    setFactor(factor) {
+        this.factor = factor;
+        return this;
+    }
 
-	get scaledUnitType() {
-		return MeasurementNodeDefinitionApi.getScaledUnitType(this.handle);
-	}
+    get scaledUnitType() {
+        return MeasurementNodeDefinitionApi.getScaledUnitType(this.handle);
+    }
 
-	set scaledUnitType(unitType) {
-		MeasurementNodeDefinitionApi.setScaledUnitType(this.handle, unitType);
-	}
+    set scaledUnitType(unitType) {
+        MeasurementNodeDefinitionApi.setScaledUnitType(this.handle, unitType);
+    }
 
-	setScaledUnitType(unitType) {
-		this.scaledUnitType = unitType;
-		return this;
-	}
+    setScaledUnitType(unitType) {
+        this.scaledUnitType = unitType;
+        return this;
+    }
 
-	get useDocumentPrecision() {
-		return MeasurementNodeDefinitionApi.getUseDocumentPrecision(this.handle);
-	}
+    get useDocumentPrecision() {
+        return MeasurementNodeDefinitionApi.getUseDocumentPrecision(this.handle);
+    }
 
-	set useDocumentPrecision(useDocumentPrecision) {
-		MeasurementNodeDefinitionApi.setDisplayPrecision(this.handle, useDocumentPrecision, this.decimalPlaces);
-	}
+    set useDocumentPrecision(useDocumentPrecision) {
+        MeasurementNodeDefinitionApi.setDisplayPrecision(this.handle, useDocumentPrecision, this.decimalPlaces);
+    }
 
-	get decimalPlaces() {
-		return MeasurementNodeDefinitionApi.getDecimalPlaces(this.handle);
-	}
+    get decimalPlaces() {
+        return MeasurementNodeDefinitionApi.getDecimalPlaces(this.handle);
+    }
 
-	set decimalPlaces(decimalPlaces) {
-		MeasurementNodeDefinitionApi.setDisplayPrecision(this.handle, this.useDocumentPrecision, decimalPlaces);
-	}
+    set decimalPlaces(decimalPlaces) {
+        MeasurementNodeDefinitionApi.setDisplayPrecision(this.handle, this.useDocumentPrecision, decimalPlaces);
+    }
 
-	setDisplayPrecision(useDocumentPrecision, decimalPlaces) {
-		MeasurementNodeDefinitionApi.setDisplayPrecision(this.handle, useDocumentPrecision, decimalPlaces);
-		return this;
-	}
+    setDisplayPrecision(useDocumentPrecision, decimalPlaces) {
+        MeasurementNodeDefinitionApi.setDisplayPrecision(this.handle, useDocumentPrecision, decimalPlaces);
+        return this;
+    }
 
-	// The label's whole text appearance - font, size and colours. Set to null to follow the document default.
-	// The getter hands back a mutable copy, so editing it does not affect the definition until it is set back.
-	get labelGlyphAtts() {
-		const handle = MeasurementNodeDefinitionApi.getLabelGlyphAtts(this.handle);
-		return handle ? new GlyphAtts(handle) : null;
-	}
+    // The label's whole text appearance - font, size and colours. Set to null to follow the document default.
+    // The getter hands back a mutable copy, so editing it does not affect the definition until it is set back.
+    get labelGlyphAtts() {
+        const handle = MeasurementNodeDefinitionApi.getLabelGlyphAtts(this.handle);
+        return handle ? new GlyphAtts(handle) : null;
+    }
 
-	set labelGlyphAtts(glyphAtts) {
-		MeasurementNodeDefinitionApi.setLabelGlyphAtts(this.handle, glyphAtts?.handle);
-	}
+    set labelGlyphAtts(glyphAtts) {
+        MeasurementNodeDefinitionApi.setLabelGlyphAtts(this.handle, glyphAtts?.handle);
+    }
 
-	setLabelGlyphAtts(glyphAtts) {
-		this.labelGlyphAtts = glyphAtts;
-		return this;
-	}
+    setLabelGlyphAtts(glyphAtts) {
+        this.labelGlyphAtts = glyphAtts;
+        return this;
+    }
 
-	static create(start, end, factor, unitType) {
-		return new MeasurementNodeDefinition(MeasurementNodeDefinitionApi.create(start, end, factor, unitType));
-	}
+    static create(start, end, factor, unitType) {
+        return new MeasurementNodeDefinition(MeasurementNodeDefinitionApi.create(start, end, factor, unitType));
+    }
 }
 
 
@@ -8808,7 +8904,7 @@ class ImageNode extends VectorNode {
     }
     
     get bitmapBrushFillDescriptor() {
-        return ImageNodeApi.getBitmapBrushFillDescriptor(this.handle);
+        return new FillDescriptor(ImageNodeApi.getBitmapBrushFillDescriptor(this.handle));
     }
     
     get isKOnly() {
@@ -8865,6 +8961,14 @@ class ImageNode extends VectorNode {
 
     get pixelSize() {
         return this.rasterInterface.pixelSize;
+    }
+
+    get rasterBoundingBox() {
+        return this.rasterInterface.rasterBoundingBox;
+    }
+
+    get inverseRasterBoundingBox() {
+        return this.rasterInterface.inverseRasterBoundingBox;
     }
 
     createCompatibleBitmap(copyContents) {
@@ -9003,7 +9107,7 @@ class PolyCurveNodeDefinition extends VectorNodeDefinition {
     }
     
     static create(curve, brushFill, lineFill, lineStyle, transparencyFill) {
-        return new PolyCurveNodeDefinition(PolyCurveNodeDefinitionApi.create(curve.handle, brushFill.handle, lineFill.handle, lineStyle.handle, transparencyFill.handle));
+        return new PolyCurveNodeDefinition(PolyCurveNodeDefinitionApi.create(curve.handle, brushFill?.handle, lineFill?.handle, lineStyle?.handle, transparencyFill?.handle));
     }
 
     static createDefault() {
@@ -9196,6 +9300,10 @@ class NodeCast extends HandleObject{
     
     setEnclosureRasterNodeHandler(callback) {
         return NodeCastApi.setEnclosureRasterNodeHandler(this.handle, callback);
+    }
+    
+    setMaskRasterNodeHandler(callback) {
+        return NodeCastApi.setMaskRasterNodeHandler(this.handle, callback);
     }
     
     setExposureAdjustmentRasterNodeHandler(callback) {
@@ -9491,6 +9599,7 @@ class NodeFactory {
         this.#caster.setDevelopNodeHandler(handle => nodes.push(new DevelopNode(handle)));
         this.#caster.setEmbeddedDocumentNodeHandler(handle => nodes.push(new EmbeddedDocumentNode(handle)));
         this.#caster.setEnclosureRasterNodeHandler(handle => nodes.push(new EnclosureRasterNode(handle)));
+        this.#caster.setMaskRasterNodeHandler(handle => nodes.push(new MaskRasterNode(handle)));
         this.#caster.setExposureAdjustmentRasterNodeHandler(handle => nodes.push(new ExposureAdjustmentRasterNode(handle)));
         this.#caster.setFilterRasterNodeHandler(handle => nodes.push(new FilterRasterNode(handle)));
         this.#caster.setGaussianBlurFilterRasterNodeHandler(handle => nodes.push(new GaussianBlurFilterRasterNode(handle)));
@@ -9596,6 +9705,8 @@ module.exports.PolyCurveTextNode = PolyCurveTextNode;
 module.exports.PolyCurveTextNodeDefinition = PolyCurveTextNodeDefinition;
 module.exports.RasterNode = RasterNode;
 module.exports.RasterNodeDefinition = RasterNodeDefinition;
+module.exports.MaskRasterNode = MaskRasterNode;
+module.exports.MaskRasterNodeDefinition = MaskRasterNodeDefinition;
 module.exports.PatternRasterNode = PatternRasterNode;
 module.exports.PatternRasterNodeDefinition = PatternRasterNodeDefinition;
 module.exports.ContainerNode = ContainerNode;

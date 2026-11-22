@@ -18,8 +18,7 @@ The SDK contains AI APIs to generate images from prompts and perform generative 
 The SDK contains a Dialog API, which should be used to generate any UI the user asks for.
 You must set the current spread before editing nodes on that spread, but don't set the spread if it's already the current spread - setting spread clears the selection.
 Completed, working scripts can be saved to the script library if the user is happy with them.
-When determining the type of a native (affinity:) API function parameter, check the require()d imports at the top of the .js file that makes the call.
-The 'tests' directory contains test code, some of which is out of date and no longer runs. You can use it for ideas, but don't trust it! 
+When determining the type of a native (affinity:) API function parameter, read the ts/ declaration file for its module (see below). The require()d imports at the top of the .js file that makes the call tell you which module that is.
 Any script you write must be directly executable. Don't use `module.exports.main = main;` like the examples do.
 
 # Parameter/property ranges and fixed-size arrays 
@@ -28,9 +27,25 @@ When calling a native API function (or code that forwards to one), check param_r
 When setting SDK struct properties, check struct_ranges.min.json to see if the property has a valid range (schema {StructType:{property:"[min, max]"}}). Also check struct_array_sizes.min.json to see if the property is a fixed size array-like object. 
 Both param_ranges and struct_ranges use e.g. [1.0, 10.0] for float ranges and  [1, 10] for int ranges. All ranges and sizes can be JS expressions (e.g. Math.PI * 2, TonalRangeType.Highlights + 1), not just numeric literals.
 
+# Native API type declarations (ts/)
+The ts/ topics are TypeScript declaration files (.d.ts) for the native affinity: modules that the SDK .js files require(). They give the exact signature of every native API method, enum and value class: parameter names and types, return type, and the signature of any callback parameter. Read them with read_sdk_documentation_topic like any other topic. Prefer them to the online API reference and to experimentation when you need a signature.
+Layout:
+    ts/<module>.d.ts        everything exported by require('affinity:<module>'), e.g. ts/commands.d.ts for affinity:commands
+    ts/dom.d.ts             the enums and value classes of affinity:dom only; its APIs are split out one per file:
+    ts/dom/<ApiName>.d.ts   one native dom API per file, e.g. ts/dom/NodeApi.d.ts, ts/dom/DocumentApi.d.ts
+    ts/handles.d.ts         the opaque handle types (NodeHandle, DocumentHandle, ...) and a comment explaining the layout
+To find a signature: note which affinity: module the symbol comes from (the require() at the top of the .js file that uses it), then read ts/<module>.d.ts, or ts/dom/<ApiName>.d.ts for a dom API. The API names are the same NativeApiClass keys used in param_ranges.min.json.
+Reading the declarations:
+    They are TypeScript syntax, but scripts must still be plain JavaScript: don't write type annotations or import statements.
+    An API is an interface plus a const of the same name; the const is the object scripts call, e.g. NodeApi.getDocument(node). An API that extends another has the base's methods too.
+    A callback parameter's signature is written inline, e.g. callback: (node: NodeHandle) => EnumerationResult, giving the arguments the SDK passes to your function and what it must return. Asynchronous callbacks are Node.js style: the first argument is an Error or null, and on error any handle arguments that follow are null.
+    Handles are opaque values returned by the SDK and passed back in; never construct one.
+    enum X { A, B } is an enum object whose members are X.A and X.B; use its keys/values/entries properties as described under Conventions.
+    A parameter whose name ends in OrNull also accepts null.
+
 # Online API reference
 https://sdk.affinity.studio/latest/js/
-Signatures only, no prose. Any methods that don't specify a return type return void. 
+Signatures only, no prose; the ts/ declaration files carry the same information and are quicker to read. Any methods that don't specify a return type return void. 
 URL scheme:
     apis/<ApiName>/index.html method list
     apis/<ApiName>/<method>.html exact args, types, return type

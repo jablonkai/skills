@@ -196,7 +196,7 @@ class Selection extends HandleObject {
     }
 
     containsItem(item) {
-        return SelectionApi.containsItem(this.handle, item.handle);
+        return SelectionApi.containsItem(this.handle, item?.handle);
     }
     
     static create(document, items, removeNested) {

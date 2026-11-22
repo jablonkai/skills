@@ -114,7 +114,7 @@ class Story extends HandleObject {
         return StoryApi.findWordPart(this.handle, startPos, maxNum);
     }
 
-    findParagraphBreak(startPos = this.length - 1, maxNum = -1) {
+    findParagraphBreak(startPos = 0, maxNum = -1) {
         return StoryApi.findParagraphBreak(this.handle, startPos, maxNum);
     }
 
@@ -130,7 +130,7 @@ class Story extends HandleObject {
         return StoryApi.rFindWordPart(this.handle, startPos, maxNum);
     }
 
-    rFindParagraphBreak(startPos, maxNum = -1) {
+    rFindParagraphBreak(startPos = this.length - 1, maxNum = -1) {
         return StoryApi.rFindParagraphBreak(this.handle, startPos, maxNum);
     }
 
@@ -139,8 +139,11 @@ class Story extends HandleObject {
         if (begin == -1)
             return new StoryRange(-1, -1);
         const end = this.findWordEnd(begin);
-        if (end < pos)
+        if (end < pos) {
+            if (end == -1)
+                return new StoryRange(begin, this.length);
             return new StoryRange(-1, -1);
+        }
         return new StoryRange(begin, end);
     }
 
@@ -188,6 +191,11 @@ class Story extends HandleObject {
             }
         }
         return new Collection(genFn);
+    }
+
+    get words() {
+        const self = this;
+        return this.wordRanges.map(r => self.getTextRange(r));
     }
 
     indexes(includeTerminator) {

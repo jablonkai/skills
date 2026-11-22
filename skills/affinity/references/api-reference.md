@@ -1,8 +1,9 @@
 # Affinity automation endpoint — API reference
 
-Verified live against **Affinity 3.3.1.4940 (macOS)**, protocol `2025-11-25`, 2026-10-29
-(3.3.1: tool set and all 142 SDK doc topics byte-identical to 3.3.0.4850).
-The tool set is unchanged from 3.2.3; the SDK itself grew substantially (see sdk-map.md).
+Verified live against **Affinity 3.3.3.5004 (macOS)**, protocol `2025-11-25`, 2026-11-22.
+The tool set is unchanged from 3.2.3. 3.3.3 grew the SDK docs from 142 to 401 topics: it adds
+`ts/` TypeScript declarations (291 files), drops `tests/` and `vectorbrush.js`, and changes
+some signatures (see the 3.3.3 gotchas in sdk-map.md).
 
 ## Endpoint
 
@@ -18,7 +19,7 @@ The tool set is unchanged from 3.2.3; the SDK itself grew substantially (see sdk
 - Long-running sessions can die server-side (POST starts returning HTTP 404) — rerun the
   command; `docs-dump` resumes, skipping already-saved files.
 
-## Tools (verified 3.3.0, re-verified 3.3.1)
+## Tools (verified 3.3.0, re-verified 3.3.3)
 
 | Tool | Arguments | Notes |
 |---|---|---|
@@ -39,8 +40,8 @@ The tool set is unchanged from 3.2.3; the SDK itself grew substantially (see sdk
 
 ## JavaScript SDK — preamble digest
 
-Full vendored docs live in `sdk-docs/` (142 topics incl. `examples/`, `tests/` and the 3 range
-JSONs; ~1.8 MB — **grep, don't read whole files**; `nodes.js` alone is ~300 KB).
+Full vendored docs live in `sdk-docs/` (401 topics incl. `examples/`, `ts/` and the 3 range
+JSONs; ~2.9 MB — **grep, don't read whole files**; `nodes.js` alone is ~300 KB).
 **[sdk-map.md](sdk-map.md) is the curated digest of all of it** — module map, node model,
 text/image/adjustment recipes, gotchas. Read it before grepping raw sdk-docs.
 
@@ -48,11 +49,13 @@ text/image/adjustment recipes, gotchas. Read it before grepping raw sdk-docs.
   `require('/document')` still works (both verified). The vendored files mirror these module
   names. Native modules appear as `require('affinity:...')` — the JS classes forward to
   `*Api` statics that take the target handle as their first argument (`self`).
-- Online reference for those native APIs (signatures only, no prose; methods without a
-  return type return void): <https://sdk.affinity.studio/latest/js/> — `apis/<ApiName>/index.html`
-  (method list), `apis/<ApiName>/<method>.html` (args/types), `enums/<Enum>.html`,
-  `classes/<Class>.html`, `objects.inv` (every symbol → URL). Use it when a vendored JS
-  wrapper only says `return XxxApi.foo(this.handle, …)`.
+- Native API signatures (3.3.3+): `sdk-docs/ts/<module>.d.ts` for `require('affinity:<module>')`
+  (e.g. `ts/commands.d.ts`), `ts/dom/<ApiName>.d.ts` for each `affinity:dom` API (e.g.
+  `ts/dom/NodeApi.d.ts`), dom enums/value classes in `ts/dom.d.ts`, handle types in
+  `ts/handles.d.ts`. Use them when a vendored JS wrapper only says
+  `return XxxApi.foo(this.handle, …)`. They are TypeScript, but scripts stay plain JS — no type
+  annotations or imports. Async callbacks are Node-style `(err, …)`; a parameter ending in
+  `OrNull` accepts `null`. Online fallback (same info): <https://sdk.affinity.studio/latest/js/>.
 - Entry API: `const { app } = require('/application');` → `app.documents.current` /
   `.all` / `.load(path)`, `app.userDesktopPath`, `app.alert/confirm/prompt/chooseFile`,
   version getters. Document: `doc.sessionUuid`, `doc.persistentUuid`.
@@ -108,8 +111,6 @@ console.log(doc.currentSpread.children.length);      // verify
 - Coordinates are document units, origin at spread top-left; `Rectangle(x, y, w, h)`.
 - Freeform paths: `PolyCurveNodeDefinition` + `builder.addPolyCurveNode` (see
   `sdk-docs/curvesinterface.js`, `geometry.js`); raster: `RasterNodeDefinition`,
-  `pixelaccessor.js`. Working examples: `sdk-docs/examples/artboardGrid.js`,
-  `sdk-docs/tests/addNodeTests.js` (tests are partly stale — ideas only).
+  `pixelaccessor.js`. Working example: `sdk-docs/examples/artboardGrid.js`.
 - Scripts must be directly executable top-level code — no `module.exports.main = main;`
   (the bundled examples use it; live execution doesn't).
-- `tests/` topics are partly outdated — ideas only, don't trust.

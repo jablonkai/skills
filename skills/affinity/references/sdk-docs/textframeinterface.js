@@ -4,6 +4,8 @@ const { EnumerationResult } = require('affinity:common');
 const { TextFrameInterfaceApi } = require('affinity:dom');
 const { HandleObject } = require('/handleobject.js');
 
+const { TextFlow } = require('/textflow.js');
+
 // cyclics:
 const NodesModule = require('/nodes.js');
 
@@ -65,6 +67,10 @@ class TextFrameInterface extends HandleObject {
 
     get textFlowIndex() {
         return TextFrameInterfaceApi.getTextFlowIndex(this.handle);
+    }
+
+    get textFlow() {
+        return new TextFlow(TextFrameInterfaceApi.getTextFlow(this.handle));
     }
 
     enumerateTextFlowNodes(callback) {

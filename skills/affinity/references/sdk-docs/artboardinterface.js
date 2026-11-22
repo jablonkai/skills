@@ -5,6 +5,7 @@ const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
 const ArtboardPropertiesModule = require('/artboardproperties.js');
+const BaselineGridInterfaceModule = require('/baselinegridinterface.js');
 const NodesModule = require('/nodes.js');
 const PhysicalRootInterfaceModule = require('/physicalrootinterface.js');
 
@@ -72,7 +73,8 @@ class ArtboardInterface extends HandleObject {
     get node() {
         return NodesModule.createTypedNode(ArtboardInterfaceApi.getNode(this.handle));
     }
-    
+
+    // physical root interface
     #physicalRootInterface;
     get physicalRootInterface() {
         if (!this.#physicalRootInterface)
@@ -86,6 +88,18 @@ class ArtboardInterface extends HandleObject {
     
     get pageCount() {
         return this.physicalRootProperties?.pageCount ?? 0;
+    }
+
+    // baseline grid interface
+    #baselineGridInterface;
+    get baselineGridInterface() {
+        if (!this.#baselineGridInterface)
+            this.#baselineGridInterface = new BaselineGridInterfaceModule.BaselineGridInterface(ArtboardInterfaceApi.getBaselineGridInterface(this.handle));
+        return this.#baselineGridInterface;
+    }
+
+    get baselineGridOptions() {
+        return this.baselineGridInterface.baselineGridOptions;
     }
 
     setArtboardEnabled(enabled, preview) {

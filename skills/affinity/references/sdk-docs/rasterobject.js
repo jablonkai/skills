@@ -61,11 +61,11 @@ class RasterObject extends HandleObject {
     }
     
     clone() {
-        return new RasterObject(RasterObjectApi.clone(this.handle));
+        return createTypedRasterObject(RasterObjectApi.clone(this.handle));
     }
     
     cloneEmpty() {
-        return new RasterObject(RasterObjectApi.cloneEmpty(this.handle));
+        return createTypedRasterObject(RasterObjectApi.cloneEmpty(this.handle));
     }
 }
 
@@ -83,8 +83,8 @@ class Bitmap extends RasterObject {
         return new Bitmap(RasterObjectApi.createBitmap(width, height, format));
     }
 
-    static loadFromFile(path, format = RasterFormat.RGBA8) {
-        return new Bitmap(RasterObjectApi.loadBitmapFromFile(path, format));
+    static loadFromFile(path, format = RasterFormat.EMPTY) {
+        return new Bitmap(RasterObjectApi.loadBitmapFromFile(path, format ?? RasterFormat.EMPTY));
     }
 
     static loadFromFileAsync(path, format, callback) {
@@ -93,9 +93,25 @@ class Bitmap extends RasterObject {
                 let rasterObject = rasterObjectHandle ? new Bitmap(rasterObjectHandle) : null;
                 return callback(errorCode, rasterObject);
             }
-            return RasterObjectApi.loadBitmapFromFileAsync(path, format, wrappedCallback);
+            return RasterObjectApi.loadBitmapFromFileAsync(path, format ?? RasterFormat.EMPTY, wrappedCallback);
         }
-        return RasterObjectApi.loadBitmapFromFileAsync(path, format, callback);
+        return RasterObjectApi.loadBitmapFromFileAsync(path, format ?? RasterFormat.EMPTY, callback);
+    }
+
+    // decodes a Resource from the script's bundle; no file system permission is involved
+    static loadFromResource(resource, format = RasterFormat.EMPTY) {
+        return new Bitmap(RasterObjectApi.loadBitmapFromResource(resource.handle, format ?? RasterFormat.EMPTY));
+    }
+
+    static loadFromResourceAsync(resource, format, callback) {
+        if (typeof callback === 'function') {
+            function wrappedCallback(errorCode, rasterObjectHandle) {
+                let rasterObject = rasterObjectHandle ? new Bitmap(rasterObjectHandle) : null;
+                return callback(errorCode, rasterObject);
+            }
+            return RasterObjectApi.loadBitmapFromResourceAsync(resource.handle, format ?? RasterFormat.EMPTY, wrappedCallback);
+        }
+        return RasterObjectApi.loadBitmapFromResourceAsync(resource.handle, format ?? RasterFormat.EMPTY, callback);
     }
 }
 
@@ -219,6 +235,22 @@ class NodeRenderingEngineOptions extends HandleObject {
 
     set drawBackground(value) {
         NodeRenderingEngineOptionsApi.setDrawBackground(this.handle, value);
+    }
+
+    get scale() {
+        return NodeRenderingEngineOptionsApi.getScale(this.handle);
+    }
+
+    set scale(value) {
+        NodeRenderingEngineOptionsApi.setScale(this.handle, value);
+    }
+
+    get sourceRect() {
+        return NodeRenderingEngineOptionsApi.getSourceRect(this.handle);
+    }
+
+    set sourceRect(value) {
+        NodeRenderingEngineOptionsApi.setSourceRect(this.handle, value);
     }
 }
 

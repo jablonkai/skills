@@ -1,7 +1,7 @@
 'use strict';
 
 const coloursModule = require('affinity:colours');
-const { ColourApi, ColourProfileApi, ColourProfileSetApi, ColourSpaceType, GradientApi } = coloursModule;
+const { ColourApi, ColourProfileApi, ColourProfileSetApi, ColourSpaceType, ColourType, GradientApi } = coloursModule;
 const { EnumerationResult } = require('affinity:common');
 const { RasterFormat, RasterIntent } = require('affinity:raster');
 const { HandleObject } = require('/handleobject.js');
@@ -131,11 +131,19 @@ class Colour extends HandleObject {
         return ColourApi.getTint(this.handle);
     }
 
+    get type() {
+        return ColourApi.getType(this.handle);
+    }
+
+    get colourSpace() {
+        return ColourApi.getColourSpace(this.handle);
+    }
+
     set tint(value) {
         ColourApi.setTint(this.handle, value);
     }
     
-    convertProfile(srcProfile, destProfile, intent, blackPointCompensation) {
+    convertProfile(srcProfile, destProfile, intent, blackPointCompensation = true) {
         ColourApi.convertProfile(this.handle, srcProfile.handle, destProfile.handle, intent, blackPointCompensation);
         return this;
     }
@@ -275,13 +283,13 @@ function IA8(intensity, alpha) {
 }
 
 function I16(intensity) {
-    return Colour.createIA8({i:intensity, alpha:65535});
+    return Colour.createIA16({i:intensity, alpha:65535});
 }
 
 function IA16(intensity, alpha) {
     if (alpha == null)
         alpha = 65535;
-    return Colour.createIA8({i:intensity, alpha:alpha});
+    return Colour.createIA16({i:intensity, alpha:alpha});
 }
 
 function CMYK8(c, m, y, k) {
@@ -797,6 +805,19 @@ function convertColourStop(stop) {
     return newStop;
 }
 
+class ColourStop {
+    constructor(colour, position = 0, midpoint = 0.5, smoothness = 0) {
+        this.colour = colour;
+        this.position = position;
+        this.midpoint = midpoint;
+        this.smoothness = smoothness;
+    }
+
+    get [Symbol.toStringTag]() {
+        return 'ColourStop';
+    }
+}
+
 class Gradient extends HandleObject {
     constructor(handle) {
         super(handle);
@@ -842,7 +863,8 @@ class Gradient extends HandleObject {
     }
     
     getStop(index) {
-        return GradientApi.getStop(this.handle, index);
+        const stop = GradientApi.getStop(this.handle, index);
+        return new ColourStop(new Colour(stop.colour), stop.position, stop.midpoint, stop.smoothness);
     }
     
     get stopCount() {
@@ -924,10 +946,7 @@ class ColourProfile extends HandleObject {
     }
 
     get colourSpaceStr() {
-        const cs = ColourProfileApi.getColourSpace(this.handle);
-        if (cs >= ColourSpaceType.keys.length)
-            throw new Error("Out of Range Error");
-        return ColourSpaceType.keys[cs];
+        return ColourProfileApi.getColourSpace(this.handle).toString();
     }
 
     get version() {
@@ -1111,10 +1130,12 @@ class ColourProfileSet extends HandleObject {
 }
 
 module.exports.Colour = Colour;
+module.exports.ColourStop = ColourStop;
 module.exports.Gradient = Gradient;
 module.exports.ColourProfile = ColourProfile;
 module.exports.ColourProfileSet = ColourProfileSet;
 module.exports.ColourSpaceType = ColourSpaceType;
+module.exports.ColourType = ColourType;
 module.exports.RasterFormat = RasterFormat;
 module.exports.RasterIntent = RasterIntent;
 module.exports.SVG11 = SVG11;

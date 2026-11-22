@@ -12,6 +12,7 @@ const {
     GroupTransformType,
     InsertionMode,
     LineCommandDefaultsMode,
+    PageInsertMode,
     SetHatchFillAttributesCommandBuilderApi
 } = require('affinity:commands');
 const { BlendMode, EnumerationResult, UnitType } = require('affinity:common');
@@ -29,6 +30,11 @@ const { HandleObject } = require('/handleobject.js');
 
 // cyclics:
 const NodesModule = require('/nodes.js');
+
+const MasterSpreadIndex = Object.freeze({
+    None: -1, // for createAddPages, apply no master
+    Append: -1, // for createAddMasterPages
+});
 
 class Command extends HandleObject {
     constructor(handle) {
@@ -74,6 +80,34 @@ class DocumentCommand extends HandleObject {
             return EnumerationResult.Continue;
         });
         return res;
+    }
+
+    static createAddPages(firstPageIndex, insertAfter, pageCount, masterSpreadIndex = MasterSpreadIndex.None, insertMode = PageInsertMode.DocumentFlow) {
+        return new DocumentCommand(DocumentCommandApi.createAddPagesCommand(
+            firstPageIndex,
+            insertAfter,
+            pageCount,
+            masterSpreadIndex,
+            insertMode));
+    }
+
+    static createDeletePages(firstPageIndex, pageCount) {
+        return new DocumentCommand(DocumentCommandApi.createDeletePagesCommand(
+            firstPageIndex,
+            pageCount));
+    }
+
+    static createAddMasterPages(insertAfterMasterSpreadIndex, masterSpreadCount, pageCount) {
+        return new DocumentCommand(DocumentCommandApi.createAddMasterPagesCommand(
+            insertAfterMasterSpreadIndex,
+            masterSpreadCount,
+            pageCount));
+    }
+
+    static createDeleteMasterPages(firstMasterSpreadIndex, masterSpreadCount) {
+        return new DocumentCommand(DocumentCommandApi.createDeleteMasterPagesCommand(
+            firstMasterSpreadIndex,
+            masterSpreadCount));
     }
 
     static createSetSelection(selection) {
@@ -156,7 +190,7 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createSetLineStyleCommand(
             selection?.handle,
             lineStyle.handle,
-            options?.lineStyleMask,
+            options?.lineStyleMask ?? LineStyleMask.All,
             options?.contentType,
             options?.useTextSelection,
             options?.defaultsMode)
@@ -167,7 +201,7 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createSetLineStyleDescriptorCommand(
             selection?.handle,
             lineStyleDescriptor.handle,
-            options?.lineStyleMask,
+            options?.lineStyleMask ?? LineStyleMask.All,
             options?.contentType,
             options?.useTextSelection,
             options?.defaultsMode)
@@ -278,7 +312,7 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createAddCurveNodeCommand(curvesInterface.handle, curveHandle, parametricDistance));
     }
 
-    static createAddCurve(curvesInterface, curve, select, preserveExistingSubSelection) {
+    static createAddCurve(curvesInterface, curve, select = true, preserveExistingSubSelection = false) {
         return new DocumentCommand(DocumentCommandApi.createAddCurveCommand(curvesInterface.handle, curve.handle, select, preserveExistingSubSelection));
     }
 
@@ -347,6 +381,18 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createGenerativeEditImageCommand(prompt));
     }
     
+    static createGenerativeUpscale(selection, scale) {
+        return new DocumentCommand(DocumentCommandApi.createGenerativeUpscaleCommand(selection?.handle, scale));
+    }
+
+    static createDecomposeLayer() {
+        return new DocumentCommand(DocumentCommandApi.createDecomposeLayerCommand());
+    }
+
+    static createLayerTo3DModel() {
+        return new DocumentCommand(DocumentCommandApi.createLayerTo3DModelCommand());
+    }
+    
     static createReplayMacro() {
         return new DocumentCommand(DocumentCommandApi.createReplayMacroCommand());
     }
@@ -405,6 +451,30 @@ class DocumentCommand extends HandleObject {
 
     static createRasterVerticalEdgeDetect(selection) {
         return new DocumentCommand(DocumentCommandApi.createRasterVerticalEdgeDetectCommand(selection?.handle));
+    }
+
+    static createRasterMLDenoise(selection, lumaStrength, chromaStrength) {
+        return new DocumentCommand(DocumentCommandApi.createRasterMLDenoiseCommand(selection?.handle, lumaStrength, chromaStrength));
+    }
+
+    static createRasterMotionBlurReduction(selection, strength) {
+        return new DocumentCommand(DocumentCommandApi.createRasterMotionBlurReductionCommand(selection?.handle, strength));
+    }
+
+    static createRasterSDRToHDR(selection, strength) {
+        return new DocumentCommand(DocumentCommandApi.createRasterSDRToHDRCommand(selection?.handle, strength));
+    }
+
+    static createMixedLightCorrection(selection, strength, preserveWhiteBalance, temperature) {
+        return new DocumentCommand(DocumentCommandApi.createMixedLightCorrectionCommand(selection?.handle, strength, preserveWhiteBalance, temperature));
+    }
+
+    static createAddMask(selection, andSelect = false, childListType = NodeChildType.Main) {
+        return new DocumentCommand(DocumentCommandApi.createAddMaskCommand(selection?.handle, andSelect, childListType));
+    }
+
+    static createAddEmptyMask(selection, andSelect = false, childListType = NodeChildType.Main) {
+        return new DocumentCommand(DocumentCommandApi.createAddEmptyMaskCommand(selection?.handle, andSelect, childListType));
     }
 
     static createRasterFill(selection, mode, colour, opacity, blendMode) {
@@ -560,7 +630,7 @@ class DocumentCommand extends HandleObject {
             options?.applyToAllFills);
     }
 
-    static createSetPenHatchFillAttributes(attr, selection, options) {
+    static createSetPenHatchFillAttributes(selection, attr, options) {
         const builder = DocumentCommand.#createHatchFillAttributesCommandBuilder(attr);
         return builder.createPenFillCommand(selection,
             options?.contentType ?? ContentType.Main,
@@ -568,7 +638,7 @@ class DocumentCommand extends HandleObject {
             options?.applyToAllFills);
     }
 
-    static createSetTransparencyHatchFillAttributes(attr, selection, options) {
+    static createSetTransparencyHatchFillAttributes(selection, attr, options) {
         const builder = DocumentCommand.#createHatchFillAttributesCommandBuilder(attr);
         return builder.createTransparencyFillCommand(selection,
             options?.contentType ?? ContentType.Main,
@@ -826,6 +896,18 @@ class DocumentCommand extends HandleObject {
     
     static createSetBlendRanges(selection, blendOptions) {
         return new DocumentCommand(DocumentCommandApi.createSetBlendRangesCommand(selection?.handle, blendOptions.handle));
+    }
+
+    static createSetArtboardBaselineGrid(selection, options) {
+        return new DocumentCommand(DocumentCommandApi.createSetArtboardBaselineGridCommand(selection?.handle, options.handle));
+    }
+
+    static createSetTextFrameBaselineGrid(selection, options) {
+        return new DocumentCommand(DocumentCommandApi.createSetTextFrameBaselineGridCommand(selection?.handle, options.handle));
+    }
+
+    static createSetDocumentBaselineGrid(options) {
+        return new DocumentCommand(DocumentCommandApi.createSetDocumentBaselineGridCommand(options.handle));
     }
     
     static createSetTagValueForKey(selection, key, value) {
@@ -1221,28 +1303,28 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createDuplicateOutlineLayerEffectCommand(selection?.handle, index));
     }
 
-    static createSetOutlineLayerEffectEnabled(selection, index, enabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetOutlineLayerEffectEnabledCommand(selection?.handle, index, enabled));
+    static createSetOutlineLayerEffectEnabled(selection, enabled, index) {
+        return new DocumentCommand(DocumentCommandApi.createSetOutlineLayerEffectEnabledCommand(selection?.handle, enabled, index));
     }
 
     static createMoveOutlineLayerEffect(selection, fromIndex, toIndex) {
         return new DocumentCommand(DocumentCommandApi.createMoveOutlineLayerEffectCommand(selection?.handle, fromIndex, toIndex));
     }
 
-    static createSetOutlineLayerEffectOpacity(selection, index, opacity, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetOutlineLayerEffectOpacityCommand(selection?.handle, index, opacity, enableIfDisabled));
+    static createSetOutlineLayerEffectOpacity(selection, opacity, index, enableIfDisabled) {
+        return new DocumentCommand(DocumentCommandApi.createSetOutlineLayerEffectOpacityCommand(selection?.handle, opacity, index, enableIfDisabled));
     }
 
-    static createSetOutlineLayerEffectRadius(selection, index, radius, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetOutlineLayerEffectRadiusCommand(selection?.handle, index, radius, enableIfDisabled));
+    static createSetOutlineLayerEffectRadius(selection, radius, index, enableIfDisabled) {
+        return new DocumentCommand(DocumentCommandApi.createSetOutlineLayerEffectRadiusCommand(selection?.handle, radius, index, enableIfDisabled));
     }
 
     static createRemoveOutlineLayerEffect(selection, index) {
         return new DocumentCommand(DocumentCommandApi.createRemoveOutlineLayerEffectCommand(selection?.handle, index));
     }
 
-    static createSetOutlineLayerEffectScaleWithObject(selection, index, scaleWithObject, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetOutlineLayerEffectScaleWithObjectCommand(selection?.handle, index, scaleWithObject, enableIfDisabled));
+    static createSetOutlineLayerEffectScaleWithObject(selection, scaleWithObject, index, enableIfDisabled) {
+        return new DocumentCommand(DocumentCommandApi.createSetOutlineLayerEffectScaleWithObjectCommand(selection?.handle, scaleWithObject, index, enableIfDisabled));
     }
 
     static createSetOutlineLayerEffect(selection, layerEffect, index) {
@@ -1347,28 +1429,28 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createDuplicateInnerShadowLayerEffectCommand(selection?.handle, index));
     }
 
-    static createSetInnerShadowLayerEffectEnabled(selection, index, enabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetInnerShadowLayerEffectEnabledCommand(selection?.handle, index, enabled));
+    static createSetInnerShadowLayerEffectEnabled(selection, enabled, index) {
+        return new DocumentCommand(DocumentCommandApi.createSetInnerShadowLayerEffectEnabledCommand(selection?.handle, enabled, index));
     }
 
     static createMoveInnerShadowLayerEffect(selection, fromIndex, toIndex) {
         return new DocumentCommand(DocumentCommandApi.createMoveInnerShadowLayerEffectCommand(selection?.handle, fromIndex, toIndex));
     }
 
-    static createSetInnerShadowLayerEffectOpacity(selection, index, opacity, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetInnerShadowLayerEffectOpacityCommand(selection?.handle, index, opacity, enableIfDisabled));
+    static createSetInnerShadowLayerEffectOpacity(selection, opacity, index, enableIfDisabled) {
+        return new DocumentCommand(DocumentCommandApi.createSetInnerShadowLayerEffectOpacityCommand(selection?.handle, opacity, index, enableIfDisabled));
     }
 
-    static createSetInnerShadowLayerEffectRadius(selection, index, radius, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetInnerShadowLayerEffectRadiusCommand(selection?.handle, index, radius, enableIfDisabled));
+    static createSetInnerShadowLayerEffectRadius(selection, radius, index, enableIfDisabled) {
+        return new DocumentCommand(DocumentCommandApi.createSetInnerShadowLayerEffectRadiusCommand(selection?.handle, radius, index, enableIfDisabled));
     }
 
     static createRemoveInnerShadowLayerEffect(selection, index) {
         return new DocumentCommand(DocumentCommandApi.createRemoveInnerShadowLayerEffectCommand(selection?.handle, index));
     }
 
-    static createSetInnerShadowLayerEffectScaleWithObject(selection, index, scaleWithObject, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetInnerShadowLayerEffectScaleWithObjectCommand(selection?.handle, index, scaleWithObject, enableIfDisabled));
+    static createSetInnerShadowLayerEffectScaleWithObject(selection, scaleWithObject, index, enableIfDisabled) {
+        return new DocumentCommand(DocumentCommandApi.createSetInnerShadowLayerEffectScaleWithObjectCommand(selection?.handle, scaleWithObject, index, enableIfDisabled));
     }
 
     static createSetInnerShadowLayerEffect(selection, layerEffect, index) {
@@ -1379,8 +1461,8 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createSetInnerShadowLayerEffectColourCommand(selection?.handle, colour?.handle, index, enableIfDisabled));
     }
 
-    static createSetInnerShadowLayerEffectIntensity(selection, index, intensity, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetInnerShadowLayerEffectIntensityCommand(selection?.handle, index, intensity, enableIfDisabled));
+    static createSetInnerShadowLayerEffectIntensity(selection, intensity, index, enableIfDisabled) {
+        return new DocumentCommand(DocumentCommandApi.createSetInnerShadowLayerEffectIntensityCommand(selection?.handle, intensity, index, enableIfDisabled));
     }
 
     static createSetInnerShadowLayerEffectOffsetAngle(selection, offset, angle, index, enableIfDisabled) {
@@ -1437,24 +1519,24 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createDuplicateColourOverlayLayerEffectCommand(selection?.handle, index));
     }
 
-    static createSetColourOverlayLayerEffectEnabled(selection, index, enabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetColourOverlayLayerEffectEnabledCommand(selection?.handle, index, enabled));
+    static createSetColourOverlayLayerEffectEnabled(selection, enabled, index) {
+        return new DocumentCommand(DocumentCommandApi.createSetColourOverlayLayerEffectEnabledCommand(selection?.handle, enabled, index));
     }
 
     static createMoveColourOverlayLayerEffect(selection, fromIndex, toIndex) {
         return new DocumentCommand(DocumentCommandApi.createMoveColourOverlayLayerEffectCommand(selection?.handle, fromIndex, toIndex));
     }
 
-    static createSetColourOverlayLayerEffectOpacity(selection, index, opacity, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetColourOverlayLayerEffectOpacityCommand(selection?.handle, index, opacity, enableIfDisabled));
+    static createSetColourOverlayLayerEffectOpacity(selection, opacity, index, enableIfDisabled) {
+        return new DocumentCommand(DocumentCommandApi.createSetColourOverlayLayerEffectOpacityCommand(selection?.handle, opacity, index, enableIfDisabled));
     }
 
     static createRemoveColourOverlayLayerEffect(selection, index) {
         return new DocumentCommand(DocumentCommandApi.createRemoveColourOverlayLayerEffectCommand(selection?.handle, index));
     }
 
-    static createSetColourOverlayLayerEffectScaleWithObject(selection, index, scaleWithObject, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetColourOverlayLayerEffectScaleWithObjectCommand(selection?.handle, index, scaleWithObject, enableIfDisabled));
+    static createSetColourOverlayLayerEffectScaleWithObject(selection, scaleWithObject, index, enableIfDisabled) {
+        return new DocumentCommand(DocumentCommandApi.createSetColourOverlayLayerEffectScaleWithObjectCommand(selection?.handle, scaleWithObject, index, enableIfDisabled));
     }
 
     static createSetColourOverlayLayerEffect(selection, layerEffect, index) {
@@ -1474,24 +1556,24 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createDuplicateGradientOverlayLayerEffectCommand(selection?.handle, index));
     }
 
-    static createSetGradientOverlayLayerEffectEnabled(selection, index, enabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetGradientOverlayLayerEffectEnabledCommand(selection?.handle, index, enabled));
+    static createSetGradientOverlayLayerEffectEnabled(selection, enabled, index) {
+        return new DocumentCommand(DocumentCommandApi.createSetGradientOverlayLayerEffectEnabledCommand(selection?.handle, enabled, index));
     }
 
     static createMoveGradientOverlayLayerEffect(selection, fromIndex, toIndex) {
         return new DocumentCommand(DocumentCommandApi.createMoveGradientOverlayLayerEffectCommand(selection?.handle, fromIndex, toIndex));
     }
 
-    static createSetGradientOverlayLayerEffectOpacity(selection, index, opacity, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetGradientOverlayLayerEffectOpacityCommand(selection?.handle, index, opacity, enableIfDisabled));
+    static createSetGradientOverlayLayerEffectOpacity(selection, opacity, index, enableIfDisabled) {
+        return new DocumentCommand(DocumentCommandApi.createSetGradientOverlayLayerEffectOpacityCommand(selection?.handle, opacity, index, enableIfDisabled));
     }
 
     static createRemoveGradientOverlayLayerEffect(selection, index) {
         return new DocumentCommand(DocumentCommandApi.createRemoveGradientOverlayLayerEffectCommand(selection?.handle, index));
     }
 
-    static createSetGradientOverlayLayerEffectScaleWithObject(selection, index, scaleWithObject, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetGradientOverlayLayerEffectScaleWithObjectCommand(selection?.handle, index, scaleWithObject, enableIfDisabled));
+    static createSetGradientOverlayLayerEffectScaleWithObject(selection, scaleWithObject, index, enableIfDisabled) {
+        return new DocumentCommand(DocumentCommandApi.createSetGradientOverlayLayerEffectScaleWithObjectCommand(selection?.handle, scaleWithObject, index, enableIfDisabled));
     }
 
     static createSetGradientOverlayLayerEffect(selection, layerEffect, index) {
@@ -1503,7 +1585,7 @@ class DocumentCommand extends HandleObject {
     }
 
     static createSetGradientOverlayLayerEffectFillTransform(selection, transform, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetGradientOverlayLayerEffectFillTransformCommand(selection?.handle, transform?.handle, enableIfDisabled));
+        return new DocumentCommand(DocumentCommandApi.createSetGradientOverlayLayerEffectFillTransformCommand(selection?.handle, transform, enableIfDisabled));
     }
 
     // OuterGlowLayerEffectCommands
@@ -1556,28 +1638,28 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createDuplicateOuterShadowLayerEffectCommand(selection?.handle, index));
     }
 
-    static createSetOuterShadowLayerEffectEnabled(selection, index, enabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetOuterShadowLayerEffectEnabledCommand(selection?.handle, index, enabled));
+    static createSetOuterShadowLayerEffectEnabled(selection, enabled, index) {
+        return new DocumentCommand(DocumentCommandApi.createSetOuterShadowLayerEffectEnabledCommand(selection?.handle, enabled, index));
     }
 
     static createMoveOuterShadowLayerEffect(selection, fromIndex, toIndex) {
         return new DocumentCommand(DocumentCommandApi.createMoveOuterShadowLayerEffectCommand(selection?.handle, fromIndex, toIndex));
     }
 
-    static createSetOuterShadowLayerEffectOpacity(selection, index, opacity, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetOuterShadowLayerEffectOpacityCommand(selection?.handle, index, opacity, enableIfDisabled));
+    static createSetOuterShadowLayerEffectOpacity(selection, opacity, index, enableIfDisabled) {
+        return new DocumentCommand(DocumentCommandApi.createSetOuterShadowLayerEffectOpacityCommand(selection?.handle, opacity, index, enableIfDisabled));
     }
 
-    static createSetOuterShadowLayerEffectRadius(selection, index, radius, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetOuterShadowLayerEffectRadiusCommand(selection?.handle, index, radius, enableIfDisabled));
+    static createSetOuterShadowLayerEffectRadius(selection, radius, index, enableIfDisabled) {
+        return new DocumentCommand(DocumentCommandApi.createSetOuterShadowLayerEffectRadiusCommand(selection?.handle, radius, index, enableIfDisabled));
     }
 
     static createRemoveOuterShadowLayerEffect(selection, index) {
         return new DocumentCommand(DocumentCommandApi.createRemoveOuterShadowLayerEffectCommand(selection?.handle, index));
     }
 
-    static createSetOuterShadowLayerEffectScaleWithObject(selection, index, scaleWithObject, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetOuterShadowLayerEffectScaleWithObjectCommand(selection?.handle, index, scaleWithObject, enableIfDisabled));
+    static createSetOuterShadowLayerEffectScaleWithObject(selection, scaleWithObject, index, enableIfDisabled) {
+        return new DocumentCommand(DocumentCommandApi.createSetOuterShadowLayerEffectScaleWithObjectCommand(selection?.handle, scaleWithObject, index, enableIfDisabled));
     }
 
     static createSetOuterShadowLayerEffect(selection, layerEffect, index) {
@@ -1588,8 +1670,8 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createSetOuterShadowLayerEffectColourCommand(selection?.handle, colour?.handle, index, enableIfDisabled));
     }
 
-    static createSetOuterShadowLayerEffectIntensity(selection, index, intensity, enableIfDisabled) {
-        return new DocumentCommand(DocumentCommandApi.createSetOuterShadowLayerEffectIntensityCommand(selection?.handle, index, intensity, enableIfDisabled));
+    static createSetOuterShadowLayerEffectIntensity(selection, intensity, index, enableIfDisabled) {
+        return new DocumentCommand(DocumentCommandApi.createSetOuterShadowLayerEffectIntensityCommand(selection?.handle, intensity, index, enableIfDisabled));
     }
 
     static createSetOuterShadowLayerEffectKnocksOut(selection, knocksOut, enableIfDisabled) {
@@ -1635,6 +1717,10 @@ class DocumentCommand extends HandleObject {
 
     static createSetGaussianBlurLayerEffectPreserveAlpha(selection, preserveAlpha, enableIfDisabled) {
         return new DocumentCommand(DocumentCommandApi.createSetGaussianBlurLayerEffectPreserveAlphaCommand(selection?.handle, preserveAlpha, enableIfDisabled));
+    }
+
+    static createSetTextFrameHideOverflow(selection, hideOverflow) {
+        return new DocumentCommand(DocumentCommandApi.createSetTextFrameHideOverflowCommand(selection?.handle, hideOverflow));
     }
 
     static createSetTextFrameIgnoreTextWraps(selection, ignoreTextWraps) {
@@ -1709,8 +1795,28 @@ class DocumentCommand extends HandleObject {
         return new DocumentCommand(DocumentCommandApi.createBoolOpXorCommand(selection?.handle));
     }
 
-    static createDivideShapes(selection) {
-        return new DocumentCommand(DocumentCommandApi.createDivideShapesCommand(selection?.handle));
+    static createDivideShapes(selection, retainAllParts = false) {
+        return new DocumentCommand(DocumentCommandApi.createDivideShapesCommand(selection?.handle, retainAllParts));
+    }
+
+    static createGroupNodes(selection) {
+        return new DocumentCommand(DocumentCommandApi.createGroupNodesCommand(selection?.handle));
+    }
+
+    static createLiveStackGroupNodes(selection) {
+        return new DocumentCommand(DocumentCommandApi.createLiveStackGroupNodesCommand(selection?.handle));
+    }
+
+    static createLiveToneBlendGroupNodes(selection) {
+        return new DocumentCommand(DocumentCommandApi.createLiveToneBlendGroupNodesCommand(selection?.handle));
+    }
+
+    static createUngroupNodes(selection) {
+        return new DocumentCommand(DocumentCommandApi.createUngroupNodesCommand(selection?.handle));
+    }
+
+    static createUngroupAllNodes(selection) {
+        return new DocumentCommand(DocumentCommandApi.createUngroupAllNodesCommand(selection?.handle));
     }
 
     static createFlipCanvas(isHorizontal) {
@@ -1784,6 +1890,10 @@ class AddChildNodesCommandBuilder extends HandleObject {
     
     addRasterNode(rasterNodeDefinition) {
         AddChildNodesCommandBuilderApi.addRasterNode(this.handle, rasterNodeDefinition.handle);
+    }
+
+    addMaskRasterNode(maskRasterNodeDefinition) {
+        AddChildNodesCommandBuilderApi.addMaskRasterNode(this.handle, maskRasterNodeDefinition.handle);
     }
     
     addPatternRasterNode(patternRasterNodeDefinition) {
@@ -2135,9 +2245,11 @@ module.exports.GroupTransformType = GroupTransformType;
 module.exports.InsertionMode = InsertionMode;
 module.exports.LineCommandDefaultsMode = LineCommandDefaultsMode;
 module.exports.LineStyleMask = LineStyleMask;
+module.exports.MasterSpreadIndex = MasterSpreadIndex;
 module.exports.NodeChildType = NodeChildType;
 module.exports.NodeMoveType = NodeMoveType;
 module.exports.PageBoundingBoxType = PageBoundingBoxType;
+module.exports.PageInsertMode = PageInsertMode;
 module.exports.PredefinedTagKey = PredefinedTagKey;
 module.exports.RasterFillMode = RasterFillMode;
 module.exports.RasterFloodFillSamplingSource = RasterFloodFillSamplingSource;

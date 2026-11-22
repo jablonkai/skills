@@ -29,8 +29,8 @@ function buildDialog(docUnits, initialSize) {
     dlg.spaceHeight = sizeGroup.addUnitValueEditor("Spacing height", UnitType.Pixel, docUnits, 0, 0);
 
     const countGroup = col.addGroup("Number of artboards");
-    dlg.horzCount = countGroup.addUnitValueEditor("Horizontally", UnitType.Number, UnitType.Number, 1, 1).setPrecision(0);
-    dlg.vertCount = countGroup.addUnitValueEditor("Vertically", UnitType.Number, UnitType.Number, 1, 1).setPrecision(0);
+    dlg.horzCount = countGroup.addUnitValueEditor("Horizontally", UnitType.Number, UnitType.Number, 1, 1, 10).setPrecision(0);
+    dlg.vertCount = countGroup.addUnitValueEditor("Vertically", UnitType.Number, UnitType.Number, 1, 1, 10).setPrecision(0);
     return dlg;
 }
 
@@ -42,8 +42,8 @@ function readOptions(dlg) {
         height: dlg.height.value,
         spaceWidth: dlg.spaceWidth.value,
         spaceHeight: dlg.spaceHeight.value,
-        horzCount: Math.round(dlg.horzCount.value),
-        vertCount: Math.round(dlg.vertCount.value)
+        horzCount: Math.min(10, Math.round(dlg.horzCount.value)),
+        vertCount: Math.min(10, Math.round(dlg.vertCount.value))
     };
 }
 

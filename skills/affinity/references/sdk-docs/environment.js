@@ -3,9 +3,11 @@
 const { EnvironmentApi, EnvironmentPermission, HeapStatistics } = require('affinity:application');
 const { EnumerationResult, LogLevel } = require('affinity:common');
 const { ConfigurationItem } = require('./configuration.js');
+const { ResourceBundle } = require('./resource.js');
 
 let environmentPermissions = null;
 let environmentConfiguration = null;
+let environmentResources = null;
 
 class Environment {
     static get [Symbol.toStringTag]() {
@@ -44,6 +46,14 @@ class Environment {
             }
         }
         return environmentConfiguration;
+    }
+
+    // the script's resource bundle; empty when the script has none
+    static get resources() {
+        if (environmentResources == null) {
+            environmentResources = new ResourceBundle(EnvironmentApi.getResources());
+        }
+        return environmentResources;
     }
 
     static enumerateFileSystemRoots(callback) {

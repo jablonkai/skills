@@ -35,6 +35,11 @@
 // prototype getters, so inspect evaluates those getters (each guarded, so a
 // throwing getter renders as '<error: ...>' rather than failing the inspect).
 // A class can take full control by implementing [inspect.custom].
+//
+// Likewise, a class with its own static Symbol.toStringTag (OS, Environment,
+// Application, ...) is treated as a namespace: at the top level its static
+// getters are evaluated and shown alongside [class Name]. Node.js shows only
+// [class Name] for these.
 
 const { HandleObject } = require('/handleobject.js');
 
@@ -420,18 +425,54 @@ function formatFunction(ctx, value, recurseTimes) {
     const protoCtorName = protoCtor && protoCtor.constructor ? protoCtor.constructor.name : '';
     if (protoCtorName === 'AsyncFunction' || protoCtorName === 'GeneratorFunction' || protoCtorName === 'AsyncGeneratorFunction')
         kind = protoCtorName;
+    const isClass = /^class[\s{]/.test(source);
     let base;
-    if (/^class[\s{]/.test(source))
+    if (isClass)
         base = value.name ? `[class ${value.name}]` : '[class (anonymous)]';
     else
         base = value.name ? `[${kind}: ${value.name}]` : `[${kind} (anonymous)]`;
 
     const entries = [];
-    appendPropertyEntries(entries, ctx, value, recurseTimes, { skipKeys: ['length', 'name', 'prototype'] });
+    const skipKeys = ['length', 'name', 'prototype'];
+    if (isClass && recurseTimes === 0 && hasOwnStaticTag(value))
+        appendStaticGetterEntries(entries, ctx, value, recurseTimes, skipKeys);
+    appendPropertyEntries(entries, ctx, value, recurseTimes, { skipKeys });
     maybeSort(ctx, entries);
     if (entries.length === 0)
         return base;
     return reduceToSingleString(ctx, base, ['{', '}'], entries);
+}
+
+// Static-only classes (OS, Application, ...) carry a static Symbol.toStringTag,
+// as Math and JSON do; their state lives behind static getters.
+function hasOwnStaticTag(fn) {
+    try {
+        const desc = Object.getOwnPropertyDescriptor(fn, Symbol.toStringTag);
+        const tag = desc && (desc.get ? desc.get.call(fn) : desc.value);
+        return typeof tag === 'string' && tag !== '';
+    }
+    catch (err) {
+        return false;
+    }
+}
+
+function appendStaticGetterEntries(entries, ctx, fn, recurseTimes, skipKeys) {
+    for (const key of Object.getOwnPropertyNames(fn)) {
+        if (skipKeys.includes(key))
+            continue;
+        const desc = Object.getOwnPropertyDescriptor(fn, key);
+        if (!desc || typeof desc.get !== 'function')
+            continue;
+        skipKeys.push(key);
+        let str;
+        try {
+            str = formatValue(ctx, desc.get.call(fn), recurseTimes + 1);
+        }
+        catch (err) {
+            str = `<error: ${err && err.message ? err.message : String(err)}>`;
+        }
+        entries.push(`${formatKey(key)}: ${str}`);
+    }
 }
 
 function formatError(ctx, value, recurseTimes) {
