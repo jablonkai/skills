@@ -15,11 +15,15 @@ import urllib.parse
 DEFAULT_APP = "/Applications/Compressor.app"
 USER_SETTINGS = os.path.expanduser("~/Library/Application Support/Compressor/Settings")
 SETTING_EXTS = (".compressorsetting", ".cmprstng", ".setting")
-# Relative to Contents/: where 5.x keeps the built-in settings and their names.
+# Relative to Contents/: where 5.x and 6.0 keep the built-in settings and their names.
 _STOMP = ("PlugIns/Compressor/CompressorKit.bundle/Contents/Frameworks/"
           "Compressor.framework/Versions/A/Frameworks")
 BUILTIN_REL = _STOMP + "/StompUI.framework/Versions/A/Resources/BuiltInSettings"
 STRINGS_REL = _STOMP + "/StompTypes.framework/Versions/A/Resources/en.lproj/Localizable.strings"
+# A few names (e.g. AppleDevicesCinematicName on 6.0) are only in LocalizableOther.strings.
+STRINGS_OTHER_REL = STRINGS_REL.replace("Localizable.strings", "LocalizableOther.strings")
+# Encoders that write video without an <video-encode isEnabled="yes"> element.
+PASSTHROUGH_VIDEO_ENCODERS = {"ClassicCinematic"}
 VIDEO_EXTS = {".mov", ".mp4", ".m4v", ".mxf", ".mts", ".m2ts", ".avi", ".mkv",
               ".mpg", ".mpeg", ".3gp", ".dv", ".braw", ".r3d", ".crm", ".insv"}
 # MXF settings name the codec by an MTCompression* constant instead of a FourCC.
@@ -57,10 +61,23 @@ def app_version():
     return out.stdout.strip() or "unknown"
 
 
+_NSLOG = re.compile(r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\.\d+ Compressor\[[^\]]*\] ")
+
+
 def _clean(text):
-    """Drop the NSLog lines (`2026-10-01 20:30:44.162 Compressor[pid:tid] ...`)."""
-    return "\n".join(l for l in text.splitlines()
-                     if not re.match(r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\.\d+ Compressor\[", l))
+    """Drop NSLog noise (`2026-10-01 20:30:44.162 Compressor[pid:tid] ...`).
+
+    NSLog lines that carry an error are kept without their prefix: 6.0 prints
+    `Submission Error: ...` and `Errors:` (followed by the reason) that way.
+    """
+    out = []
+    for line in text.splitlines():
+        m = _NSLOG.match(line)
+        if not m:
+            out.append(line)
+        elif re.search(r"error", line[m.end():], re.I):
+            out.append(line[m.end():])
+    return "\n".join(out)
 
 
 def run_cli(args, timeout=120):
@@ -88,12 +105,14 @@ def display_strings():
     global _STRINGS
     if _STRINGS is None:
         _STRINGS = {}
-        path = os.path.join(app_path(), "Contents", STRINGS_REL)
-        if os.path.isfile(path):
-            p = subprocess.run(["/usr/bin/plutil", "-convert", "json", "-o", "-", path],
-                               capture_output=True, text=True)
-            if p.returncode == 0:
-                _STRINGS = json.loads(p.stdout)
+        # Localizable.strings wins; LocalizableOther.strings only fills the gaps.
+        for rel in (STRINGS_OTHER_REL, STRINGS_REL):
+            path = os.path.join(app_path(), "Contents", rel)
+            if os.path.isfile(path):
+                p = subprocess.run(["/usr/bin/plutil", "-convert", "json", "-o", "-", path],
+                                   capture_output=True, text=True)
+                if p.returncode == 0:
+                    _STRINGS.update(json.loads(p.stdout))
     return _STRINGS
 
 
@@ -106,7 +125,7 @@ def size_spec(w, h):
     """Describe Compressor's <automatic width height> pair.
 
     -100/-100 → source size; -P/-P → P percent; -W/H → fit inside WxH (no upscale);
-    W/H (both positive) → exactly WxH.
+    W/H (both positive) → exactly WxH. (0/0 is resolved from <bounds> by the caller.)
     """
     if w is None or h is None:
         return {"mode": "source", "text": "source size"}
@@ -146,6 +165,12 @@ def parse_setting(path, source="builtin", group=""):
         if a:
             w, h = _attr(a.group(), "width"), _attr(a.group(), "height")
             w, h = (float(w), float(h)) if w and h else (None, None)
+        if w == 0 and h == 0:
+            # The app saves an explicit frame size as <automatic width="0" height="0">
+            # plus <bounds width= height=>; 0/0 means "use <bounds>" (verified on 6.0).
+            b = re.search(r"<bounds [^>]*>", venc.group(1))
+            bw, bh = (_attr(b.group(), "width"), _attr(b.group(), "height")) if b else (None, None)
+            w, h = (float(bw), float(bh)) if bw and bh else (None, None)
     encoder = enc.group(1) if enc else None
     ext = ext.group(1).strip() if ext else ""
     sequence = encoder == "TIFF" and ext not in ("gif", "")
@@ -156,7 +181,8 @@ def parse_setting(path, source="builtin", group=""):
     return {
         "name": display, "key": key, "group": group, "source": source, "path": path,
         "encoder": encoder, "ext": ext, "video_codec": vcodec,
-        "audio_only": not venc and not sequence, "image_sequence": sequence,
+        "audio_only": not venc and not sequence and encoder not in PASSTHROUGH_VIDEO_ENCODERS,
+        "image_sequence": sequence,
         "has_audio": has_audio, "size": size_spec(w, h),
     }
 
@@ -233,8 +259,16 @@ def submit(jobs, batch_name, priority=None):
         start = out.index("{")
         batch = json.JSONDecoder().raw_decode(out, start)[0]["batch"]
     except (ValueError, KeyError):
-        msg = (err.strip() or out.strip() or "no output").splitlines()
-        raise CmpError("Compressor rejected the batch (exit %d): %s" % (code, " | ".join(msg[-3:])))
+        text = "\n".join(x for x in (err.strip(), out.strip()) if x) or "no output"
+        msg = [l.strip() for l in text.splitlines() if l.strip()]
+        hint = ""
+        if "custom Location" in text:
+            # 6.0 is sandboxed: it writes only to ~/Movies, ~/Desktop and Locations
+            # the user added in the app's Locations pane.
+            hint = (" — Compressor 6 can only write to ~/Movies, ~/Desktop or a folder added "
+                    "as a custom Location in the app; use --out-dir under ~/Movies")
+        raise CmpError("Compressor rejected the batch (exit %d): %s%s"
+                       % (code, " | ".join(msg[-3:]), hint))
     return batch["batchID"], [j.get("jobID") for j in batch.get("jobs", [])]
 
 

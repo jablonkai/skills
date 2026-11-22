@@ -1,32 +1,34 @@
 # Compressor CLI reference
 
 The binary is `/Applications/Compressor.app/Contents/MacOS/Compressor`. Below is its own
-`-help` output, captured verbatim on **Compressor 5.4**, followed by what actually happens
+`-help` output, captured verbatim on **Compressor 6.0** (build 460012), followed by what actually happens
 when you run it. Where the two disagree, the observed behaviour wins. The gotchas are
 explained in [gotchas.md](gotchas.md).
 
-## Observed behaviour (5.4)
+## Observed behaviour (6.0)
 
 | Flag | What `-help` says | What it really does |
 |---|---|---|
 | `-jobpath` | "url to source file" | Takes a `file://` URL **or** a plain path. The URL text is used literally, so `file:///a%20b.mov` fails with *path does not exist*. Pass `file:///a b.mov` or `/a b.mov` |
 | `-locationpath` | "path to location file" | Must be the **full output file path**. A folder fails with *"Destination is a directory; Expected complete output file path"* (exit 255). Missing parent folders must already exist. An existing file is **overwritten without warning**. For image-sequence settings, `dir/name.tiff` writes the folder `dir/name/frame-NNNNNN.tiff` |
+| `-locationpath` outside the sandbox | — | 6.0 writes only to `~/Movies`, `~/Desktop` and custom Locations added in the app. Any other folder rejects the whole batch before it is queued: `Errors:` / *"The file "x.mov" cannot be saved in the folder "out" because you don't have permission. Add the location "out" as a custom Location in Compressor."* (exit 1). `-jobpath` can be read from anywhere |
+| `-sourcestarttimecode` | "override the start time code of the job's source asset" | New in 6.0. Per job, like `-in`/`-out`. Not exercised by the scripts |
 | `-settingpath` | "path to settings file" | Any `.compressorsetting` / `.cmprstng` / `.setting` file. It does not have to be in a Settings folder |
 | `-jobpath … -settingpath … -locationpath …` | "repeated to enter multiple job targets" | Each repetition is one job. All jobs share one batch and run in parallel |
 | `-outputformat json` | on submission | Prints `{ "batch" : { "batchID" : "…", "jobs" : [ {"jobID" : "…"}, … ] }}` on stdout. Job IDs come back in submission order. Exit 0 means **queued**, not finished |
 | `-monitor -format json` | documented | **Rejected**: `Invalid parameter: -format`. Use `-monitor -outputformat json` |
 | `-monitor … -once` | "show job status only once" | Prints one or more JSON arrays. The early ones are `[ ]` until the batch registers. Each non-empty one is `[{ "batchStatus": {…, "jobs": [{"jobStatus": {…}}]} }]` |
 | `-kill -batchid ID` | kill | The status becomes `Cancelled` with `percentComplete` `100`. Partial outputs are deleted |
-| Submission errors | — | A missing source or a folder as location: `Parameter error: …`, exit 255. An unreadable/corrupt source: `Submission Error: …` on stderr, exit 3. No batch is created in either case |
+| Submission errors | — | A missing source or a folder as location: `Parameter error: …`, exit 255. An unreadable/corrupt source: `Submission Error: …` on stderr, exit 3. While the background service is restarting: `Submission Error: … the cluster could not be found`, exit 3; submit again. No batch is created in any of these cases. The `Submission Error` and `Errors:` lines carry the NSLog prefix, so don't filter those lines out |
 
 Status values seen: `Waiting`, `Processing`, `Successful`, `Cancelled`,
 `Failed: <reason>`. Use the `timeElapsedSeconds`/`timeRemainingSeconds` fields. The
 `submissionTime` strings follow the system locale (e.g. `2026. 10. 01., 20:30:55`).
 
-NSLog noise such as `2026-10-01 20:30:44.162 Compressor[93565:…] fileURL is NOT a directory`
+Other NSLog noise such as `2026-10-01 20:30:44.162 Compressor[93565:…] fileURL is NOT a directory`
 goes to stderr on every call and does not mean anything went wrong.
 
-## `Compressor -help` (5.4, verbatim)
+## `Compressor -help` (6.0, verbatim)
 
 ```text
 
@@ -41,6 +43,7 @@ Job Info: Used when submitting individual source files. Following parameters are
 	-jobpath <url> -- url to source file.
 				   -- In case of Image Sequence, URL should be a file URL pointing to directory with image sequence.
 				   -- Additional URL query style parameters may be specified to set frameRate (file:///myImageSequenceDir?frameRate=29.97) and audio file (e.g. file:///myImageSequenceDir?audio=/usr/me/myaudiofile.mov). 
+	-sourcestarttimecode <hh:mm:ss;ff> -- override the start time code of the job's source asset. (; or : to indicate drop frame or non drop frame.)
 	-settingpath <path> -- path to settings file.
 	-locationpath <path> -- path to location file.
 	-info <xml> -- xml for job info.
