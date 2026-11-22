@@ -1,16 +1,32 @@
 # FCPXML subset used by the skill
 
-Checked against `FCPXMLv1_14.dtd` bundled with Final Cut Pro 12.4
+Checked against `FCPXMLv1_15.dtd` bundled with Final Cut Pro 13.0
 (`Contents/Frameworks/Interchange.framework/Versions/A/Resources/`, which holds DTDs
-1.0–1.14) and against what FCP 12.4 writes on File ▸ Export XML. FCP 12.4 exports
-1.14 (default), 1.13 or 1.12.
+1.0–1.15) and against what FCP 13.0 writes on File ▸ Export XML. FCP 13.0 exports
+1.15 (default), 1.14 or 1.13 (12.4 exported 1.14, 1.13 or 1.12). The scripts write
+the newest version the installed FCP has a DTD for; `fcpxml-build.py --version 1.14`
+targets an older FCP, and files of any bundled version are read and validated.
+
+### What 1.15 adds over 1.14
+
+Nothing the skill writes changed; a 1.14 file is valid 1.15 apart from the version
+number. New in the 1.15 DTD:
+
+- `flags` (CDATA) on every anchorable item (`ao_attrs`) and on `gap`.
+- `adjust-natural-motion-blur` (`enabled`, `amount` 0–100, `param*`) — only in a
+  primitive `<video>` element, after its other `adjust-*` children.
+- `mask-semantic` (`name`, `enabled`, `blendMode` add/subtract/multiply, `type`) as a
+  mask item inside a mask filter, beside `mask-shape` and `mask-isolation`.
+- `keyframe interp` adds `hold`, `bezier` and `passthrough`; `pan-rect` gets an
+  `interp` (default `ease`).
+- `frameSampling` on `conform-rate` and `timeMap` adds `vsa-motion-blur`.
 
 ## Document skeleton
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE fcpxml>
-<fcpxml version="1.14">
+<fcpxml version="1.15">
   <import-options>                                  <!-- optional, first child -->
     <option key="library location" value="file:///Users/me/Movies/X.fcpbundle/"/>
     <option key="copy assets" value="0"/>           <!-- 0: reference media in place -->
@@ -32,15 +48,15 @@ Checked against `FCPXMLv1_14.dtd` bundled with Final Cut Pro 12.4
 
 `<fcpxml>` content order: `import-options?, resources?, (library | event* | clips*)`.
 Without `library location`, FCP shows an "Open Library — Which library do you want to
-import X into?" chooser. Verified with an existing, open library; point it at a library
-that exists. `.fcpxmld` (what FCP 12.4 exports) is a folder holding `Info.fcpxml`.
+import X into?" chooser. Verified with an existing, open library; on 13.0 a path to a bundle that doesn't
+exist yet makes FCP create the library. `.fcpxmld` (what FCP 13.0 exports) is a folder holding `Info.fcpxml`.
 FCP opens both forms.
 
 ## Resources
 
 | Element | Key attributes | Notes |
 |---|---|---|
-| `format` | `id`, `name`, `frameDuration`, `width`, `height`, `colorSpace` | Names: `FFVideoFormat1080p25`, `FFVideoFormat1080p2997`, `FFVideoFormat720p50`, `FFVideoFormat3840x2160p25`. FCP writes `frameDuration="100/2500s"` for 25p and `1001/30000s` for 29.97. |
+| `format` | `id`, `name`, `frameDuration`, `width`, `height`, `colorSpace` | Names: `FFVideoFormat1080p25`, `FFVideoFormat1080p2997`, `FFVideoFormat720p50`, `FFVideoFormat3840x2160p25`. FCP writes `frameDuration="100/2500s"` for 25p and `1001/30000s` for 29.97. Custom sizes (960x540, 1000x1000) have no name. Always write `colorSpace` (`1-1-1 (Rec. 709)`, `9-1-9 (Rec. 2020)`, `9-16-9 (Rec. 2020 PQ)`, `9-18-9 (Rec. 2020 HLG)`; new in 1.7): FCP 13 rejects an unnamed format without it (gotchas #20). |
 | `asset` | `id`, `name`, `start`, `duration`, `hasVideo`, `hasAudio`, `format`, `videoSources`, `audioSources`, `audioChannels`, `audioRate` | Holds `<media-rep kind="original-media" src="file:///…"/>`. The `src` is an absolute, percent-encoded file URL. `start` is the media's timecode origin (0s without embedded timecode). |
 | `effect` | `id`, `name`, `uid` | Titles, generators and transitions (below). |
 | `media` | `id`, `name` + `<sequence>` | A compound clip, used by `ref-clip`. `<multicam>` for multicam. |
@@ -49,7 +65,7 @@ FCP adds to assets on export: `uid`, `sig`, a `<bookmark>` (a base64 security-sc
 bookmark, which can be dropped when editing) and `<metadata>`. Resources may appear in
 any order before use. FCP writes formats and assets interleaved.
 
-### Effect uids verified on FCP 12.4
+### Effect uids verified on FCP 13.0
 
 | Effect | uid |
 |---|---|

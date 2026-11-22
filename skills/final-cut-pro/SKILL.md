@@ -3,7 +3,7 @@ name: final-cut-pro
 description: 'Build and inspect Final Cut Pro timelines through FCPXML: generate a project from a clip list or CSV shot list (clips, gaps, B-roll, transitions, titles, lower thirds, markers, chapters, keywords) with exact rational-time math, validate it against the installed DTD, import it into FCP and confirm it via the read-only AppleScript model; add lower thirds or markers to an exported FCPXML; list clips with timeline and source in/out from .fcpxml/.fcpxmld. Use for any task or question that writes, reads or edits FCPXML, or converts FCPXML times, frames and timecode (drop frame too), e.g. "rough cut in Final Cut from these clips", "fcpxml from this shot list", "chapter markers in my FCP project", "lower thirds at these timecodes", "clips and in/out points in this fcpxml", "450 frames at 29.97 as FCPXML time", "bring my DaVinci Resolve timeline into Final Cut Pro". Not for work inside DaVinci Resolve (davinci-resolve), Compressor or ffmpeg encodes, Motion templates, iMovie or Premiere XML.'
 summary: "build and inspect Final Cut Pro timelines through FCPXML — rough cuts with gaps, connected clips, transitions, titles, markers and keywords, exact rational-time math, DTD validation, import with AppleScript read-back, FCPXML parsing and Resolve interchange"
 category: video
-compatibility: "Built for Final Cut Pro 12.4 (FCPXML 1.14) on macOS 27."
+compatibility: "Built for Final Cut Pro 13.0 (FCPXML 1.15) on macOS 27.2."
 risk: medium
 tags:
     - final-cut-pro
@@ -13,7 +13,7 @@ tags:
     - applescript
 license: GPL-3.0-only
 metadata:
-  version: "1.1.3"
+  version: "1.2.0"
   author: "Tamás Jablonkai"
 ---
 
@@ -22,14 +22,14 @@ metadata:
 Final Cut Pro has **no editing API**. The skill writes FCPXML, checks it, and imports it
 with `open`; FCP's AppleScript dictionary is **read-only** (libraries → events →
 projects → sequence duration) and is used to confirm the import. Verified against
-**Final Cut Pro 12.4** (bundle id `com.apple.FinalCut`, FCPXML 1.14) on macOS 27.
+**Final Cut Pro 13.0** (bundle id `com.apple.FinalCut`, FCPXML 1.15) on macOS 27.2.
 
 | Script | Does |
 |---|---|
 | `bash scripts/fcp.sh --check` | app, version, FCPXML versions, ffprobe/xmllint, Automation + Accessibility. Run first. |
-| `python3 scripts/fcpxml-build.py SPEC.json --out X.fcpxml` | JSON spec (or `--shots CSV --media-dir DIR`) → validated FCPXML |
+| `python3 scripts/fcpxml-build.py SPEC.json --out X.fcpxml` | JSON spec (or `--shots CSV --media-dir DIR`) → validated FCPXML in the newest installed version (1.15 on FCP 13.0; `--version 1.14` or older for an older FCP) |
 | `python3 scripts/fcpxml-verify.py X.fcpxml [--duration …]` | DTD, media, frame grid, handles, storyline, expectations, `--in-fcp` |
-| `python3 scripts/fcp-import.py X.fcpxml [--library L]` | import, handle FCP's dialogs, confirm project + duration |
+| `python3 scripts/fcp-import.py X.fcpxml [--library L]` | import, handle FCP's dialogs, confirm project + duration; refuses transitions without handles |
 | `python3 scripts/fcpxml-edit.py IN --out OUT --titles/--markers …` | add lower thirds/markers to an existing FCPXML → new project |
 | `python3 scripts/fcpxml-read.py IN [--json] [--all] [--expand]` | every clip: lane, timeline in/out, source in/out, media; titles; markers |
 | `python3 scripts/fcptime.py rate/frames/time/tc/snap …` | exact time math; `--selftest` |
@@ -45,7 +45,7 @@ and exits non-zero on failure — read the JSON, don't assume success.
    System Settings ▸ Privacy & Security ▸ Automation ▸ Final Cut Pro. `accessibility:
    DENIED` → imports still work, but warning dialogs aren't read (ask the user to look).
 2. **Build** from a spec, or **edit** an FCPXML the user exported
-   (File ▸ Export XML… — FCP 12.4 writes a `.fcpxmld` bundle; exporting is a manual step).
+   (File ▸ Export XML… — FCP 13.0 writes a `.fcpxmld` bundle, FCPXML 1.15 by default; exporting is a manual step).
 3. `fcpxml-verify.py` with the expectations you know: `--duration` is a **length**
    (`512/25s`, `20.48` or `00:00:20:12`), not the end timecode; `--clips/--chapters/--titles`.
 4. `fcp-import.py FILE --library ~/Movies/<Library>.fcpbundle`. It fails on any FCP
@@ -89,6 +89,10 @@ and exits non-zero on failure — read the JSON, don't assume success.
   the `apple-motion` skill) goes in as `{"name": "…", "uid": "~/Titles.localized/<Category>/<Name>/<Name>.moti"}`;
   without `size`/`font`/`color` it keeps the template's own styling.
 - Marker `kind`: `marker`, `chapter` (chapter marker), `todo` (to-do marker).
+- `format` (rate, width, height) defaults to the first video clip's; `format.colorSpace`
+  sets the project's colour space (default `1-1-1 (Rec. 709)`; e.g.
+  `9-18-9 (Rec. 2020 HLG)`). Every format is written with a `colorSpace`, which FCP 13
+  needs for custom sizes such as 960x540.
 - `--library` adds the `library location` import option (no library chooser);
   media is referenced in place (`copy assets` 0) unless `--copy-media`.
 
@@ -146,8 +150,9 @@ Resolve export.
 
 ## Pitfalls (details in references/gotchas.md)
 
-- FCP drops a transition whose clips lack media handles (warning dialog) — the
-  builder refuses those instead; shorten the transition or trim the clips.
+- FCP drops a transition whose clips lack media handles — **silently** in FCP 13.0
+  (12.4 still showed a warning dialog); the builder and `fcp-import.py` refuse those
+  and `fcpxml-verify.py` reports `handles`; shorten the transition or trim the clips.
 - Missing media gives **no** warning, just an offline clip; build and verify check paths.
 - Without a `library location` option FCP asks which library to import into;
   `fcp-import.py --library NAME` picks it from the list, otherwise the run stops.
@@ -174,4 +179,4 @@ cleaning a scratch library up is the user's call (close it in FCP, then delete i
 - [references/fcpxml.md](references/fcpxml.md) — the element subset, attributes and order, effect uids, import options
 - [references/time.md](references/time.md) — rational time, frame durations, timecode and drop frame
 - [references/recipes.md](references/recipes.md) — raw FCPXML for what the scripts don't build
-- [references/gotchas.md](references/gotchas.md) — every behaviour verified on FCP 12.4
+- [references/gotchas.md](references/gotchas.md) — every behaviour verified on FCP 13.0 (or the version a row names)

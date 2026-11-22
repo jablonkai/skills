@@ -31,6 +31,25 @@ class BuildError(Exception):
     pass
 
 
+# FCP's colorSpace values (what it writes on export). Every <format> gets one: FCP 13
+# rejected an unnamed custom-size sequence format without it ("Encountered an unexpected
+# value (format=…/sequence[1]/@format)") when the library already had that size at
+# another rate, e.g. 960x540 29.97 after 960x540 30p.
+REC709 = "1-1-1 (Rec. 709)"
+
+
+def color_space(v):
+    """FCP colorSpace for an ffprobe video stream (Rec. 709 when untagged)."""
+    prim, trc = v.get("color_primaries") or "", v.get("color_transfer") or ""
+    if prim == "bt2020" or trc in ("smpte2084", "arib-std-b67"):
+        if trc == "smpte2084":
+            return "9-16-9 (Rec. 2020 PQ)"
+        if trc == "arib-std-b67":
+            return "9-18-9 (Rec. 2020 HLG)"
+        return "9-1-9 (Rec. 2020)"
+    return REC709
+
+
 # ---------------------------------------------------------------- media
 
 def ffprobe(path):
@@ -65,6 +84,7 @@ class Media:
                                  "supported by the builder (make a clip with ffmpeg -loop 1)")
             self.fd = frame_duration(rate)
             self.width, self.height = int(v["width"]), int(v["height"])
+            self.color_space = color_space(v)
             nb = v.get("nb_frames")
             if nb and nb.isdigit() and int(nb) > 1:
                 self.duration = int(nb) * self.fd
@@ -74,6 +94,7 @@ class Media:
         else:
             self.fd = None
             self.width = self.height = None
+            self.color_space = None
             sr = int(a.get("sample_rate", "48000"))
             d = Fraction(a.get("duration") or fmt.get("duration") or "0")
             self.duration = Fraction(round(d * sr), sr)
@@ -129,11 +150,13 @@ class Builder:
                                   "used": fmt_time(after, grid), "grid": FD_TEXT.get(grid, fmt_time(grid))})
 
     # -- resources
-    def format_id(self, fd, w, h):
-        key = (fd, w, h)
+    def format_id(self, fd, w, h, cs=REC709):
+        key = (fd, w, h, cs)
         if key not in self.formats:
             attrs = {"id": self.nid(), "frameDuration": FD_TEXT.get(fd, fmt_time(fd)),
                      "width": str(w), "height": str(h)}
+            if tuple(int(x) for x in self.root.get("version").split(".")) >= (1, 7):
+                attrs["colorSpace"] = cs  # the attribute is new in FCPXML 1.7
             suffix = RATE_NAME.get(fd)
             name = {(1920, 1080): "1080p", (1280, 720): "720p"}.get((w, h))
             if suffix and name:
@@ -158,7 +181,7 @@ class Builder:
                      "hasVideo": "1" if m.has_video else "0",
                      "hasAudio": "1" if m.has_audio else "0"}
             if m.has_video:
-                attrs["format"] = self.format_id(m.fd, m.width, m.height)
+                attrs["format"] = self.format_id(m.fd, m.width, m.height, m.color_space)
                 attrs["videoSources"] = "1"
             if m.has_audio:
                 attrs.update(audioSources="1", audioChannels=str(m.channels),
@@ -219,7 +242,8 @@ class Builder:
             self.seq_fd = first_video.fd
         w = self.size[0] or (first_video.width if first_video else 1920)
         h = self.size[1] or (first_video.height if first_video else 1080)
-        seq_fmt = self.format_id(self.seq_fd, int(w), int(h))
+        seq_fmt = self.format_id(self.seq_fd, int(w), int(h),
+                                 (spec.get("format") or {}).get("colorSpace") or REC709)
         if self.drop and self.seq_fd not in (Fraction(1001, 30000), Fraction(1001, 60000)):
             raise BuildError("drop_frame needs a 29.97 or 59.94 sequence")
         self.tc_start = Fraction(0)
