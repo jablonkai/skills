@@ -4,6 +4,8 @@
   fcp-import.py cut.fcpxml [--library ~/Movies/Scratch.fcpbundle] [--timeout 120]
 
 1. DTD-validates the file (refuses an invalid one) and reads the projects it defines.
+   Also refuses a transition without media handles (fcpxml-verify.py `handles`): FCP 13
+   drops such a transition without any warning, so the import itself can't catch it.
 2. `open -b com.apple.FinalCut FILE` (launches FCP if needed).
 3. Polls until every project shows up as a *new* project in FCP's read-only AppleScript
    model, then compares each project's duration with the file's sequence duration.
@@ -19,6 +21,7 @@
 Stop path: every wait ends at --timeout; FCP is never quit and nothing is deleted.
 """
 import argparse
+import json
 import os
 import subprocess
 import sys
@@ -40,12 +43,12 @@ on run argv
         set msgs to ""
         try
           repeat with r in rows of outline 1 of scroll area 1 of w
-            repeat with st in static texts of r
-              set msgs to msgs & (value of st) & linefeed
+            repeat with txt in static texts of r
+              set msgs to msgs & (value of txt) & linefeed
             end repeat
             try
-              repeat with st in static texts of group 1 of r
-                set msgs to msgs & (value of st) & linefeed
+              repeat with txt in static texts of group 1 of r
+                set msgs to msgs & (value of txt) & linefeed
               end repeat
             end try
           end repeat
@@ -87,6 +90,25 @@ def ui_step(lib_name):
     return head.strip(), rest.strip()
 
 
+def dialog_lines(text):
+    """The warning rows of an Import XML dialog (row 1, the file name, dropped)."""
+    lines = [ln for ln in text.splitlines() if ln.strip()
+             and not ln.endswith((".fcpxml", ".fcpxmld"))]
+    return lines or ["FCP showed an Import XML warnings dialog (text not readable)"]
+
+
+def handle_problems(path):
+    """The `handles` details fcpxml-verify.py reports for the file (empty when fine)."""
+    verify = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fcpxml-verify.py")
+    r = subprocess.run([sys.executable, verify, path], capture_output=True, text=True, timeout=120)
+    try:
+        res = json.loads(r.stdout)
+    except ValueError:
+        return []
+    return [d for c in res.get("checks", []) if c["check"].startswith("handles") and not c["ok"]
+            for d in (c.get("detail") or [])]
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("file")
@@ -106,6 +128,11 @@ def main():
             ok, msgs = xmllint(a.file, version)
             if not ok:
                 emit({"ok": False, "error": "not valid against the FCPXML DTD", "dtd_errors": msgs[:20]})
+                return 1
+            bad = handle_problems(a.file)
+            if bad:
+                emit({"ok": False, "error": "FCP would silently drop these transitions (no media "
+                      "handles): shorten them or trim the clips", "handles": bad})
                 return 1
         want = []
         for ev, pr in projects(root):
@@ -143,7 +170,7 @@ def main():
         if r.returncode != 0:
             raise FcpError(f"open failed: {r.stderr.strip()}")
 
-        warnings, notes, found = [], [], {}
+        warnings, notes, found, loading = [], [], {}, {}
         ui_ok = True
         deadline = t0 + a.timeout
         while time.time() < deadline:
@@ -153,8 +180,9 @@ def main():
             if ui_ok:
                 state, text = ui_step(lib_name)
                 if state == "warnings":
-                    warnings += [ln for ln in text.splitlines() if ln.strip()
-                                 and not ln.endswith((".fcpxml", ".fcpxmld"))]
+                    warnings += dialog_lines(text)
+                elif state == "error" and not any(n.startswith("dialog check") for n in notes):
+                    notes.append(f"dialog check failed: {text}")
                 elif state == "chose":
                     notes.append(f"picked library {lib_name!r} in FCP's chooser")
                 elif state in ("chooser", "chooser-no-match"):
@@ -184,20 +212,28 @@ def main():
                         continue
                     if p["project"] == w["project"] or p["project"].startswith(w["project"] + " "):
                         if w["event"] in (None, p["event"]) or p["event"].startswith(str(w["event"])):
+                            # FCP 13 lists a freshly imported project with a 0s sequence for
+                            # a moment before it is loaded: keep polling until it has length.
+                            if parse_time(p["duration"]) == 0 and w["duration"]:
+                                loading[key] = p
+                                break
                             found[key] = p
                             break
             if len(found) == len(want):
-                time.sleep(1.0)
-                if ui_ok:  # a warnings dialog can appear just after the project
+                # FCP 13 lists the project first and shows the Import XML warnings a few
+                # seconds later: keep watching for the dialog before reporting success.
+                grace = time.time() + float(os.environ.get("FCP_DIALOG_GRACE", 8))
+                while ui_ok and time.time() < min(grace, deadline):
+                    time.sleep(0.5)
                     state, text = ui_step(lib_name)
                     if state == "warnings":
-                        warnings += [ln for ln in text.splitlines() if ln.strip()
-                                     and not ln.endswith((".fcpxml", ".fcpxmld"))]
+                        warnings += dialog_lines(text)
+                        break
                 break
         out = []
         ok = True
         for w in want:
-            p = found.get((w["event"], w["project"]))
+            p = found.get((w["event"], w["project"])) or loading.get((w["event"], w["project"]))
             row = {"event": w["event"], "project": w["project"],
                    "expected_duration": fmt_time(w["duration"]) if w["duration"] is not None else None}
             if p is None:

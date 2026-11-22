@@ -51,7 +51,7 @@ FCP conforms everything in a project to the **sequence** frame grid:
 
 Off-grid values are not rejected. FCP floors the start and **appends a one-frame copy
 of the clip after the last item**, so the project comes out one frame longer. Verified
-twice on 12.4. `fcpxml-verify.py` reports this as `grid`. The builder snaps (a start
+twice on 12.4 and again on 13.0. `fcpxml-verify.py` reports this as `grid`. The builder snaps (a start
 rounds up to stay inside the media) and lists every change under `"adjusted"`.
 
 A cross dissolve centred on a cut needs an even number of frames (half on each side).
