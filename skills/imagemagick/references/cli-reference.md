@@ -1,6 +1,6 @@
 # ImageMagick 7 CLI reference
 
-The flags that matter for batch work, checked against 7.1.2-34. Full docs:
+The flags that matter for batch work, checked against 7.1.2-36. Full docs:
 <https://imagemagick.org/script/command-line-options.php>.
 
 ## Command shape
@@ -119,9 +119,11 @@ magick a.png b.png -metric RMSE -compare -format '%[distortion]' info:   # norma
 ```
 
 7.1.2 metrics: `RMSE`, `MAE`, `PSNR` (dB, 120 = identical, normalised = dB/120),
-`SSIM` and `DSSIM` (both are **distortions**: 0 = identical), `AE` (channel-averaged:
+`SSIM` and `DSSIM` (both are **distortions**: 0 = identical; SSIM exits 1 even when
+identical since 7.1.2-36), `AE` (channel-averaged:
 not a pixel count), `NCC`, `PHASH`. `-fuzz N%` makes small differences count as equal.
-`-highlight-color`/`-lowlight-color` style the diff image. Both images must be the same
+`-highlight-color`/`-lowlight-color` style the diff image. A Gray first image is compared on
+its one channel only, so add `-colorspace sRGB` to each. Both images must be the same
 size; `-subimage-search` finds a small image inside a large one.
 
 ## mogrify

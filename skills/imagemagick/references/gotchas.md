@@ -1,7 +1,7 @@
 # Gotchas
 
 Each of these produces output that looks fine in a quick check and is still wrong.
-Behaviour verified on ImageMagick 7.1.2-34 Q16-HDRI (Homebrew, macOS 27.2).
+Behaviour verified on ImageMagick 7.1.2-36 Q16-HDRI (Homebrew, macOS 27.2).
 
 ## Syntax and versions
 
@@ -10,9 +10,10 @@ Behaviour verified on ImageMagick 7.1.2-34 Q16-HDRI (Homebrew, macOS 27.2).
   tool. Always use `magick`, and `magick mogrify|montage|compare|identify`. Old blog
   recipes also use `composite -dissolve`. In IM7 use `magick … -compose dissolve
   -define compose:args=40 -composite`, or the alpha-multiply form.
-- **Settings vs operators.** `magick in.jpg out.jpg -quality 80` sets the quality
-  *after* writing, so it has no effect. Put settings before the output, and `-font`
-  before `-annotate`/`label:`.
+- **Settings vs operators.** IM7 takes the *last* argument as the output, so `magick
+  in.jpg out.jpg -quality 80` fails (`unable to open image 'out.jpg'`, or `MissingArgument
+  '-quality'` when out.jpg exists) and writes nothing. Put settings before the output,
+  and `-font` before `-annotate`/`label:`.
 - **Shell metacharacters in geometry.** `-resize 1600x1600>` without quotes redirects
   output to a file named `1600`. Quote the argument: `'1600x1600>'`.
 
@@ -81,9 +82,15 @@ Behaviour verified on ImageMagick 7.1.2-34 Q16-HDRI (Homebrew, macOS 27.2).
   0.67. A 121-pixel change reported AE 80.67. For a true count, threshold the
   difference image and take the max across channels (what `im_compare.py` does).
 - **SSIM is a distortion.** `-metric SSIM` prints 0 for identical images, the same as
-  DSSIM. Similarity = 1 − value.
+  DSSIM. Similarity = 1 − value. Since 7.1.2-36 SSIM is treated as higher-is-better for
+  the exit code, so it exits **1 even for identical images**. Use `-metric DSSIM` when
+  the exit code matters.
+- **Grayscale vs colour.** PNG and JPEG writers store neutral images as Gray, and when
+  the *first* image of `compare`, `-compose difference` or a composite is Gray, only its
+  one channel is used: white vs red (255,0,0) gives AE 0 and RMSE 0, and a red logo
+  composited onto it comes out grey. Convert each image with `-colorspace sRGB` first.
 - **PSNR** prints dB with 120 for identical. The parenthesised value is dB/120.
-- **Exit code 1 means "different", not an error.** Only 2 is an error. Don't wrap
+- **Exit code 1 means "different", not an error** (see SSIM above for the exception). Only 2 is an error. Don't wrap
   `compare` in `set -e` scripts without allowing 1.
 - **Different sizes** are an error (`image widths or heights differ`). Resize one first,
   or use `-subimage-search` on purpose.

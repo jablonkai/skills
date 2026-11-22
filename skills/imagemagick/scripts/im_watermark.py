@@ -90,7 +90,9 @@ def main():
             lw, lh = int(dims[0]), int(dims[1])
         overlay += ["-alpha", "set", "-channel", "A", "-evaluate", "multiply", str(a.opacity), "+channel", ")"]
         dst = im.out_name(srcf, a.out, ext, a.suffix)
-        args = [srcf, "-auto-orient", *overlay, "-gravity", a.gravity, "-geometry", f"+{m}+{m}",
+        # a Grayscale base would drop the mark's colour in 7.1.2-36 (composite keeps one channel)
+        srgb = ["-colorspace", "sRGB"] if info.get("colorspace") in ("Gray", "Grey") else []
+        args = [srcf, "-auto-orient", *srgb, *overlay, "-gravity", a.gravity, "-geometry", f"+{m}+{m}",
                 "-compose", "over", "-composite", *im.quality_args(dst.rsplit(".", 1)[-1].lower(), a.quality), dst]
         im.run(args)
 
@@ -99,10 +101,11 @@ def main():
         pad = 2
         rect = f"rectangle {max(0, x - pad)},{max(0, y - pad)} {min(W, x + lw + pad)},{min(H, y + lh + pad)}"
         crop = f"{lw}x{lh}+{x}+{y}"
-        outside = distortion([srcf, "-auto-orient", "-fill", "black", "-draw", rect,
-                              dst, "-fill", "black", "-draw", rect])
-        inside = distortion(["(", srcf, "-auto-orient", "-crop", crop, "+repage", ")",
-                             "(", dst, "-crop", crop, "+repage", ")"])
+        # compare as sRGB on both sides: a Gray first image hides colour differences
+        outside = distortion(["(", srcf, "-auto-orient", "-colorspace", "sRGB", "-fill", "black", "-draw", rect, ")",
+                              "(", dst, "-colorspace", "sRGB", "-fill", "black", "-draw", rect, ")"])
+        inside = distortion(["(", srcf, "-auto-orient", "-colorspace", "sRGB", "-crop", crop, "+repage", ")",
+                             "(", dst, "-colorspace", "sRGB", "-crop", crop, "+repage", ")"])
         rec = {"src": srcf, "out": dst, "size": f"{o.get('width')}x{o.get('height')}",
                "mark_box": f"{lw}x{lh}+{x}+{y}", "rmse_outside": round(outside, 5), "rmse_inside": round(inside, 5)}
         problems = []

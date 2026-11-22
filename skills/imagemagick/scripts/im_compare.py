@@ -8,7 +8,9 @@
 use `compare -metric AE` for this: ImageMagick 7.1.2 averages AE over the channels, so a
 pixel that changed in two of three channels counts as 0.67. Other 7.1.2 quirks handled
 here: `-metric SSIM` returns a distortion (0 = identical, same as DSSIM), and PSNR is
-reported in dB with 120 meaning identical. Exit 0 when the chosen metric passes
+reported in dB with 120 meaning identical. Both images are compared as sRGB: in 7.1.2-36
+a Grayscale first image makes `compare` and `-compose difference` look at its one channel
+only, so a colour change against a grey image reads as no change. Exit 0 when the chosen metric passes
 --threshold (default: no differing pixels). Images of different sizes are reported, not
 compared, unless --resize-b is given.
 """
@@ -62,22 +64,26 @@ def main():
             im.die(f"cannot read {i['file']}: {i['error']}")
     keys = ("file", "format", "width", "height", "colorspace")
     rep = {"a": {k: ia[k] for k in keys}, "b": {k: ib[k] for k in keys}}
-    A, B = f"{a.a}[0]", f"{a.b}[0]"
     W, H = ia["width"], ia["height"]
-    tmp = None
+    resize = []
     if (W, H) != (ib["width"], ib["height"]):
         if not a.resize_b:
             rep.update(ok=False, error="sizes differ; pass --resize-b to compare B scaled to A")
             im.emit(rep)
             sys.exit(1)
-        fd, tmp = tempfile.mkstemp(suffix=".png")
-        os.close(fd)
-        im.run([B, "-resize", f"{W}x{H}!", tmp])
-        B = tmp
+        resize = ["-resize", f"{W}x{H}!"]
+    tmps = []
     try:
-        ok = report(a, rep, A, B, W, H)
+        # MIFF keeps the sRGB colourspace; a PNG writer would store neutral images as Gray again
+        for src, extra in ((a.a, []), (a.b, resize)):
+            fd, tmp = tempfile.mkstemp(suffix=".miff")
+            os.close(fd)
+            tmps.append(tmp)
+            im.run([f"{src}[0]", *extra, "-colorspace", "sRGB", "-type", "TrueColorAlpha"
+                    if (ia if src == a.a else ib).get("alpha") else "TrueColor", tmp])
+        ok = report(a, rep, tmps[0], tmps[1], W, H)
     finally:
-        if tmp:
+        for tmp in tmps:
             os.remove(tmp)
     sys.exit(0 if ok else 1)
 
