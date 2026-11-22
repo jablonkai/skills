@@ -246,7 +246,7 @@ def main():
     ap.add_argument("--csv-formulas", action="store_true",
                     help="enter CSV cells that start with = as formulas (default: kept as text)")
     ap.add_argument("--export", action="append", default=[], metavar="PATH",
-                    help="also export to PATH (.xlsx, .csv, .pdf, .numbers09); repeatable")
+                    help="also export to PATH (.xlsx, .csv, .pdf); repeatable")
     ap.add_argument("--json", action="store_true", help="print the result as JSON")
     add_export_args(ap)
     ns = ap.parse_args()

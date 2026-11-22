@@ -135,8 +135,15 @@ function build(req) {
     tb.headerRowCount = req.headerRows;
     tb.headerColumnCount = req.headerCols;
     tb.footerRowCount = req.footerRows;
+    // Formats go on before the values (a text-format cell keeps "007" as typed). Since
+    // Numbers 16 writing a number resets a currency cell to automatic, so display-only
+    // formats go on again afterwards. Duration and date formats are not re-applied:
+    // on a number they reinterpret the value as days and change it.
     for (const f of req.formats) tb.ranges[f.range].format = f.format;
     for (const [a, v] of req.writes) tb.cells[a].value = v;
+    for (const f of req.formats) {
+      if (["text", "duration", "date and time"].indexOf(f.format) < 0) tb.ranges[f.range].format = f.format;
+    }
     const res = {
       out: req.out,
       sheet: tb.parent().name(),

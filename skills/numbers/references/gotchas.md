@@ -1,6 +1,6 @@
 # Numbers gotchas
 
-Each one was reproduced on Numbers Creator Studio 15.4, macOS 27, region hu_HU (decimal
+Each one was reproduced on Numbers Creator Studio 16.0, macOS 27.2, region hu_HU (decimal
 `,`, grouping no-break space). Where the region matters, an English region behaves the
 same way with `.` and `,` swapped.
 
@@ -13,6 +13,8 @@ same way with `.` and `,` swapped.
 | A CSV cell `=HACK()` is entered as a formula | Same parsing | It goes into a text-format cell, which keeps `=…` as text; `--csv-formulas` opts in to formulas |
 | `value` prints `42,5` | AppleScript coerces numbers to text with the region's decimal mark | The scripts use JXA and JSON, which are locale-free |
 | `formula` reads `=SZUM(A2:A3)` and `=1÷0` | Formula text comes back in the UI language, with display operators | Writing English names works. Compare values, not formula text |
+| `=ROUND(A2/3,2)` is an error and `=A2*0.5` leaves the cell empty | Formulas are parsed with the region's decimal mark and argument separator, even with English function names | Write `=ROUND(A2/3;2)` and `=A2*0,5` under a comma-decimal region. The builder's summary formulas have neither |
+| `--format Revenue=currency` shows only on the footer, the body reads `1250,5` | Since 16.0 writing a number resets a `currency`, `duration` or `date and time` cell to `automatic` (`percent`, `number`, `scientific`, `fraction`, `checkbox` survive) | The builder applies formats again after the values, except duration and date: on a number they reinterpret it as days (800 becomes 69 120 000 s) |
 | An error cell (`=1/0`) reads as `missing value` | Same as an empty cell | `numbers-read` flags cells that have a formula but no value as errors |
 | A date written as `2024-01-05` reads back as `2024-01-04 23:00` | Date values cross Apple events with a timezone skew | The reader reports dates as their formatted value |
 | Currency shows `1357 Ft`, no decimals, while the value is 1357.0 | `currency` uses the region's currency and rounding. There is no scripted decimal-places setting | Assertions compare `value`. Mention the display rounding to the user |
@@ -23,7 +25,7 @@ same way with `.` and `,` swapped.
 | Symptom | Cause / fix |
 |---|---|
 | A new document's table is 22 × 7, with a header row **and a header column** | Default template. The builder sets the exact size, `--header-rows` (default 1) and `--header-cols` (default 0) |
-| `make new sheet at end of sheets of d` → -10000; `make new sheet with properties {name:…}` → -10006 | Use `tell d to make new sheet`, then `set name of last sheet of d`. In JXA use `d.sheets.push(N.Sheet())` |
+| `make new sheet at end of sheets of d` → -10000, or -10006 with properties | Use `tell d to make new sheet` (on 16.0 `with properties {name:…}` works there), or rename `last sheet of d` afterwards. In JXA use `d.sheets.push(N.Sheet())` |
 | `N.make({new: "table", at: sheet})` in JXA → "can't convert types" | Use `sheet.tables.push(N.Table({rowCount, columnCount}))` |
 | A new sheet already contains a table | The builder reuses it rather than adding a second one |
 | Header or footer counts don't stick | They must fit inside `row count`. Set the size first, then the header and footer counts |
@@ -36,6 +38,7 @@ same way with `.` and `,` swapped.
 | XLSX gets an extra first sheet ("Összegzés exportálása") | A summary worksheet, added when the document has several sheets or tables. `numbers-export` excludes it unless `--summary-worksheet` |
 | XLSX worksheet names are `Main - Second` | One worksheet per table, named `Sheet - Table`; only a table that still has its default name gives the bare sheet name |
 | openpyxl shows `ArrayFormula` objects | Numbers writes array formulas. Read `data_only=True` for the cached values, or `.text` for the formula |
+| Numbers '09 export to `x.numbers09` fails with `".numbers09"` | Numbers 16 writes that format only to a `.numbers` path. `numbers-export --to numbers09` writes `x-09.numbers` |
 | `x.csv` is a folder | A document with several tables exports one CSV per table into that folder. `--flat-csv` gives `x-Sheet-Table.csv` files |
 | CSV has `;` separators and `33 Ft` | Numbers' CSV follows the region and writes formatted values. `--raw-csv` writes comma CSV of the raw values |
 
@@ -48,7 +51,8 @@ same way with `.` and `,` swapped.
 - `NUMBERS_TIMEOUT` bounds each `osascript` process. JXA ignores a `timeout` argument on
   commands, so the process timeout is the stop path.
 - In AppleScript, open files **as an alias** (`POSIX file p as alias`), as with Pages
-  and Keynote. JXA's `N.open(Path(p))` worked for foreign files in tests.
+  and Keynote. On 16.0 a bare `POSIX file` opened a `.numbers` too, but the alias is
+  the safe form. JXA's `N.open(Path(p))` worked for foreign files in tests.
 - A document that is already open is refused. The user's unsaved edits and the
   script's would collide.
 - A new document saved right after `make` leaves no "Untitled" copy in the Numbers

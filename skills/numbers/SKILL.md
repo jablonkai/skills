@@ -3,7 +3,7 @@ name: numbers
 description: 'Automate Apple Numbers on macOS via its scripting dictionary (osascript, JXA) — build a .numbers spreadsheet from CSV/JSON with typed values, header and footer rows, formulas such as a SUM totals row, and cell formats; read sheets, tables, recalculated values and formulas back and report totals per table; export or batch-convert .numbers files to XLSX, CSV or PDF. Use whenever the user mentions Numbers or a .numbers file: "import this CSV into Numbers and add a totals row", "what are the totals in budget.numbers", "convert these Numbers files to Excel", "export my .numbers to PDF". Not for .xlsx work without Numbers (use xlsx), CSV or pandas analysis that never touches Numbers, spreadsheets to Markdown (use markitdown), or Pages and Keynote documents.'
 summary: "automate Apple Numbers via AppleScript/JXA — build spreadsheets from CSV with formulas and formats, read recalculated values back, and XLSX/CSV/PDF export or batch conversion"
 category: office
-compatibility: "Built for Numbers Creator Studio 15.4 on macOS 27."
+compatibility: "Built for Numbers Creator Studio 16.0 on macOS 27.2."
 risk: low
 tags:
     - numbers
@@ -15,7 +15,7 @@ tags:
     - csv
 license: GPL-3.0-only
 metadata:
-  version: "1.0.3"
+  version: "1.1.0"
   author: "Tamás Jablonkai"
 ---
 
@@ -24,7 +24,7 @@ metadata:
 Apple Numbers is driven through its **scripting dictionary via `osascript`** (JXA). Each
 script call opens the documents it needs, works, and closes them again. There is no
 bridge or listener; macOS Automation consent is the only gate. Verified against
-**Numbers Creator Studio 15.4** (bundle id `com.apple.Numbers`) on macOS 27.
+**Numbers Creator Studio 16.0** (bundle id `com.apple.Numbers`) on macOS 27.2.
 
 Everything goes through the scripts below. They encode workarounds for behaviour that
 looks right but is locale-dependent or broken (see Pitfalls), so reach for raw
@@ -79,7 +79,14 @@ python3 $S/numbers-build.py more.csv -o sales.numbers --into --sheet Sales --tab
 - `--format` takes a header name, a column letter or range (`C:D`, `Q1:Q2` as two
   header names) or an A1 range, and one of `number currency percent text date duration
   fraction scientific checkbox automatic`. Column formats cover the body and footer.
-- `--formula CELL EXPR` sets any cell (the table grows to include it).
+  Writing a number resets a `currency`, `duration` or `date` cell to automatic in
+  Numbers 16, so the builder applies formats again afterwards, except `duration` and
+  `date`: on a number they reinterpret it as days and change the value. Such number
+  cells end up `automatic`.
+- `--formula CELL EXPR` sets any cell (the table grows to include it). Function names
+  are English, but decimal literals and the argument separator follow the region:
+  `=ROUND(D2/3;2)` and `=D2*0,5` under a comma-decimal region (`numbers.sh --check`
+  prints it); `=D2*0.5` is silently dropped there.
 - CSV cells starting with `=` stay text (no formula injection) unless `--csv-formulas`.
 - `--into` adds the table to an existing document: onto sheet `--sheet` if it exists,
   else a new sheet. It saves that document in place — work on a copy unless the user
@@ -127,13 +134,16 @@ python3 $S/numbers-verify.py ~/Reports-xlsx/q3.xlsx --numbers-coords --expect B1
   region) and formatted values (`33 Ft`); several tables give a folder `X.csv/`.
   `--flat-csv` flattens it; `--raw-csv` writes comma-separated raw values instead —
   prefer it when a program will read the CSV.
+- **Numbers 09** is written as `X-09.numbers`: Numbers 16 refuses any other extension.
 - `--password`/`--password-hint` for XLSX, PDF, Numbers 09. Existing outputs are
   skipped unless `--force`; a folder tree is mirrored under `--out-dir`.
 
-## Pitfalls (all measured on 15.4)
+## Pitfalls (all measured on 16.0)
 
-- **Charts can't be created or read by script.** `make new chart` fails and charts
-  expose only position and size. Build the table, then tell the user to add the chart
+- **Charts can't be built or read by script.** Since 16.0 `make new chart` succeeds, but
+  it inserts a placeholder column chart with sample data, not the table's; type, series
+  and data ranges stay out of reach, and charts expose only position and size. Build
+  the table, then tell the user to add the chart
   in the UI (or render one with matplotlib, or add it to the XLSX with openpyxl).
   `numbers-read` reports how many charts a sheet has.
 - **A modal alert blocks all scripting** (password prompt, "can't be opened", missing
@@ -144,7 +154,7 @@ python3 $S/numbers-verify.py ~/Reports-xlsx/q3.xlsx --numbers-coords --expect B1
   Values stay exact; mention display rounding when it hides decimals.
 - **Never open a document the user has open.** Their unsaved edits and yours would
   collide; the scripts refuse.
-- In raw AppleScript: open files **as an alias**; create sheets with `tell d to make
+- In raw AppleScript: open files **as an alias** (the safe form); create sheets with `tell d to make
   new sheet`, then rename; AppleScript prints numbers with the region's decimal mark —
   use JXA when you need to parse values.
 

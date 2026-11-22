@@ -15,6 +15,7 @@ files). Numbers' CSV uses the region's list separator (";" where "," is the deci
 mark) and formatted values ("33 Ft"); --raw-csv writes comma CSV of the raw values
 instead. XLSX: one worksheet per table, the table name in row 1, so every address
 moves down one row; the summary worksheet is left out unless --summary-worksheet.
+Numbers '09: written as X-09.numbers (Numbers accepts only the .numbers extension).
 Standard library only (python3 3.9).
 """
 import argparse
@@ -29,6 +30,9 @@ from numbers_osa import (  # noqa: E402
     remove_path, run_ops)
 
 BATCH = 10  # documents per osascript call: bounds the damage of one stuck file
+# Output suffix per --to. Numbers 16 refuses a Numbers '09 export to any extension but
+# .numbers, and "-09" keeps it from landing on its own source.
+SUFFIX = {"numbers09": "-09.numbers"}
 
 
 def find_sources(paths, recursive):
@@ -114,14 +118,19 @@ def main():
         as_name = EXPORT_AS[ns.to]
         opts = export_options(ns, as_name)
         items, skipped = [], 0
+        suffix = SUFFIX.get(ns.to, "." + ns.to)
         for src, rel in sources:
             check_numbers_file(src)
             if ns.out:
                 dst = real(ns.out)
             elif ns.out_dir:
-                dst = os.path.join(real(ns.out_dir), os.path.splitext(rel)[0] + "." + ns.to)
+                dst = os.path.join(real(ns.out_dir), os.path.splitext(rel)[0] + suffix)
             else:
-                dst = os.path.splitext(src)[0] + "." + ns.to
+                dst = os.path.splitext(src)[0] + suffix
+            if ns.to == "numbers09" and not dst.lower().endswith(".numbers"):
+                raise NumbersError("a Numbers '09 export needs a .numbers path: %s" % dst)
+            if dst == src:
+                raise NumbersError("output would replace its source: %s" % dst)
             if os.path.exists(dst):
                 if not ns.force:
                     print("SKIP %s (exists; --force to overwrite)" % dst)
