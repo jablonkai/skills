@@ -1,6 +1,6 @@
 # Raw AppleScript recipes
 
-For what the scripts don't cover. Every snippet ran against Pages 15.4. Run it with
+For what the scripts don't cover. Every snippet ran against Pages 16.0. Run it with
 `osascript file.applescript arg…`, and pass paths and values as `argv`. Never splice
 user text into the script source.
 
@@ -53,6 +53,27 @@ end tell
 ```
 
 `document body` true = a word-processing document, false = page layout.
+
+## Fill a template's placeholders (header and footer too)
+
+Pages 16.0 and later. `pages-fill` only sees body text, shapes and tables, so this is
+the way to fill a built-in template's header/footer placeholders ("Author name",
+"Footer", the page-number field).
+
+```applescript
+-- d: a document made from a template and saved to its path (see above)
+repeat with i from (count placeholder texts of d) to 1 by -1 -- last first: filled ones drop out
+	set shown to (placeholder text i of d) as text
+	if shown is "Szerző neve" then set placeholder text i of d to "Kovács Anna"
+end repeat
+save d
+```
+
+Match on the shown text or on `tag of placeholder text i of d`. Contact fields have
+key tags (`TPMailMerge_FullNamePseudoProperty`, `postalAddresses`) and come pre-filled
+from the user's own card. The value is plain text in the placeholder's style, and once
+filled it can't be found again by script, so verify the exported PDF with
+`pages-verify --contains`.
 
 ## Password protect
 
