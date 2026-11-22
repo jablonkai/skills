@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Filtered lookup in SolidCraft's command registry (819 commands in 0.45.0) and its bundled docs.
+"""Filtered lookup in SolidCraft's command registry (853 commands in 0.46.2) and its bundled docs.
 
   sc_commands.py WORD…                 commands whose id or label contains every word
   sc_commands.py --prefix solid.       every command under a prefix
@@ -16,7 +16,8 @@ import sys
 
 from sclib import Session, ToolError, run_cli
 
-DOCS = ("solidcraft-modeling", "solidcraft-editing", "solidcraft-checking", "solidcraft-mechanisms")
+DOCS = ("solidcraft-modeling", "solidcraft-editing", "solidcraft-checking", "solidcraft-mechanisms",
+        "solidcraft-sheetmetal")
 
 
 def main():
