@@ -21,13 +21,24 @@ rm -f "$C"
 
 - **Save before `quit`.** With unsaved changes it answers
   `{"needs_confirmation": true, "quitting": false}`. In 0.15.0 testing, the app
-  still exited about 3 s later and the changes were lost. In 0.18.0 to 0.21.1 it stays
-  open waiting for an answer in the window (still running 10 s later), so a
+  still exited about 3 s later and the changes were lost. In 0.18.0 to 0.22.0 it stays
+  open waiting for an answer in the window (still running 30 s later), so a
   scripted run never ends until someone answers it or the process is killed.
+  It can be answered by script: `state` then shows `close_prompt: true`, and
+  `inspect` lists the prompt's three buttons (Save, Cancel, Don't Save) at the
+  end of the widget list. `click id=<id>` on Don't Save quits in about 2 s.
+  Button labels follow the app's UI language, so pick by position or id, not by
+  an English label.
+- **Killing the app with unsaved changes leaves a Recovery dialog for the next
+  start** (0.22.0). `state` shows `dialog: "Recovery"`, and an `open` stays in
+  `pending_opens` (`active` stays null, every page command is "disabled right
+  now") until it is answered. Find its two buttons (Discard, Restore) with
+  `inspect` and `click id=…` Discard.
 
-- Methods (0.21.1): `state`, `inspect`, `click`, `focus`, `resize`, `move`,
+- Methods (0.22.0): `state`, `inspect`, `click`, `focus`, `resize`, `move`,
   `drag`, `type`, `key`, `command`, `commands`, `set`, `open`, `screenshot`,
   `quit`. An unknown method lists them.
+- `click` and `focus` take exactly one of `id=` (from `inspect`) or `label=`.
 - `open` returns `pending: true`. Poll `state` until `active` is non-null
   (it carries `doc`, `page`, `zoom_percent`) before sending commands.
 - `command id=<registry id>` runs a menu command on the active document
@@ -47,10 +58,11 @@ bash $S/pf.sh mcp --compact \
      --automation-read-root "$PWD/in" --automation-write-root "$PWD/out"
 ```
 
-- stdio MCP server with the same 208 tools. `--compact` lists a core set plus
+- stdio MCP server with the same 216 tools. `--compact` lists a core set plus
   `tool_search` and `tool_call`.
 - `--automation-read-root` / `--automation-write-root` confine what the tools
   may open and write (links followed). **A root left out grants no access of
   that kind.** That is the sandboxed option when an MCP client, not this skill,
-  is in control. Register it in the client's MCP config. Don't start it from a
+  is in control. `--root DIR`, when also given, applies as well. Register it
+  in the client's MCP config. Don't start it from a
   task: it waits on stdin.
