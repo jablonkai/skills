@@ -1,7 +1,7 @@
-# Command ids by task (pinned to 0.46.2)
+# Command ids by task (pinned to 0.47.0)
 
-These ids were checked against `solidcraft-cli commands` from SolidCraft 0.46.2, which
-has 853 commands. The parameter shapes are long and change between releases, so look
+These ids were checked against `solidcraft-cli commands` from SolidCraft 0.47.0, which
+has 854 commands. The parameter shapes are long and change between releases, so look
 them up instead of copying them from here:
 - `sc_commands.py WORD…` for one-line signatures;
 - `sc_commands.py --id ID` for the full text and the typed schema, where there is one;
@@ -14,7 +14,7 @@ In the parameter shapes, `expr` means a number in mm, or text such as `"thicknes
 |---|---|---|
 | Parameters | `parameters.add`, `parameters.change`, `parameters.list`, `parameters.rename`, `parameters.delete`, `parameters.export`, `parameters.import` | `add {name, expression, unit?}`. `change {changes: {name: expr}}` takes existing names only and applies all or none. `list {filter: all\|user\|sketch\|feature}` |
 | Sketch | `sketch.create`, `sketch.finish`, `sketch.edit`, `sketch.solve`, `sketch.inspect` | `create {plane: XY\|XZ\|YZ\|{origin,x_dir,y_dir}\|{face:[x,y,z]}, offset?, name?}` |
-| Sketch geometry | `sketch.line`, `sketch.rectangle.two_point`, `sketch.rectangle.center`, `sketch.rectangle.rounded`, `sketch.circle.center`, `sketch.arc.center_point`, `sketch.polygon.inscribed`, `sketch.slot.overall`, `sketch.point`, `sketch.draw.dimensioned` | `rectangle.two_point {p0, p1}`, `circle.center {center, radius\|diameter}`. The reply lists the new ids in `created` (`l1`, `c1`, `c1.center`) |
+| Sketch geometry | `sketch.line`, `sketch.rectangle.two_point`, `sketch.rectangle.center`, `sketch.rectangle.rounded`, `sketch.circle.center`, `sketch.arc.center_point`, `sketch.polygon.inscribed`, `sketch.slot.overall`, `sketch.point`, `sketch.draw.dimensioned`, `sketch.fit_curves_to_section` (new in 0.47.0: a mesh or solid body's section with the sketch plane as lines and arcs) | `rectangle.two_point {p0, p1}`, `circle.center {center, radius\|diameter}`. The reply lists the new ids in `created` (`l1`, `c1`, `c1.center`) |
 | Constraints and dimensions | `sketch.dimension`, `sketch.constraint.{horizontal_vertical,coincident,tangent,equal,parallel,perpendicular,fix,midpoint,concentric,collinear,symmetry}` | `dimension {entities, type?, value}`. `value: "w = 40"` adds the parameter `w` and drives the dimension with it |
 | Primitives | `solid.box`, `solid.cylinder`, `solid.sphere`, `solid.torus`, `solid.cone` | `box {length, width, height, corner?\|center?, operation?, body_name?}` |
 | Sketch features | `solid.extrude`, `solid.revolve`, `solid.sweep`, `solid.loft`, `solid.rib`, `solid.web`, `solid.emboss`, `solid.coil`, `solid.pipe` | `extrude {distance\|through_all, operation?: new\|join\|cut\|intersect, direction?: positive\|negative\|symmetric, profiles?, body_name?, name?}` |

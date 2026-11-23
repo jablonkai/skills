@@ -1,4 +1,4 @@
-# Gotchas (SolidCraft 0.46.2)
+# Gotchas (SolidCraft 0.47.0)
 
 ## Silent failures
 
@@ -6,7 +6,8 @@
   new parameter (`thikness = 6 mm`) and leaves the model as it was. Use the `changes`
   form, `parameters.change {"changes": {"thickness": "6 mm"}}`, which refuses an unknown
   name (`unknown parameter 'thikness'`) and applies all the changes or none.
-  `sc_params.py` does this, then checks that no parameter was added.
+  `sc_params.py` does this, then checks that no parameter was added. The `--param
+  NAME=EXPR` flag of `run` and `eval` (0.47.0) also refuses an unknown name.
 - **Plain `run` ignores unknown parameter keys.** `solid.extrude {"bodyname": "X"}` gives
   a body called `Body1`. Run scripts through `sc_run.py` instead: its MCP session uses
   `--param-check strict`, which refuses the key and names the right one.
@@ -62,6 +63,6 @@
   `--no-grid`.
 - **`exec` ignores `--connect`.** It always runs on an empty headless design.
 - **The CLI on PATH may be older than the app** (0.22.1 against 0.25.0 once; both were
-  0.46.2 at the last check). Commands it lacks, such as `solid.cone`, fail as unknown, and it refuses
+  0.47.0 at the last check). Commands it lacks, such as `solid.cone`, fail as unknown, and it refuses
   designs saved by the newer app (`format 41; reads up to 36`). Use the app's copy,
   which `sclib.cli()` picks.
