@@ -1,6 +1,6 @@
 # Recipes
 
-`S=<skill>/scripts`. All verified on effectcraft-cli 0.24.1.
+`S=<skill>/scripts`. All verified on effectcraft-cli 0.25.1.
 
 ## Lower third from a spec
 
@@ -99,7 +99,7 @@ When `start` isn't 0, key by comp time instead (the time the user reads off the 
 
 ```sh
 effectcraft-cli run --project promo-edit.ecproj --save \
-  prop.set '{"layer":"Card","path":"transform/opacity","value":60,"time":2.5,"timeBase":"comp"}'
+  prop.set '{"layer":"Card","path":"transform/opacity","value":60,"time":2.48,"timeBase":"comp"}'
 ```
 
 Then compare `get … --json` before and after: the same number of keys, only the one value
