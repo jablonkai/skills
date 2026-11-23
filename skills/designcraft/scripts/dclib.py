@@ -9,9 +9,10 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 import zipfile
 
-PINNED_VERSION = "0.20.1"
+PINNED_VERSION = "0.21.1"
 PAGE_MARKER = "\ue000"  # Current Page Number marker inside story text
 
 
@@ -45,8 +46,29 @@ def inspect(doc):
     return run_cmds(doc, "document.inspect")
 
 
-def links(doc):
-    return run_cmds(doc, "links.list") or []
+def links(doc, timeout=30.0):
+    """`links.list` once the background link checks are done. Since 0.21.1 a linked
+    file reports status `checking` until it has been hashed; `links.progress` applies
+    the results, so poll it in one session before listing."""
+    doc = os.path.realpath(doc)
+    here = os.path.dirname(doc)
+    reads = {here}
+    for asset in (doc_json(doc).get("assets") or {}).values():
+        for target in (asset.get("link"), asset.get("linkRelative")):
+            if target:  # the session may only check files inside its read roots
+                reads.add(os.path.dirname(os.path.realpath(os.path.join(here, target))))
+    s = Session(reads, {here})
+    try:
+        s.tool("open_document", {"path": doc})
+        deadline = time.monotonic() + timeout
+        while True:
+            prog = s.cmd("links.progress") or {}
+            if not (isinstance(prog, dict) and prog.get("checking")) or time.monotonic() > deadline:
+                break
+            time.sleep(0.2)
+        return s.cmd("links.list") or []
+    finally:
+        s.close()
 
 
 def doc_json(doc):

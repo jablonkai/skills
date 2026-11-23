@@ -1,4 +1,4 @@
-# Gotchas (DesignCraft 0.20.1)
+# Gotchas (DesignCraft 0.21.1)
 
 Each was hit while building or testing the skill.
 
@@ -15,7 +15,7 @@ Each was hit while building or testing the skill.
   hint: 0 glyphs on a text page means the wrong page.
 - **PNG renders include the bleed.** At `--scale 2` an A4 page with 3 mm bleed is
   1225 × 1718 px, not 1191 × 1684. Pages without bleed render at exactly page × scale. The MCP `export_png` (what `dc_build.py`
-  `png` uses) renders the trim size only (595 × 842 at scale 1; checked in 0.20.1), so size-check
+  `png` uses) renders the trim size only (595 × 842 at scale 1; checked in 0.21.1), so size-check
   those PNGs against the page, not the bleed.
 
 ## Units and geometry
@@ -64,7 +64,7 @@ Each was hit while building or testing the skill.
 
 ## CLI behaviour
 
-- `run` with `--cmd` but no `--in`/`--sample` works on an empty Letter document (a bare `--export` fails: `no active document`) — easy to miss when a
+- `run` with `--cmd` but no `--in`/`--sample` works on an empty Letter document (a bare `--export` fails: ``command `file.exportPdf` is not available right now: no document open``) — easy to miss when a
   path variable is empty.
 - `--cmd 'file.save={}'` writes back to the `--in` file: copy first.
 - The `wrote …` lines and command results may print out of order.
@@ -73,3 +73,8 @@ Each was hit while building or testing the skill.
   (`unknown perPage value`).
 - `/Applications/DesignCraft.app/Contents/MacOS/DesignCraft --help` opens the GUI —
   don't probe the app binary.
+- **Link checks run in the background (0.21.1):** right after opening, `links.list` reports a
+  linked file as `checking` until it has been hashed; `links.progress` applies the results
+  (`{checking, remaining}`). Repeating `--cmd links.progress` in one `run` does not wait, so
+  poll it in a session — `dclib.links()` does, with the links' folders as read roots
+  (outside them a file reads as `missing`).

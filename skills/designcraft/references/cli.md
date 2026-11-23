@@ -1,4 +1,4 @@
-# designcraft-cli reference (0.20.1)
+# designcraft-cli reference (0.21.1)
 
 `designcraft-cli` (`~/.local/bin/designcraft-cli`) runs the DesignCraft engine headless.
 Vendor docs: `docs/agents.md`, `docs/mcp.md`, `docs/control-protocol.md` in
@@ -33,7 +33,7 @@ designcraft-cli run [--in FILE | --sample] [--cmd ID[=JSON]]… [--page N] [--sc
 ## script
 
 ```sh
-designcraft-cli script [FILE|-] [--in FILE | --sample] [--save OUT] [--export OUT]… [--keep-going]
+designcraft-cli script [FILE|-] [--in FILE | --sample] [--connect PORT] [--save OUT] [--export OUT]… [--keep-going]
 ```
 
 One step per line: `command.id {"param": 1}`, `command.id={json}`, `command.id` alone,
@@ -94,7 +94,7 @@ the empty start document (e.g. "needs a selection"), not the command's availabil
 
 ## validate-pdf
 
-`designcraft-cli validate-pdf F.pdf` → `{path, standard, valid, issues: [...]}`, exit 1
+`designcraft-cli validate-pdf F.pdf [--standard x4|x1a]` (the standard defaults to the file's own) → `{path, standard, valid, issues: [...]}`, exit 1
 when invalid. Checks PDF/X-4 identification, output intent, trim/bleed boxes, encryption,
 image interpolation, Type 3 fonts, device RGB under a CMYK intent and unembedded fonts
 that draw visible text. Not a complete preflight; `preflight.run` checks the document side
