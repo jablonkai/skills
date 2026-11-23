@@ -1,6 +1,6 @@
-# PdfCraft 0.21.1 tools used by the recipes
+# PdfCraft 0.22.0 tools used by the recipes
 
-Pinned for 0.21.1 (208 tools in all). For anything not listed, or when a call
+Pinned for 0.22.0 (216 tools in all). For anything not listed, or when a call
 here fails after an upgrade, look it up instead of guessing:
 
 ```sh
@@ -31,6 +31,8 @@ Conventions shared by every tool:
 | `doc_info` | `doc`* | Per-page `rotation`, `width`, `height`, `label`; `outline`, `fields`, `annotations`, `security` |
 | `doc_set_info` | `doc`*, `key`* (`Title`, `Author`, `Subject`, `Keywords`, or custom), `value`* | |
 | `doc_combine` | `paths`*, `pages` (per file, e.g. `"1-3, 6"`), `out`, `open` | Document-free: works with a single `run` |
+| `doc_batch` | `paths`*, `steps`*, `out_dir`*, `recursive`, `dry_run`, `ppi`, `quality`, `dpi`, `language` | Same as the `batch` subcommand. `dry_run: true` returns each file's planned `output` and writes nothing |
+| `doc_bates_multi` | `files`* (`[{input, output}]`), `prefix`, `suffix`, `digits`, `start_number`, `dry_run` | Document-free. One consecutive Bates sequence across the files in order (9 + 3 pages → 1-9, 10-12), stamped as page content. Never replaces an existing output |
 
 ## Pages
 

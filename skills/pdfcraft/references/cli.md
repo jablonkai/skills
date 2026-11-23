@@ -1,4 +1,4 @@
-# pdfcraft-cli 0.21.1 reference
+# pdfcraft-cli 0.22.0 reference
 
 Run every subcommand through `scripts/pf.sh` (same arguments) so OCR finds its
 models. `pdfcraft-cli help <sub>` prints the same usage text as `--help`.
@@ -15,7 +15,7 @@ models. `pdfcraft-cli help <sub>` prints the same usage text as `--help`.
 
 | Command | Output | Notes |
 |---|---|---|
-| `info FILE [--password PW]` | JSON: `pages`, `title`, `author`, `producer`, `pdf_version`, `pdfa`, `pdfua`, `tagged`, `encrypted`, `fields`, `annotations`, `bookmarks`, `attachments`, `javascript`, `warnings` | No per-page rotation or size list. Use `doc_info` (via `run`, or `pf_verify.py`) for those |
+| `info FILE [--password PW]` | JSON: `pages`, `title`, `author`, `producer`, `pdf_version`, `pdfa`, `pdfua`, `tagged`, `encrypted`, `fields`, `annotations`, `bookmarks`, `attachments`, `links`, `layers`, `javascript`, `first_page_pt`, `page_labels`, `file_size`, `warnings` | No per-page rotation or size list (`first_page_pt` is page 1 only), and `page_labels` lists at most the first 8 pages. Use `doc_info` (via `run`, or `pf_verify.py`) for those |
 | `text FILE [--page N]` | Plain text, pages separated by form feeds (`\f`) | No text from a scan until it is OCRed |
 | `render FILE --page N [--dpi 96] --out X.png` | `.png`, `.jpg`, `.tif` or `.pam` | Inspect redactions, stamps and watermarks visually |
 | `check FILES/DIRS… [--timeout 20] [--dpi 36] [--json out.json]` | `checked N files: {"ok": N}` | Opens and renders every page. Exit status 0 only if all files pass |
@@ -69,6 +69,11 @@ pf.sh batch FILES/DIRS… --steps convert,ocr,optimize --out-dir DIR \
   into the same `--out-dir` writes `name (2).pdf`. Use an empty or new folder.
 - `--recursive` mirrors subfolders under `--out-dir`. Without it, only files
   directly in the folder are processed.
+- No `--dry-run` on the subcommand. To see the output names first (including
+  the `name (2).pdf` a non-empty folder would get), run `doc_batch` with
+  `dry_run=true`: `pf.sh run doc_batch 'paths=["/abs/scans"]' out_dir=/abs/out
+  'steps=["ocr"]' dry_run=true`. Each file is `status: "planned"` with its
+  `output`, and nothing is written.
 - `--ocr-all-pages` re-OCRs pages that already have text. By default they are
   skipped, so text PDFs pass through unchanged.
 - OCR needs the models: `pf.sh` sets `PDFCRAFT_MODELS`. Bare `pdfcraft-cli batch
@@ -95,7 +100,7 @@ pf.sh run --script steps.json [--root DIR] [--report]
 
 ## Servers and the app
 
-- `pf.sh mcp [--compact] [--automation-read-root DIR] [--automation-write-root DIR]`
+- `pf.sh mcp [--root DIR] [--compact] [--automation-read-root DIR] [--automation-write-root DIR]`
   is a stdio MCP server exposing the same tools. See [live-app.md](live-app.md).
 - `pf.sh ui --control FILE METHOD [key=value…] [--out shot.png]` drives a running
   app. See [live-app.md](live-app.md).

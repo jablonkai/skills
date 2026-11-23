@@ -1,4 +1,4 @@
-# Gotchas (pdfcraft-cli 0.21.1)
+# Gotchas (pdfcraft-cli 0.22.0)
 
 Each was found by running the CLI. Where the fix is mechanical, the scripts
 already apply it.
@@ -42,7 +42,8 @@ already apply it.
 - Rotation is relative: `--rotate N:90` and `page_rotate degrees: 90` add to the
   existing `/Rotate`. To get an absolute value, read the current one
   (`pf_verify.py --rotation`, or `doc_info`) first.
-- `info` has no per-page rotation. Use `doc_info` via `pf_verify.py`.
+- `info` has no per-page rotation, and its `page_labels` stops after 8 pages
+  even when `pages` is higher. Use `doc_info` via `pf_verify.py`.
 - `combine` adds a top-level bookmark per input file, titled with the file name.
   It is visible in `doc_info.outline`, and it leaks file names. Remove it with
   `bookmark_delete` or `doc_remove_hidden categories=["bookmarks"]` if that
@@ -52,6 +53,8 @@ already apply it.
 
 - Existing outputs are never replaced. A second run into the same `--out-dir`
   adds `name (2).pdf`, so counts double. Start from an empty folder.
+  `doc_batch` with `dry_run: true` lists the planned output names without
+  writing anything (the subcommand has no `--dry-run`).
 - Exit 1 if any file failed, and the JSON report on stdout names each file's
   error. Only files directly in a folder are processed unless `--recursive` is
   given.
