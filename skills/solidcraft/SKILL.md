@@ -3,12 +3,12 @@ name: solidcraft
 description: 'Automate SolidCraft, the parametric solid-modeling CAD app, headless with solidcraft-cli: build parametric parts from sketch and feature scripts (extrude, holes, fillets, chamfers, shells, patterns, booleans) and save .solidcraft; change named parameters of an existing design and re-export; measure volume, bounding box and mass of designs and STEP/STL parts; export STEP, STL, 3MF and OBJ; render iso, orthographic and section snapshots, with every result read back by eval. Use when the user mentions SolidCraft, solidcraft-cli or a .solidcraft file, or wants a part modeled, resized or measured with SolidCraft: "model a mounting plate with four corner holes in SolidCraft", "set wall to 5 mm in this .solidcraft and re-export the STEP", "what is the volume and bounding box of this STEP in SolidCraft", "render an iso and a section view". Not for FreeCAD (freecad), BRL-CAD (brl-cad), 2D drawings or DXF (cadcraft, qcad), PCBs (kicad), or mesh and art modeling (blender).'
 summary: "automate SolidCraft headless with solidcraft-cli — parametric parts from sketch and feature scripts (extrude, holes, fillets, patterns, booleans), named-parameter edits with re-evaluation, volume, bounding-box and mass read-back, STEP/STL/3MF export and import, iso and section snapshots, eval read-back verified"
 category: cad
-compatibility: "Built for SolidCraft 0.46.2 and its bundled solidcraft-cli 0.46.2 (the artcraft-cli standalone install, also 0.46.2, works too) on macOS, Python 3.9+; pre-1.0, so command ids may change."
+compatibility: "Built for SolidCraft 0.47.0 and its bundled solidcraft-cli 0.47.0 (the artcraft-cli standalone install, also 0.47.0, works too) on macOS, Python 3.9+; pre-1.0, so command ids may change."
 risk: medium
 tags: [solidcraft, cad, parametric, solid-modeling, step, stl, 3mf, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   author: "Tamás Jablonkai"
 ---
 
@@ -16,17 +16,17 @@ metadata:
 
 SolidCraft is a parametric solid-modeling CAD app. A design (`.solidcraft`) holds user
 parameters, sketches and a feature timeline (extrude, hole, fillet, pattern…) that
-rebuild when a parameter changes. Every tool is a command in one registry (853 in
-0.46.2). The same commands run from a script (`solidcraft-cli run`), from a headless MCP
+rebuild when a parameter changes. Every tool is a command in one registry (854 in
+0.47.0). The same commands run from a script (`solidcraft-cli run`), from a headless MCP
 session (`solidcraft-cli mcp`) and in the app. This skill drives them **headless**, with
 no window open, and checks each result with `solidcraft-cli eval`, a measurement that
-runs independently of the build. Verified against **SolidCraft 0.46.2** with the
-**solidcraft-cli 0.46.2** inside the app on macOS. The software is pre-1.0, so if a
+runs independently of the build. Verified against **SolidCraft 0.47.0** with the
+**solidcraft-cli 0.47.0** inside the app on macOS. The software is pre-1.0, so if a
 pinned id fails, look it up rather than guessing.
 
 ```sh
 SC=/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli   # the app's own copy
-$SC --version          # solidcraft-cli 0.46.2; a copy on PATH may be older, so prefer this one
+$SC --version          # solidcraft-cli 0.47.0; a copy on PATH may be older, so prefer this one
 ```
 
 ## Pick the route
@@ -36,6 +36,7 @@ $SC --version          # solidcraft-cli 0.46.2; a copy on PATH may be older, so 
 | New part from a feature script, saved and exported | `scripts/sc_run.py part.json --save P.solidcraft --out P.step --out P.stl --expect-volume V` |
 | Add or change features on a copy of a design or STEP | `scripts/sc_run.py edit.json --in IN --save OUT.solidcraft [--out …]` |
 | Change named parameters (wall, length…) and re-export | `scripts/sc_params.py IN --set wall="5 mm" --save OUT.solidcraft --out OUT.step` |
+| Preview a parameter value without saving | `$SC eval IN --param wall="5 mm"` (or `--params-file p.json`; an unknown name fails) |
 | What can be changed | `scripts/sc_params.py IN` (user parameters), or `--all` to include sketch and feature inputs |
 | Size, volume, mass of a design, STEP, STL or 3MF; snapshots | `scripts/sc_inspect.py F [--snap-dir D --views iso top --section mid]` |
 | Check an output against numbers, or an export against its design | `scripts/sc_verify.py part F --volume V --size X Y Z --same-as G` |
@@ -126,7 +127,7 @@ the default.
 ## References
 
 - [references/cli.md](references/cli.md): subcommands, script format, `eval` JSON, formats, MCP tools.
-- [references/commands.md](references/commands.md): command ids by task, pinned to 0.46.2.
+- [references/commands.md](references/commands.md): command ids by task, pinned to 0.47.0.
 - [references/recipes.md](references/recipes.md): the plate, the bracket and its parameter edit, STEP inspection, a flange with a bolt circle, mesh export, history scripts.
 - [references/gotchas.md](references/gotchas.md): silent failures and surprises.
 - [references/security.md](references/security.md): file access, the app's control channel, config the app writes.

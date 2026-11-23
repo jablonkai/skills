@@ -1,15 +1,15 @@
-# solidcraft-cli 0.46.2
+# solidcraft-cli 0.47.0
 
 Use the CLI inside the app (`/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli`).
 A separately installed copy (`~/.local/bin/solidcraft-cli`, a link into
 `~/.local/share/artcraft-cli/solidcraft/current/`, from the artcraft-cli installer) can be
-older: it was once 0.22.1, with 461 commands instead of 493. At 0.46.2 both copies match,
+older: it was once 0.22.1, with 461 commands instead of 493. At 0.47.0 both copies match,
 and without the app the standalone copy works on its own. `sclib.cli()` picks
 `SOLIDCRAFT_CLI`, then the app's copy, then PATH, and warns when PATH is older.
 
 ```sh
 SC=/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli
-$SC --version          # solidcraft-cli 0.46.2
+$SC --version          # solidcraft-cli 0.47.0
 $SC --help             # the full usage text below
 ```
 
@@ -31,16 +31,17 @@ format. `eval` and `run` replay it.
 
 | Command | What it does |
 |---|---|
-| `run SCRIPT [--in DESIGN] [--out F]… [--save F.solidcraft] [--quiet] [--results] [--timings] [--profile] [--json-out F] [--allow-errors] [--param-check off\|warn\|strict] [--quality standard\|fine\|finest] [--script-relative] [--validation each_step\|each_feature\|off] [--profile-out trace.json]` | Replays the script on a new design, or on `--in`. A failing feature exits 1 and writes nothing unless `--allow-errors` is given. `--out` exports by extension. `--quality` sets how closely an STL/OBJ/3MF `--out` follows curved faces (`fine` roughly doubles the file). `--script-relative` resolves file paths inside the script from the script's folder. `--results` prints every step's reply, which is very large; prefer `--quiet` followed by `eval`. |
+| `run SCRIPT [--in DESIGN] [--out F]… [--save F.solidcraft] [--quiet] [--results] [--timings] [--profile] [--json-out F] [--allow-errors] [--param-check off\|warn\|strict] [--quality standard\|fine\|finest] [--script-relative] [--validation each_step\|each_feature\|off] [--profile-out trace.json] [--param NAME=EXPR]… [--params-file F.json]` | Replays the script on a new design, or on `--in`. A failing feature exits 1 and writes nothing unless `--allow-errors` is given. `--out` exports by extension. `--quality` sets how closely an STL/OBJ/3MF `--out` follows curved faces (`fine` roughly doubles the file). `--script-relative` resolves file paths inside the script from the script's folder. `--param NAME=EXPR` (new in 0.47.0, repeatable) and `--params-file` (`{"NAME": "EXPR"}`, applied first) set existing parameters before the script runs, as `parameters.change` does; they need a design (positional or `--in`), and an unknown name fails the run. `--results` prints every step's reply, which is very large; prefer `--quiet` followed by `eval`. |
 | `run --in F --out G…` | Converts with no script, for example STEP → STL/3MF. |
-| `eval FILE [--json-out F]` (alias `inspect`) | Measures a design, part (STEP/STL/3MF/OBJ) or script and returns JSON. This is the read-back oracle. |
+| `eval FILE [--json-out F] [--param NAME=EXPR]… [--params-file F.json]` (alias `inspect`) | Measures a design, part (STEP/STL/3MF/OBJ) or script and returns JSON. This is the read-back oracle. With `--param` it measures the design at those values and saves nothing (a misspelled name fails with `no parameter … in the design`). |
 | `eval SCRIPT --in DESIGN` | Runs the script on DESIGN, measures the result and saves nothing. Use it to preview an edit. |
 | `script DESIGN [--out s.json]` | The feature history as a replayable script. |
+| `textconv DESIGN` | New in 0.47.0: prints a design (or `.scdwg` drawing) as text for `git diff`: the container header, the document JSON, then a size and SHA-256 line per other file. Read-only. |
 | `check DESIGN\|SCRIPT [--drawing ID\|NAME] [--sheet ID\|NAME] [--json-out F]` | Runs `drawing.check` on each drawing of the design and prints `{drawings: [{id, name, check}], findings}`. Exits 1 when anything is found; a design with no drawings gives `findings: 0`. |
 | `snapshot SCRIPT\|DESIGN [--in F] --out shot.png [--width W --height H] [--view V \| --camera JSON] [--no-grid] [--no-axes] [--body NAME:opacity=0.3,color=#rrggbb]… [--tool NAME]… [--section SPEC] [--quality coarse\|normal\|fine\|ultra]` | Headless viewport render (CPU), 1280×800 by default. `--quality` is the display meshing (default `normal`). |
 | `render SCRIPT\|DESIGN --out img.png [--samples N] [--transparent] …` | Path-traced render. It is slow; use it for presentation images, not for checks. |
 | `exec COMMAND [json]` | Runs one command on an empty headless design. `--connect` has no effect here. |
-| `commands` | The whole registry as JSON: id, label, `params` signature, `enabled`, `disabled_reason`. About 540 KB, so filter it with `sc_commands.py`. |
+| `commands [FILTER \| --id ID]` | The registry as JSON: id, label, `params` signature, `enabled`, `disabled_reason`. Unfiltered it is about 540 KB, so filter it (`FILTER` matches ids) or use `sc_commands.py`. `--id` prints one command's docs and schemas. |
 | `mcp [--headless] [--in F] [--connect 127.0.0.1:PORT [--token T]] [--allow-path DIR]… [--require-allow-path] [--param-check off\|warn\|strict] [--compact]` | MCP server over stdio. See below. `--compact` (or `SOLIDCRAFT_MCP_COMPACT=1`) shortens tool output: `inspect_design` summarises sketches and takes `sketches`/`bodies` filters. |
 | `mcp setup [--dry-run] [--client …] [--live]` | Writes a `solidcraft` entry into AI-client configs. It changes the user's config files, so run it only when asked. |
 | `crashes [list\|show ID\|replay ID]`, `gpu`, `licences`, `bench-*`, `oracle`, `kernel-cases`, `fuzz`, `recipe`, `icon`, `plugin check\|test` | Diagnostics, benchmarks and plugin packaging checks; not needed for normal work. |
@@ -113,7 +114,7 @@ which:
   ids, a worked parametric plate;
 - `solidcraft-editing`;
 - `solidcraft-checking` (`SKILL.md`, `reference/porting.md`);
-- `solidcraft-mechanisms` (joints, motion).
+- `solidcraft-mechanisms` (`SKILL.md`, `reference.md`): joints, motion.
 - `solidcraft-sheetmetal` (`SKILL.md`, `reference.md`): `sheet.*` commands, bend
   arithmetic, rule values, a worked example.
 
