@@ -1,7 +1,7 @@
 # Pages scripting gotchas
 
-Each item was reproduced against Pages Creator Studio 15.4 on macOS 27 while this
-skill was being built, and re-checked against 16.0 on macOS 27.2. Rows marked
+Each item was reproduced against Pages Creator Studio 15.4 while this
+skill was being built, and re-checked against 16.0. Rows marked
 **16.0** changed in that release; the opening-by-bare-`POSIX file` alert, the EPUB
 chapter/TOC notes and text-box clipping were not re-triggered on 16.0. The scripts already handle every one of them. The notes explain
 why the scripts work the way they do, and what to watch for in raw AppleScript.

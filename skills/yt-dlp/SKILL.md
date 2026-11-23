@@ -3,7 +3,7 @@ name: yt-dlp
 description: 'Download video, audio and subtitles from YouTube, Vimeo and other sites with the yt-dlp CLI, for content the user may download (own uploads, Creative Commons, public domain); never circumvents DRM. Picks formats by resolution and codec (1080p H.264 MP4, audio-only M4A/MP3), fetches manual or auto subtitles in chosen languages as SRT without the video, downloads only a time range, batches playlists and channels with a download archive so re-runs skip finished items, and reports titles, durations, formats and subtitle languages without downloading; outputs checked with ffprobe. Use for "download this in 1080p as MP4", "just the audio as M4A", "get the Hungarian and English subtitles", "only 1:00 to 1:30", "download the playlist and skip what I have", "list the channel''s videos to a CSV", or a yt-dlp error like "Sign in to confirm". Not for editing files already on disk (ffmpeg, handbrake), a Markdown transcript (markitdown), recording a stream or screen (obs), or editing in Resolve (davinci-resolve).'
 summary: "download video, audio and subtitles with yt-dlp — resolution and codec capped downloads, audio-only M4A/MP3, manual or auto subtitles as SRT, frame-accurate time-range clips, resumable playlist and channel batches with a download archive, metadata and format reports without downloading, ffprobe-verified outputs"
 category: video
-compatibility: "Built for yt-dlp 2026.10.26 (Homebrew) with FFmpeg 9.0.2 and deno 2.9.8 on macOS 27.2; Python 3.9+ for the helper scripts. Also runs on Linux with a pip or standalone install."
+compatibility: "Built for yt-dlp 2026.10.26 (Homebrew) with FFmpeg 9.0.2 and deno 2.9.8; Python 3.9+ for the helper scripts. Also runs on Linux with a pip or standalone install."
 risk: low
 tags:
     - yt-dlp
@@ -13,7 +13,7 @@ tags:
     - youtube
 license: GPL-3.0-only
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   author: "Tamás Jablonkai"
 ---
 
@@ -24,7 +24,7 @@ The scripts below build those commands, print each one so it can be reused, and 
 prove the result with ffprobe, because yt-dlp happily exits 0 with the wrong codec,
 an Opus track in an MP4, a clip that starts three seconds early, or auto-captions
 where the user asked for real subtitles. Verified against **yt-dlp 2026.10.26**
-(Homebrew) with FFmpeg 9.0.2 and deno on macOS 27.2.
+(Homebrew) with FFmpeg 9.0.2 and deno.
 
 ## Rights first
 

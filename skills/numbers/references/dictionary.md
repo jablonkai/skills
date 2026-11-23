@@ -1,7 +1,7 @@
 # Numbers scripting dictionary
 
 Checked with `sdef "/Applications/Numbers Creator Studio.app"` on **Numbers Creator
-Studio 16.0** (bundle id `com.apple.Numbers`) on macOS 27.2. The suites are Numbers Suite, iWork
+Studio 16.0** (bundle id `com.apple.Numbers`). The suites are Numbers Suite, iWork
 Suite, iWork Text Suite, Compatibility Suite and CocoaStandard (open, save, close).
 Nothing that the documented Numbers dictionary offers is missing from the Creator
 Studio edition.

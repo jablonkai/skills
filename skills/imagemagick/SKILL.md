@@ -3,12 +3,12 @@ name: imagemagick
 description: 'Batch-process raster images with the ImageMagick 7 CLI (magick, mogrify, montage, compare): resize, crop, pad and convert images or whole folders into a new folder without touching originals (HEIC/iPhone photos to JPEG, WebP, AVIF, no upscaling, auto-orient), logo or text watermarks, labelled contact sheets, square, story and OG versions with blurred-background padding, trimmed borders, frames and rounded corners, sRGB conversion and EXIF/GPS stripping for the web, and screenshot diffs with an exact changed-pixel count. Use for "resize this folder to 1600 px as WebP", "convert these HEICs to JPEG", "watermark every photo with my logo", "make a contact sheet", "Instagram square and story versions", "strip GPS before upload", "how different are these two screenshots". Not for retouching or painting (gimp, krita), ML edits (pixelmator-pro), PSD layers (photocraft), raw development (lightcraft), SVG/vector (inkscape), the Photos library (apple-photos), video or GIFs from video (ffmpeg), or PDF pages (poppler).'
 summary: "batch-process images with the ImageMagick 7 CLI — folder resize and WebP/AVIF/HEIC/JPEG conversion without touching originals, logo and text watermarks, labelled contact sheets, blurred-pad social sizes, trim, borders and rounded corners, sRGB and metadata strip, compare diffs, identify-verified outputs"
 category: design-automation
-compatibility: "Built for ImageMagick 7.1.2-36 Q16-HDRI (Homebrew) on macOS 27.2; Python 3.9+ for the helper scripts. Also runs with ImageMagick 7 on Linux."
+compatibility: "Built for ImageMagick 7.1.2-36 Q16-HDRI (Homebrew); Python 3.9+ for the helper scripts. Also runs with ImageMagick 7 on Linux."
 risk: low
 tags: [imagemagick, magick, mogrify, montage, resize, webp, avif, watermark, contact-sheet, batch]
 license: GPL-3.0-only
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
   author: "Tamás Jablonkai"
 ---
 
@@ -17,7 +17,7 @@ metadata:
 Headless command-line only: no app, no bridge. Every operation is one `magick` process.
 The bundled scripts cover the jobs people ask for most, and they **verify every
 output**: size, format, colourspace, untouched originals. Verified against
-**ImageMagick 7.1.2-36 Q16-HDRI** on macOS 27.2.
+**ImageMagick 7.1.2-36 Q16-HDRI**.
 
 ```sh
 S=<this skill>/scripts

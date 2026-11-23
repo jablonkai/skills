@@ -3,7 +3,7 @@ name: final-cut-pro
 description: 'Build and inspect Final Cut Pro timelines through FCPXML: generate a project from a clip list or CSV shot list (clips, gaps, B-roll, transitions, titles, lower thirds, markers, chapters, keywords) with exact rational-time math, validate it against the installed DTD, import it into FCP and confirm it via the read-only AppleScript model; add lower thirds or markers to an exported FCPXML; list clips with timeline and source in/out from .fcpxml/.fcpxmld. Use for any task or question that writes, reads or edits FCPXML, or converts FCPXML times, frames and timecode (drop frame too), e.g. "rough cut in Final Cut from these clips", "fcpxml from this shot list", "chapter markers in my FCP project", "lower thirds at these timecodes", "clips and in/out points in this fcpxml", "450 frames at 29.97 as FCPXML time", "bring my DaVinci Resolve timeline into Final Cut Pro". Not for work inside DaVinci Resolve (davinci-resolve), Compressor or ffmpeg encodes, Motion templates, iMovie or Premiere XML.'
 summary: "build and inspect Final Cut Pro timelines through FCPXML — rough cuts with gaps, connected clips, transitions, titles, markers and keywords, exact rational-time math, DTD validation, import with AppleScript read-back, FCPXML parsing and Resolve interchange"
 category: video
-compatibility: "Built for Final Cut Pro 13.0 (FCPXML 1.15) on macOS 27.2."
+compatibility: "Built for Final Cut Pro 13.0 (FCPXML 1.15)."
 risk: medium
 tags:
     - final-cut-pro
@@ -13,7 +13,7 @@ tags:
     - applescript
 license: GPL-3.0-only
 metadata:
-  version: "1.2.0"
+  version: "1.2.1"
   author: "Tamás Jablonkai"
 ---
 
@@ -22,7 +22,7 @@ metadata:
 Final Cut Pro has **no editing API**. The skill writes FCPXML, checks it, and imports it
 with `open`; FCP's AppleScript dictionary is **read-only** (libraries → events →
 projects → sequence duration) and is used to confirm the import. Verified against
-**Final Cut Pro 13.0** (bundle id `com.apple.FinalCut`, FCPXML 1.15) on macOS 27.2.
+**Final Cut Pro 13.0** (bundle id `com.apple.FinalCut`, FCPXML 1.15).
 
 | Script | Does |
 |---|---|

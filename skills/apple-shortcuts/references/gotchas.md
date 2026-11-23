@@ -1,6 +1,6 @@
 # Gotchas
 
-All of these were reproduced on Shortcuts 10.0 / macOS 27.0.1.
+All of these were reproduced on Shortcuts 10.0.
 
 ## Running
 

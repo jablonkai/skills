@@ -1,4 +1,4 @@
-# Gotchas — verified on Final Cut Pro 13.0 (FCPXML 1.15), macOS 27.2
+# Gotchas — verified on Final Cut Pro 13.0 (FCPXML 1.15)
 
 Rows 1, 2, 4, 11, 12, 14, 15, 16 and 19–21 were checked on 13.0; the others were last
 verified on 12.4 (FCPXML 1.14) and nothing in the 1.15 DTD touches them.

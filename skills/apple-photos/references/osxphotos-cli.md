@@ -1,6 +1,6 @@
 # osxphotos CLI reference
 
-Checked against `--help` of **osxphotos 0.77.2** on macOS 27 / Photos 12. Only the
+Checked against `--help` of **osxphotos 0.77.2** on Photos 12. Only the
 flags this skill relies on are listed. `osxphotos help <command>` has the rest.
 
 Every command takes `--library PATH`. Without it, osxphotos opens the **system**

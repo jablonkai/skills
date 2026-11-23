@@ -1,6 +1,6 @@
 # The `shortcuts` CLI and the scripting dictionary
 
-Checked with `--help` on Shortcuts 10.0 / macOS 27.2. The CLI exists since macOS 12.
+Checked with `--help` on Shortcuts 10.0. The CLI exists since macOS 12.
 
 ## Subcommands
 
