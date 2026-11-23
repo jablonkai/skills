@@ -5,7 +5,8 @@
 | `models checkpoints` is empty but the user generates fine | split loaders: models are in `diffusion_models`, `unet_gguf`, `text_encoders`, `vae` | `models --all`; report every non-empty folder |
 | `.gguf` not in `diffusion_models` | ComfyUI-GGUF registers its own `unet_gguf` / `clip_gguf` folders | use those names with `UnetLoaderGGUF` / `CLIPLoaderGGUF` |
 | same image every run | the seed is a literal in the API graph; *randomize* is editor-only | pass `--seed` |
-| run finished, no files | cached: identical prompt with caching on executes nothing new; or no Save node (previews are `temp`) | change seed; `--include-temp`; add `SaveImage` |
+| run finished, no files | cached: identical prompt with caching on executes nothing new; or no Save node (previews are `temp`) | change seed; `--include-temp`; add `SaveImage`; or `server start -- --force-output-rerun` (0.46+: Save nodes rewrite files on a cache hit, upstream stays cached) |
+| `Cannot handle this data type: (1, 1, …), \|u1` | `pixel_space` picked in `VAELoader` (0.46 prints a TIPS line) | pick the VAE that matches the model |
 | prompt "rejected" yet it ran later | `node_errors` with HTTP 200 queues the valid outputs | `comfy.py` dequeues it; by hand, `POST /queue {"delete": [id]}` |
 | `bad_linked_input` on a list value | a bare list reads as a link | wrap as `{"__value__": [...]}` |
 | `value_not_in_list` on a model name | name differs from disk (subfolder prefix, case, extension) | copy exactly from `models FOLDER` |
