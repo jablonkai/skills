@@ -93,7 +93,7 @@ wait_event("RecordStateChanged", 30, lambda d: d["outputState"] == "OBS_WEBSOCKE
 print("recorded:", path)
 ```
 
-Check the file with `ffprobe -show_chapters "<path>"`. `CreateRecordChapter` fails
+Check the file with `ffprobe -show_chapters "<path>"`. Hybrid MOV/MP4 adds chapters of its own: one at 0 named after the UI language's "Start" (e.g. `Kezdés`), and a trailing `Dummy` chapter that starts at or past the end of the file — skip both when reading chapters back. `CreateRecordChapter` fails
 (702) on plain MP4/MKV output — fall back to noting timestamps, or ask the user to switch the
 recording format to Hybrid MP4/MOV. `SplitRecordFile` needs automatic file splitting enabled.
 The recording folder comes from `GetRecordDirectory`; change it only when asked.

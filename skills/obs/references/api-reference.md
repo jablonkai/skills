@@ -1,6 +1,6 @@
 # obs-websocket v5 — condensed API reference
 
-Checked against **OBS 33.0.0 / obs-websocket 5.7.6** (151 requests). The authoritative spec,
+Checked against **OBS 33.0.3 / obs-websocket 5.7.6** (151 requests). The authoritative spec,
 with every field and event, is
 [protocol.md](https://github.com/obsproject/obs-websocket/blob/master/docs/generated/protocol.md).
 On any other version, `call("GetVersion")["availableRequests"]` lists what exists.
