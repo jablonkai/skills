@@ -1,4 +1,4 @@
-# Recipes (DesignCraft 0.20.1)
+# Recipes (DesignCraft 0.21.1)
 
 `S=<skill>/scripts`. Every recipe ends with a read-back; don't skip it.
 
@@ -115,7 +115,7 @@ designcraft-cli run --in out/newsletter-edited.designcraft \
   --scale 2 --page 0 --export out/page1.png
 python3 $S/dc_verify.py doc out/newsletter-edited.designcraft --style Body:size=12 \
   --image photo-new.jpg@1 photo2.jpg@2 --no-overset
-python3 $S/dc_verify.py png out/page1.png --size 1191x1684
+python3 $S/dc_verify.py png out/page1.png --size 1191x1684   # A4 at --scale 2, no bleed; add 2 × bleed otherwise
 ```
 
 - `style.paragraph.edit` changes only the attributes it names; other attributes and the
