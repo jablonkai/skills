@@ -1,6 +1,6 @@
 # Compressor CLI gotchas
 
-These were first observed on Compressor 5.4 and re-checked on 6.0 (build 460012, macOS 27.2,
+These were first observed on Compressor 5.4 and re-checked on 6.0 (build 460012,
 arm64). `cmp-encode.py` and the other scripts handle each one. Read this before writing raw `Compressor` commands.
 
 ## Submitting

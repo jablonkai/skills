@@ -1,6 +1,6 @@
 # Keynote scripting dictionary (Creator Studio 16.0)
 
-Confirmed with `sdef "/Applications/Keynote Creator Studio.app"` on macOS 27. Suites:
+Confirmed with `sdef "/Applications/Keynote Creator Studio.app"`. Suites:
 Keynote Suite, iWork Suite, iWork Text Suite, Compatibility Suite, plus `open`,
 `save`, `close` and `count` from the Cocoa Standard Suite (`xi:include`). Nothing the
 older Keynote dictionary documents is missing from this edition, and every term below

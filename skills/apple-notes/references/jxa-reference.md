@@ -1,6 +1,6 @@
 # Notes scripting dictionary (JXA)
 
-Confirmed with `sdef /System/Applications/Notes.app` on Notes 4.13 / macOS 27.2.
+Confirmed with `sdef /System/Applications/Notes.app` on Notes 4.13.
 
 | Class | Elements | Properties (r = read-only) |
 |---|---|---|

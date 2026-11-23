@@ -1,6 +1,6 @@
 # Numbers gotchas
 
-Each one was reproduced on Numbers Creator Studio 16.0, macOS 27.2, region hu_HU (decimal
+Each one was reproduced on Numbers Creator Studio 16.0, region hu_HU (decimal
 `,`, grouping no-break space). Where the region matters, an English region behaves the
 same way with `.` and `,` swapped.
 

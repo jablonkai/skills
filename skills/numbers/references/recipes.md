@@ -1,7 +1,7 @@
 # Raw AppleScript recipes
 
 For what the scripts don't cover. Every snippet here ran against Numbers Creator Studio
-16.0 on macOS 27.2. Run them with `osascript file.applescript /abs/path.numbers` and read values
+16.0. Run them with `osascript file.applescript /abs/path.numbers` and read values
 from `argv`. Never splice values into the script text.
 
 Always open a **copy**, and close without saving unless the user asked for the edit:

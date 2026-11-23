@@ -1,6 +1,6 @@
 # Keynote scripting gotchas
 
-Each item was reproduced against Keynote Creator Studio 16.0 on macOS 27.2, with the UI
+Each item was reproduced against Keynote Creator Studio 16.0, with the UI
 in Hungarian. The scripts handle every one of them.
 The notes explain why the scripts work the way they do, and what to watch for in raw
 AppleScript.

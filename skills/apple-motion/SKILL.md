@@ -3,7 +3,7 @@ name: apple-motion
 description: 'Author, edit and install Apple Motion templates for Final Cut Pro as ozml XML, without opening Motion: Titles (.moti), Generators (.motn), Effects (.moef) and Transitions (.motr). Change text, PostScript fonts, sizes, text and shape colours; set and publish the parameters FCP shows in its inspector; turn one base template into a branded variant set from JSON or CSV; install into ~/Movies/Motion Templates with thumbnails and get the FCPXML uid; render a headless preview through Compressor with pixel colour checks. Use for "make a lower third template for Final Cut", "rebrand this Motion title in our colours and font", "title variants for each event from a CSV", "publish the backplate colour", "install this .moti so FCP sees it", "what parameters does this template publish". Not for building or editing FCP timelines (final-cut-pro), transcoding (compressor/handbrake), procedural motion graphics in Cavalry (cavalry), Resolve/Fusion titles (davinci-resolve) or 3D (blender).'
 summary: "author and install Apple Motion templates for Final Cut Pro as ozml XML — lower-third titles, generators and effects with published parameters, branded variant sets, headless renders through Compressor and use in FCPXML timelines"
 category: motion-design
-compatibility: "Built for Motion 7.0, Final Cut Pro 13.0 and Compressor 6.0 on macOS 27.2."
+compatibility: "Built for Motion 7.0, Final Cut Pro 13.0 and Compressor 6.0."
 risk: low
 tags:
     - apple-motion
@@ -14,7 +14,7 @@ tags:
     - branding
 license: GPL-3.0-only
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
   author: "Tamás Jablonkai"
 ---
 
@@ -24,8 +24,7 @@ Motion has **no usable scripting API**: `NSAppleScriptEnabled` is false and ther
 dictionary. What it does have is a text file format: every template is **ozml XML**
 (`<!DOCTYPE ozxmlscene>`). This skill edits that XML, installs the result where Final
 Cut Pro looks, and checks it with a headless **Compressor** render. The Motion window
-never opens. Verified against **Motion 7.0**, **Final Cut Pro 13.0** and **Compressor 6.0**
-on macOS 27.2.
+never opens. Verified against **Motion 7.0**, **Final Cut Pro 13.0** and **Compressor 6.0**.
 
 | Script | Does |
 |---|---|

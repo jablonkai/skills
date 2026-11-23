@@ -3,7 +3,7 @@ name: numbers
 description: 'Automate Apple Numbers on macOS via its scripting dictionary (osascript, JXA) — build a .numbers spreadsheet from CSV/JSON with typed values, header and footer rows, formulas such as a SUM totals row, and cell formats; read sheets, tables, recalculated values and formulas back and report totals per table; export or batch-convert .numbers files to XLSX, CSV or PDF. Use whenever the user mentions Numbers or a .numbers file: "import this CSV into Numbers and add a totals row", "what are the totals in budget.numbers", "convert these Numbers files to Excel", "export my .numbers to PDF". Not for .xlsx work without Numbers (use xlsx), CSV or pandas analysis that never touches Numbers, spreadsheets to Markdown (use markitdown), or Pages and Keynote documents.'
 summary: "automate Apple Numbers via AppleScript/JXA — build spreadsheets from CSV with formulas and formats, read recalculated values back, and XLSX/CSV/PDF export or batch conversion"
 category: office
-compatibility: "Built for Numbers Creator Studio 16.0 on macOS 27.2."
+compatibility: "Built for Numbers Creator Studio 16.0."
 risk: low
 tags:
     - numbers
@@ -15,7 +15,7 @@ tags:
     - csv
 license: GPL-3.0-only
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
   author: "Tamás Jablonkai"
 ---
 
@@ -24,7 +24,7 @@ metadata:
 Apple Numbers is driven through its **scripting dictionary via `osascript`** (JXA). Each
 script call opens the documents it needs, works, and closes them again. There is no
 bridge or listener; macOS Automation consent is the only gate. Verified against
-**Numbers Creator Studio 16.0** (bundle id `com.apple.Numbers`) on macOS 27.2.
+**Numbers Creator Studio 16.0** (bundle id `com.apple.Numbers`).
 
 Everything goes through the scripts below. They encode workarounds for behaviour that
 looks right but is locale-dependent or broken (see Pitfalls), so reach for raw

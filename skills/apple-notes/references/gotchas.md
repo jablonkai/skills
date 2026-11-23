@@ -10,7 +10,7 @@
   attachments it can't save. Don't bypass that with raw JXA.
 - **A body rewrite flattens headings.** Writing back the HTML that `body` returned keeps
   a heading's `<b>` and font size but drops `face=".AppleSystemUIFontBold"`, so the note's
-  existing `#`/`##` lines turn into big bold text (verified on macOS 27.2). `nt-write.py
+  existing `#`/`##` lines turn into big bold text (verified on Notes 4.13). `nt-write.py
   append` turns them back into `<h1>`/`<h2>` before the rewrite, and the reader also
   treats bold text of ≥ 17px as a heading, which covers notes rewritten earlier.
 - **No real checklists.** Notes' tappable checkboxes are invisible to scripting. Reading

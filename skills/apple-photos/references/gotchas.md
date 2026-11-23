@@ -1,6 +1,6 @@
 # Gotchas
 
-All reproduced on Photos 12.0, macOS 27.0.1 and osxphotos 0.77.2 unless noted.
+All reproduced on Photos 12.0 and osxphotos 0.77.2 unless noted.
 
 ## Library and permissions
 

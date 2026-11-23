@@ -1,7 +1,7 @@
 # Gotchas
 
 Each of these produces output that looks fine in a quick check and is still wrong.
-Behaviour verified on ImageMagick 7.1.2-36 Q16-HDRI (Homebrew, macOS 27.2).
+Behaviour verified on ImageMagick 7.1.2-36 Q16-HDRI (Homebrew).
 
 ## Syntax and versions
 

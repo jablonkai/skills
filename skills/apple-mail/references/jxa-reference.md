@@ -1,4 +1,4 @@
-# Mail JXA reference (Mail 16, macOS 27)
+# Mail JXA reference (Mail 16)
 
 `const M = Application("Mail")`. Read the dictionary with `sdef /System/Applications/Mail.app`.
 

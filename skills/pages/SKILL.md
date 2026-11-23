@@ -3,7 +3,7 @@ name: pages
 description: 'Automate Apple Pages on macOS through its AppleScript/JXA dictionary (osascript) — create documents from Pages templates, replace {{placeholder}} tokens in body text, text boxes and tables without losing their formatting, swap or insert images, mail-merge a .pages template against CSV/JSON rows into one PDF/DOCX per row, and export or batch-convert .pages files to PDF, Word (DOCX), EPUB with title/author/language metadata, RTF or plain text — then verify the exports (PDF text and page count, EPUB metadata). Use whenever the user mentions Pages or a .pages file: "fill my Pages template", "export this .pages to PDF", "convert these Pages documents to Word", "make an EPUB from my Pages book", "mail merge this CSV into a Pages letter". Not for .docx files edited without Pages (use docx), generic PDF work (use pdf), converting files to Markdown (use markitdown), or Keynote and Numbers documents.'
 summary: "automate Apple Pages via AppleScript/JXA — fill templates and {{placeholders}} without losing formatting, swap images, CSV mail merge, and PDF/DOCX/EPUB export or batch conversion of .pages files"
 category: office
-compatibility: "Built for Pages Creator Studio 16.0 on macOS 27.2."
+compatibility: "Built for Pages Creator Studio 16.0."
 risk: low
 tags:
     - pages
@@ -14,7 +14,7 @@ tags:
     - epub
 license: GPL-3.0-only
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
   author: "Tamás Jablonkai"
 ---
 
@@ -23,7 +23,7 @@ metadata:
 Apple Pages is driven through its **AppleScript dictionary via `osascript`**: each
 script call opens the documents it needs, works, and closes them again. There is no
 bridge or listener; macOS Automation consent is the only gate. Verified against
-**Pages Creator Studio 16.0** (bundle id `com.apple.Pages`) on macOS 27.2.
+**Pages Creator Studio 16.0** (bundle id `com.apple.Pages`).
 
 Everything goes through the scripts below. They encode workarounds for several
 dictionary features that look usable but are broken (see Pitfalls), so reach for raw
