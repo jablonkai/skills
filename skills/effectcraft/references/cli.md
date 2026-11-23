@@ -1,4 +1,4 @@
-# effectcraft-cli 0.24.1
+# effectcraft-cli 0.25.1
 
 Each invocation runs a headless engine, does its work and exits. `--help` lists everything;
 running the app binary would open a window, so don't.
@@ -25,9 +25,9 @@ a name; `<value>` is JSON (`50`, `[960,540]`, `"#ff0000"`) or a bare string.
 | Command | Does |
 |---|---|
 | `info` | project summary: version, active comp with its layers, project items, renderer |
-| `commands [--filter T] [--enabled]` | the registry as text (≈730 lines — filter it, or use `ec_commands.py`) |
+| `commands [--filter T] [--enabled]` | the registry as text (≈770 lines — filter it, or use `ec_commands.py`) |
 | `exec ID [--params JSON]` / `exec --list [--schemas] --json` | one command / the registry as JSON |
-| `run ID JSON [ID JSON …]` / `run --args-file F` / `run --commands FILE\|-` | several commands in order, one process; no `$N` references. `--commands`: JSON array or JSON Lines of `{"command":ID,"params":{}}`, `-` = stdin (new in 0.20.0, smoke-tested) |
+| `run ID JSON [ID JSON …]` / `run --args-file F` / `run --commands FILE\|-` | several commands in order, one process; no `$N` references. `--commands`: JSON array or JSON Lines of `{"command":ID,"params":{}}`, `"id"` works for `"command"`, `-` = stdin, repeatable, at most 64 MiB and 100000 steps |
 | `props COMP LAYER [--flat] [--time S]` | a layer's property tree with paths (`--json` nests groups and names effects) |
 | `get COMP LAYER PATH [--time S]` | value at comp time S, `keys[]` (time = layerTime, compTime, value, in/out interpolation), `expression` |
 | `set COMP LAYER PATH VALUE [--time S] [--expression E]` | static value, a keyframe at layer time S (replaces a key already there), or an expression |
@@ -35,7 +35,8 @@ a name; `<value>` is JSON (`50`, `[960,540]`, `"#ff0000"`) or a bare string.
 | `render [--comp C] --out FILE [--format F] …` | a deliverable (below) |
 | `render`/`render-frame --template T.ectemplate [--values V.json]` | a template instance; can't combine with `--project`, `--comp`, `--queue` |
 | `script FILE.jsx [F.ecproj] \| --eval CODE` | After Effects-style JavaScript (below) |
-| `mcp [--autosave] [--automation-read-root D] [--automation-write-root D]` | stdio MCP server (see security.md) |
+| `mcp [--autosave | --bridge PORT] [--automation-read-root D] [--automation-write-root D]` | stdio MCP server (see security.md) |
+| `replay SCRIPT.jsonl [--keep-going]` | replay a journal or repro script headless; per-step ok/error, exits 1 on the first failure |
 | `bench …` | timings; not needed for normal work |
 
 ## render
@@ -47,6 +48,7 @@ render --project F --comp C --out FILE --format h264|hevc|av1|prores|webm|png|jp
        [--bitrate KBPS] [--audio auto|on|off] [--jpeg-quality N]
        [--profile main|main10] [--rate-control bitrate|quality] [--video-quality N] [--keyint N]
        [--webm-codec vp9|av1] [--level auto|4.1] [--audio-bitrate KBPS] [--opus-app audio|voice]
+       [--exr-compression none|rle|zips|zip|piz|pxr24|b44|b44a|dwaa|dwab] [--exr-depth half|float]   # EXR is always frame-numbered: --out t.exr writes t_00000.exr
        [--progress]      # or: render --queue (render the project's queue)
 ```
 
