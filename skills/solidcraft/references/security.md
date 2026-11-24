@@ -51,3 +51,18 @@ route only when the user wants changes made in their open design, and asks befor
 setup`, add a `solidcraft` MCP entry to the AI clients the app finds: Claude Code, Claude
 Desktop, Cursor, OpenCode and others. They back up each file first. The skill never runs
 `mcp setup` unless asked, and it mentions this when it finds such an entry. (#22)
+
+That entry is a plain `solidcraft-cli mcp` (stdio, no `--headless`). The client starts
+one copy for every session, so one `solidcraft-cli mcp` process per open session shows
+in `ps`. Each copy runs until its session ends. It is not started by the skill and is
+not a leak. To stop the per-session server for good, remove the entry, but only when
+the user asks: for Claude Code, run `claude mcp remove solidcraft -s user` (the entry
+lives in `~/.claude.json`, under `mcpServers`). `solidcraft-cli mcp setup` puts it back.
+
+## Processes the skill starts
+
+Each script starts one `solidcraft-cli mcp --headless` child and stops it before it
+exits, on success, on an error, on Ctrl-C, SIGTERM or SIGHUP, and at interpreter exit.
+The order is EOF on stdin, then terminate, then kill (`sclib.Session.close`). A script
+killed with SIGKILL cannot clean up, but its child gets EOF on stdin and exits on its
+own. Checked against 0.48.1: no headless server was left after any of those exits.

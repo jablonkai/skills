@@ -46,12 +46,9 @@ def main():
 
     dirs = {os.path.dirname(os.path.abspath(a.design))}
     if not a.set:
-        s = Session(dirs)
-        try:
+        with Session(dirs) as s:
             s.open(a.design)
             res = s.cmd("parameters.list", {"filter": "all" if a.all else "user"})
-        finally:
-            s.close()
         keep = ("name", "expression", "value", "unit", "source", "feature", "input", "comment", "error")
         print(json.dumps([{k: p.get(k) for k in keep if p.get(k) not in (None, "")}
                           for p in res.get("parameters", [])], indent=2, ensure_ascii=False))
@@ -70,23 +67,21 @@ def main():
 
     in_hash = sha256(a.design)
     before = measure(a.design)
-    s = Session(dirs)
     try:
-        s.open(a.design)
-        known = {p["name"]: p for p in s.cmd("parameters.list", {"filter": "all"}).get("parameters", [])}
-        unknown = [n for n in changes if n not in known]
-        if unknown:
-            user = sorted(n for n, p in known.items() if p.get("source") in (None, "user"))
-            sys.exit("no parameter named %s; user parameters: %s (sc_params.py %s --all lists the rest)"
-                     % (", ".join(unknown), ", ".join(user) or "none", a.design))
-        s.batch([{"command": "parameters.change", "params": {"changes": changes}}])
-        s.save(a.save)
-        for o in a.out:
-            s.export(o)
+        with Session(dirs) as s:
+            s.open(a.design)
+            known = {p["name"]: p for p in s.cmd("parameters.list", {"filter": "all"}).get("parameters", [])}
+            unknown = [n for n in changes if n not in known]
+            if unknown:
+                user = sorted(n for n, p in known.items() if p.get("source") in (None, "user"))
+                sys.exit("no parameter named %s; user parameters: %s (sc_params.py %s --all lists the rest)"
+                         % (", ".join(unknown), ", ".join(user) or "none", a.design))
+            s.batch([{"command": "parameters.change", "params": {"changes": changes}}])
+            s.save(a.save)
+            for o in a.out:
+                s.export(o)
     except ToolError as e:
-        s.close()
         sys.exit("error: %s" % e)
-    s.close()
 
     after = measure(a.save)
     checks = []
@@ -94,13 +89,9 @@ def main():
     def check(name, ok, detail):
         checks.append({"check": name, "ok": bool(ok), "detail": detail})
 
-    all_after = {}
-    s = Session(dirs)
-    try:
+    with Session(dirs) as s:
         s.open(a.save)
         all_after = {p["name"]: p for p in s.cmd("parameters.list", {"filter": "all"}).get("parameters", [])}
-    finally:
-        s.close()
     for name, expr in changes.items():
         p = all_after.get(name) or {}
         got = p.get("expression")
