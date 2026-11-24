@@ -3,12 +3,12 @@ name: solidcraft
 description: 'Automate SolidCraft, the parametric solid-modeling CAD app, headless with solidcraft-cli: build parametric parts from sketch and feature scripts (extrude, holes, fillets, chamfers, shells, patterns, booleans) and save .solidcraft; change named parameters of an existing design and re-export; measure volume, bounding box and mass of designs and STEP/STL parts; export STEP, STL, 3MF and OBJ; render iso, orthographic and section snapshots, with every result read back by eval. Use when the user mentions SolidCraft, solidcraft-cli or a .solidcraft file, or wants a part modeled, resized or measured with SolidCraft: "model a mounting plate with four corner holes in SolidCraft", "set wall to 5 mm in this .solidcraft and re-export the STEP", "what is the volume and bounding box of this STEP in SolidCraft", "render an iso and a section view". Not for FreeCAD (freecad), BRL-CAD (brl-cad), 2D drawings or DXF (cadcraft, qcad), PCBs (kicad), or mesh and art modeling (blender).'
 summary: "automate SolidCraft headless with solidcraft-cli — parametric parts from sketch and feature scripts (extrude, holes, fillets, patterns, booleans), named-parameter edits with re-evaluation, volume, bounding-box and mass read-back, STEP/STL/3MF export and import, iso and section snapshots, eval read-back verified"
 category: cad
-compatibility: "Built for SolidCraft 0.47.0 and its bundled solidcraft-cli 0.47.0 (the artcraft-cli standalone install, also 0.47.0, works too) on macOS, Python 3.9+; pre-1.0, so command ids may change."
+compatibility: "Built for SolidCraft 0.48.1 and its bundled solidcraft-cli 0.48.1 (the artcraft-cli standalone install, also 0.48.1, works too) on macOS, Python 3.9+; pre-1.0, so command ids may change."
 risk: medium
 tags: [solidcraft, cad, parametric, solid-modeling, step, stl, 3mf, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.2.0"
+  version: "1.3.0"
   author: "Tamás Jablonkai"
 ---
 
@@ -16,17 +16,17 @@ metadata:
 
 SolidCraft is a parametric solid-modeling CAD app. A design (`.solidcraft`) holds user
 parameters, sketches and a feature timeline (extrude, hole, fillet, pattern…) that
-rebuild when a parameter changes. Every tool is a command in one registry (854 in
-0.47.0). The same commands run from a script (`solidcraft-cli run`), from a headless MCP
+rebuild when a parameter changes. Every tool is a command in one registry (866 in
+0.48.1). The same commands run from a script (`solidcraft-cli run`), from a headless MCP
 session (`solidcraft-cli mcp`) and in the app. This skill drives them **headless**, with
 no window open, and checks each result with `solidcraft-cli eval`, a measurement that
-runs independently of the build. Verified against **SolidCraft 0.47.0** with the
-**solidcraft-cli 0.47.0** inside the app on macOS. The software is pre-1.0, so if a
+runs independently of the build. Verified against **SolidCraft 0.48.1** with the
+**solidcraft-cli 0.48.1** inside the app on macOS. The software is pre-1.0, so if a
 pinned id fails, look it up rather than guessing.
 
 ```sh
 SC=/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli   # the app's own copy
-$SC --version          # solidcraft-cli 0.47.0; a copy on PATH may be older, so prefer this one
+$SC --version          # solidcraft-cli 0.48.1; a copy on PATH may be older, so prefer this one
 ```
 
 ## Pick the route
@@ -51,6 +51,8 @@ Set `S=<this skill>/scripts` and call each as `python3 $S/<script>`. They need P
 3.9+ and the standard library only, and each has a full `--help`. They find the CLI
 (`SOLIDCRAFT_CLI`, then the app's copy, then PATH), never write to their input, refuse
 to overwrite outputs without `--overwrite`, print JSON and exit 1 on any failed check.
+Each starts its own `mcp --headless` server and stops it before it exits, also on an
+error, Ctrl-C or SIGTERM.
 
 - **`sc_run.py SCRIPT [--in F] [--save F.solidcraft] [--out F]… [--expect-volume V] [--tol PCT] [--expect-size X Y Z] [--expect-bodies N]`**
   - SCRIPT is `{"commands":[{"command":ID,"params":{…}}]}`, from a file or inline.
@@ -95,7 +97,9 @@ to overwrite outputs without `--overwrite`, print JSON and exit 1 on any failed 
 6. **Look at it.** Run `sc_inspect.py OUT --snap-dir D --views iso top`, plus `--section`
    for inside features, then Read the PNGs. A hole in the wrong corner keeps the volume
    right; only the picture shows it.
-7. **Report** the outputs, the measured numbers next to the expected ones, and anything
+7. **Leave nothing running.** Run `pgrep -fl 'solidcraft-cli mcp --headless'`; it
+   must print nothing. See [No background processes](#no-background-processes).
+8. **Report** the outputs, the measured numbers next to the expected ones, and anything
    you could not check.
 
 ## The traps that cost the most (details in [gotchas.md](references/gotchas.md))
@@ -116,6 +120,24 @@ to overwrite outputs without `--overwrite`, print JSON and exit 1 on any failed 
 - **The CLI on PATH can be older than the app**, which then reports commands it lacks
   as unknown. Use the app's copy.
 
+## No background processes
+
+A task leaves no `solidcraft-cli` running when it ends:
+
+- Run each script and CLI call in the foreground. Never start `solidcraft-cli mcp`
+  with `&`, `nohup`, a background shell or a detached terminal to keep a session
+  between steps. Put the steps in one `sc_run.py` script instead.
+- If a call hangs, stop it and check `pgrep -fl 'solidcraft-cli mcp --headless'`.
+  Stop only the PIDs that this task started (`kill PID`).
+- A plain `solidcraft-cli mcp` with no `--headless`, whose parent is the AI client, is
+  not a leak. It is the `solidcraft` MCP server that the app's *Make SolidCraft
+  available to AI apps* setting or `mcp setup` registered. The client starts one copy
+  for each session and keeps it running until the session ends. Leave it alone and
+  tell the user where it comes from (see [security.md](references/security.md#config-the-app-writes)).
+  Only remove the entry if the user asks.
+- The app launched for the live route (`SolidCraft --control PORT`) is quit when the
+  task ends.
+
 ## The running app (optional)
 
 To change the design the user has open in SolidCraft, rather than a file, use the app's
@@ -127,7 +149,7 @@ the default.
 ## References
 
 - [references/cli.md](references/cli.md): subcommands, script format, `eval` JSON, formats, MCP tools.
-- [references/commands.md](references/commands.md): command ids by task, pinned to 0.47.0.
+- [references/commands.md](references/commands.md): command ids by task, pinned to 0.48.1.
 - [references/recipes.md](references/recipes.md): the plate, the bracket and its parameter edit, STEP inspection, a flange with a bolt circle, mesh export, history scripts.
 - [references/gotchas.md](references/gotchas.md): silent failures and surprises.
 - [references/security.md](references/security.md): file access, the app's control channel, config the app writes.

@@ -4,18 +4,22 @@
 when the copy on PATH is older than the app's. `Session` drives `solidcraft-cli mcp
 --headless --param-check strict` over stdio, so a misspelled parameter key is an error
 instead of being silently dropped, and file access stays inside the given folders.
+A Session never outlives its script: `close()` runs on `with` exit, on an exception,
+on SIGINT/SIGTERM/SIGHUP and at interpreter exit, and kills a server that does not stop.
 """
+import atexit
 import hashlib
 import json
 import os
 import shutil
+import signal
 import struct
 import subprocess
 import sys
 import tempfile
 import zlib
 
-PINNED_VERSION = "0.47.0"
+PINNED_VERSION = "0.48.1"
 APP_CLI = "/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli"
 _CLI = None
 
@@ -282,9 +286,21 @@ class Session:
         self._err = tempfile.TemporaryFile(mode="w+")
         self.proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                      stderr=self._err, text=True, bufsize=1)
-        self._rpc("initialize", {"protocolVersion": "2025-06-18", "capabilities": {},
-                                 "clientInfo": {"name": "solidcraft-skill", "version": "1"}})
-        self._send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+        _LIVE.add(self)
+        try:
+            self._rpc("initialize", {"protocolVersion": "2025-06-18", "capabilities": {},
+                                     "clientInfo": {"name": "solidcraft-skill", "version": "1"}})
+            self._send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+        except BaseException:
+            self.close()
+            raise
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+        return False
 
     def _send(self, msg):
         self.proc.stdin.write(json.dumps(msg) + "\n")
@@ -343,11 +359,47 @@ class Session:
         return self.tool("export", {"path": os.path.realpath(path)})
 
     def close(self):
-        try:
-            self.proc.stdin.close()
-            self.proc.wait(timeout=10)
-        except Exception:  # noqa: BLE001 - best effort shutdown
-            self.proc.kill()
+        """Stop the server: EOF on stdin, then terminate, then kill. Safe to call twice."""
+        _LIVE.discard(self)
+        p = self.proc
+        if p.poll() is None:
+            try:
+                p.stdin.close()
+            except Exception:  # noqa: BLE001 - the pipe may already be gone
+                pass
+            for stop in (None, p.terminate, p.kill):
+                if stop:
+                    stop()
+                try:
+                    p.wait(timeout=5)
+                    break
+                except subprocess.TimeoutExpired:
+                    continue
+        for f in (p.stdout, self._err):
+            try:
+                f.close()
+            except Exception:  # noqa: BLE001
+                pass
+
+
+_LIVE = set()
+
+
+def _close_all(*_):
+    for s in list(_LIVE):
+        s.close()
+
+
+def _on_signal(signum, _frame):
+    _close_all()
+    signal.signal(signum, signal.SIG_DFL)
+    os.kill(os.getpid(), signum)
+
+
+atexit.register(_close_all)
+for _sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+    if signal.getsignal(_sig) in (signal.SIG_DFL, signal.default_int_handler):
+        signal.signal(_sig, _on_signal)
 
 
 def load_script(arg):

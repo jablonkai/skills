@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Filtered lookup in SolidCraft's command registry (854 commands in 0.47.0) and its bundled docs.
+"""Filtered lookup in SolidCraft's command registry (866 commands in 0.48.1) and its bundled docs.
 
   sc_commands.py WORD…                 commands whose id or label contains every word
   sc_commands.py --prefix solid.       every command under a prefix
@@ -33,25 +33,23 @@ def main():
         ap.error("give WORDs, --prefix, --id or --doc")
 
     if a.doc is not None or a.id:
-        s = Session()
         try:
-            if a.id:
-                print(json.dumps(s.tool("describe_command", {"id": a.id}), indent=2, ensure_ascii=False))
-            elif not a.doc:
-                for d in DOCS:
-                    # an unknown file name is refused with the list of the skill's files
-                    try:
-                        files = s.tool("skill_reference", {"skill": d, "file": "?"})
-                    except ToolError as e:
-                        files = str(e)
-                    print("%s: %s" % (d, str(files).split("Available files:")[-1].strip()))
-            else:
-                skill, _, f = a.doc.partition("/")
-                print(s.tool("skill_reference", {"skill": skill, "file": f or "SKILL.md"}))
+            with Session() as s:
+                if a.id:
+                    print(json.dumps(s.tool("describe_command", {"id": a.id}), indent=2, ensure_ascii=False))
+                elif not a.doc:
+                    for d in DOCS:
+                        # an unknown file name is refused with the list of the skill's files
+                        try:
+                            files = s.tool("skill_reference", {"skill": d, "file": "?"})
+                        except ToolError as e:
+                            files = str(e)
+                        print("%s: %s" % (d, str(files).split("Available files:")[-1].strip()))
+                else:
+                    skill, _, f = a.doc.partition("/")
+                    print(s.tool("skill_reference", {"skill": skill, "file": f or "SKILL.md"}))
         except ToolError as e:
             sys.exit(str(e))
-        finally:
-            s.close()
         return
 
     cmds = json.loads(run_cli(["commands"]).stdout)

@@ -66,20 +66,18 @@ def main():
         os.makedirs(d, exist_ok=True)
 
     report = {"steps": len(steps), "outputs": {}, "checks": []}
-    s = Session(dirs)
     try:
-        if a.inp:
-            s.open(a.inp)
-        if steps:
-            s.batch(steps)
-        if a.save:
-            s.save(a.save)
-        for o in a.out:
-            s.export(o)
+        with Session(dirs) as s:
+            if a.inp:
+                s.open(a.inp)
+            if steps:
+                s.batch(steps)
+            if a.save:
+                s.save(a.save)
+            for o in a.out:
+                s.export(o)
     except ToolError as e:
-        s.close()
         sys.exit("error: %s" % e)
-    s.close()
 
     def check(name, ok, detail):
         report["checks"].append({"check": name, "ok": bool(ok), "detail": detail})
