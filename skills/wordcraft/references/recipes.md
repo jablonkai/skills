@@ -1,4 +1,4 @@
-# Recipes (verified with WordCraft 0.18.1)
+# Recipes (verified with WordCraft 0.19.1)
 
 `S=<skill>/scripts`. Set `export WORDCRAFT_REGION=en-US` (or the user's region) so the
 paper size doesn't depend on the machine.
@@ -103,6 +103,7 @@ python3 $S/wc_batch.py reports/ refreshed/ --to docx --update-fields
  "save": []}
 ```
 
+- Run it from the script's folder (or use absolute paths): `members.csv` and `out/merged.docx` are command params, which resolve against the cwd, unlike `file` and `save`.
 - When the letter has no merge fields yet, add them first: `select.text` on the placeholder text, then `mailings.insertField {"field": "name"}`.
 - `finish` writes all records into one document. For one file per record, pass `{"path": "out/rec-N.docx", "from": N, "to": N}` in a loop of runs.
 - Verified result: "Dear Ada from London / Dear Bob from Paris".
