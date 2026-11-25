@@ -19,7 +19,7 @@ import sys
 import tempfile
 import zlib
 
-PINNED_VERSION = "0.48.1"
+PINNED_VERSION = "0.49.1"
 APP_CLI = "/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli"
 _CLI = None
 

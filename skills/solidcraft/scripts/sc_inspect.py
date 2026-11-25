@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Measure a part (STEP, STL, 3MF, OBJ, .solidcraft) and render snapshots of it.
+"""Measure a part (STEP, IGES, STL, 3MF, OBJ, .sc/.solidcraft) and render snapshots of it.
 
   sc_inspect.py part.step
   sc_inspect.py part.step --snap-dir shots --views iso top --section mid

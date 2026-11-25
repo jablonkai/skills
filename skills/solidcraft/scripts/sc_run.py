@@ -26,7 +26,8 @@ import sys
 from sclib import Session, ToolError, load_script, measure, refuse_existing, sha256
 
 MESH_EXT = (".stl", ".obj", ".3mf")
-READBACK_EXT = (".solidcraft", ".step", ".stp") + MESH_EXT
+DESIGN_EXT = (".sc", ".solidcraft")  # 0.49.1 names designs .sc; it still reads and writes .solidcraft
+READBACK_EXT = DESIGN_EXT + (".step", ".stp", ".igs", ".iges") + MESH_EXT
 
 
 def near(a, b, pct):
@@ -36,9 +37,9 @@ def near(a, b, pct):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("script")
-    ap.add_argument("--in", dest="inp", help="design or part to start from (.solidcraft, .step, .stl …)")
-    ap.add_argument("--save", help="write the design here (.solidcraft)")
-    ap.add_argument("--out", action="append", default=[], help="export by extension: .step .stl .3mf .obj .urdf (repeat)")
+    ap.add_argument("--in", dest="inp", help="design or part to start from (.sc, .solidcraft, .step, .stl …)")
+    ap.add_argument("--save", help="write the design here (.sc or .solidcraft)")
+    ap.add_argument("--out", action="append", default=[], help="export by extension: .step .igs .stl .3mf .obj .glb .urdf (repeat)")
     ap.add_argument("--overwrite", action="store_true")
     ap.add_argument("--expect-volume", type=float, help="total volume in mm³")
     ap.add_argument("--expect-size", type=float, nargs=3, metavar=("X", "Y", "Z"), help="overall bbox size in mm")
@@ -53,8 +54,8 @@ def main():
     outs = ([a.save] if a.save else []) + a.out
     if a.inp and any(os.path.realpath(o) == os.path.realpath(a.inp) for o in outs):
         sys.exit("an output is the --in file; write a copy (e.g. NAME-v2.solidcraft) instead")
-    if a.save and not a.save.endswith((".solidcraft", ".json")):
-        sys.exit("--save takes a .solidcraft (or .json) path; use --out for exports")
+    if a.save and not a.save.lower().endswith(DESIGN_EXT + (".json",)):
+        sys.exit("--save takes a .sc or .solidcraft (or .json) path; use --out for exports")
     refuse_existing(outs, a.overwrite)
     steps = load_script(a.script)
 

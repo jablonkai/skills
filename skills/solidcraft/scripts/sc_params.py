@@ -37,7 +37,7 @@ def main():
     ap.add_argument("design")
     ap.add_argument("--all", action="store_true", help="list sketch and feature parameters too")
     ap.add_argument("--set", nargs="+", action="extend", default=[], metavar="NAME=EXPR")
-    ap.add_argument("--save", help="the changed copy (.solidcraft); required with --set")
+    ap.add_argument("--save", help="the changed copy (.sc or .solidcraft); required with --set")
     ap.add_argument("--out", action="append", default=[], help="export the changed design (repeat)")
     ap.add_argument("--overwrite", action="store_true")
     ap.add_argument("--expect-volume", type=float)
@@ -109,9 +109,9 @@ def main():
         check("volume", v is not None and abs(v - a.expect_volume) <= abs(a.expect_volume) * a.tol / 100,
               "%s mm³, expected %s ±%s%%" % (v, a.expect_volume, a.tol))
     for o in a.out:
-        if o.lower().endswith((".step", ".stp", ".stl", ".3mf", ".obj")) and os.path.isfile(o):
+        if o.lower().endswith((".step", ".stp", ".igs", ".iges", ".stl", ".3mf", ".obj")) and os.path.isfile(o):
             v = measure(o)["volume_mm3"]
-            pct = 0.1 if o.lower().endswith((".step", ".stp")) else 1.0
+            pct = 0.1 if o.lower().endswith((".step", ".stp", ".igs", ".iges")) else 1.0
             ref = after["volume_mm3"]
             check("volume of " + o, v is not None and ref and abs(v - ref) <= ref * pct / 100,
                   "%s vs %s mm³" % (v, ref))
