@@ -22,7 +22,8 @@ as read). "last" (or -1, -2 …) counts from the end.
   {"op": "layout",   "slide": 2, "layout": "twoContent"}
   {"op": "hide",     "slide": 6, "hidden": true}
   {"op": "theme",    "name": "Harbor"}
-  {"op": "cmd",      "slide": 2, "id": "format.size", "params": {"size": 28}}   (any command)
+  {"op": "cmd",      "slide": 2, "id": "transition.set", "params": {"kind": "fade"}}   (any command;
+                     format.* acts on the selection: an edit.select cmd with ids first)
 
 Shape ids are resolved with slide.inspect inside the same session, never guessed. Prints
 the titles before and after as JSON and exits 1 if --expect-titles doesn't match the

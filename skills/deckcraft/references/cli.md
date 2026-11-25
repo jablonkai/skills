@@ -1,4 +1,4 @@
-# deckcraft-cli 0.18.1
+# deckcraft-cli 0.19.1
 
 `deckcraft-cli help SUBCOMMAND` explains any subcommand; this page is what the help
 leaves implicit. Slides are 960 × 540 pt by default (16:9); positions are points, x right,
@@ -70,7 +70,7 @@ blank?}`, `open_presentation {path}`, `save_presentation {path}` (format by exte
 - `--automation-read-root DIR` / `--automation-write-root DIR` confine every file read
   (open, pictures, media) and write (save, export). Each may be repeated since 0.14.1 (0.13.1: once). A root
   left out grants none of that access; a path outside is refused with `automation path
-  rejected: outside the write root …`. Roots conflict with `--connect`.
+  rejected: outside the write roots …`. Roots conflict with `--connect`.
 - The scripts in this skill speak MCP through `dklib.Session` so one presentation stays
   open across many commands — shape ids from `slide.inspect` stay valid — and file
   access stays in the task's folders.
