@@ -3,22 +3,22 @@ name: wordcraft
 description: 'Automate WordCraft, the Word-style word processor, with wordcraft-cli (headless or live): fill .docx templates and {{placeholders}} (headers and footers too) without losing formatting, build documents from Markdown or an outline with heading styles, tables and an updated table of contents, add tracked changes and comments by a named author, export markup PDFs, refresh fields, mail-merge from CSV, and convert docx/doc/odt/rtf/html/md to docx/pdf one file or a folder at a time, checked by inspect read-back and a page render. Use when the user mentions WordCraft or wordcraft-cli, or wants a Word document filled, reviewed, built or converted with it: "fill this docx template with WordCraft", "add my edits as tracked changes by Legal", "turn these markdown notes into docx with a TOC", "refresh the TOC". Not for Apple Pages (pages), headless LibreOffice/soffice (libreoffice), python-docx/OOXML code without WordCraft (docx), extracting documents to Markdown (markitdown), e-books (calibre) or PDF merge/split (pdf).'
 summary: "automate WordCraft with wordcraft-cli — docx template fill with formatting kept (headers and footers too), documents from Markdown with heading styles, tables and an updated TOC, tracked changes and comments by a named author, markup PDFs, docx/odt/rtf/html/md/pdf conversion and folder batches, inspect read-back verified"
 category: office
-compatibility: "Built for WordCraft 0.18.1 and wordcraft-cli 0.18.1 on macOS 27; helper scripts need Python 3.9+. Pre-1.0, so command ids may change."
+compatibility: "Built for WordCraft 0.19.1 and wordcraft-cli 0.19.1; helper scripts need Python 3.9+. Pre-1.0, so command ids may change."
 risk: medium
 tags: [wordcraft, word, docx, templates, tracked-changes, comments, toc, markdown, conversion, headless]
 license: GPL-3.0-only
 metadata:
-  version: "1.1.10"
+  version: "1.2.0"
   author: "Tamás Jablonkai"
 ---
 
 # WordCraft via wordcraft-cli
 
 WordCraft is a Word-style word processor. Every ribbon button, dialog and keystroke is a
-command in one registry: 671 of them in 0.18.1. The same commands run headless from
+command in one registry: 674 of them in 0.19.1. The same commands run headless from
 `wordcraft-cli`, in a headless MCP session, and in the desktop app. This skill works
 **headless by default**, so no window opens, and checks every result by reading the
-document back. It is verified against **WordCraft 0.18.1 / wordcraft-cli 0.18.1**. The
+document back. It is verified against **WordCraft 0.19.1 / wordcraft-cli 0.19.1**. The
 software is pre-1.0: when a pinned id fails, look it up rather than guess.
 
 ```sh
@@ -78,6 +78,8 @@ a full `--help`. All refuse to overwrite without `--overwrite` and never write a
    view the PNG. Layout problems (overflowing tables, wrong page size) only show here.
    `render` takes documents, not PDFs; to see comments and revision marks, use
    `wordcraft-cli convert OUT.docx /tmp/markup.png --markup` (page 1 with the margin).
+   For deliverable PDFs add `--strict` to `convert`/`render`: it writes nothing and exits
+   3 if a glyph can't be drawn or a picture is missing (JSON report on stderr).
 6. **Report** paths, page counts and what the read-back confirmed.
 
 ## `run --script`: the main edit tool
@@ -96,7 +98,8 @@ a full `--help`. All refuse to overwrite without `--overwrite` and never write a
 
 `wordcraft-cli run --script steps.json --author "Claude"`. Relative paths resolve against
 **the script's folder**, not the shell's cwd (`--script -` reads stdin; then use absolute
-paths). More recipes: [recipes.md](references/recipes.md).
+paths). Paths inside command params (`mailings.recipients`, `file.open`) resolve against
+the cwd instead. More recipes: [recipes.md](references/recipes.md).
 
 ## Traps that fail silently
 
@@ -122,7 +125,7 @@ More, with fixes: [gotchas.md](references/gotchas.md).
 
 - [cli.md](references/cli.md): subcommands, flags, the script schema, formats, `inspect`
   JSON, MCP tools.
-- [commands.md](references/commands.md): pinned 0.18.1 command ids by task.
+- [commands.md](references/commands.md): pinned 0.19.1 command ids by task.
 - [recipes.md](references/recipes.md): template fill, review pass, Markdown with TOC,
   folder conversion, mail merge, styles, tables, headers and footers.
 - [gotchas.md](references/gotchas.md): every trap found while building this skill.

@@ -1,19 +1,19 @@
-# wordcraft-cli reference (0.18.1)
+# wordcraft-cli reference (0.19.1)
 
-All behaviour below was verified against wordcraft-cli 0.18.1 on macOS. `-h` on any
+All behaviour below was verified against wordcraft-cli 0.19.1 on macOS. `-h` on any
 subcommand prints this same global help; there is no per-command help and no `describe`.
 
 ## Subcommands
 
 | Command | What it does |
 |---|---|
-| `convert IN OUT [--markup] [--update-fields] [--format wordml2003\|flatopc]` | Format conversion by extension. `--update-fields` refreshes unlocked fields first. `--markup` adds comments beside each page and revision marks in pdf/png, or a comment list in html/md/txt |
+| `convert IN OUT [--markup] [--update-fields] [--strict] [--format wordml2003\|flatopc]` | Format conversion by extension. `--update-fields` refreshes unlocked fields first. `--markup` adds comments beside each page and revision marks in pdf/png, or a comment list in html/md/txt. `--strict` (pdf/png output only, 0.19.x) writes nothing and exits 3 if a character can't be drawn or a picture is missing or undecodable; the report is one JSON line on stderr |
 | `info FILE` | JSON: pages, words, paragraphs, sections, comments, trackChanges, properties |
 | `text FILE` | Plain body text. Tracked deletions are left out; headers and footers are not included |
 | `inspect FILE` | Structure JSON (below) |
-| `render FILE OUT.png [--page N] [--scale S]` | One page to PNG. Pages are 1-based; scale is px per pt (default 2) |
-| `run [--file F \| --template T] [--script FILE\|-] --cmd 'id={json}' … [--save OUT] [--print] [--author NAME]` | Runs commands headless, then saves. `--print` prints each command's result |
-| `commands [--json]` | The registry (671 ids). Filter it with `scripts/wc_commands.py` |
+| `render FILE OUT.png [--page N] [--scale S] [--strict]` | One page to PNG. Pages are 1-based; scale is px per pt (default 2). `--strict` as for `convert` |
+| `run [--file F \| --template T] [--script FILE\|-] --cmd 'id={json}' … [--save OUT] [--page N] [--scale S] [--print] [--author NAME]` | Runs commands headless, then saves. `--print` prints each command's result. A PNG save uses `--page` (default 1) and `--scale` (default 2) |
+| `commands [--json]` | The registry (674 ids). Filter it with `scripts/wc_commands.py` |
 | `parity [--markdown]` | Feature-catalogue coverage |
 | `mcp [--connect HOST:PORT \| --author NAME] [--automation-read-root DIR] [--automation-write-root DIR]` | MCP server on stdio, headless or bridged to the app |
 | `zotero <command> FILE …` | Zotero citation commands (needs Zotero running) |
@@ -40,7 +40,8 @@ Password-protected files take `--password-file PATH` or `WORDCRAFT_PASSWORD`. A
  "save": ["out.docx", "out.pdf"]}
 ```
 
-- Relative paths in the script resolve against the script file's folder. With `--script -` (stdin), use absolute paths.
+- Relative `file`/`template`/`save` paths in the script resolve against the script file's folder. With `--script -` (stdin), use absolute paths.
+- Paths **inside command params** (`mailings.recipients {"path"}`, `mailings.finish {"path"}`, `file.open {"path"}`, …) resolve against the shell's cwd, not the script's folder: run from that folder or pass absolute paths.
 - `--author NAME` sets the author of new tracked changes and comments. Without it they are "WordCraft User". The `file.setAuthor` command does the same.
 - `file.new` and `file.open` open another document and make it the active one; later commands and the `save` list act on the active document. `view.switchWindows` lists the open documents and, with `{"id": N}`, activates one.
 - An unknown id stops the run: `unknown command `font.bold``. The error names the id.

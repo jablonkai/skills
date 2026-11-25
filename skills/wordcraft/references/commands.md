@@ -1,6 +1,6 @@
-# Command ids by task (pinned to WordCraft 0.18.1)
+# Command ids by task (pinned to WordCraft 0.19.1)
 
-These are the ids this skill uses, checked against the 0.18.1 registry. Look anything
+These are the ids this skill uses, checked against the 0.19.1 registry. Look anything
 else up rather than guessing. Names follow the ribbon, but not always the obvious way:
 it is `format.bold`, not `font.bold`.
 
@@ -10,7 +10,7 @@ python3 $S/wc_commands.py --prefix references.
 python3 $S/wc_commands.py --id edit.replaceAll   # full params
 ```
 
-In a session, `list_commands {"query": "…"}` does the same. In 0.18.1 the largest
+In a session, `list_commands {"query": "…"}` does the same. In 0.19.1 the largest
 namespaces are `para`, `table`, `insert`, `format`, `view`, `review`, `edit`, `file`,
 `outline`, `references`, `text` and `mailings`.
 0.15.0 added `proof.packs`, `proof.installPack {"locale"}` and `proof.removePack`
@@ -99,5 +99,6 @@ the app by the user).
 | `file.new` | `{"template"?: "blank\|sample\|letter\|resume\|report"}` |
 | `file.newFromTemplate` | `{"path"}` |
 | `file.open` | `{"path"}` |
-| `file.save` / `file.saveAs` | `{"path", "markup"?, "format"?}` |
+| `file.save` / `file.saveAs` | `{"path", "markup"?, "format"?, "strict"?}`. `strict` (pdf/png only) refuses to write if a glyph or picture is missing |
+| `file.strictReport` | `{"markup"?, "page"?}`. Read-only; returns `{strict: passed\|failed, missing_glyphs, missing_pictures, …}` without writing |
 | `file.inspect` | `{"remove"?: ["comments", "revisions", "properties", "hidden", "headers"]}`. Document Inspector |
