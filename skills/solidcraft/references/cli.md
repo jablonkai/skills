@@ -1,17 +1,22 @@
-# solidcraft-cli 0.48.1
+# solidcraft-cli 0.49.1
 
 Use the CLI inside the app (`/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli`).
 A separately installed copy (`~/.local/bin/solidcraft-cli`, a link into
 `~/.local/share/artcraft-cli/solidcraft/current/`, from the artcraft-cli installer) can be
-older: it was once 0.22.1, with 461 commands instead of 493. At 0.48.1 both copies match,
+older: it was once 0.22.1, with 461 commands instead of 493. At 0.49.1 both copies match,
 and without the app the standalone copy works on its own. `sclib.cli()` picks
 `SOLIDCRAFT_CLI`, then the app's copy, then PATH, and warns when PATH is older.
 
 ```sh
 SC=/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli
-$SC --version          # solidcraft-cli 0.48.1
+$SC --version          # solidcraft-cli 0.49.1
 $SC --help             # the full usage text below
 ```
+
+Designs are `.sc` files in 0.49.1 (the help and the registry call them that). A
+`.solidcraft` design from an earlier release opens as before, and `--save` or `file.save`
+to a `.solidcraft` path still writes the same container, so either name works; the
+scripts accept both.
 
 ## Script format
 
@@ -31,18 +36,18 @@ format. `eval` and `run` replay it.
 
 | Command | What it does |
 |---|---|
-| `run SCRIPT [--in DESIGN] [--out F]… [--save F.solidcraft] [--quiet] [--results] [--timings] [--profile] [--json-out F] [--allow-errors] [--param-check off\|warn\|strict] [--quality standard\|fine\|finest] [--script-relative] [--validation each_step\|each_feature\|off] [--profile-out trace.json] [--param NAME=EXPR]… [--params-file F.json]` | Replays the script on a new design, or on `--in`. A failing feature exits 1 and writes nothing unless `--allow-errors` is given. `--out` exports by extension. `--quality` sets how closely an STL/OBJ/3MF `--out` follows curved faces (`fine` roughly doubles the file). `--script-relative` resolves file paths inside the script from the script's folder. `--param NAME=EXPR` (new in 0.47.0, repeatable) and `--params-file` (`{"NAME": "EXPR"}`, applied first) set existing parameters before the script runs, as `parameters.change` does; they need a design (positional or `--in`), and an unknown name fails the run. `--results` prints every step's reply, which is very large; prefer `--quiet` followed by `eval`. |
+| `run SCRIPT [--in DESIGN] [--out F]… [--save F.sc] [--quiet] [--results] [--timings] [--profile] [--json-out F] [--allow-errors] [--param-check off\|warn\|strict] [--quality standard\|fine\|finest] [--script-relative] [--validation each_step\|each_feature\|off] [--profile-out trace.json] [--param NAME=EXPR]… [--params-file F.json]` | Replays the script on a new design, or on `--in`. A failing feature exits 1 and writes nothing unless `--allow-errors` is given. `--out` exports by extension. `--quality` sets how closely an STL/OBJ/3MF `--out` follows curved faces (`fine` roughly doubles the file). `--script-relative` resolves file paths inside the script from the script's folder. `--param NAME=EXPR` (new in 0.47.0, repeatable) and `--params-file` (`{"NAME": "EXPR"}`, applied first) set existing parameters before the script runs, as `parameters.change` does; they need a design (positional or `--in`), and an unknown name fails the run. `--results` prints every step's reply, which is very large; prefer `--quiet` followed by `eval`. A script step that fails stops the run even with `--allow-errors`; `--results` then gives `{results, error: {step, command, error}}`. |
 | `run --in F --out G…` | Converts with no script, for example STEP → STL/3MF. |
-| `eval FILE [--json-out F] [--param NAME=EXPR]… [--params-file F.json]` (alias `inspect`) | Measures a design, part (STEP/STL/3MF/OBJ) or script and returns JSON. This is the read-back oracle. With `--param` it measures the design at those values and saves nothing (a misspelled name fails with `no parameter … in the design`). |
+| `eval FILE [--json-out F] [--quiet] [--allow-errors] [--param NAME=EXPR]… [--params-file F.json]` (alias `inspect`) | Measures a design, part (STEP/STL/3MF/OBJ) or script and returns JSON. This is the read-back oracle. With `--param` it measures the design at those values and saves nothing (a misspelled name fails with `no parameter … in the design`). |
 | `eval SCRIPT --in DESIGN` | Runs the script on DESIGN, measures the result and saves nothing. Use it to preview an edit. |
 | `script DESIGN [--out s.json]` | The feature history as a replayable script. |
 | `textconv DESIGN` | New in 0.47.0: prints a design (or `.scdwg` drawing) as text for `git diff`: the container header, the document JSON, then a size and SHA-256 line per other file. Read-only. |
 | `check DESIGN\|SCRIPT [--drawing ID\|NAME] [--sheet ID\|NAME] [--json-out F]` | Runs `drawing.check` on each drawing of the design and prints `{drawings: [{id, name, check}], findings}`. Exits 1 when anything is found; a design with no drawings gives `findings: 0`. |
-| `snapshot SCRIPT\|DESIGN [--in F] --out shot.png [--width W --height H] [--view V \| --camera JSON] [--no-grid] [--no-axes] [--body NAME:opacity=0.3,color=#rrggbb]… [--tool NAME]… [--section SPEC] [--quality coarse\|normal\|fine\|ultra]` | Headless viewport render (CPU), 1280×800 by default. `--quality` is the display meshing (default `normal`). |
+| `snapshot SCRIPT\|DESIGN [--in F] --out shot.png [--width W --height H] [--view V \| --camera JSON] [--no-grid] [--no-axes] [--transparent] [--body NAME:opacity=0.3,color=#rrggbb]… [--tool NAME]… [--section SPEC] [--quality coarse\|normal\|fine\|ultra]` | Headless viewport render, 1280×800 by default, on the GPU when `solidcraft-cli gpu` finds one, else on the CPU (the reply's `renderer` says which). `--transparent` gives an alpha background and takes about twice as long. `--quality` is the display meshing (default `normal`). |
 | `render SCRIPT\|DESIGN --out img.png [--samples N] [--transparent] …` | Path-traced render. It is slow; use it for presentation images, not for checks. |
 | `exec COMMAND [json]` | Runs one command on an empty headless design. `--connect` has no effect here. |
 | `commands [FILTER \| --id ID]` | The registry as JSON: id, label, `params` signature, `enabled`, `disabled_reason`. Unfiltered it is about 540 KB, so filter it (`FILTER` matches ids) or use `sc_commands.py`. `--id` prints one command's docs and schemas. |
-| `mcp [--headless] [--in F] [--connect 127.0.0.1:PORT [--token T]] [--allow-path DIR]… [--allow-any-path] [--require-allow-path] [--param-check off\|warn\|strict] [--render-gpu] [--compact]` | MCP server over stdio. See below. It runs until its stdin closes, so whoever starts it must stop it (the scripts do). `--render-gpu` is listed in 0.48.1 with no help text; the scripts do not pass it. The skill never passes `--allow-any-path`. `--compact` (or `SOLIDCRAFT_MCP_COMPACT=1`) shortens tool output: `inspect_design` summarises sketches and takes `sketches`/`bodies` filters. |
+| `mcp [--headless] [--in F] [--connect 127.0.0.1:PORT [--token T]] [--allow-path DIR]… [--allow-any-path] [--require-allow-path] [--param-check off\|warn\|strict] [--render-gpu] [--compact]` | MCP server over stdio. See below. It runs until its stdin closes, so whoever starts it must stop it (the scripts do). `--render-gpu` is listed in 0.49.1 with no help text; the scripts do not pass it. The skill never passes `--allow-any-path`. `--compact` (or `SOLIDCRAFT_MCP_COMPACT=1`) shortens tool output: `inspect_design` summarises sketches and takes `sketches`/`bodies` filters. |
 | `mcp setup [--dry-run] [--client …] [--live]` | Writes a `solidcraft` entry into AI-client configs. It changes the user's config files, so run it only when asked. |
 | `crashes [list\|show ID\|replay ID]`, `gpu`, `licences`, `bench-*`, `oracle`, `kernel-cases`, `fuzz`, `recipe`, `icon`, `plugin check\|test` | Diagnostics, benchmarks and plugin packaging checks; not needed for normal work. |
 
@@ -62,14 +67,15 @@ show a cutter inside the stock.
  "bodies": [{"name": "Plate", "closed": true, "volume_mm3": 23420.14, "mass_g": 30.21,
              "density_g_cm3": 1.29, "material": "Default", "area_mm2": 7135.15,
              "bbox": {"min": [0,0,0], "max": [60,40,10]}, "center_of_mass": [30,20,5],
-             "faces": 14, "edges": 32, "vertices": 24,
-             "face_types": {"plane": 6, "cylinder": 8}, "kernel": {"faces": 18}}],
+             "faces": 14, "edges": 36, "vertices": 24, "measured_by": "smlib",
+             "face_types": {"plane": 6, "cylinder": 8},
+             "kernel": {"faces": 14, "edges": 36, "vertices": 24, "shells": 1}}],
  "params": [{"name": "thickness", "expression": "10 mm", "value": 10.0, "unit": "mm", "error": null}],
  "sketches": [{"name": "Outline", "profiles": 5, "dof": 14, "status": "solved"}],
  "timeline": [{"id": 2, "name": "Extrude1", "type": "ExtrudeFeature", "error": null, "warning": null,
                "suppressed": false, "rolled_back": false, "ms": 4.2}],
  "total": {"volume_mm3": 23420.14, "mass_g": 30.21, "area_mm2": 7135.15, "faces": 14,
-           "edges": 32, "vertices": 24, "open_bodies_skipped": 0}}
+           "edges": 36, "vertices": 24, "open_bodies_skipped": 0}}
 ```
 
 - Volume and mass are given only for closed bodies; `open_bodies_skipped` counts the rest.
@@ -85,8 +91,8 @@ show a cutter inside the stock.
 
 | Direction | Formats |
 |---|---|
-| Export (`--out`, `file.export`, MCP `export`) | `.step/.stp`, `.stl` (binary), `stla` (ASCII STL), `.obj`, `.3mf`, `3mf-tagged`, `.urdf`, `.json`. **No IGES export.** STL/OBJ/3MF take `quality: standard\|fine\|finest`. |
-| Open (`--in`, MCP `open`) | `.solidcraft`, `.step/.stp`, `.3mf`, `.stl`, `.obj`, `.glb/.gltf`. A mesh opens as a mesh body, so `eval` measures it but B-rep features can't use it. |
+| Export (`--out`, `file.export`, MCP `export`) | `.step/.stp`, `.stl` (binary), `stla` (ASCII STL), `.obj`, `.3mf`, `3mf-tagged`, `.glb`, `.usd`, `.3dm`, `.urdf`, `.sdf` (a Gazebo model folder), `.json`. `.igs/.iges` by extension through `--out` and MCP `export` (IGES 5.3; `file.export`'s `format` list omits it). STL/OBJ/3MF take `quality: standard\|fine\|finest`. `eval` reads STEP, IGES, glTF and USD back; it can't read its own `.3dm`. |
+| Open (`--in`, MCP `open`) | `.sc`/`.solidcraft`, `.step/.stp`, `.igs`, `.3mf`, `.stl`, `.obj`, `.glb/.gltf`, `.usd`. A mesh opens as a mesh body, so `eval` measures it but B-rep features can't use it. |
 | Insert into the open design (`file.insert_step`, `file.insert_mesh`) | STEP, IGES, FreeCAD `.FCStd`, Rhino `.3dm`, meshes. |
 | 2D | `sketch.export_dxf`, `sheet.export_dxf` (flat patterns), `file.export_view_dxf`. |
 
