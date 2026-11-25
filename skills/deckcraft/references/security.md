@@ -12,7 +12,7 @@ network port, and no window opens.
 `--automation-write-root DIR` (repeatable since 0.14.1; 0.13.1 allowed one each). With them, every file a command reads (open, pictures,
 audio, video) must lie inside the read root and every file it writes (save, export)
 inside the write root, links followed; anything else is refused (`automation path
-rejected: outside the write root …`). A kind left out grants none of its access.
+rejected: outside the write roots …`). A kind left out grants none of its access.
 `dk_build.py` and `dk_edit.py` always start `mcp` with roots: the common parent of the
 input folders (outline, images, source deck) for reading and of the output folders for
 writing, and they refuse a root as wide as `/` or `/Users`. The plain `run`, `convert`
