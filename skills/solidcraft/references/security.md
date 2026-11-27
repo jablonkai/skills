@@ -65,4 +65,4 @@ Each script starts one `solidcraft-cli mcp --headless` child and stops it before
 exits, on success, on an error, on Ctrl-C, SIGTERM or SIGHUP, and at interpreter exit.
 The order is EOF on stdin, then terminate, then kill (`sclib.Session.close`). A script
 killed with SIGKILL cannot clean up, but its child gets EOF on stdin and exits on its
-own. Checked against 0.49.1: no headless server was left after any of those exits.
+own. Checked against 0.50.0: no headless server was left after any of those exits.
