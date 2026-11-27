@@ -26,7 +26,7 @@ import sys
 from sclib import Session, ToolError, load_script, measure, refuse_existing, sha256
 
 MESH_EXT = (".stl", ".obj", ".3mf")
-DESIGN_EXT = (".sc", ".solidcraft")  # 0.49.1 names designs .sc; it still reads and writes .solidcraft
+DESIGN_EXT = (".sc", ".solidcraft")  # 0.50.0 names designs .sc; it still reads and writes .solidcraft
 READBACK_EXT = DESIGN_EXT + (".step", ".stp", ".igs", ".iges") + MESH_EXT
 
 
